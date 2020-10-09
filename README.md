@@ -1,0 +1,1 @@
+to start run bash script/init.sh
