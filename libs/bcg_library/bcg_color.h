@@ -17,6 +17,18 @@
 // -----------------------------------------------------------------------------
 namespace bcg {
 
+inline vec3f white();
+inline vec3f yellow();
+inline vec3f magenta();
+inline vec3f red();
+inline vec3f cyan();
+inline vec3f green();
+inline vec3f blue();
+inline vec3f black();
+inline vec3f orange();
+inline vec3f violet();
+inline vec3f grey();
+
 // Conversion between flots and bytes
 inline vec3b float_to_byte(const vec3f &a);
 
@@ -135,6 +147,50 @@ inline vec3f colormap(float t, colormap_type type = colormap_type::viridis);
 // IMPLEMENTATION FOR COLOR CONVERSION UTILITIES
 // -----------------------------------------------------------------------------
 namespace bcg {
+
+inline vec3f white() {
+    return one3f;
+}
+
+inline vec3f yellow(){
+    return {1, 1, 0};
+}
+
+inline vec3f magenta(){
+    return {1, 0, 1};
+}
+
+inline vec3f red(){
+    return {1, 0, 0};
+}
+
+inline vec3f cyan(){
+    return {0, 1, 1};
+}
+
+inline vec3f green(){
+    return {0, 1, 0};
+}
+
+inline vec3f blue(){
+    return {0, 0, 1};
+}
+
+inline vec3f black(){
+    return zero3f;
+}
+
+inline vec3f orange(){
+    return {1, 0.5, 0};
+}
+
+inline vec3f violet(){
+    return {0.5, 0, 1};
+}
+
+inline vec3f grey(){
+    return {0.5, 0.5, 0.5};
+}
 
 // Conversion between flots and bytes
 inline vec3b float_to_byte(const vec3f &a) {
@@ -551,6 +607,8 @@ inline vec3f colormap(float t, colormap_type type) {
             return colormap_plasma(t);
     }
     return {0, 0, 0};
+}
+
 }
 
 #endif //BCG_GRAPHICS_BCG_COLOR_H

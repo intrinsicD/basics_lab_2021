@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_MATH_CONSTANTS_H
 
 #include <limits>
+#include <cmath>
 
 // -----------------------------------------------------------------------------
 // MATH CONSTANTS AND FUNCTIONS

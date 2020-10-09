@@ -9,7 +9,9 @@
 // INCLUDES
 // -----------------------------------------------------------------------------
 
+#include <initializer_list>
 #include "bcg_math.h"
+#include "bcg_transforms.h"
 
 // -----------------------------------------------------------------------------
 // AXIS ALIGNED BOUNDING BOXES
@@ -87,8 +89,6 @@ inline void expand(bbox3f &a, const bbox3f &b);
 namespace bcg {
 // Transforms bounding boxes by matrices.
 inline bbox3f transform_bbox(const mat4f &a, const bbox3f &b);
-
-inline bbox3f transform_bbox(const frame3f &a, const bbox3f &b);
 
 }
 
@@ -197,18 +197,6 @@ inline void expand(bbox3f &a, const bbox3f &b) { a = merge(a, b); }
 namespace bcg {
 
 inline bbox3f transform_bbox(const mat4f &a, const bbox3f &b) {
-    auto corners = {vec3f{b.min.x, b.min.y, b.min.z},
-                    vec3f{b.min.x, b.min.y, b.max.z}, vec3f{b.min.x, b.max.y, b.min.z},
-                    vec3f{b.min.x, b.max.y, b.max.z}, vec3f{b.max.x, b.min.y, b.min.z},
-                    vec3f{b.max.x, b.min.y, b.max.z}, vec3f{b.max.x, b.max.y, b.min.z},
-                    vec3f{b.max.x, b.max.y, b.max.z}};
-    auto xformed = bbox3f();
-    for (auto &corner : corners)
-        xformed = merge(xformed, transform_point(a, corner));
-    return xformed;
-}
-
-inline bbox3f transform_bbox(const frame3f &a, const bbox3f &b) {
     auto corners = {vec3f{b.min.x, b.min.y, b.min.z},
                     vec3f{b.min.x, b.min.y, b.max.z}, vec3f{b.min.x, b.max.y, b.min.z},
                     vec3f{b.min.x, b.max.y, b.max.z}, vec3f{b.max.x, b.min.y, b.min.z},

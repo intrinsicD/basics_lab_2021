@@ -5,6 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_VECTOR_H
 #define BCG_GRAPHICS_BCG_VECTOR_H
 
+#include "bcg_math_constant.h"
+
 // -----------------------------------------------------------------------------
 // VECTORS
 // -----------------------------------------------------------------------------

@@ -9,14 +9,10 @@
 // INCLUDES
 // -----------------------------------------------------------------------------
 
-#include <cmath>
-#include <cstdint>
-#include <utility>
 #include "bcg_math_constant.h"
 #include "bcg_vector.h"
 #include "bcg_matrix.h"
-#include "bcg_rigid_body_frame.h"
 #include "bcg_quaternion.h"
-#include "bcg_transform.h"
+#include "bcg_transforms.h"
 
 #endif //BCG_GRAPHICS_BCG_MATH_H

@@ -5,7 +5,6 @@
 #ifndef BCG_GRAPHICS_BCG_MATRIX_H
 #define BCG_GRAPHICS_BCG_MATRIX_H
 
-
 // -----------------------------------------------------------------------------
 // MATRICES
 // -----------------------------------------------------------------------------
@@ -297,7 +296,7 @@ inline mat3f inverse(const mat3f &a) {
 inline mat3f basis_fromz(const vec3f &v) {
     // https://graphics.pixar.com/library/OrthonormalB/paper.pdf
     auto z = normalize(v);
-    auto sign = copysignf(1.0f, z.z);
+    auto sign = std::copysignf(1.0f, z.z);
     auto a = -1.0f / (sign + z.z);
     auto b = z.x * z.y * a;
     auto x = vec3f{1.0f + sign * z.x * z.x * a, sign * b, -sign * z.x};

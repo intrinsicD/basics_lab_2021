@@ -1,50 +1,19 @@
+//
+// Created by alex on 09.10.20.
+//
 #include <cassert>
 #include <stdexcept>
-#include <unordered_set>
-
 #include "exts/glad/glad.h"
 #include "bcg_opengl.h"
-#include "bcg_library/bcg_math.h"
 
 #ifdef _WIN32
 #undef near
 #undef far
 #endif
 
-// -----------------------------------------------------------------------------
-// USING DIRECTIVES
-// -----------------------------------------------------------------------------
 namespace bcg {
 
-// using directives
-using std::unordered_set;
 using namespace std::string_literals;
-
-}  // namespace bcg
-
-// -----------------------------------------------------------------------------
-// VECTOR HASHING
-// -----------------------------------------------------------------------------
-namespace std {
-
-// Hash functor for vector for use with hash_map
-template<>
-struct hash<bcg::vec2i> {
-    size_t operator()(const bcg::vec2i &v) const {
-        static const auto hasher = std::hash<int>();
-        auto h = (size_t) 0;
-        h ^= hasher(v.x) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= hasher(v.y) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        return h;
-    }
-};
-
-}  // namespace std
-
-// -----------------------------------------------------------------------------
-// LOW-LEVEL OPENGL HELPERS
-// -----------------------------------------------------------------------------
-namespace bcg {
 
 bool init_ogl(std::string &error) {
     if (!gladLoadGL()) {
@@ -68,8 +37,12 @@ GLenum _assert_ogl_error() {
             case GL_INVALID_OPERATION:
                 error = "INVALID_OPERATION";
                 break;
-                // case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
-                // case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+            case GL_STACK_OVERFLOW:
+                error = "STACK_OVERFLOW";
+                break;
+            case GL_STACK_UNDERFLOW:
+                error = "STACK_UNDERFLOW";
+                break;
             case GL_OUT_OF_MEMORY:
                 error = "OUT_OF_MEMORY";
                 break;
@@ -94,39 +67,13 @@ void clear_ogl_framebuffer(const vec4f &color, bool clear_depth) {
     }
 }
 
-void set_ogl_viewport(const vec4i &viewport) {
-    glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
-}
-
-void set_ogl_viewport(const vec2i &viewport) {
-    glViewport(0, 0, viewport.x, viewport.y);
-}
-
-void set_ogl_wireframe(bool enabled) {
-    if (enabled)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
-void set_ogl_blending(bool enabled) {
-    if (enabled) {
-        glEnable(GL_BLEND);
-        glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-    } else {
-        glDisable(GL_BLEND);
-    }
-}
-
-void set_ogl_point_size(int size) { glPointSize(size); }
 
 void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
                  const byte *img, bool as_srgb, bool linear, bool mipmap, bool wrap_repeat) {
-    static auto sformat = vector < uint > {
+    static auto sformat = std::vector<uint>{
             0, GL_SRGB, GL_SRGB, GL_SRGB, GL_SRGB_ALPHA};
-    static auto iformat = vector < uint > {0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
-    static auto cformat = vector < uint > {0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
+    static auto iformat = std::vector<uint>{0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
+    static auto cformat = std::vector<uint>{0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
     assert_ogl_error();
 
     if (size == zero2i) {
@@ -173,10 +120,10 @@ void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
 void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
                  const float *img, bool as_float, bool linear, bool mipmap,
                  bool wrap_repeat) {
-    static auto fformat = vector < uint > {
+    static auto fformat = std::vector<uint>{
             0, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGBA32F};
-    static auto iformat = vector < uint > {0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
-    static auto cformat = vector < uint > {0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
+    static auto iformat = std::vector<uint>{0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
+    static auto cformat = std::vector<uint>{0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
     assert_ogl_error();
 
     if (size == zero2i) {
@@ -241,48 +188,13 @@ void clear_texture(ogl_texture *texture) {
     assert_ogl_error();
 }
 
-void set_texture(ogl_texture *texture, const image <vec4b> &img, bool as_srgb,
-                 bool linear, bool mipmap) {
-    set_texture(texture, img.imsize(), 4, (const byte *) img.data(), as_srgb,
-                linear, mipmap);
-}
-
-void set_texture(ogl_texture *texture, const image <vec4f> &img, bool as_float,
-                 bool linear, bool mipmap) {
-    set_texture(texture, img.imsize(), 4, (const float *) img.data(), as_float,
-                linear, mipmap);
-}
-
-void set_texture(ogl_texture *texture, const image <vec3b> &img, bool as_srgb,
-                 bool linear, bool mipmap) {
-    set_texture(texture, img.imsize(), 3, (const byte *) img.data(), as_srgb,
-                linear, mipmap);
-}
-
-void set_texture(ogl_texture *texture, const image <vec3f> &img, bool as_float,
-                 bool linear, bool mipmap) {
-    set_texture(texture, img.imsize(), 3, (const float *) img.data(), as_float,
-                linear, mipmap);
-}
-
-void set_texture(ogl_texture *texture, const image <byte> &img, bool as_srgb,
-                 bool linear, bool mipmap) {
-    set_texture(texture, img.imsize(), 1, (const byte *) img.data(), as_srgb,
-                linear, mipmap);
-}
-
-void set_texture(ogl_texture *texture, const image<float> &img, bool as_float,
-                 bool linear, bool mipmap) {
-    set_texture(texture, img.imsize(), 1, (const float *) img.data(), as_float,
-                linear, mipmap);
-}
 
 void set_cubemap(ogl_cubemap *cubemap, int size, int num_channels,
-                 const array<byte *, 6> &images, bool as_srgb, bool linear, bool mipmap) {
-    static auto sformat = vector < uint > {
+                 const std::array<byte *, 6> &images, bool as_srgb, bool linear, bool mipmap) {
+    static auto sformat = std::vector<uint>{
             0, GL_SRGB, GL_SRGB, GL_SRGB, GL_SRGB_ALPHA};
-    static auto iformat = vector < uint > {0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
-    static auto cformat = vector < uint > {0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
+    static auto iformat = std::vector<uint>{0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
+    static auto cformat = std::vector<uint>{0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
     assert_ogl_error();
 
     if (size == 0) {
@@ -336,11 +248,11 @@ void set_cubemap(ogl_cubemap *cubemap, int size, int num_channels,
 }
 
 void set_cubemap(ogl_cubemap *cubemap, int size, int num_channels,
-                 const array<float *, 6> &images, bool as_float, bool linear, bool mipmap) {
-    static auto fformat = vector < uint > {
+                 const std::array<float *, 6> &images, bool as_float, bool linear, bool mipmap) {
+    static auto fformat = std::vector<uint>{
             0, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGBA32F};
-    static auto iformat = vector < uint > {0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
-    static auto cformat = vector < uint > {0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
+    static auto iformat = std::vector<uint>{0, GL_RGB, GL_RGB, GL_RGB, GL_RGBA};
+    static auto cformat = std::vector<uint>{0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
     assert_ogl_error();
 
     if (size == 0) {
@@ -415,65 +327,6 @@ void clear_cubemap(ogl_cubemap *cubemap) {
     assert_ogl_error();
 }
 
-void set_cubemap(ogl_cubemap *cubemap, const array<image<vec4b>, 6> &img,
-                 int num_channels, bool as_srgb, bool linear, bool mipmap) {
-    auto data = array < byte *,
-    6 > {(byte *) img[0].data(), (byte *) img[1].data(),
-         (byte *) img[2].data(), (byte *) img[3].data(), (byte *) img[4].data(),
-         (byte *) img[5].data()};
-    set_cubemap(
-            cubemap, img[0].imsize().x, num_channels, data, as_srgb, linear, mipmap);
-}
-
-void set_cubemap(ogl_cubemap *cubemap, const array<image<vec4f>, 6> &img,
-                 int num_channels, bool as_float, bool linear, bool mipmap) {
-    auto data = array < float *,
-    6 > {(float *) img[0].data(), (float *) img[1].data(),
-         (float *) img[2].data(), (float *) img[3].data(), (float *) img[4].data(),
-         (float *) img[5].data()};
-    set_cubemap(
-            cubemap, img[0].imsize().x, num_channels, data, as_float, linear, mipmap);
-}
-
-void set_cubemap(ogl_cubemap *cubemap, const array<image<vec3b>, 6> &img,
-                 int num_channels, bool as_srgb, bool linear, bool mipmap) {
-    auto data = array < byte *,
-    6 > {(byte *) img[0].data(), (byte *) img[1].data(),
-         (byte *) img[2].data(), (byte *) img[3].data(), (byte *) img[4].data(),
-         (byte *) img[5].data()};
-    set_cubemap(
-            cubemap, img[0].imsize().x, num_channels, data, as_srgb, linear, mipmap);
-}
-
-void set_cubemap(ogl_cubemap *cubemap, const array<image<vec3f>, 6> &img,
-                 int num_channels, bool as_float, bool linear, bool mipmap) {
-    auto data = array < float *,
-    6 > {(float *) img[0].data(), (float *) img[1].data(),
-         (float *) img[2].data(), (float *) img[3].data(), (float *) img[4].data(),
-         (float *) img[5].data()};
-    set_cubemap(
-            cubemap, img[0].imsize().x, num_channels, data, as_float, linear, mipmap);
-}
-
-void set_cubemap(ogl_cubemap *cubemap, const array<image<byte>, 6> &img,
-                 int num_channels, bool as_srgb, bool linear, bool mipmap) {
-    auto data = array < byte *,
-    6 > {(byte *) img[0].data(), (byte *) img[1].data(),
-         (byte *) img[2].data(), (byte *) img[3].data(), (byte *) img[4].data(),
-         (byte *) img[5].data()};
-    set_cubemap(
-            cubemap, img[0].imsize().x, num_channels, data, as_srgb, linear, mipmap);
-}
-
-void set_cubemap(ogl_cubemap *cubemap, const array<image<float>, 6> &img,
-                 int num_channels, bool as_float, bool linear, bool mipmap) {
-    auto data = array < float *,
-    6 > {(float *) img[0].data(), (float *) img[1].data(),
-         (float *) img[2].data(), (float *) img[3].data(), (float *) img[4].data(),
-         (float *) img[5].data()};
-    set_cubemap(
-            cubemap, img[0].imsize().x, num_channels, data, as_float, linear, mipmap);
-}
 
 // cleanup
 ogl_arraybuffer::~ogl_arraybuffer() { clear_arraybuffer(this); }
@@ -531,22 +384,22 @@ void clear_arraybuffer(ogl_arraybuffer *buffer) {
 
 // set buffer
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const vector<float> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<float> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 1, 1, (float *) data.data(), dynamic);
 }
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const vector <vec2f> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<vec2f> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 2, 2, (float *) data.data(), dynamic);
 }
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const vector <vec3f> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<vec3f> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 3, 3, (float *) data.data(), dynamic);
 }
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const vector <vec4f> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<vec4f> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 4, 4, (float *) data.data(), dynamic);
 }
 
@@ -605,24 +458,24 @@ void clear_elementbuffer(ogl_elementbuffer *buffer) {
 
 // set buffer
 void set_elementbuffer(
-        ogl_elementbuffer *buffer, const vector<int> &points, bool dynamic) {
+        ogl_elementbuffer *buffer, const std::vector<int> &points, bool dynamic) {
     set_elementbuffer(buffer, points.size() * 1, 1, (int *) points.data(), dynamic);
 }
 
 void set_elementbuffer(
-        ogl_elementbuffer *buffer, const vector <vec2i> &lines, bool dynamic) {
+        ogl_elementbuffer *buffer, const std::vector<vec2i> &lines, bool dynamic) {
     set_elementbuffer(buffer, lines.size() * 2, 2, (int *) lines.data(), dynamic);
 }
 
 void set_elementbuffer(
-        ogl_elementbuffer *buffer, const vector <vec3i> &triangles, bool dynamic) {
+        ogl_elementbuffer *buffer, const std::vector<vec3i> &triangles, bool dynamic) {
     set_elementbuffer(
             buffer, triangles.size() * 3, 3, (int *) triangles.data(), dynamic);
 }
 
 // initialize program
-bool set_program(ogl_program *program, const string &vertex,
-                 const string &fragment, string &error, string &errorlog) {
+bool set_program(ogl_program *program, const std::string &vertex,
+                 const std::string &fragment, std::string &error, std::string &errorlog) {
     // error
     auto program_error = [&error, &errorlog, program](
             const char *message, const char *log) {
@@ -642,8 +495,8 @@ bool set_program(ogl_program *program, const string &vertex,
     const char *ccvertex = vertex.data();
     const char *ccfragment = fragment.data();
     auto errflags = 0;
-    auto errbuf = array < char,
-    10000 > {};
+    auto errbuf = std::array<char,
+            10000>{};
 
     // create vertex
     assert_ogl_error();
@@ -699,17 +552,17 @@ bool set_program(ogl_program *program, const string &vertex,
 }
 
 // initialize program
-bool set_program(ogl_program *program, const string &vertex,
-                 const string &fragment, string &error) {
-    auto errorlog = string{};
+bool set_program(ogl_program *program, const std::string &vertex,
+                 const std::string &fragment, std::string &error) {
+    auto errorlog = std::string{};
     return set_program(program, vertex, fragment, error, errorlog);
 }
 
 // initialize program, print eventual errors to stdout
-bool set_program(ogl_program *program, const string &vertex,
-                 const string &fragment, bool exceptions) {
-    auto error = string{};
-    auto errorlog = string{};
+bool set_program(ogl_program *program, const std::string &vertex,
+                 const std::string &fragment, bool exceptions) {
+    auto error = std::string{};
+    auto errorlog = std::string{};
     if (!set_program(program, vertex, fragment, error, errorlog)) {
         if (exceptions) throw std::runtime_error{error + "\n" + errorlog};
         return false;
@@ -805,18 +658,6 @@ void set_uniform(const ogl_program *program, int location, const mat3f &value) {
 
 void set_uniform(const ogl_program *program, int location, const mat4f &value) {
     glUniformMatrix4fv(location, 1, false, &value.x.x);
-    assert_ogl_error();
-}
-
-void set_uniform(
-        const ogl_program *program, int location, const frame2f &value) {
-    glUniformMatrix3x2fv(location, 1, false, &value.x.x);
-    assert_ogl_error();
-}
-
-void set_uniform(
-        const ogl_program *program, int location, const frame3f &value) {
-    glUniformMatrix4x3fv(location, 1, false, &value.x.x);
     assert_ogl_error();
 }
 
@@ -1013,7 +854,7 @@ void clear_shape(ogl_shape *shape) {
 
 template<typename T>
 void set_vertex_buffer_impl(
-        ogl_shape *shape, const vector <T> &data, int location) {
+        ogl_shape *shape, const std::vector<T> &data, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     while (shape->vertex_buffers.size() <= location) {
         shape->vertex_buffers.push_back(new ogl_arraybuffer{});
@@ -1030,25 +871,25 @@ void set_vertex_buffer_impl(
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const vector<float> &values, int location) {
+        ogl_shape *shape, const std::vector<float> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const vector <vec2f> &values, int location) {
+        ogl_shape *shape, const std::vector<vec2f> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const vector <vec3f> &values, int location) {
+        ogl_shape *shape, const std::vector<vec3f> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const vector <vec4f> &values, int location) {
+        ogl_shape *shape, const std::vector<vec4f> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
@@ -1094,17 +935,17 @@ void set_instance_buffer(ogl_shape *shape, int location, bool is_instance) {
     assert_ogl_error();
 }
 
-void set_index_buffer(ogl_shape *shape, const vector<int> &indices) {
+void set_index_buffer(ogl_shape *shape, const std::vector<int> &indices) {
     set_elementbuffer(shape->index_buffer, indices);
     shape->elements = ogl_element_type::points;
 }
 
-void set_index_buffer(ogl_shape *shape, const vector <vec2i> &indices) {
+void set_index_buffer(ogl_shape *shape, const std::vector<vec2i> &indices) {
     set_elementbuffer(shape->index_buffer, indices);
     shape->elements = ogl_element_type::lines;
 }
 
-void set_index_buffer(ogl_shape *shape, const vector <vec3i> &indices) {
+void set_index_buffer(ogl_shape *shape, const std::vector<vec3i> &indices) {
     set_elementbuffer(shape->index_buffer, indices);
     shape->elements = ogl_element_type::triangles;
 }
@@ -1155,7 +996,7 @@ void draw_shape(const ogl_shape *shape) {
 
 void set_cube_shape(ogl_shape *shape) {
     // clang-format off
-    static const auto positions = vector < vec3f > {
+    static const auto positions = std::vector<vec3f>{
             {1,  -1, -1},
             {1,  -1, 1},
             {-1, -1, 1},
@@ -1165,7 +1006,7 @@ void set_cube_shape(ogl_shape *shape) {
             {-1, 1,  1},
             {-1, 1,  -1},
     };
-    static const auto triangles = vector < vec3i > {
+    static const auto triangles = std::vector<vec3i>{
             {1, 3, 0},
             {7, 5, 4},
             {4, 1, 0},
@@ -1186,13 +1027,13 @@ void set_cube_shape(ogl_shape *shape) {
 
 void set_quad_shape(ogl_shape *shape) {
     // clang-format off
-    static const auto positions = vector < vec3f > {
+    static const auto positions = std::vector<vec3f>{
             {-1, -1, 0},
             {1,  -1, 0},
             {1,  1,  0},
             {-1, 1,  0},
     };
-    static const auto triangles = vector < vec3i > {
+    static const auto triangles = std::vector<vec3i>{
             {0, 1, 3},
             {3, 2, 1}
     };
@@ -1201,123 +1042,5 @@ void set_quad_shape(ogl_shape *shape) {
     set_index_buffer(shape, triangles);
 }
 
-}  // namespace bcg
 
-// -----------------------------------------------------------------------------
-// HIGH-LEVEL OPENGL IMAGE DRAWING
-// -----------------------------------------------------------------------------
-namespace bcg {
-
-static auto ogl_image_vertex =
-        R"(
-#version 330
-in vec2 positions;
-out vec2 frag_texcoord;
-uniform vec2 window_size, image_size;
-uniform vec2 image_center;
-uniform float image_scale;
-void main() {
-    vec2 pos = (positions * 0.5) * image_size * image_scale + image_center;
-    gl_Position = vec4(2 * pos.x / window_size.x - 1, 1 - 2 * pos.y / window_size.y, 0, 1);
-    frag_texcoord = positions * 0.5 + 0.5;
 }
-)";
-#if 0
-static auto ogl_image_vertex = R"(
-#version 330
-in vec2 positions;
-out vec2 frag_texcoord;
-uniform vec2 window_size, image_size, border_size;
-uniform vec2 image_center;
-uniform float image_scale;
-void main() {
-    vec2 pos = (positions * 0.5) * (image_size + border_size*2) * image_scale + image_center;
-    gl_Position = vec4(2 * pos.x / window_size.x - 1, 1 - 2 * pos.y / window_size.y, 0.1, 1);
-    frag_texcoord = positions * 0.5 + 0.5;
-}
-)";
-#endif
-static auto ogl_image_fragment =
-        R"(
-#version 330
-in vec2 frag_texcoord;
-out vec4 frag_color;
-uniform sampler2D txt;
-void main() {
-    frag_color = texture(txt, frag_texcoord);
-}
-)";
-#if 0
-static auto ogl_image_fragment = R"(
-#version 330
-in vec2 frag_texcoord;
-out vec4 frag_color;
-uniform vec2 image_size, border_size;
-uniform float image_scale;
-void main() {
-    ivec2 imcoord = ivec2(frag_texcoord * (image_size + border_size*2) - border_size);
-    ivec2 tilecoord = ivec2(frag_texcoord * (image_size + border_size*2) * image_scale - border_size);
-    ivec2 tile = tilecoord / 16;
-    if(imcoord.x <= 0 || imcoord.y <= 0 || 
-        imcoord.x >= image_size.x || imcoord.y >= image_size.y) frag_color = vec4(0,0,0,1);
-    else if((tile.x + tile.y) % 2 == 0) frag_color = vec4(0.1,0.1,0.1,1);
-    else frag_color = vec4(0.3,0.3,0.3,1);
-}
-)";
-#endif
-
-ogl_image::~ogl_image() {
-    if (program) delete program;
-    if (texture) delete texture;
-    if (quad) delete quad;
-}
-
-bool is_initialized(const ogl_image *image) {
-    return is_initialized(image->program);
-}
-
-// init image program
-bool init_image(ogl_image *image) {
-    if (is_initialized(image)) return true;
-    if (!set_program(image->program, ogl_image_vertex, ogl_image_fragment))
-        return false;
-    set_quad_shape(image->quad);
-    return true;
-}
-
-// clear an opengl image
-void clear_image(ogl_image *image) {
-    clear_program(image->program);
-    clear_texture(image->texture);
-    clear_shape(image->quad);
-}
-
-// update image data
-void set_image(
-        ogl_image *oimg, const image <vec4f> &img, bool linear, bool mipmap) {
-    set_texture(oimg->texture, img, false, linear, mipmap);
-}
-
-void set_image(
-        ogl_image *oimg, const image <vec4b> &img, bool linear, bool mipmap) {
-    set_texture(oimg->texture, img, false, linear, mipmap);
-}
-
-// draw image
-void draw_image(ogl_image *image, const ogl_image_params &params) {
-    assert_ogl_error();
-    set_ogl_viewport(params.framebuffer);
-    clear_ogl_framebuffer(params.background);
-    bind_program(image->program);
-    set_uniform(image->program, "txt", image->texture, 0);
-    set_uniform(image->program, "window_size",
-                vec2f{(float) params.window.x, (float) params.window.y});
-    set_uniform(image->program, "image_size",
-                vec2f{(float) image->texture->size.x, (float) image->texture->size.y});
-    set_uniform(image->program, "image_center", params.center);
-    set_uniform(image->program, "image_scale", params.scale);
-    draw_shape(image->quad);
-    unbind_program();
-}
-
-}  // namespace bcg
