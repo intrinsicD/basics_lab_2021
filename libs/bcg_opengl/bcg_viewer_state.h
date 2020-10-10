@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_VIEWER_CORE_H
 
 #include "bcg_camera.h"
-#include "bcg_library/bcg_dynamic_bitset.h"
+#include "bcg_library/utils/bcg_dynamic_bitset.h"
 
 namespace bcg{
 

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "bcg_library/bcg_math.h"
+#include "bcg_library/math/bcg_math.h"
 
 // forward declaration
 struct GLFWwindow;

@@ -13,6 +13,6 @@
 #include "bcg_vector.h"
 #include "bcg_matrix.h"
 #include "bcg_quaternion.h"
-#include "bcg_transforms.h"
+#include "bcg_library/geometry/bcg_transforms.h"
 
 #endif //BCG_GRAPHICS_BCG_MATH_H

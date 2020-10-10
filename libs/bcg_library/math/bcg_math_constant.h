@@ -94,6 +94,16 @@ inline int pow2(int a);
 
 inline void swap(int &a, int &b);
 
+template<typename T = float>
+[[nodiscard]] bool inline CMP(T x, T y, T eps = std::numeric_limits<T>::epsilon());
+
+
+template<typename T>
+inline T SafeAcos(T value);
+
+template<typename T>
+inline T SafeAsin(T value);
+
 }
 
 // -----------------------------------------------------------------------------
@@ -183,6 +193,33 @@ inline int sign(int a) { return a < 0 ? -1 : 1; }
 inline int pow2(int a) { return 1 << a; }
 
 inline void swap(int &a, int &b) { std::swap(a, b); }
+
+template<typename T>
+[[nodiscard]] bool inline CMP(T x, T y, T eps) {
+    return (std::abs(x - y) <= eps * std::max(T(1), std::max(std::abs(x), std::abs(y))));
+}
+
+template<typename T>
+inline T SafeAcos(T value) {
+    if (value > T(1)) {
+        return 0;
+    } else if (value < -T(1)) {
+        return M_PI;
+    } else {
+        return std::acos(value);
+    }
+}
+
+template<typename T>
+inline T SafeAsin(T value) {
+    if (value > T(1)) {
+        return M_PI / 2;
+    } else if (value < -T(1)) {
+        return M_PI / 2;
+    } else {
+        return std::asin(value);
+    }
+}
 
 }
 

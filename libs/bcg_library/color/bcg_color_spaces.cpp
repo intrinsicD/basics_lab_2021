@@ -4,8 +4,8 @@
 
 #include <stdexcept>
 #include "bcg_color_spaces.h"
-#include "bcg_matrix.h"
-#include "bcg_math_constant.h"
+#include "../math/bcg_matrix.h"
+#include "../math/bcg_math_constant.h"
 
 namespace bcg {
 

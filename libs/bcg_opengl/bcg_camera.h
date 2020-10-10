@@ -5,8 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_CAMERA_H
 #define BCG_GRAPHICS_BCG_CAMERA_H
 
-#include "bcg_library/bcg_vector.h"
-#include "bcg_library/bcg_matrix.h"
+#include "bcg_library/math/bcg_vector.h"
+#include "bcg_library/math/bcg_matrix.h"
 
 namespace bcg {
 

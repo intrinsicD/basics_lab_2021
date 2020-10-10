@@ -58,7 +58,7 @@ inline const auto one4f = vec4f{1, 1, 1, 1};
 
 inline int size(const vec2f &a);
 
-inline const float *begin(const vec2f &a);
+inline const float *begin(vec2f a);
 
 inline const float *end(const vec2f &a);
 

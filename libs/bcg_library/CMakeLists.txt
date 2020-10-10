@@ -1,7 +1,8 @@
 add_library(bcg_graphics
         bcg_common.h bcg_commonio.h bcg_commonio.cpp
-        bcg_math.h bcg_color.h
-        bcg_color_spaces.h bcg_color_spaces.cpp
+        math/bcg_math.h color/bcg_color.h
+        color/bcg_color_spaces.h color/bcg_color_spaces.cpp
+        geometry/bcg_aligned_box.h geometry/bcg_property.h geometry/bcg_property_map_eigen.h geometry/bcg_transforms.h
         exts/cgltf/cgltf.h exts/cgltf/cgltf_write.h
         exts/entt/single_include/entt/entt.hpp
         exts/stb/stb_image.h exts/stb/stb_image_resize.h exts/stb/stb_image_write.h

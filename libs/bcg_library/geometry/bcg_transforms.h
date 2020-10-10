@@ -5,8 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_TRANSFORMS_H
 #define BCG_GRAPHICS_BCG_TRANSFORMS_H
 
-#include "bcg_vector.h"
-#include "bcg_matrix.h"
+#include "bcg_library/math/bcg_vector.h"
+#include "bcg_library/math/bcg_matrix.h"
 
 namespace bcg {
 

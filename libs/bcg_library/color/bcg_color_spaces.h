@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_COLOR_SPACES_H
 #define BCG_GRAPHICS_BCG_COLOR_SPACES_H
 
-#include "bcg_vector.h"
+#include "../math/bcg_vector.h"
 
 namespace bcg{
 
