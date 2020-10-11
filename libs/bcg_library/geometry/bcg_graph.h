@@ -30,15 +30,21 @@ struct halfedge_graph : public point_cloud {
 
     ~halfedge_graph() override = default;
 
-    virtual void assign(const halfedge_graph &other);
+    void assign(const halfedge_graph &other);
 
-    virtual halfedge_graph &operator=(const halfedge_graph &other);
+    halfedge_graph &operator=(const halfedge_graph &other);
 
-    bool has_garbage() const;
+    bool has_garbage() const override;
 
     void garbage_collection() override;
 
     bool is_isolated(vertex_handle v) const;
+
+    virtual bool is_boundary(vertex_handle v) const;
+
+    virtual bool is_boundary(halfedge_handle h) const;
+
+    virtual bool is_boundary(edge_handle e) const;
 
     void delete_vertex(vertex_handle v) override;
 
@@ -66,23 +72,25 @@ struct halfedge_graph : public point_cloud {
 
     edge_handle get_edge(halfedge_handle h) const;
 
-    vertex_handle get_vertex(edge_handle e, bool i);
+    halfedge_handle get_halfedge(edge_handle e, bool i) const;
+
+    vertex_handle get_vertex(edge_handle e, bool i) const;
 
     size_t get_valence(vertex_handle v) const;
 
     float get_length(edge_handle e) const;
 
-    point_cloud::position_t get_center(halfedge_handle e) const;
+    point_cloud::position_t get_center(halfedge_handle h) const;
 
     point_cloud::position_t get_center(edge_handle e) const;
 
-    point_cloud::position_t get_vector(halfedge_handle e) const;
+    point_cloud::position_t get_vector(halfedge_handle h) const;
 
     point_cloud::position_t get_vector(edge_handle e) const;
 
     halfedge_handle add_edge(vertex_handle v0, vertex_handle v1);
 
-    void remove_edge(edge_handle edge);
+    void remove_edge(edge_handle e);
 
     halfedge_handle find_halfedge(vertex_handle v0, vertex_handle v1) const;
 

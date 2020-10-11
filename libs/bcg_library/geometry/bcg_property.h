@@ -61,6 +61,10 @@ struct base_handle {
 struct vertex_handle : public base_handle {
     using base_handle::base_handle;
 
+    vertex_handle(base_handle handle) : base_handle(handle) {
+
+    }
+
     vertex_handle &operator=(const base_handle &other) {
         idx = other.idx;
     }
@@ -68,6 +72,10 @@ struct vertex_handle : public base_handle {
 
 struct halfedge_handle : public base_handle {
     using base_handle::base_handle;
+
+    halfedge_handle(base_handle handle) : base_handle(handle) {
+
+    }
 
     halfedge_handle &operator=(const base_handle &other) {
         idx = other.idx;
@@ -77,6 +85,10 @@ struct halfedge_handle : public base_handle {
 struct edge_handle : public base_handle {
     using base_handle::base_handle;
 
+    edge_handle(base_handle handle) : base_handle(handle) {
+
+    }
+
     edge_handle &operator=(const base_handle &other) {
         idx = other.idx;
     }
@@ -84,6 +96,10 @@ struct edge_handle : public base_handle {
 
 struct face_handle : public base_handle {
     using base_handle::base_handle;
+
+    face_handle(base_handle handle) : base_handle(handle) {
+
+    }
 
     face_handle &operator=(const base_handle &other) {
         idx = other.idx;

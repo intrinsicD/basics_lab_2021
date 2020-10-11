@@ -42,7 +42,7 @@ bool point_cloud::has_garbage() const {
 void point_cloud::garbage_collection() {
     if (!has_garbage()) return;
 
-    auto deleted = vertices.get_or_add<bool, 1>("deleted");
+    auto deleted = vertices.get<bool, 1>("deleted");
 
     size_t nV = vertices.size();
     if (nV > 0) {
@@ -90,7 +90,7 @@ vertex_handle point_cloud::add_vertex(const position_t &point) {
 }
 
 void point_cloud::delete_vertex(vertex_handle v) {
-    auto deleted = vertices.get_or_add<bool, 1>("deleted");
+    auto deleted = vertices.get_or_add<bool, 1>("deleted", false);
     if (deleted[v]) return;
 
     deleted[v] = true;

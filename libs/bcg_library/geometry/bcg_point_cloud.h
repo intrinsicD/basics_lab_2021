@@ -20,13 +20,13 @@ struct point_cloud {
 
     virtual ~point_cloud() = default;
 
-    virtual void assign(const point_cloud &other);
+    void assign(const point_cloud &other);
 
-    virtual point_cloud &operator=(const point_cloud &other);
+    point_cloud &operator=(const point_cloud &other);
 
     bool empty() const;
 
-    bool has_garbage() const;
+    virtual bool has_garbage() const;
 
     virtual void garbage_collection();
 
