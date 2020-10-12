@@ -5,15 +5,20 @@
 #ifndef BCG_GRAPHICS_BCG_MATRIX_T_H
 #define BCG_GRAPHICS_BCG_MATRIX_T_H
 
-#include "bcg_vector_t.h"
+#include <memory>
+#include "bcg_array.h"
 
 namespace bcg {
 
 template<std::size_t M, std::size_t N, typename T>
 struct matrix {
     using vector = vector<M, T>;
-    std::array<vector, N> data;
+    using storage_t = std::array<vector, N>;
 
+    std::shared_ptr<storage_t> data_ptr;
+
+    using iterator_t = typename storage_t::iterator_t;
+    using const_iterator_t = typename storage_t::const_iterator_t;
     using reference_t = typename vector::reference_t;
     using const_reference_t = typename vector::const_reference_t;
 
@@ -23,6 +28,13 @@ struct matrix {
 
     matrix(std::initializer_list<T> data);
 
+    array<M, N, T> to_array() const;
+
+private:
+    friend array<M, N, T>;
+
+    matrix(const std::shared_ptr<storage_t> &other) : data_ptr(other) { }
+
     static matrix zero();
 
     static matrix one();
@@ -30,6 +42,8 @@ struct matrix {
     static matrix infinity();
 
     static matrix identity();
+
+    static matrix random();
 
     reference_t &operator[](size_t i);
 
@@ -71,8 +85,6 @@ struct matrix {
 
     inline matrix &operator*=(const matrix &other);
 
-    inline matrix &cwise_mul(const matrix &other);
-
     inline matrix &operator/=(const matrix &other);
 
     inline matrix operator+(const matrix &other) const;
@@ -80,8 +92,6 @@ struct matrix {
     inline matrix operator-(const matrix &other) const;
 
     inline matrix operator*(const matrix &other) const;
-
-    inline matrix cwise_mul(const matrix &other) const;
 
     inline matrix operator/(const matrix &other) const;
 
@@ -109,9 +119,22 @@ struct matrix {
 
     inline matrix inverse() const;
 
+    inline matrix pseudo_inverse() const;
+
     inline T trace() const;
 
     inline T determinant() const;
+
+    inline matrix sqrt() const;
+
+    inline matrix square() const;
+
+    inline matrix exp() const;
+
+    inline matrix log() const;
+
+    template<typename E>
+    inline matrix pow(E exponent) const;
 };
 
 }

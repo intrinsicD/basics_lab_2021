@@ -8,6 +8,7 @@
 #include <vector>
 #include <limits>
 #include <string>
+#include <algorithm>
 
 namespace bcg {
 
@@ -76,6 +77,9 @@ public:
                 }
             }
         }
+        number.erase(std::find_if(number.rbegin(), number.rend(), [](int ch) {
+            return ch != '0';
+        }).base(), number.end());
         return number;
     }
 

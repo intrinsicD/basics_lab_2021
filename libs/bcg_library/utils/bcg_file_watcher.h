@@ -16,16 +16,18 @@ struct file_watcher {
 
     bool trigger(bool force_trigger = false);
 
-    void watch(std::string, std::function<void()> &cb);
+    template<typename Lambda>
+    void watch(std::string, Lambda cb);
 };
 }
 
 namespace bcg {
 
-void file_watcher::watch(std::string filename, std::function<void()> &cb) {
+template<typename Lambda>
+void file_watcher::watch(std::string filename, Lambda cb) {
     auto time = std::filesystem::last_write_time(filename);
-    std::function<bool(bool)> function = [filename, cb, time](bool force = false) mutable {
-        auto last_mod_time = std::filesystem::last_write_time((filename);
+    watched[filename] = [filename, cb, time](bool force = false) mutable {
+        auto last_mod_time = std::filesystem::last_write_time((filename));
         if (force || time != last_mod_time) {
             time = last_mod_time;
             cb();

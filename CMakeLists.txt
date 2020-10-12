@@ -3,7 +3,7 @@ project(bcg_graphics VERSION 1.0)
 
 option(BCG_APPS "Build Apps" ON)
 option(BCG_OPENGL "Build OpenGL" ON)
-option(BCG_TESTS "Build tests" OFF)
+option(BCG_TESTS "Build tests" ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -30,3 +30,7 @@ endif (GENERATOR_IS_MULTI_CONFIG)
 add_subdirectory(exts)
 add_subdirectory(libs)
 add_subdirectory(apps)
+
+if(BCG_TESTS)
+    add_subdirectory(tests)
+endif(BCG_TESTS)

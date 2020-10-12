@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include "bcg_graph.h"
-#include "bcg_library/utils/bcg_stl_utils.h"
+#include "bcg_library/utils/bcg_test_stl_utils.h"
 
 namespace bcg {
 

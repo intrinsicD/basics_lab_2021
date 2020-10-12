@@ -63,7 +63,7 @@ inline void sort_by_first(std::vector<First> &first, std::vector<Second> &second
             return lhs.first < rhs.first;
         });
     }
-    unzip(container, first, second);
+    unzip<First, Second>(container, &first, &second);
 }
 
 }

@@ -8,26 +8,30 @@
 #include <cmath>
 #include <array>
 #include <limits>
+#include <random>
+#include <algorithm>
 #include <initializer_list>
 
 namespace bcg {
 
 template<size_t N, typename T>
 struct vector {
-    using reference_t = std::reference_wrapper<T>;
-    using const_reference_t = std::reference_wrapper<const T>;
+    using reference_t = typename std::array<T, N>::reference;
+    using const_reference_t = typename std::array<T, N>::const_reference;
     using iterator_t = typename std::array<T, N>::iterator;
     using const_iterator_t = typename std::array<T, N>::const_iterator;
 
     std::array<T, N> data;
 
-    vector(T value = 0);
+    explicit vector(T value = 0);
 
-    vector(const std::array<T, N> &other);
+    explicit vector(const std::array<T, N> &data);
 
-    vector(const vector<N - 1, T> &other);
+    explicit vector(const vector<N - 1, T> &other, T value = 1);
 
     vector(std::initializer_list<T> values);
+
+    inline size_t size() const;
 
     inline reference_t operator[](size_t i);
 
@@ -61,6 +65,10 @@ struct vector {
     static vector one();
 
     static vector infinity();
+
+    static vector unit(size_t index = 0);
+
+    static vector random(T min = -1, T max = 1);
 
     // Vector comparison operations.
     inline bool operator==(const vector &other) const;
@@ -111,7 +119,7 @@ struct vector {
 
     inline vector<N + 1, T> lift(size_t index = N, T value = 1) const;
 
-    inline vector<N - 1, T> project(size_t index = N - 1) const;
+    inline vector<N - 1, T> project(size_t index = N) const;
 
     inline T dot(const vector &other) const;
 
@@ -143,33 +151,44 @@ struct vector {
 
     inline void normalize();
 
-    inline vector &normalized();
+    inline vector normalized() const;
 
-    inline vector orthogonal();
+    inline vector orthogonal() const;
 
-    inline vector orthonormal();
+    inline vector orthonormal() const;
 
-    inline vector orthonormalize(const vector &other);
+    inline vector orthonormalize(const vector &other) const;
 
-    inline vector abs();
+    inline vector abs() const;
 
-    inline vector sqrt();
+    inline vector sqrt() const;
 
-    inline vector exp();
+    inline vector square() const;
 
-    inline vector log();
+    inline vector exp() const;
+
+    inline vector log() const;
 
     template<typename E>
-    inline vector pow(E exponent);
+    inline vector pow(E exponent) const;
 
     inline vector &clamped(T min, T max);
 
-    inline vector clamp(T min, T max);
+    inline vector clamp(T min, T max) const;
 
-    inline vector lerp(const vector &b, T u);
+    inline vector lerp(const vector &b, T u) const;
 
-    inline vector lerp(const vector &b, const vector &u);
+    inline vector lerp(const vector &b, const vector &u) const;
 };
+
+template<size_t N, typename T>
+std::ostream &operator<<(std::ostream &stream, const vector<N, T> &vec) {
+    for (const auto &v : vec) {
+        stream << v << ' ';
+    }
+    stream << "\n";
+    return stream;
+}
 
 template<size_t N, typename T>
 vector<N, T>::vector(T value) {
@@ -177,14 +196,14 @@ vector<N, T>::vector(T value) {
 }
 
 template<size_t N, typename T>
-vector<N, T>::vector(const std::array<T, N> &data) : data(data){
+vector<N, T>::vector(const std::array<T, N> &data) : data(data) {
 
 }
 
 template<size_t N, typename T>
-vector<N, T>::vector(const vector<N - 1, T> &other) {
+vector<N, T>::vector(const vector<N - 1, T> &other, T value) {
     copy(other);
-    back() = 1;
+    back() = value;
 }
 
 template<size_t N, typename T>
@@ -198,6 +217,42 @@ vector<N, T>::vector(std::initializer_list<T> values) {
     } else {
         std::copy(values.begin(), values.begin() + N, begin());
     }
+}
+
+template<size_t N, typename T>
+inline size_t vector<N, T>::size() const {
+    return data.size();
+}
+
+// Vector comparison operations.
+template<size_t N, typename T>
+inline bool vector<N, T>::operator==(const vector &other) const {
+    return data == other.data;
+}
+
+template<size_t N, typename T>
+inline bool vector<N, T>::operator!=(const vector &other) const {
+    return data != other.data;
+}
+
+template<size_t N, typename T>
+inline bool vector<N, T>::operator<(const vector &other) const {
+    return data < other.data;
+}
+
+template<size_t N, typename T>
+inline bool vector<N, T>::operator<=(const vector &other) const {
+    return data <= other.data;
+}
+
+template<size_t N, typename T>
+inline bool vector<N, T>::operator>(const vector &other) const {
+    return data > other.data;
+}
+
+template<size_t N, typename T>
+inline bool vector<N, T>::operator>=(const vector &other) const {
+    return data >= other.data;
 }
 
 template<size_t N, typename T>
@@ -246,53 +301,63 @@ void vector<N, T>::copy(const vector<M, S> &other) {
 }
 
 template<size_t N, typename T>
-static vector<N, T> zero() { return vector<N, T>(0); }
+vector<N, T> vector<N, T>::zero() { return vector<N, T>(0); }
 
 template<size_t N, typename T>
-static vector<N, T> one() { return vector<N, T>(1); }
+vector<N, T> vector<N, T>::one() { return vector<N, T>(1); }
 
 template<size_t N, typename T>
-static vector<N, T> infinity() { return vector<N, T>(std::numeric_limits<T>::max()); }
+vector<N, T> vector<N, T>::infinity() { return vector<N, T>(std::numeric_limits<T>::max()); }
 
-// Vector comparison operations.
 template<size_t N, typename T>
-inline bool vector<N, T>::operator==(const vector &other) const {
-    return data == other.data;
+vector<N, T> vector<N, T>::unit(size_t index) {
+    auto u = zero();
+    u[index] = T(1);
+    return u;
 }
 
-template<size_t N, typename T>
-inline bool vector<N, T>::operator!=(const vector &other) const {
-    return data != other.data;
-}
+template<typename T>
+struct random_distribution {
+    random_distribution(T min, T max) : dist{min, max}{}
+    std::uniform_int_distribution<T> dist;
+};
+
+template<>
+struct random_distribution<float> {
+    random_distribution(float min, float max) : dist{min, max}{}
+    std::uniform_real_distribution<float> dist;
+};
+
+template<>
+struct random_distribution<double> {
+    random_distribution(double min, double max) : dist{min, max}{}
+    std::uniform_real_distribution<double> dist;
+};
 
 template<size_t N, typename T>
-inline bool vector<N, T>::operator<(const vector &other) const {
-    return data < other.data;
+vector<N, T> vector<N, T>::random(T min, T max) {
+    std::random_device rnd_device;
+    std::mt19937 mersenne_engine{rnd_device()};
+    random_distribution rd{min, max};
+
+    auto gen = [&rd, &mersenne_engine]() {
+        return rd.dist(mersenne_engine);
+    };
+
+    auto result = vector<N, T>();
+    std::generate(result.begin(), result.end(), gen);
+    return result;
 }
 
-template<size_t N, typename T>
-inline bool vector<N, T>::operator<=(const vector &other) const {
-    return data <= other.data;
-}
-
-template<size_t N, typename T>
-inline bool vector<N, T>::operator>(const vector &other) const {
-    return data > other.data;
-}
-
-template<size_t N, typename T>
-inline bool vector<N, T>::operator>=(const vector &other) const {
-    return data >= other.data;
-}
 
 template<size_t N, typename T>
 inline vector<N, T> vector<N, T>::operator-() {
-    return 0 - *this;
+    return T(0) - *this;
 }
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator+=(const vector &other) {
-    const auto *ptr = other.data;
+    const auto *ptr = other.data.data();
     for (auto &s : *this) {
         s += (*ptr);
         ++ptr;
@@ -302,7 +367,7 @@ inline vector<N, T> &vector<N, T>::operator+=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator-=(const vector &other) {
-    const auto *ptr = other.data;
+    const auto *ptr = other.data.data();
     for (auto &s : *this) {
         s -= (*ptr);
         ++ptr;
@@ -312,7 +377,7 @@ inline vector<N, T> &vector<N, T>::operator-=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator*=(const vector &other) {
-    const auto *ptr = other.data;
+    const auto *ptr = other.data.data();
     for (auto &s : *this) {
         s *= (*ptr);
         ++ptr;
@@ -322,7 +387,7 @@ inline vector<N, T> &vector<N, T>::operator*=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator/=(const vector &other) {
-    const auto *ptr = other.data;
+    const auto *ptr = other.data.data();
     for (auto &s : *this) {
         (*ptr) != 0 ? s /= (*ptr) : s = 0;
         ++ptr;
@@ -332,26 +397,26 @@ inline vector<N, T> &vector<N, T>::operator/=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> vector<N, T>::operator+(const vector &other) const {
-    auto result = other;
-    return result += *this;
+    auto result = *this;
+    return result += other;
 }
 
 template<size_t N, typename T>
 inline vector<N, T> vector<N, T>::operator-(const vector &other) const {
-    auto result = other;
-    return result -= *this;
+    auto result = *this;
+    return result -= other;
 }
 
 template<size_t N, typename T>
 inline vector<N, T> vector<N, T>::operator*(const vector &other) const {
-    auto result = other;
-    return result *= *this;
+    auto result = *this;
+    return result *= other;
 }
 
 template<size_t N, typename T>
 inline vector<N, T> vector<N, T>::operator/(const vector &other) const {
-    auto result = other;
-    return result /= *this;
+    auto result = *this;
+    return result /= other;
 }
 
 template<size_t N, typename T>
@@ -434,7 +499,7 @@ inline T vector<N, T>::dot(const vector &other) const {
     T cc = 0;
     T cs = 0;
     T ccs = 0;
-    const auto *ptr = other.data;
+    const auto *ptr = other.data.data();
     for (const auto v : *this) {
         auto s = v * (*ptr);
         auto t = sum + s;
@@ -475,7 +540,7 @@ inline T vector<N, T>::squared_distance(const vector &other) const {
     T cc = 0;
     T cs = 0;
     T ccs = 0;
-    const auto *ptr = other.data;
+    const auto *ptr = other.data.data();
     for (const auto v : *this) {
         auto s = (v - (*ptr)) * (v - (*ptr));
         auto t = sum + s;
@@ -593,13 +658,14 @@ inline void vector<N, T>::normalize() {
 }
 
 template<size_t N, typename T>
-inline vector<N, T> &vector<N, T>::normalized() {
-    normalize();
-    return *this;
+inline vector<N, T> vector<N, T>::normalized() const {
+    auto result = *this;
+    result.normalize();
+    return result;
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::orthogonal() {
+inline vector<N, T> vector<N, T>::orthogonal() const {
     auto cmax = std::abs((*this)[0]);
     size_t imax = 0;
     for (int i = 1; i < N; ++i) {
@@ -616,22 +682,23 @@ inline vector<N, T> vector<N, T>::orthogonal() {
         inext = 0;
     }
     result[imax] = (*this)[inext];
-    result[inext] = -v(*this)[imax];
+    result[inext] = -(*this)[imax];
     return result;
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::orthonormal() {
+inline vector<N, T> vector<N, T>::orthonormal() const {
     return orthogonal().normalized();
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::orthonormalize(const vector &other) {
-    return *this - other * dot(other);
+inline vector<N, T> vector<N, T>::orthonormalize(const vector &other) const {
+    auto tmp = other.normalized();
+    return *this - tmp * dot(tmp);
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::abs() {
+inline vector<N, T> vector<N, T>::abs() const {
     auto result = *this;
     for (auto &s : result) {
         s = std::abs(s);
@@ -640,7 +707,7 @@ inline vector<N, T> vector<N, T>::abs() {
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::sqrt() {
+inline vector<N, T> vector<N, T>::sqrt() const {
     auto result = *this;
     for (auto &s : result) {
         s = std::sqrt(s);
@@ -649,7 +716,16 @@ inline vector<N, T> vector<N, T>::sqrt() {
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::exp() {
+inline vector<N, T> vector<N, T>::square() const {
+    auto result = *this;
+    for (auto &s : result) {
+        s = s * s;
+    }
+    return result;
+}
+
+template<size_t N, typename T>
+inline vector<N, T> vector<N, T>::exp() const {
     auto result = *this;
     for (auto &s : result) {
         s = std::exp(s);
@@ -658,7 +734,7 @@ inline vector<N, T> vector<N, T>::exp() {
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::log() {
+inline vector<N, T> vector<N, T>::log() const {
     auto result = *this;
     for (auto &s : result) {
         s = std::log(s);
@@ -668,7 +744,7 @@ inline vector<N, T> vector<N, T>::log() {
 
 template<size_t N, typename T>
 template<typename E>
-inline vector<N, T> vector<N, T>::pow(E exponent) {
+inline vector<N, T> vector<N, T>::pow(E exponent) const {
     auto result = *this;
     for (auto &s : result) {
         s = std::pow(s, exponent);
@@ -685,18 +761,18 @@ inline vector<N, T> &vector<N, T>::clamped(T min, T max) {
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::clamp(T min, T max) {
+inline vector<N, T> vector<N, T>::clamp(T min, T max) const {
     auto result = *this;
     return result.clamped();
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::lerp(const vector &b, T u) {
+inline vector<N, T> vector<N, T>::lerp(const vector &b, T u) const {
     return *this * (1 - u) + b * u;
 }
 
 template<size_t N, typename T>
-inline vector<N, T> vector<N, T>::lerp(const vector &b, const vector &u) {
+inline vector<N, T> vector<N, T>::lerp(const vector &b, const vector &u) const {
     return *this * (1 - u) + b * u;
 }
 
@@ -707,7 +783,11 @@ inline vector<N, T> operator+(S value, const vector<N, T> &other) {
 
 template<size_t N, typename T, typename S>
 inline vector<N, T> operator-(S value, const vector<N, T> &other) {
-    return other - value;
+    auto result = other;
+    for (auto &s : result) {
+        s = value - s;
+    }
+    return result;
 }
 
 template<size_t N, typename T, typename S>

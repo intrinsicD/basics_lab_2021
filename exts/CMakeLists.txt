@@ -7,3 +7,8 @@ if (BCG_APPS)
     add_subdirectory(glfw)
 
 endif (BCG_APPS)
+
+if(BCG_TESTS)
+    add_subdirectory(googletest)
+    include_directories(googletest/googletest/include)
+endif(BCG_TESTS)
