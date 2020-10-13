@@ -11,6 +11,8 @@ namespace bcg {
 halfedge_graph::halfedge_graph() : point_cloud(),
                                    vconn(vertices.add<vertex_connectivity, 1>("connectivity")),
                                    hconn(halfedges.add<halfedge_connectivity, 1>("connectivity")),
+                                   halfedges_deleted(halfedges.add<bool, 1>("deleted")),
+                                   edges_deleted(edges.add<bool, 1>("deleted")),
                                    size_halfedges_deleted(0),
                                    size_edges_deleted(0) {
 
@@ -22,10 +24,23 @@ void halfedge_graph::assign(const halfedge_graph &other) {
         halfedges.remove_all();
         edges.remove_all();
         positions = vertices.get_or_add<position_t, 3>("position");
+
         vconn = vertices.get_or_add<vertex_connectivity, 1>("connectivity");
         hconn = halfedges.get_or_add<halfedge_connectivity, 1>("connectivity");
+
+        halfedges_deleted = halfedges.get_or_add<bool, 1>("deleted");
+        edges_deleted = edges.get_or_add<bool, 1>("deleted");
+
         vconn.vector() = other.vconn.vector();
         hconn.vector() = other.hconn.vector();
+
+        halfedges_deleted.vector() = other.halfedges_deleted.vector();
+        edges_deleted.vector() = other.edges_deleted.vector();
+
+        vertices.resize(other.vertices.size());
+        edges.resize(other.edges.size());
+        halfedges.resize(other.halfedges.size());
+
         size_halfedges_deleted = other.size_halfedges_deleted;
         size_edges_deleted = other.size_edges_deleted;
     }
@@ -37,8 +52,14 @@ halfedge_graph &halfedge_graph::operator=(const halfedge_graph &other) {
         halfedges = other.halfedges;
         edges = other.edges;
         positions = vertices.get_or_add<position_t, 3>("position");
+
         vconn = vertices.get_or_add<vertex_connectivity, 1>("connectivity");
         hconn = halfedges.get_or_add<halfedge_connectivity, 1>("connectivity");
+
+        vertices_deleted = vertices.get_or_add<bool, 1>("deleted");
+        halfedges_deleted = halfedges.get_or_add<bool, 1>("deleted");
+        edges_deleted = edges.get_or_add<bool, 1>("deleted");
+
         size_vertices_deleted = other.size_vertices_deleted;
         size_halfedges_deleted = other.size_halfedges_deleted;
         size_edges_deleted = other.size_edges_deleted;
@@ -52,10 +73,6 @@ bool halfedge_graph::has_garbage() const {
 
 void halfedge_graph::garbage_collection() {
     if (!has_garbage()) return;
-
-    auto vertices_deleted = vertices.get<bool, 1>("deleted");
-    auto halfedges_deleted = halfedges.get<bool, 1>("deleted");
-    auto edges_deleted = edges.get<bool, 1>("deleted");
 
     size_t nV = vertices.size();
     size_t nE = edges.size();
@@ -181,8 +198,7 @@ bool halfedge_graph::is_boundary(edge_handle e) const{
 }
 
 void halfedge_graph::delete_vertex(vertex_handle v) {
-    auto deleted = vertices.get_or_add<bool, 1>("deleted", false);
-    if (deleted[v]) return;
+    if (vertices_deleted[v]) return;
 
     for (const auto h : get_halfedges(v)) {
         remove_edge(get_edge(h));
@@ -263,7 +279,7 @@ float halfedge_graph::get_length(edge_handle e) const {
 }
 
 point_cloud::position_t halfedge_graph::get_center(halfedge_handle h) const {
-    return (positions[get_to_vertex(h)] + positions[get_from_vertex(h)]) / 2.0;
+    return (positions[get_to_vertex(h)] + positions[get_from_vertex(h)]) / 2.0f;
 }
 
 point_cloud::position_t halfedge_graph::get_center(edge_handle e) const {
@@ -321,8 +337,6 @@ halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
 }
 
 void halfedge_graph::remove_edge(edge_handle e) {
-    auto edges_deleted = edges.get_or_add<bool, 1>("deleted", false);
-    auto halfedges_deleted = halfedges.get_or_add<bool, 1>("deleted", false);
     if (edges_deleted[e]) return;
 
     auto h0 = get_halfedge(e, 0);
@@ -346,14 +360,7 @@ void halfedge_graph::remove_edge(edge_handle e) {
         }
     }
 
-    edges_deleted[e] = true;
-    ++size_edges_deleted;
-    edges.set_dirty();
-    halfedges_deleted[h0] = true;
-    halfedges_deleted[h1] = true;
-    ++size_halfedges_deleted;
-    ++size_halfedges_deleted;
-    halfedges.set_dirty();
+    mark_edge_deleted(e);
 }
 
 halfedge_handle halfedge_graph::find_halfedge(vertex_handle v0, vertex_handle v1) const {
@@ -510,6 +517,18 @@ halfedge_handle halfedge_graph::new_edge(vertex_handle v0, vertex_handle v1) {
     assert(halfedges.is_dirty());
     assert(edges.is_dirty());
     return h;
+}
+
+void halfedge_graph::mark_edge_deleted(edge_handle e){
+    if(edges_deleted[e]) return;
+
+    edges_deleted[e] = true;
+    halfedges_deleted[get_halfedge(e, 0)] = true;
+    halfedges_deleted[get_halfedge(e, 1)] = true;
+    ++size_edges_deleted;
+    ++size_halfedges_deleted;
+    ++size_halfedges_deleted;
+    edges_deleted.set_dirty();
 }
 
 edge_handle find_closest_edge(const halfedge_graph &graph, const halfedge_graph::position_t &point) {

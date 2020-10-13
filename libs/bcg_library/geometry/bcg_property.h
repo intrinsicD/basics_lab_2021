@@ -62,10 +62,6 @@ struct base_handle {
 struct vertex_handle : public base_handle {
     using base_handle::base_handle;
 
-    vertex_handle(base_handle handle) : base_handle(handle) {
-
-    }
-
     vertex_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
@@ -73,10 +69,6 @@ struct vertex_handle : public base_handle {
 
 struct halfedge_handle : public base_handle {
     using base_handle::base_handle;
-
-    halfedge_handle(base_handle handle) : base_handle(handle) {
-
-    }
 
     halfedge_handle &operator=(const base_handle &other) override {
         idx = other.idx;
@@ -86,10 +78,6 @@ struct halfedge_handle : public base_handle {
 struct edge_handle : public base_handle {
     using base_handle::base_handle;
 
-    edge_handle(base_handle handle) : base_handle(handle) {
-
-    }
-
     edge_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
@@ -97,11 +85,7 @@ struct edge_handle : public base_handle {
 
 struct face_handle : public base_handle {
     using base_handle::base_handle;
-
-    face_handle(base_handle handle) : base_handle(handle) {
-
-    }
-
+    
     face_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
@@ -723,7 +707,7 @@ struct property_container {
         });
     }
 
-    [[nodiscard]] inline bool is_valid(const base_handle& handle) const {
+    [[nodiscard]] inline bool is_valid(const base_handle &handle) const {
         return handle.idx < size();
     }
 
@@ -827,6 +811,117 @@ std::ostream &operator<<(std::ostream &stream, const property_container &contain
     }
     return stream;
 }
+
+template<typename Derived, typename Handle, typename Container>
+struct property_iterator {
+    explicit property_iterator(Handle handle = Handle(),
+                               const Container *container = nullptr,
+                               property<bool, 1> deleted = {}) : handle(handle),
+                                                                 container(container),
+                                                                 deleted(deleted) {
+        if (container) {
+            if (deleted) {
+                while (container->is_valid(handle) && deleted[handle]) {
+                    ++handle;
+                }
+            }
+        }
+    }
+
+    inline Handle operator*() const {
+        return handle;
+    }
+
+    inline bool operator==(const Derived &rhs) const {
+        return handle == rhs.handle;
+    }
+
+    inline bool operator!=(const Derived &rhs) const {
+        return handle != rhs.handle;
+    }
+
+    inline Derived &operator++() {
+        ++handle;
+        while (deleted && container->is_valid(handle) && deleted[handle]) {
+            ++handle;
+        }
+        return *this;
+    }
+
+    inline Derived &operator--() {
+        --handle;
+        while (deleted && handle.idx > 0 && container->is_valid(handle) &&
+               deleted[handle]) {
+            --handle;
+        }
+        return *this;
+    }
+
+private:
+    Handle handle;
+    property<bool, 1> deleted;
+    const Container *container;
+};
+
+struct vertex_container : public property_container {
+    using property_container::property_container;
+
+    struct vertex_iterator : public property_iterator<vertex_iterator, vertex_handle, vertex_container> {
+        explicit vertex_iterator(vertex_handle v = vertex_handle(),
+                                 property<bool, 1> deleted = {},
+                                 const vertex_container *container = nullptr) : property_iterator(v, container,
+                                                                                                  deleted) {}
+    };
+
+    inline vertex_iterator begin() const { return vertex_iterator(0, get<bool, 1>("deleted"), this); }
+
+    inline vertex_iterator end() const { return vertex_iterator(size(), get<bool, 1>("deleted"), this); }
+};
+
+struct halfedge_container : public property_container {
+    using property_container::property_container;
+
+    struct halfedge_iterator : public property_iterator<halfedge_iterator, halfedge_handle, halfedge_container> {
+        explicit halfedge_iterator(halfedge_handle h = halfedge_handle(),
+                                   property<bool, 1> deleted = {},
+                                   const halfedge_container *container = nullptr) : property_iterator(h, container,
+                                                                                                      deleted) {}
+    };
+
+    inline halfedge_iterator begin() const { return halfedge_iterator(0, get<bool, 1>("deleted"), this); }
+
+    inline halfedge_iterator end() const { return halfedge_iterator(size(), get<bool, 1>("deleted"), this); }
+};
+
+struct edge_container : public property_container {
+    using property_container::property_container;
+
+    struct edge_iterator : public property_iterator<edge_iterator, edge_handle, edge_container> {
+        explicit edge_iterator(edge_handle e = edge_handle(),
+                               property<bool, 1> deleted = {},
+                               const edge_container *container = nullptr) : property_iterator(e, container,
+                                                                                              deleted) {}
+    };
+
+    inline edge_iterator begin() const { return edge_iterator(0, get<bool, 1>("deleted"), this); }
+
+    inline edge_iterator end() const { return edge_iterator(size(), get<bool, 1>("deleted"), this); }
+};
+
+struct face_container : public property_container {
+    using property_container::property_container;
+
+    struct face_iterator : public property_iterator<face_iterator, face_handle, face_container> {
+        explicit face_iterator(face_handle f = face_handle(),
+                               property<bool, 1> deleted = {},
+                               const face_container *container = nullptr) : property_iterator(f, container,
+                                                                                              deleted) {}
+    };
+
+    inline face_iterator begin() const { return face_iterator(0, get<bool, 1>("deleted"), this); }
+
+    inline face_iterator end() const { return face_iterator(size(), get<bool, 1>("deleted"), this); }
+};
 
 
 }

@@ -12,8 +12,10 @@ namespace bcg {
 
 struct point_cloud {
     using position_t = vec3f;
-    property_container vertices, object_properties;
+    vertex_container vertices;
+    property_container object_properties;
     property<position_t, 3> positions;
+    property<bool, 1> vertices_deleted;
     size_t size_vertices_deleted;
 
     point_cloud();
@@ -35,6 +37,9 @@ struct point_cloud {
     vertex_handle add_vertex(const position_t &point);
 
     virtual void delete_vertex(vertex_handle v);
+
+protected:
+    void mark_vertex_deleted(vertex_handle v);
 };
 
 std::ostream operator<<(std::ostream stream, const point_cloud &pc);

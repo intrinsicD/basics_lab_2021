@@ -20,9 +20,12 @@ struct halfedge_graph : public point_cloud {
         halfedge_handle ph;
     };
 
-    property_container halfedges, edges;
+    halfedge_container halfedges;
+    edge_container edges;
     property<vertex_connectivity, 1> vconn;
     property<halfedge_connectivity, 1> hconn;
+    property<bool, 1> halfedges_deleted;
+    property<bool, 1> edges_deleted;
     size_t size_halfedges_deleted;
     size_t size_edges_deleted;
 
@@ -152,6 +155,9 @@ struct halfedge_graph : public point_cloud {
     std::vector<vec2i> get_connectivity() const;
 
     halfedge_handle new_edge(vertex_handle v0, vertex_handle v1);
+
+protected:
+    void mark_edge_deleted(edge_handle e);
 };
 
 

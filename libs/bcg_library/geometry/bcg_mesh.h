@@ -21,10 +21,13 @@ struct halfedge_mesh : public halfedge_graph {
         halfedge_handle h;
     };
 
-    property_container faces, object_properties;
+    face_container faces;
     property<position_t, 3> position;
     property<vertex_connectivity, 1> vconn;
-    property<halfedge_connectivity, 1> hconn; //unlink in graph
+    property<halfedge_connectivity, 1> hconn; //unlink in graph_base
+    property<face_connectivity, 1> fconn;
+    property<bool, 1> faces_deleted;
+    size_t size_faces_deleted;
 
     halfedge_mesh();
 
@@ -60,17 +63,17 @@ struct halfedge_mesh : public halfedge_graph {
 
     bool is_flip_ok(edge_handle e) const;
 
-    face_handle get_face(edge_handle e) const;
+    face_handle get_face(edge_handle e, bool i) const;
 
-    void set_face(edge_handle e, face_handle f);
+    face_handle get_face(halfedge_handle h) const;
+
+    void set_face(halfedge_handle h, face_handle f);
 
     halfedge_handle get_halfedge(face_handle f) const;
 
     void set_halfedge(face_handle f, halfedge_handle h);
 
-    size_t num_vertices(face_handle f) const;
-
-    size_t num_edges(face_handle f) const;
+    size_t get_valence(face_handle f) const;
 
     face_handle add_face(const std::vector<vertex_handle> &f_vertices);
 
@@ -204,6 +207,8 @@ struct halfedge_mesh : public halfedge_graph {
     face_handle find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const;
 protected:
     face_handle new_face();
+
+    void mark_face_deleted(face_handle f);
 
     std::vector<halfedge_handle> m_add_face_halfedges;
     std::vector<bool> m_add_face_is_new;
