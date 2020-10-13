@@ -17,7 +17,7 @@ add_library(bcg_graphics
 
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(bcg_graphics PRIVATE ./exts/entt/single_include)
-target_include_directories(bcg_graphics PRIVATE ./exts/glm/glm)
+target_include_directories(bcg_graphics PUBLIC ./exts/glm)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)
