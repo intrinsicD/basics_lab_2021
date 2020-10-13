@@ -3,8 +3,9 @@
 //
 
 #include <gtest/gtest.h>
+#include <numeric>
 
-#include "bcg_library/utils/bcg_test_stl_utils.h"
+#include "bcg_library/utils/bcg_stl_utils.h"
 
 using namespace bcg;
 
@@ -45,5 +46,22 @@ TEST(TestSuiteStlUtils, sort_by_dirst) {
     for(size_t i = 0; i < values2.size(); ++i){
         EXPECT_EQ(values1[i], i);
         EXPECT_EQ(values2[i], max - i);
+    }
+}
+
+TEST(TestSuiteStlUtils, range){
+    size_t counter = 0;
+    for(const auto &i : range<int>(0, 100)){
+        EXPECT_EQ(i, counter++);
+    }
+}
+
+TEST(TestSuiteStlUtils, enumerate){
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 0);
+    size_t counter = 0;
+    for(const auto &item : enumerate(vec)){
+        EXPECT_EQ(item.first, counter);
+        EXPECT_EQ(item.second, counter++);
     }
 }

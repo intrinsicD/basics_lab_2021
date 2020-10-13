@@ -8,8 +8,8 @@ set(TEST_SOURCES
         bcg_test_dynamic_bitset.cpp
         bcg_test_file.cpp
         bcg_test_file_watcher.cpp
-        bcg_test_stl_utils.cpp
-        bcg_vector_test.cpp
+        bcg_stl_utils.cpp
+        bcg_glm_vector_test.cpp
         )
 add_executable(bcg_library_test ${TEST_SOURCES})
 set_target_properties(bcg_library_test PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)

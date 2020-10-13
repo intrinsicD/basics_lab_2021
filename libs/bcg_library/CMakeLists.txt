@@ -1,7 +1,12 @@
 add_library(bcg_graphics
-        bcg_common.h bcg_commonio.h bcg_commonio.cpp
-        math/bcg_math.h color/bcg_color.h
-        color/bcg_color_spaces.h color/bcg_color_spaces.cpp
+        bcg_commonio.h
+        utils/bcg_file.h utils/bcg_file.cpp
+        utils/bcg_dynamic_bitset.h
+        utils/bcg_file_watcher.h
+        utils/bcg_logger.h
+        utils/bcg_path.h utils/bcg_path.cpp
+        utils/bcg_stl_utils.h
+        math/bcg_linalg.h
         geometry/bcg_aligned_box.h geometry/bcg_property.h geometry/bcg_property_map_eigen.h geometry/bcg_transforms.h
         exts/cgltf/cgltf.h exts/cgltf/cgltf_write.h
         exts/entt/single_include/entt/entt.hpp
@@ -12,6 +17,7 @@ add_library(bcg_graphics
 
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(bcg_graphics PRIVATE ./exts/entt/single_include)
+target_include_directories(bcg_graphics PRIVATE ./exts/glm/glm)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)

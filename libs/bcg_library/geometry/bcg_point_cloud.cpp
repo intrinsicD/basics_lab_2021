@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include "bcg_point_cloud.h"
-#include "../utils/bcg_test_stl_utils.h"
+#include "../utils/bcg_stl_utils.h"
 
 namespace bcg {
 

@@ -8,8 +8,7 @@
 #include <string>
 #include <array>
 #include <vector>
-#include "bcg_library/math/bcg_vector.h"
-#include "bcg_library/math/bcg_matrix.h"
+#include "bcg_library/math/bcg_linalg.h"
 
 namespace bcg {
 

@@ -10,7 +10,7 @@
 // -----------------------------------------------------------------------------
 
 #include <initializer_list>
-#include "bcg_library/math/bcg_math.h"
+#include "bcg_library/math/bcg_linalg.h"
 #include "bcg_transforms.h"
 
 // -----------------------------------------------------------------------------

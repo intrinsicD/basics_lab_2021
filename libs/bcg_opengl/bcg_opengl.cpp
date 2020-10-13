@@ -647,17 +647,17 @@ void set_uniform(const ogl_program *program, int location, const vec4f &value) {
 }
 
 void set_uniform(const ogl_program *program, int location, const mat2f &value) {
-    glUniformMatrix2fv(location, 1, false, &value.x.x);
+    glUniformMatrix2fv(location, 1, false, glm::value_ptr(value));
     assert_ogl_error();
 }
 
 void set_uniform(const ogl_program *program, int location, const mat3f &value) {
-    glUniformMatrix3fv(location, 1, false, &value.x.x);
+    glUniformMatrix3fv(location, 1, false, glm::value_ptr(value));
     assert_ogl_error();
 }
 
 void set_uniform(const ogl_program *program, int location, const mat4f &value) {
-    glUniformMatrix4fv(location, 1, false, &value.x.x);
+    glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
     assert_ogl_error();
 }
 

@@ -12,7 +12,6 @@
 
 namespace bcg {
 
-
 class DynamicBitset {
 public:
     struct reference_t {
@@ -65,7 +64,7 @@ public:
         m_storage.clear();
     }
 
-    std::string to_string() const {
+    [[nodiscard]] std::string to_string() const {
         std::string number;
         size_t is = item_size();
         for (const auto &item : m_storage) {
@@ -109,7 +108,7 @@ public:
         return is_not_zero_from(cap);
     }
 
-    bool is_zero_from(size_t pos) const {
+    [[nodiscard]] bool is_zero_from(size_t pos) const {
         size_t cap = capacity();
         for (size_t i = pos; i < cap; ++i) {
             if ((*this)[i] == 1) return false;
@@ -117,7 +116,7 @@ public:
         return true;
     }
 
-    bool is_not_zero_from(size_t pos) const {
+    [[nodiscard]] bool is_not_zero_from(size_t pos) const {
         size_t cap = capacity();
         for (size_t i = pos; i < cap; ++i) {
             if ((*this)[i] == 1) return true;
@@ -125,36 +124,32 @@ public:
         return false;
     }
 
-    bool all() const {
-        for (int i : m_storage) {
-            if (~i != 0) return false;
-        }
-        return true;
+    [[nodiscard]] bool all() const {
+        return std::all_of(m_storage.begin(), m_storage.end(), [&](const auto i){
+            return ~i == 0;
+        });
     }
 
-    bool all_of(const std::vector<size_t> &indices) const {
+    [[nodiscard]] bool all_of(const std::vector<size_t> &indices) const {
         size_t cap = capacity();
-        for (const auto i : indices) {
-            if (i >= cap || !test(i)) return false;
-        }
-        return true;
+        return std::all_of(indices.begin(), indices.end(), [&](const auto i){
+            return i < cap && test(i);
+        });
     }
 
-    bool any() const {
-        for (const auto i : m_storage) {
-            if (i != 0) return true;
-        }
-        return false;
+    [[nodiscard]] bool any() const {
+        return std::all_of(m_storage.begin(), m_storage.end(), [](const auto i){
+            return i != 0;
+        });
     }
 
-    bool none() const {
-        for (const auto i : m_storage) {
-            if (i != 0) return false;
-        }
-        return true;
+    [[nodiscard]] bool none() const {
+        return std::all_of(m_storage.begin(), m_storage.end(), [](const auto i){
+           return i == 0;
+        });
     }
 
-    size_t count() const {
+    [[nodiscard]] size_t count() const {
         size_t count = 0;
         for (const auto i : m_storage) {
             count += COUNTSETBITS(i);
@@ -194,7 +189,7 @@ public:
         return false;
     }
 
-    bool test(size_t i) const {
+    [[nodiscard]] bool test(size_t i) const {
         if (i >= capacity()) return false;
         return test(vector_index(i), item_index(i));
     }
@@ -207,13 +202,13 @@ public:
         return std::numeric_limits<item_t>::digits;
     }
 
-    size_t num_set_bits() const { return m_set_bits; }
+    [[nodiscard]] size_t num_set_bits() const { return m_set_bits; }
 
-    size_t size() const {
+    [[nodiscard]] size_t size() const {
         return m_storage.size();
     }
 
-    size_t capacity() const {
+    [[nodiscard]] size_t capacity() const {
         return size() * item_size();
     }
 
@@ -340,7 +335,7 @@ private:
     using item_t = unsigned char;
 
     template<typename T>
-    inline T BIT(T pos) const {
+    [[nodiscard]] inline T BIT(T pos) const {
         return 1 << pos;
     }
 
@@ -350,12 +345,12 @@ private:
     }
 
     template<typename T, typename U>
-    inline T DROP(T var, U pos) const {
+    [[nodiscard]] inline T DROP(T var, U pos) const {
         return var >> pos;
     }
 
     template<typename T, typename U>
-    inline bool CHECK_BIT(T var, U pos) const {
+    [[nodiscard]] inline bool CHECK_BIT(T var, U pos) const {
         return DROP(var, pos) & 1;
     }
 
@@ -364,17 +359,17 @@ private:
         var &= ~BIT(pos);
     }
 
-    size_t COUNTSETBITS(size_t var) const {
+    static size_t COUNTSETBITS(size_t var) {
         var = var - ((var >> 1) & 0x5555555555555555UL);
         var = (var & 0x3333333333333333UL) + ((var >> 2) & 0x3333333333333333UL);
         return (size_t) ((((var + (var >> 4)) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL) >> 56);
     }
 
-    inline bool pos_too_large(size_t pos) const {
+    [[nodiscard]] inline bool pos_too_large(size_t pos) const {
         return pos >= capacity();
     }
 
-    inline bool test(size_t vi, size_t ii) const {
+    [[nodiscard]] inline bool test(size_t vi, size_t ii) const {
         return CHECK_BIT(m_storage[vi], ii);
     }
 

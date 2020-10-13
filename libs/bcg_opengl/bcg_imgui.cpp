@@ -9,7 +9,9 @@
 
 #include "bcg_imgui.h"
 #include "exts/glad/glad.h"
-#include "bcg_library/bcg_commonio.h"
+#include "bcg_library/utils/bcg_file.h"
+#include "bcg_library/utils/bcg_path.h"
+
 
 #ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
@@ -378,7 +380,7 @@ struct filedialog_state {
         _set_filename(filename);
     }
 
-    void _set_dirname(const std::string &name) {
+    void _set_dirname(const std::string& name) {
         if (path_exists(name) && path_isdir(name)) {
             dirname = name;
         } else if (path_exists(dirname) && path_isdir(dirname)) {
@@ -396,7 +398,7 @@ struct filedialog_state {
                 entries.push_back({path_filename(entry), false});
             }
         }
-        std::sort(entries.begin(), entries.end(), [](auto &a, auto &b) {
+        std::sort(entries.begin(), entries.end(), [](auto& a, auto& b) {
             if (a.second == b.second) return a.first < b.first;
             return a.second;
         });
@@ -665,7 +667,7 @@ bool draw_coloredit(gui_window *win, const char *lbl, vec4f &value) {
 bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec3f &value) {
     auto color = value;
     auto exposure = 0.0f;
-    auto scale = max(color);
+    auto scale = glm::compMax(color);
     if (scale > 1) {
         color /= scale;
         exposure = log2(scale);
@@ -684,7 +686,7 @@ bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec3f &value) {
 bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec4f &value) {
     auto color = value;
     auto exposure = 0.0f;
-    auto scale = max(xyz(color));
+    auto scale = glm::compMax(vec3f(color));
     if (scale > 1) {
         color.x /= scale;
         color.y /= scale;

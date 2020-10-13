@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "bcg_library/math/bcg_vector_t.h"
+#include "bcg_vector_t.h"
 
 using namespace bcg;
 
@@ -41,6 +41,15 @@ TEST_F(TestVectorFixture, constructors) {
     }
     for (size_t i = 0; i < vec3.size(); ++i) {
         EXPECT_EQ(vec3[i], i + 1);
+    }
+
+    std::vector<float> test(100);
+    std::iota(test.begin(), test.end(), 0);
+    vector<Dynamic, float> test_vector;
+    test_vector.copy(test);
+
+    for (size_t i = 0; i < test_vector.size(); ++i) {
+        EXPECT_EQ(test_vector[i], i);
     }
 }
 
@@ -195,4 +204,33 @@ TEST_F(TestVectorFixture, clamped) {
 TEST_F(TestVectorFixture, lerp) {
     EXPECT_EQ(zeros.lerp(ones, 0.5), ones / 2.0);
     EXPECT_EQ(zeros.lerp(vec3, ones), vec3);
+}
+
+TEST_F(TestVectorFixture, dynamic) {
+    vector<size_t(-1), float> test_dynamic;
+    test_dynamic = vec3;
+    vector<3, float> test_static;
+    test_static = vec3;
+    for(size_t i = 0; i < vec3.size(); ++i){
+        EXPECT_EQ(test_dynamic[i], vec3[i]);
+    }
+    for(size_t i = 0; i < test_static.size(); ++i){
+        EXPECT_EQ(test_static[i], vec3[i]);
+    }
+}
+
+TEST_F(TestVectorFixture, head) {
+    vector<size_t(-1), float> test_dynamic;
+    test_dynamic = vec3.head<3>();
+    for(size_t i = 0; i < test_dynamic.size(); ++i){
+        EXPECT_EQ(test_dynamic[i], vec3[i]);
+    }
+}
+
+TEST_F(TestVectorFixture, tail) {
+    vector<size_t(-1), float> test_dynamic;
+    test_dynamic = vec3.tail<3>();
+    for(size_t i = 0; i < test_dynamic.size(); ++i){
+        EXPECT_EQ(test_dynamic[i], vec3[vec3.size() - test_dynamic.size() + i]);
+    }
 }

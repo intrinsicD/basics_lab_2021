@@ -22,11 +22,11 @@ TEST(TestSuiteFileWatcher, constructor){
 }
 
 TEST(TestSuiteFileWatcher, add_file){
-    file test_file(test_data_path + "test_watched_file.txt");
+    file_stream test_file(test_data_path + "test_watched_file.txt");
     test_file.create();
     file_watcher watcher;
     bool changed = false;
-    watcher.watch(test_file.absolute_path(), [&changed](){
+    watcher.watch(test_file, [&changed](){
         changed = true;
     });
     sleep(1);

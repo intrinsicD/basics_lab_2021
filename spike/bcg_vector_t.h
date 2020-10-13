@@ -14,16 +14,40 @@
 
 namespace bcg {
 
+constexpr size_t Dynamic = std::numeric_limits<size_t>::max();
+
+template<size_t N, typename T>
+struct vector;
+
+template<size_t N, typename T>
+struct vector_storage{
+    using storage_t = std::array<T, N>;
+    static void resize(storage_t &data, size_t M){
+
+    }
+};
+
+template<typename T>
+struct vector_storage<Dynamic, T>{
+    using storage_t = std::vector<T>;
+    static void resize(storage_t &data, size_t M){
+        data.resize(M);
+    }
+};
+
 template<size_t N, typename T>
 struct vector {
-    using reference_t = typename std::array<T, N>::reference;
-    using const_reference_t = typename std::array<T, N>::const_reference;
-    using iterator_t = typename std::array<T, N>::iterator;
-    using const_iterator_t = typename std::array<T, N>::const_iterator;
+    using storage_t = typename vector_storage<N, T>::storage_t;
+    using reference_t = typename storage_t::reference;
+    using const_reference_t = typename storage_t::const_reference;
+    using iterator_t = typename storage_t::iterator;
+    using const_iterator_t = typename storage_t::const_iterator;
 
-    std::array<T, N> data;
+    storage_t storage;
 
-    explicit vector(T value = 0);
+    vector();
+
+    explicit vector(T value);
 
     explicit vector(const std::array<T, N> &data);
 
@@ -32,6 +56,12 @@ struct vector {
     vector(std::initializer_list<T> values);
 
     inline size_t size() const;
+
+    template<size_t M, typename S>
+    inline vector<N, T> &operator=(const vector<M, S> &other);
+
+    template<typename S>
+    inline vector<N, S> cast() const;
 
     inline reference_t operator[](size_t i);
 
@@ -57,8 +87,21 @@ struct vector {
 
     inline const_reference_t back() const;
 
+    inline T *data();
+
+    inline const T *data() const;
+
+    template<size_t M>
+    inline vector<M, T> head() const;
+
+    template<size_t M>
+    inline vector<M, T> tail() const;
+
     template<size_t M, typename S>
     void copy(const vector<M, S> &other);
+
+    template<typename S>
+    void copy(const std::vector<S> &other);
 
     static vector zero();
 
@@ -191,12 +234,17 @@ std::ostream &operator<<(std::ostream &stream, const vector<N, T> &vec) {
 }
 
 template<size_t N, typename T>
+vector<N, T>::vector() : storage(){
+
+}
+
+template<size_t N, typename T>
 vector<N, T>::vector(T value) {
     std::fill(begin(), end(), value);
 }
 
 template<size_t N, typename T>
-vector<N, T>::vector(const std::array<T, N> &data) : data(data) {
+vector<N, T>::vector(const std::array<T, N> &data) : storage(data) {
 
 }
 
@@ -220,83 +268,137 @@ vector<N, T>::vector(std::initializer_list<T> values) {
 }
 
 template<size_t N, typename T>
+template<size_t M, typename S>
+inline vector<N, T> &vector<N, T>::operator=(const vector<M, S> &other){
+    vector_storage<N, T>::resize(storage, M);
+    copy(other);
+    return *this;
+}
+
+template<size_t N, typename T>
+template<typename S>
+inline vector<N, S> vector<N, T>::cast() const{
+    vector<N, S> result;
+    result.copy(*this);
+    return result;
+}
+
+template<size_t N, typename T>
 inline size_t vector<N, T>::size() const {
-    return data.size();
+    return storage.size();
 }
 
 // Vector comparison operations.
 template<size_t N, typename T>
 inline bool vector<N, T>::operator==(const vector &other) const {
-    return data == other.data;
+    return storage == other.storage;
 }
 
 template<size_t N, typename T>
 inline bool vector<N, T>::operator!=(const vector &other) const {
-    return data != other.data;
+    return storage != other.storage;
 }
 
 template<size_t N, typename T>
 inline bool vector<N, T>::operator<(const vector &other) const {
-    return data < other.data;
+    return storage < other.storage;
 }
 
 template<size_t N, typename T>
 inline bool vector<N, T>::operator<=(const vector &other) const {
-    return data <= other.data;
+    return storage <= other.storage;
 }
 
 template<size_t N, typename T>
 inline bool vector<N, T>::operator>(const vector &other) const {
-    return data > other.data;
+    return storage > other.storage;
 }
 
 template<size_t N, typename T>
 inline bool vector<N, T>::operator>=(const vector &other) const {
-    return data >= other.data;
+    return storage >= other.storage;
 }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::reference_t vector<N, T>::operator[](size_t i) { return data[i]; }
+inline typename vector<N, T>::reference_t vector<N, T>::operator[](size_t i) { return storage[i]; }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::const_reference_t vector<N, T>::operator[](size_t i) const { return data[i]; }
+inline typename vector<N, T>::const_reference_t vector<N, T>::operator[](size_t i) const { return storage[i]; }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::reference_t vector<N, T>::operator()(size_t i) { return data[i]; }
+inline typename vector<N, T>::reference_t vector<N, T>::operator()(size_t i) { return storage[i]; }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::const_reference_t vector<N, T>::operator()(size_t i) const { return data[i]; }
+inline typename vector<N, T>::const_reference_t vector<N, T>::operator()(size_t i) const { return storage[i]; }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::iterator_t vector<N, T>::begin() { return data.begin(); }
+inline typename vector<N, T>::iterator_t vector<N, T>::begin() { return storage.begin(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::iterator_t vector<N, T>::end() { return data.end(); }
+inline typename vector<N, T>::iterator_t vector<N, T>::end() { return storage.end(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::const_iterator_t vector<N, T>::begin() const { return data.begin(); }
+inline typename vector<N, T>::const_iterator_t vector<N, T>::begin() const { return storage.begin(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::const_iterator_t vector<N, T>::end() const { return data.end(); }
+inline typename vector<N, T>::const_iterator_t vector<N, T>::end() const { return storage.end(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::reference_t vector<N, T>::front() { return data.front(); }
+inline typename vector<N, T>::reference_t vector<N, T>::front() { return storage.front(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::const_reference_t vector<N, T>::front() const { return data.front(); }
+inline typename vector<N, T>::const_reference_t vector<N, T>::front() const { return storage.front(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::reference_t vector<N, T>::back() { return data.back(); }
+inline typename vector<N, T>::reference_t vector<N, T>::back() { return storage.back(); }
 
 template<size_t N, typename T>
-inline typename vector<N, T>::const_reference_t vector<N, T>::back() const { return data.back(); }
+inline typename vector<N, T>::const_reference_t vector<N, T>::back() const { return storage.back(); }
+
+template<size_t N, typename T>
+inline T *vector<N, T>::data(){
+    return storage.data();
+}
+
+template<size_t N, typename T>
+inline const T *vector<N, T>::data() const{
+    return storage.data();
+}
+
+template<size_t N, typename T>
+template<size_t M>
+inline vector<M, T> vector<N, T>::head() const{
+    vector<M, T> result;
+    result.copy(*this);
+    return result;
+}
+
+template<size_t N, typename T>
+template<size_t M>
+inline vector<M, T> vector<N, T>::tail() const{
+    vector<M, T> result;
+    for(size_t i = 0; i < M; ++i){
+        result[i] = (*this)[N - M + i];
+    }
+    return result;
+}
 
 template<size_t N, typename T>
 template<size_t M, typename S>
 void vector<N, T>::copy(const vector<M, S> &other) {
     size_t _min = std::min(M, N);
     for (size_t i = 0; i < _min; ++i) {
-        data[i] = other[i];
+        storage[i] = other[i];
+    }
+}
+
+template<size_t N, typename T>
+template<typename S>
+void vector<N, T>::copy(const std::vector<S> &other){
+    size_t _min = std::min(other.size(), N);
+    vector_storage<N, T>::resize(storage, _min);
+    for (size_t i = 0; i < _min; ++i) {
+        storage[i] = other[i];
     }
 }
 
@@ -357,7 +459,7 @@ inline vector<N, T> vector<N, T>::operator-() {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator+=(const vector &other) {
-    const auto *ptr = other.data.data();
+    const auto *ptr = other.storage.storage();
     for (auto &s : *this) {
         s += (*ptr);
         ++ptr;
@@ -367,7 +469,7 @@ inline vector<N, T> &vector<N, T>::operator+=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator-=(const vector &other) {
-    const auto *ptr = other.data.data();
+    const auto *ptr = other.storage.storage();
     for (auto &s : *this) {
         s -= (*ptr);
         ++ptr;
@@ -377,7 +479,7 @@ inline vector<N, T> &vector<N, T>::operator-=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator*=(const vector &other) {
-    const auto *ptr = other.data.data();
+    const auto *ptr = other.storage.storage();
     for (auto &s : *this) {
         s *= (*ptr);
         ++ptr;
@@ -387,7 +489,7 @@ inline vector<N, T> &vector<N, T>::operator*=(const vector &other) {
 
 template<size_t N, typename T>
 inline vector<N, T> &vector<N, T>::operator/=(const vector &other) {
-    const auto *ptr = other.data.data();
+    const auto *ptr = other.storage.storage();
     for (auto &s : *this) {
         (*ptr) != 0 ? s /= (*ptr) : s = 0;
         ++ptr;
@@ -471,10 +573,10 @@ template<size_t N, typename T>
 inline vector<N + 1, T> vector<N, T>::lift(size_t index, T value) const {
     vector<N + 1, T> result(value);
     for (size_t i = 0; i < index; ++i) {
-        result[i] = data[i];
+        result[i] = storage[i];
     }
     for (size_t i = index + 1; i < N + 1; ++i) {
-        result[i] = data[i - 1];
+        result[i] = storage[i - 1];
     }
     return result;
 }
@@ -483,10 +585,10 @@ template<size_t N, typename T>
 inline vector<N - 1, T> vector<N, T>::project(size_t index) const {
     vector<N - 1, T> result(0);
     for (size_t i = 0; i < index; ++i) {
-        result[i] = data[i];
+        result[i] = storage[i];
     }
     for (size_t i = index; i < N; ++i) {
-        result[i - 1] = data[i];
+        result[i - 1] = storage[i];
     }
     return result;
 }
@@ -499,7 +601,7 @@ inline T vector<N, T>::dot(const vector &other) const {
     T cc = 0;
     T cs = 0;
     T ccs = 0;
-    const auto *ptr = other.data.data();
+    const auto *ptr = other.storage.storage();
     for (const auto v : *this) {
         auto s = v * (*ptr);
         auto t = sum + s;
@@ -540,7 +642,7 @@ inline T vector<N, T>::squared_distance(const vector &other) const {
     T cc = 0;
     T cs = 0;
     T ccs = 0;
-    const auto *ptr = other.data.data();
+    const auto *ptr = other.storage.storage();
     for (const auto v : *this) {
         auto s = (v - (*ptr)) * (v - (*ptr));
         auto t = sum + s;
@@ -587,9 +689,9 @@ template<size_t N, typename T>
 inline T vector<N, T>::min_coeff(size_t &index) const {
     T _min = std::numeric_limits<T>::max();
     for (size_t i = 0; i < N; ++i) {
-        if (data[i] < _min) {
+        if (storage[i] < _min) {
             index = i;
-            _min = data[i];
+            _min = storage[i];
         }
     }
     return _min;
@@ -599,9 +701,9 @@ template<size_t N, typename T>
 inline T vector<N, T>::max_coeff(size_t &index) const {
     T _max = std::numeric_limits<T>::min();
     for (size_t i = 0; i < N; ++i) {
-        if (data[i] > _max) {
+        if (storage[i] > _max) {
             index = i;
-            _max = data[i];
+            _max = storage[i];
         }
     }
     return _max;
