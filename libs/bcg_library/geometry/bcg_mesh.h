@@ -10,13 +10,6 @@
 namespace bcg {
 
 struct halfedge_mesh : public halfedge_graph {
-    using position_t = vec3f;
-    property_container vertices, halfedges, edges, faces, object_properties;
-
-    struct vertex_connectivity {
-        halfedge_handle h;
-    };
-
     struct halfedge_connectivity {
         vertex_handle v;
         halfedge_handle nh;
@@ -28,9 +21,10 @@ struct halfedge_mesh : public halfedge_graph {
         halfedge_handle h;
     };
 
+    property_container faces, object_properties;
     property<position_t, 3> position;
     property<vertex_connectivity, 1> vconn;
-    property<halfedge_connectivity, 1> hconn;
+    property<halfedge_connectivity, 1> hconn; //unlink in graph
 
     halfedge_mesh();
 
@@ -88,7 +82,7 @@ struct halfedge_mesh : public halfedge_graph {
 
     void delete_face(face_handle f);
 
-    void remove_edge(edge_handle e);
+    void remove_edge(edge_handle e) override;
 
     void delete_edge(edge_handle e);
 
@@ -197,15 +191,26 @@ struct halfedge_mesh : public halfedge_graph {
 
     void flip(edge_handle e);
 
-    std::vector<vec3i> get_triangles();
+    std::vector<int> get_triangles();
 
-    std::vector<vec3i> get_triangles_adjacencies();
+    std::vector<int> get_triangles_adjacencies();
 
+    face_handle find_closest_face(const position_t &point) const;
 
+    std::vector<face_handle> find_closest_k_face(const position_t &point, size_t k) const;
 
+    std::vector<face_handle> find_closest_faces(const position_t &point, float radius) const;
+
+    face_handle find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const;
 protected:
+    face_handle new_face();
 
-
+    std::vector<halfedge_handle> m_add_face_halfedges;
+    std::vector<bool> m_add_face_is_new;
+    std::vector<bool> m_add_face_needs_adjust;
+    using NextCacheEntry = std::pair<halfedge_handle, halfedge_handle>;
+    using NextCache = std::vector<NextCacheEntry>;
+    NextCache m_add_face_next_cache;
 };
 
 }

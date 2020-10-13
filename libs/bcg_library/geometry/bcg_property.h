@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_PROPERTY_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <unordered_map>
 #include <memory>
@@ -25,7 +26,7 @@ struct base_handle {
 
     }
 
-    base_handle &operator=(const base_handle &other) {
+    virtual base_handle &operator=(const base_handle &other) {
         idx = other.idx;
     }
 
@@ -65,7 +66,7 @@ struct vertex_handle : public base_handle {
 
     }
 
-    vertex_handle &operator=(const base_handle &other) {
+    vertex_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
 };
@@ -77,7 +78,7 @@ struct halfedge_handle : public base_handle {
 
     }
 
-    halfedge_handle &operator=(const base_handle &other) {
+    halfedge_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
 };
@@ -89,7 +90,7 @@ struct edge_handle : public base_handle {
 
     }
 
-    edge_handle &operator=(const base_handle &other) {
+    edge_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
 };
@@ -101,7 +102,7 @@ struct face_handle : public base_handle {
 
     }
 
-    face_handle &operator=(const base_handle &other) {
+    face_handle &operator=(const base_handle &other) override {
         idx = other.idx;
     }
 };
@@ -166,7 +167,7 @@ struct base_property {
         std::pair<SignedType, FundamentalType> type_t = {SignedType::Other, FundamentalType::FloatingPoint};
     };
 
-    explicit base_property(const std::pair<SignedType, FundamentalType> &scalar_type) : scalar_type(scalar_type) {
+    explicit base_property(std::pair<SignedType, FundamentalType> scalar_type) : scalar_type(std::move(scalar_type)) {
 
     };
 
@@ -225,11 +226,11 @@ struct property_vector : public base_property {
     using reference_t = typename std::vector<T>::reference;
     using const_reference_t = typename std::vector<T>::const_reference;
 
-    explicit property_vector(const std::string &name, T t = T()) : base_property(base_property::to_type<T>::type_t),
-                                                                   property_name(name),
-                                                                   default_value(t),
-                                                                   dirty(false),
-                                                                   container() {
+    explicit property_vector(std::string name, T t = T()) : base_property(base_property::to_type<T>::type_t),
+                                                            property_name(std::move(name)),
+                                                            default_value(t),
+                                                            dirty(false),
+                                                            container() {
 
     };
 
@@ -323,7 +324,7 @@ struct property {
     using iterator_t = typename property_vector<T, N>::iterator_t;
     using const_iterator_t = typename property_vector<T, N>::const_iterator_t;
 
-    property(std::shared_ptr<property_vector<T, N>> p = nullptr) : sptr(p) {}
+    property(std::shared_ptr<property_vector<T, N>> p = nullptr) : sptr(std::move(p)) {}
 
     inline operator bool() const {
         return sptr != nullptr;
@@ -347,7 +348,7 @@ struct property {
         return false;
     }
 
-    inline bool is_dirty() const {
+    [[nodiscard]] inline bool is_dirty() const {
         return sptr->dirty;
     }
 
@@ -359,7 +360,7 @@ struct property {
         sptr->set_clean();
     }
 
-    const std::string &name() const {
+    [[nodiscard]] const std::string &name() const {
         return sptr->name();
     }
 
@@ -554,10 +555,9 @@ struct property_container {
     std::unordered_map<std::string, std::shared_ptr<base_property>> container;
 
     struct Iterator {
-        explicit Iterator(base_handle handle = base_handle(), const property_container *container = nullptr) : m_handle(
-                handle),
-                                                                                                               m_container(
-                                                                                                                       container) {
+        explicit Iterator(base_handle handle = base_handle(),
+                          const property_container *container = nullptr) : m_handle(handle),
+                                                                           m_container(container) {
             if (m_container && deleted) {
                 deleted = m_container->get<bool, 1>("deleted");
                 if (deleted) {
@@ -723,7 +723,7 @@ struct property_container {
         });
     }
 
-    [[nodiscard]] inline bool is_valid(base_handle handle) const {
+    [[nodiscard]] inline bool is_valid(const base_handle& handle) const {
         return handle.idx < size();
     }
 

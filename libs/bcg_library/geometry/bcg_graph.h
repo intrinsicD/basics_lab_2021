@@ -90,7 +90,7 @@ struct halfedge_graph : public point_cloud {
 
     halfedge_handle add_edge(vertex_handle v0, vertex_handle v1);
 
-    void remove_edge(edge_handle e);
+    virtual void remove_edge(edge_handle e);
 
     halfedge_handle find_halfedge(vertex_handle v0, vertex_handle v1) const;
 
