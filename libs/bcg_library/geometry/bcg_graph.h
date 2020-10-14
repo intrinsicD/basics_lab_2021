@@ -37,6 +37,10 @@ struct halfedge_graph : public point_cloud {
 
     halfedge_graph &operator=(const halfedge_graph &other);
 
+    size_t num_edges() const;
+
+    size_t num_halfedges() const;
+
     bool has_garbage() const override;
 
     void garbage_collection() override;
@@ -106,21 +110,21 @@ struct halfedge_graph : public point_cloud {
 
         explicit vertex_around_vertex_circulator(const halfedge_graph *ds = nullptr, vertex_handle v = vertex_handle());
 
-        inline bool operator==(const vertex_around_vertex_circulator &rhs) const;
+        bool operator==(const vertex_around_vertex_circulator &rhs) const;
 
-        inline bool operator!=(const vertex_around_vertex_circulator &rhs) const;
+        bool operator!=(const vertex_around_vertex_circulator &rhs) const;
 
-        inline vertex_around_vertex_circulator &operator++();
+        vertex_around_vertex_circulator &operator++();
 
-        inline vertex_around_vertex_circulator &operator--();
+        vertex_around_vertex_circulator &operator--();
 
-        inline vertex_handle operator*() const;
+        vertex_handle operator*() const;
 
-        inline operator bool() const;
+        operator bool() const;
 
-        inline vertex_around_vertex_circulator &begin();
+        vertex_around_vertex_circulator &begin();
 
-        inline vertex_around_vertex_circulator &end();
+        vertex_around_vertex_circulator &end();
     };
 
     vertex_around_vertex_circulator get_vertices(vertex_handle v) const;
@@ -133,21 +137,21 @@ struct halfedge_graph : public point_cloud {
         explicit halfedge_around_vertex_circulator(const halfedge_graph *ds = nullptr,
                                                    vertex_handle v = vertex_handle());
 
-        inline bool operator==(const halfedge_around_vertex_circulator &rhs) const;
+        bool operator==(const halfedge_around_vertex_circulator &rhs) const;
 
-        inline bool operator!=(const halfedge_around_vertex_circulator &rhs) const;
+        bool operator!=(const halfedge_around_vertex_circulator &rhs) const;
 
-        inline halfedge_around_vertex_circulator &operator++();
+        halfedge_around_vertex_circulator &operator++();
 
-        inline halfedge_around_vertex_circulator &operator--();
+        halfedge_around_vertex_circulator &operator--();
 
-        inline halfedge_handle operator*() const;
+        halfedge_handle operator*() const;
 
-        inline operator bool() const;
+        operator bool() const;
 
-        inline halfedge_around_vertex_circulator &begin();
+        halfedge_around_vertex_circulator &begin();
 
-        inline halfedge_around_vertex_circulator &end();
+        halfedge_around_vertex_circulator &end();
     };
 
     halfedge_around_vertex_circulator get_halfedges(vertex_handle v) const;
@@ -163,11 +167,14 @@ protected:
 
 edge_handle find_closest_edge(const halfedge_graph &graph, const halfedge_graph::position_t &point);
 
-std::vector<edge_handle> find_closest_k_edges(const halfedge_graph &graph, const halfedge_graph::position_t &point, size_t k) ;
+std::vector<edge_handle>
+find_closest_k_edges(const halfedge_graph &graph, const halfedge_graph::position_t &point, size_t k);
 
-std::vector<edge_handle> find_closest_edges_radius(const halfedge_graph &graph, const halfedge_graph::position_t &point, float radius);
+std::vector<edge_handle>
+find_closest_edges_radius(const halfedge_graph &graph, const halfedge_graph::position_t &point, float radius);
 
-edge_handle find_closest_edge_in_neighborhood(const halfedge_graph &graph, vertex_handle v, const halfedge_graph::position_t &point);
+edge_handle find_closest_edge_in_neighborhood(const halfedge_graph &graph, vertex_handle v,
+                                              const halfedge_graph::position_t &point);
 
 
 }

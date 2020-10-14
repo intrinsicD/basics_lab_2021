@@ -28,6 +28,7 @@ struct base_handle {
 
     virtual base_handle &operator=(const base_handle &other) {
         idx = other.idx;
+        return *this;
     }
 
     [[nodiscard]] inline operator bool() const {
@@ -64,6 +65,7 @@ struct vertex_handle : public base_handle {
 
     vertex_handle &operator=(const base_handle &other) override {
         idx = other.idx;
+        return *this;
     }
 };
 
@@ -72,6 +74,7 @@ struct halfedge_handle : public base_handle {
 
     halfedge_handle &operator=(const base_handle &other) override {
         idx = other.idx;
+        return *this;
     }
 };
 
@@ -80,80 +83,23 @@ struct edge_handle : public base_handle {
 
     edge_handle &operator=(const base_handle &other) override {
         idx = other.idx;
+        return *this;
     }
 };
 
 struct face_handle : public base_handle {
     using base_handle::base_handle;
-    
+
     face_handle &operator=(const base_handle &other) override {
         idx = other.idx;
+        return *this;
     }
 };
 
 struct property_container;
 
 struct base_property {
-    enum class SignedType {
-        Signed,
-        Unsigned,
-        Other
-    };
-
-    enum class FundamentalType {
-        Bool,
-        Char,
-        Integer,
-        Long,
-        FloatingPoint,
-        Other
-    };
-
-    std::pair<SignedType, FundamentalType> scalar_type;
-
-    template<typename T>
-    struct to_type {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Other, FundamentalType::Other};
-    };
-
-    template<>
-    struct to_type<char> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Signed, FundamentalType::Char};
-    };
-
-    template<>
-    struct to_type<unsigned char> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Unsigned, FundamentalType::Char};
-    };
-
-    template<>
-    struct to_type<int> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Signed, FundamentalType::Integer};
-    };
-
-    template<>
-    struct to_type<unsigned int> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Unsigned, FundamentalType::Integer};
-    };
-
-    template<>
-    struct to_type<long> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Signed, FundamentalType::Long};
-    };
-
-    template<>
-    struct to_type<unsigned long> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Unsigned, FundamentalType::Long};
-    };
-
-    template<>
-    struct to_type<float> {
-        std::pair<SignedType, FundamentalType> type_t = {SignedType::Other, FundamentalType::FloatingPoint};
-    };
-
-    explicit base_property(std::pair<SignedType, FundamentalType> scalar_type) : scalar_type(std::move(scalar_type)) {
-
-    };
+    base_property() = default;
 
     virtual ~base_property() = default;
 
@@ -172,6 +118,8 @@ struct base_property {
     [[nodiscard]] virtual const void *void_ptr() const = 0;
 
     [[nodiscard]] virtual bool is_dirty() const = 0;
+
+    virtual void set_dirty() = 0;
 
     virtual void set_clean() = 0;
 
@@ -210,7 +158,7 @@ struct property_vector : public base_property {
     using reference_t = typename std::vector<T>::reference;
     using const_reference_t = typename std::vector<T>::const_reference;
 
-    explicit property_vector(std::string name, T t = T()) : base_property(base_property::to_type<T>::type_t),
+    explicit property_vector(std::string name, T t = T()) : base_property(),
                                                             property_name(std::move(name)),
                                                             default_value(t),
                                                             dirty(false),
@@ -219,6 +167,10 @@ struct property_vector : public base_property {
     };
 
     ~property_vector() override = default;
+
+    const std::string &name() const override{
+        return property_name;
+    }
 
     inline void swap(size_t i0, size_t i1) override {
         std::swap(container[i0], container[i1]);
@@ -252,6 +204,10 @@ struct property_vector : public base_property {
         dirty = true;
     }
 
+    inline void set_dirty() override { dirty = true; }
+
+    inline void set_clean() override { dirty = false; }
+
     [[nodiscard]] inline size_t dims() const override { return N; }
 
     [[nodiscard]] inline size_t size() const override { return container.size(); }
@@ -263,6 +219,8 @@ struct property_vector : public base_property {
     [[nodiscard]] inline bool empty() const override { return container.empty(); }
 
     [[nodiscard]] inline const void *void_ptr() const override { return (const void *) data(); }
+
+    [[nodiscard]] inline bool is_dirty() const override { return dirty; }
 
     [[nodiscard]] inline T *data() { return container.data(); }
 
@@ -317,7 +275,7 @@ struct property {
     bool set(const std::vector<T> &vector) {
         if (*this) {
             sptr->vector() = vector;
-            sptr->dirty = true;
+            sptr->set_dirty();
             return true;
         }
         return false;
@@ -326,18 +284,18 @@ struct property {
     bool append(const std::vector<T> &vector) {
         if (*this) {
             sptr->vector().insert(sptr->end(), vector.begin(), vector.end());
-            sptr->dirty = true;
+            sptr->set_dirty();
             return true;
         }
         return false;
     }
 
     [[nodiscard]] inline bool is_dirty() const {
-        return sptr->dirty;
+        return sptr->is_dirty();
     }
 
     inline void set_dirty() {
-        sptr->dirty = true;
+        sptr->set_dirty();
     }
 
     inline void set_clean() {
@@ -374,19 +332,19 @@ struct property {
     }
 
     [[nodiscard]] inline size_t size() const {
-        return std::const_pointer_cast<const base_property>(sptr)->size();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->size();
     }
 
     [[nodiscard]] inline size_t size_bytes() const {
-        return std::const_pointer_cast<const base_property>(sptr)->size_bytes();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->size_bytes();
     }
 
     [[nodiscard]] inline size_t capacity() const {
-        return std::const_pointer_cast<const base_property>(sptr)->capacity();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->capacity();
     }
 
     [[nodiscard]] inline bool empty() const {
-        return std::const_pointer_cast<const base_property>(sptr)->empty();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->empty();
     }
 
     inline void reset_ptr() {
@@ -394,7 +352,7 @@ struct property {
     }
 
     [[nodiscard]] const void *void_ptr() const {
-        return std::const_pointer_cast<const base_property>(sptr)->void_ptr();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->void_ptr();
     }
 
     [[nodiscard]] inline T *data() {
@@ -402,7 +360,7 @@ struct property {
     }
 
     [[nodiscard]] inline const T *data() const {
-        return std::const_pointer_cast<const base_property>(sptr)->data();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->data();
     }
 
     [[nodiscard]] inline reference_t operator[](size_t i) {
@@ -410,7 +368,7 @@ struct property {
     }
 
     [[nodiscard]] inline const_reference_t operator[](size_t i) const {
-        return std::const_pointer_cast<const base_property>(sptr)->operator[](i);
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->operator[](i);
     }
 
     [[nodiscard]] inline reference_t operator[](base_handle handle) {
@@ -418,7 +376,7 @@ struct property {
     }
 
     [[nodiscard]] inline const_reference_t operator[](base_handle handle) const {
-        return std::const_pointer_cast<const base_property>(sptr)->operator[](handle.idx);
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->operator[](handle.idx);
     }
 
     [[nodiscard]] inline T &back() {
@@ -426,7 +384,7 @@ struct property {
     }
 
     [[nodiscard]]  inline const T &back() const {
-        return std::const_pointer_cast<const base_property>(sptr)->back();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->back();
     }
 
     [[nodiscard]] inline iterator_t begin() {
@@ -438,11 +396,11 @@ struct property {
     }
 
     [[nodiscard]] inline const_iterator_t begin() const {
-        return std::const_pointer_cast<const base_property>(sptr)->begin();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->begin();
     }
 
     [[nodiscard]] inline const_iterator_t end() const {
-        return std::const_pointer_cast<const base_property>(sptr)->end();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->end();
     }
 
     [[nodiscard]] inline std::vector<T> &vector() {
@@ -450,15 +408,15 @@ struct property {
     }
 
     [[nodiscard]] inline const std::vector<T> &vector() const {
-        return std::const_pointer_cast<const base_property>(sptr)->vector();
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr)->vector();
     }
 
-    [[nodiscard]] inline std::shared_ptr<base_property> &shared_ptr() {
+    [[nodiscard]] inline std::shared_ptr<base_property> shared_ptr() {
         return sptr;
     }
 
-    [[nodiscard]] inline const std::shared_ptr<const base_property> &shared_ptr() const {
-        return std::const_pointer_cast<const base_property>(sptr);
+    [[nodiscard]] inline const std::shared_ptr<const property_vector<T, N>> &shared_ptr() const {
+        return std::const_pointer_cast<const property_vector<T, N>>(sptr);
     }
 
     inline void resize(size_t n) {
@@ -596,6 +554,15 @@ struct property_container {
     }
 
     template<typename T, int N>
+    bool has(property<T, N> &other) const {
+        return has(other.name());
+    }
+
+    bool has(const std::string &name) const {
+        return container.find(name) != container.end();
+    }
+
+    template<typename T, int N>
     property<T, N> get(const std::string &name) const {
         auto iter = container.find(name);
         if (iter == container.end()) {
@@ -608,20 +575,28 @@ struct property_container {
     property<T, N> add(const std::string &name, T t = T()) {
         auto iter = container.find(name);
         if (iter != container.end()) {
-            return nullptr;
+            return property<T, N>();
         }
-        container[name] = std::make_shared<property_vector<T, N>>(name, t);
-        return std::dynamic_pointer_cast<property_vector<T, N>>(container[name]);
+        auto sptr = std::make_shared<property_vector<T, N>>(name, t);
+        auto n = size();
+        if (n > 0) {
+            sptr->reserve(n);
+            while (sptr->size() < n) {
+                sptr->push_back();
+            }
+        }
+        container[name] = sptr;
+        return std::dynamic_pointer_cast<property_vector<T, N>>(sptr);
     }
 
     template<typename T, int N>
     property<T, N> add(property<T, N> &other) {
-        auto iter = container.find(other.name);
+        auto iter = container.find(other.name());
         if (iter != container.end()) {
-            return nullptr;
+            return std::dynamic_pointer_cast<property_vector<T, N>>(iter->second);
         }
-        container[other.name] = other.shared_ptr();
-        return std::dynamic_pointer_cast<property_vector<T, N>>(container[other.name]);
+        container[other.name()] = other.shared_ptr();
+        return std::dynamic_pointer_cast<property_vector<T, N>>(container[other.name()]);
     }
 
     template<typename T, int N>
@@ -646,8 +621,11 @@ struct property_container {
     }
 
     template<typename T, int N>
-    inline void remove(const property<T, N> &prop) {
-        remove(prop.name());
+    inline void remove(property<T, N> &prop) {
+        if(prop){
+            remove(prop.name());
+            prop.reset_ptr();
+        }
     }
 
     inline void remove_all() {
@@ -656,37 +634,37 @@ struct property_container {
 
     inline void swap(size_t i0, size_t i1) {
         std::for_each(container.begin(), container.end(), [i0, i1](auto &p) {
-            p->swap(i0, i1);
+            p.second->swap(i0, i1);
         });
     }
 
     inline void clear() {
         std::for_each(container.begin(), container.end(), [](auto &p) {
-            p->clear();
+            p.second->clear();
         });
     }
 
     inline void free_unused_memory() {
         std::for_each(container.begin(), container.end(), [](auto &p) {
-            p->free_unused_memory();
+            p.second->free_unused_memory();
         });
     }
 
     inline void reserve(size_t n) {
         std::for_each(container.begin(), container.end(), [&n](auto &p) {
-            p->reserve(n);
+            p.second->reserve(n);
         });
     }
 
     inline void resize(size_t n) {
         std::for_each(container.begin(), container.end(), [&n](auto &p) {
-            p->resize(n);
+            p.second->resize(n);
         });
     }
 
     inline void push_back() {
         std::for_each(container.begin(), container.end(), [](auto &p) {
-            p->push_back();
+            p.second->push_back();
         });
     }
 
@@ -703,7 +681,7 @@ struct property_container {
 
     [[nodiscard]] inline bool is_dirty() const {
         return std::any_of(container.begin(), container.end(), [](const auto &p) {
-            return p->is_dirty();
+            return p.second->is_dirty();
         });
     }
 
@@ -713,13 +691,13 @@ struct property_container {
 
     inline void set_dirty() const {
         std::for_each(container.begin(), container.end(), [](auto &p) {
-            p->set_dirty();
+            p.second->set_dirty();
         });
     }
 
     inline void set_clean() const {
         std::for_each(container.begin(), container.end(), [](auto &p) {
-            p->set_clean();
+            p.second->set_clean();
         });
     }
 
@@ -735,7 +713,7 @@ struct property_container {
         std::vector<std::string> names;
         std::transform(container.begin(), container.end(), std::back_inserter(names),
                        [](const auto &p) {
-                           return p->name();
+                           return p.second->name();
                        }
         );
         return names;
@@ -744,8 +722,8 @@ struct property_container {
     [[nodiscard]] inline std::vector<std::string> dirty_properties_names() const {
         std::vector<std::string> names;
         std::for_each(container.begin(), container.end(), [&names](auto &p) {
-            if (p->is_dirty()) {
-                names.push_back(p->name());
+            if (p.second->is_dirty()) {
+                names.push_back(p.second->name());
             }
         });
         return names;
@@ -756,53 +734,6 @@ struct property_container {
     }
 };
 
-template<>
-std::string to_string<bool>(const base_property &prop) {
-    std::stringstream ss;
-    std::shared_ptr<const base_property> p(&prop);
-    property<bool, 1> P(std::dynamic_pointer_cast<property_vector<bool, 1>>(p));
-
-    for (size_t i = 0; i < prop.size(); ++i) {
-        ss << P[i] << "\n";
-    }
-    return ss.str();
-}
-
-std::ostream &operator<<(std::ostream &stream, const base_property &prop) {
-    if (prop.scalar_type.second == base_property::FundamentalType::Char) {
-        if (prop.scalar_type.first == base_property::SignedType::Unsigned) {
-            stream << to_string<unsigned char>(prop);
-        } else {
-            stream << to_string<char>(prop);
-        }
-        return stream;
-    }
-    if (prop.scalar_type.second == base_property::FundamentalType::Integer) {
-        if (prop.scalar_type.first == base_property::SignedType::Unsigned) {
-            stream << to_string<unsigned int>(prop);
-        } else {
-            stream << to_string<int>(prop);
-        }
-        return stream;
-    }
-    if (prop.scalar_type.second == base_property::FundamentalType::Long) {
-        if (prop.scalar_type.first == base_property::SignedType::Unsigned) {
-            stream << to_string<unsigned long>(prop);
-        } else {
-            stream << to_string<long>(prop);
-        }
-        return stream;
-    }
-    if (prop.scalar_type.second == base_property::FundamentalType::FloatingPoint) {
-        stream << to_string<float>(prop);
-        return stream;
-    }
-    if (prop.scalar_type.second == base_property::FundamentalType::Bool) {
-        stream << to_string<bool>(prop);
-        return stream;
-    }
-    return stream;
-}
 
 std::ostream &operator<<(std::ostream &stream, const property_container &container) {
     stream << "num properties: " << container.num_properties() << "\n";
@@ -840,7 +771,7 @@ struct property_iterator {
         return handle != rhs.handle;
     }
 
-    inline Derived &operator++() {
+    inline property_iterator &operator++() {
         ++handle;
         while (deleted && container->is_valid(handle) && deleted[handle]) {
             ++handle;
@@ -848,7 +779,7 @@ struct property_iterator {
         return *this;
     }
 
-    inline Derived &operator--() {
+    inline property_iterator &operator--() {
         --handle;
         while (deleted && handle.idx > 0 && container->is_valid(handle) &&
                deleted[handle]) {

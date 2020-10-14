@@ -5,6 +5,7 @@
 #include <cassert>
 #include "bcg_point_cloud.h"
 #include "../utils/bcg_stl_utils.h"
+#include "../math/bcg_math_common.h"
 
 namespace bcg {
 
@@ -100,6 +101,10 @@ void point_cloud::delete_vertex(vertex_handle v) {
     mark_vertex_deleted(v);
 }
 
+size_t point_cloud::num_vertices() const{
+    return vertices.size() - size_vertices_deleted;
+}
+
 void point_cloud::mark_vertex_deleted(vertex_handle v){
     if (vertices_deleted[v]) return;
 
@@ -110,12 +115,13 @@ void point_cloud::mark_vertex_deleted(vertex_handle v){
     assert(has_garbage());
 }
 
-std::ostream operator<<(std::ostream stream, const point_cloud &pc) {
+std::ostream &operator<<(std::ostream &stream, const point_cloud &pc) {
     stream << "point cloud\n";
     if (pc.has_garbage()) {
         stream << "size_vertices_deleted: " << pc.size_vertices_deleted << "\n";
     }
     stream << pc.vertices << "\n";
+    return stream;
 }
 
 vertex_handle find_closest_vertex(const point_cloud &pc, const point_cloud::position_t &point) {

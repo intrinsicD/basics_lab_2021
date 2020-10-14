@@ -22,8 +22,6 @@ struct halfedge_mesh : public halfedge_graph {
     };
 
     face_container faces;
-    property<position_t, 3> position;
-    property<vertex_connectivity, 1> vconn;
     property<halfedge_connectivity, 1> hconn; //unlink in graph_base
     property<face_connectivity, 1> fconn;
     property<bool, 1> faces_deleted;
@@ -36,6 +34,8 @@ struct halfedge_mesh : public halfedge_graph {
     void assign(const halfedge_mesh &other);
 
     halfedge_mesh &operator=(const halfedge_mesh &other);
+
+    size_t num_faces() const;
 
     bool has_garbage() const override;
 
@@ -98,21 +98,21 @@ struct halfedge_mesh : public halfedge_graph {
 
         explicit face_around_vertex_circulator(const halfedge_mesh *ds = nullptr, vertex_handle v = vertex_handle());
 
-        inline bool operator==(const face_around_vertex_circulator &rhs) const;
+        bool operator==(const face_around_vertex_circulator &rhs) const;
 
-        inline bool operator!=(const face_around_vertex_circulator &rhs) const;
+        bool operator!=(const face_around_vertex_circulator &rhs) const;
 
-        inline face_around_vertex_circulator &operator++();
+        face_around_vertex_circulator &operator++();
 
-        inline face_around_vertex_circulator &operator--();
+        face_around_vertex_circulator &operator--();
 
-        inline face_handle operator*() const;
+        face_handle operator*() const;
 
-        inline operator bool() const;
+        operator bool() const;
 
-        inline face_around_vertex_circulator &begin();
+        face_around_vertex_circulator &begin();
 
-        inline face_around_vertex_circulator &end();
+        face_around_vertex_circulator &end();
     };
 
     face_around_vertex_circulator get_faces(vertex_handle v) const;
@@ -124,19 +124,19 @@ struct halfedge_mesh : public halfedge_graph {
 
         explicit vertex_around_face_circulator(const halfedge_mesh *ds = nullptr, face_handle f = face_handle());
 
-        inline bool operator==(const vertex_around_face_circulator &rhs) const;
+        bool operator==(const vertex_around_face_circulator &rhs) const;
 
-        inline bool operator!=(const vertex_around_face_circulator &rhs) const;
+        bool operator!=(const vertex_around_face_circulator &rhs) const;
 
-        inline vertex_around_face_circulator &operator++();
+        vertex_around_face_circulator &operator++();
 
-        inline vertex_around_face_circulator &operator--();
+        vertex_around_face_circulator &operator--();
 
-        inline vertex_handle operator*() const;
+        vertex_handle operator*() const;
 
-        inline vertex_around_face_circulator &begin();
+        vertex_around_face_circulator &begin();
 
-        inline vertex_around_face_circulator &end();
+        vertex_around_face_circulator &end();
     };
 
     vertex_around_face_circulator get_vertices(face_handle f) const;
@@ -149,19 +149,19 @@ struct halfedge_mesh : public halfedge_graph {
 
         explicit halfedge_around_face_circulator(const halfedge_mesh *ds = nullptr, face_handle f = face_handle());
 
-        inline bool operator==(const halfedge_around_face_circulator &rhs) const;
+        bool operator==(const halfedge_around_face_circulator &rhs) const;
 
-        inline bool operator!=(const halfedge_around_face_circulator &rhs) const;
+        bool operator!=(const halfedge_around_face_circulator &rhs) const;
 
-        inline halfedge_around_face_circulator &operator++();
+        halfedge_around_face_circulator &operator++();
 
-        inline halfedge_around_face_circulator &operator--();
+        halfedge_around_face_circulator &operator--();
 
-        inline halfedge_handle operator*() const;
+        halfedge_handle operator*() const;
 
-        inline halfedge_around_face_circulator &begin();
+        halfedge_around_face_circulator &begin();
 
-        inline halfedge_around_face_circulator &end();
+        halfedge_around_face_circulator &end();
     };
 
     halfedge_around_face_circulator get_halfedges(face_handle f) const;
@@ -205,6 +205,7 @@ struct halfedge_mesh : public halfedge_graph {
     std::vector<face_handle> find_closest_faces(const position_t &point, float radius) const;
 
     face_handle find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const;
+
 protected:
     face_handle new_face();
 

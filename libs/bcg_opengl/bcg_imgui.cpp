@@ -9,6 +9,7 @@
 
 #include "bcg_imgui.h"
 #include "exts/glad/glad.h"
+#include "bcg_library/math/bcg_math_common.h"
 #include "bcg_library/utils/bcg_file.h"
 #include "bcg_library/utils/bcg_path.h"
 

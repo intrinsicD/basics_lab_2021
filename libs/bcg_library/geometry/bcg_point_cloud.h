@@ -38,11 +38,13 @@ struct point_cloud {
 
     virtual void delete_vertex(vertex_handle v);
 
+    size_t num_vertices() const;
+
 protected:
     void mark_vertex_deleted(vertex_handle v);
 };
 
-std::ostream operator<<(std::ostream stream, const point_cloud &pc);
+std::ostream &operator<<(std::ostream &stream, const point_cloud &pc);
 
 vertex_handle find_closest_vertex(const point_cloud &pc, const point_cloud::position_t &point);
 

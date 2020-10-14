@@ -7,7 +7,13 @@ add_library(bcg_graphics
         utils/bcg_path.h utils/bcg_path.cpp
         utils/bcg_stl_utils.h
         math/bcg_linalg.h
-        geometry/bcg_aligned_box.h geometry/bcg_property.h geometry/bcg_property_map_eigen.h geometry/bcg_transforms.h
+        geometry/bcg_aligned_box.h
+        geometry/bcg_property.h
+        geometry/bcg_property_map_eigen.h
+        geometry/bcg_transforms.h
+        geometry/bcg_point_cloud.h geometry/bcg_point_cloud.cpp
+        geometry/bcg_graph.h geometry/bcg_graph.cpp
+        geometry/bcg_mesh.h geometry/bcg_mesh.cpp geometry/bcg_meshio.h geometry/bcg_meshio.cpp
         exts/cgltf/cgltf.h exts/cgltf/cgltf_write.h
         exts/entt/single_include/entt/entt.hpp
         exts/stb/stb_image.h exts/stb/stb_image_resize.h exts/stb/stb_image_write.h

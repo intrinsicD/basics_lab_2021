@@ -12,8 +12,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "glm/glm.hpp"
-#include "glm/gtx/component_wise.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/component_wise.hpp"
+#include "glm/gtx/string_cast.hpp"
 
 using namespace glm;
 
@@ -73,14 +74,7 @@ using vec4d = glm::dvec4;
 [[maybe_unused]] inline constexpr auto one3d = vec3d{1, 1, 1};
 [[maybe_unused]] inline const auto one4d = vec4d{1, 1, 1, 1};
 
-[[maybe_unused]] inline constexpr double pi = glm::pi<double>();
-[[maybe_unused]] inline constexpr float pif = glm::pi<float>();
 
-[[maybe_unused]] inline constexpr auto int_max = std::numeric_limits<int>::max();
-[[maybe_unused]] inline constexpr auto int_min = std::numeric_limits<int>::lowest();
-[[maybe_unused]] inline constexpr auto flt_max = std::numeric_limits<float>::max();
-[[maybe_unused]] inline constexpr auto flt_min = std::numeric_limits<float>::lowest();
-[[maybe_unused]] inline constexpr auto flt_eps = std::numeric_limits<float>::epsilon();
 
 
 #endif //BCG_GRAPHICS_BCG_LINALG_H

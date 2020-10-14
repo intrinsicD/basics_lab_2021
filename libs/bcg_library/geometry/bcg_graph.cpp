@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include "bcg_graph.h"
-#include "bcg_library/utils/bcg_stl_utils.h"
+#include "../utils/bcg_stl_utils.h"
 
 namespace bcg {
 
@@ -65,6 +65,14 @@ halfedge_graph &halfedge_graph::operator=(const halfedge_graph &other) {
         size_edges_deleted = other.size_edges_deleted;
     }
     return *this;
+}
+
+size_t halfedge_graph::num_edges() const{
+    return edges.size() - size_edges_deleted;
+}
+
+size_t halfedge_graph::num_halfedges() const{
+    return halfedges.size() - size_halfedges_deleted;
 }
 
 bool halfedge_graph::has_garbage() const {
@@ -533,7 +541,7 @@ void halfedge_graph::mark_edge_deleted(edge_handle e){
 
 edge_handle find_closest_edge(const halfedge_graph &graph, const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
-    float min_sqr_dist_yet = flt_max;
+    float min_sqr_dist_yet = FLT_MAX;
     for (const auto e : graph.edges) {
         float sqr_dist = dot(graph.positions[graph.get_vertex(e, 0)] - point,
                              graph.positions[graph.get_vertex(e, 1)] - point);
@@ -598,7 +606,7 @@ find_closest_edges_radius(const halfedge_graph &graph, const halfedge_graph::pos
 edge_handle find_closest_edge_in_neighborhood(const halfedge_graph &graph, vertex_handle v,
                                               const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
-    float min_dist_yet = flt_max;
+    float min_dist_yet = FLT_MAX;
     for (const auto h : graph.get_halfedges(v)) {
         float sqr_dist = dot(graph.positions[graph.get_from_vertex(h)] - point,
                              graph.positions[graph.get_to_vertex(h)] - point);
