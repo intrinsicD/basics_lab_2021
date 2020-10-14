@@ -50,8 +50,6 @@ bool point_cloud::has_garbage() const {
 void point_cloud::garbage_collection() {
     if (!has_garbage()) return;
 
-    auto deleted = vertices.get<bool, 1>("deleted");
-
     size_t nV = vertices.size();
     if (nV > 0) {
         size_t i0 = 0;
@@ -59,10 +57,10 @@ void point_cloud::garbage_collection() {
 
         while (true) {
             // find first deleted and last un-deleted
-            while (!deleted[i0] && i0 < i1) {
+            while (!vertices_deleted[i0] && i0 < i1) {
                 ++i0;
             }
-            while (deleted[i1] && i0 < i1) {
+            while (vertices_deleted[i1] && i0 < i1) {
                 --i1;
             }
             if (i0 >= i1) break;
@@ -72,10 +70,9 @@ void point_cloud::garbage_collection() {
         }
 
         // remember new size
-        nV = deleted[i0] ? i0 : i0 + 1;
+        nV = vertices_deleted[i0] ? i0 : i0 + 1;
     }
 
-    vertices.remove(deleted);
     vertices.resize(nV);
     vertices.free_unused_memory();
     size_vertices_deleted = 0;
@@ -124,11 +121,11 @@ std::ostream &operator<<(std::ostream &stream, const point_cloud &pc) {
     return stream;
 }
 
-vertex_handle find_closest_vertex(const point_cloud &pc, const point_cloud::position_t &point) {
+vertex_handle point_cloud::find_closest_vertex(const point_cloud::position_t &point) {
     vertex_handle closest_yet(0);
     auto min_dist_yet = flt_max;
-    for (const auto v : pc.vertices) {
-        auto dist = distance(pc.positions[v], point);
+    for (const auto v : vertices) {
+        auto dist = distance(positions[v], point);
         if (dist < min_dist_yet) {
             min_dist_yet = dist;
             closest_yet = v;
@@ -140,12 +137,12 @@ vertex_handle find_closest_vertex(const point_cloud &pc, const point_cloud::posi
 }
 
 std::vector<vertex_handle>
-find_closest_k_vertices(const point_cloud &pc, const point_cloud::position_t &point, size_t k) {
+point_cloud::find_closest_k_vertices(const point_cloud::position_t &point, size_t k) {
     using DistIndex = std::pair<float, vertex_handle>;
     std::vector<DistIndex> closest_k;
 
-    for (const auto v : pc.vertices) {
-        auto dist = distance(pc.positions[v], point);
+    for (const auto v : vertices) {
+        auto dist = distance(positions[v], point);
         if (closest_k.size() < k) {
             closest_k.emplace_back(dist, v);
         } else {
@@ -167,11 +164,11 @@ find_closest_k_vertices(const point_cloud &pc, const point_cloud::position_t &po
 }
 
 std::vector<vertex_handle>
-find_closest_vertices_radius(const point_cloud &pc, const point_cloud::position_t &point, float radius) {
+point_cloud::find_closest_vertices_radius(const point_cloud::position_t &point, float radius) {
     using DistIndex = std::pair<float, vertex_handle>;
     std::vector<DistIndex> closest;
-    for (const auto v: pc.vertices) {
-        auto dist = distance(pc.positions[v], point);
+    for (const auto v: vertices) {
+        auto dist = distance(positions[v], point);
         if (dist <= radius) {
             closest.emplace_back(dist, v);
         }

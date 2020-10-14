@@ -10,7 +10,7 @@
 
 namespace bcg {
 
-meshio::meshio(const std::string &filename, const io_flags &flags) : filename(filename), flags(flags) {
+meshio::meshio(const std::string &filename, const meshio_flags &flags) : filename(filename), flags(flags) {
 
 }
 

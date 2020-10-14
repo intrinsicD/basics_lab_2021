@@ -40,19 +40,21 @@ struct point_cloud {
 
     size_t num_vertices() const;
 
+    vertex_handle find_closest_vertex(const point_cloud::position_t &point);
+
+    std::vector<vertex_handle>
+    find_closest_k_vertices(const point_cloud::position_t &point, size_t k);
+
+    std::vector<vertex_handle>
+    find_closest_vertices_radius(const point_cloud::position_t &point, float radius);
+
+
 protected:
     void mark_vertex_deleted(vertex_handle v);
 };
 
 std::ostream &operator<<(std::ostream &stream, const point_cloud &pc);
 
-vertex_handle find_closest_vertex(const point_cloud &pc, const point_cloud::position_t &point);
-
-std::vector<vertex_handle>
-find_closest_k_vertices(const point_cloud &pc, const point_cloud::position_t &point, size_t k);
-
-std::vector<vertex_handle>
-find_closest_vertices_radius(const point_cloud &pc, const point_cloud::position_t &point, float radius);
 
 }
 

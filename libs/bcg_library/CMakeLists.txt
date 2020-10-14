@@ -6,6 +6,7 @@ add_library(bcg_graphics
         utils/bcg_logger.h
         utils/bcg_path.h utils/bcg_path.cpp
         utils/bcg_stl_utils.h
+        utils/bcg_string_utils.h utils/bcg_string_utils.cpp
         math/bcg_linalg.h
         geometry/bcg_aligned_box.h
         geometry/bcg_property.h

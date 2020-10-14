@@ -43,6 +43,12 @@ using vec4i = glm::ivec4;
 using vec4f = glm::fvec4;
 using vec4d = glm::dvec4;
 
+template<int L, typename T, qualifier Q>
+inline std::ostream &operator<<(std::ostream &stream, const glm::vec<L, T, Q> &vec){
+    stream << to_string(vec) << "\n";
+    return stream;
+}
+
 // Zero vector constants.
 [[maybe_unused]] inline constexpr auto zero2i = vec2i{0, 0};
 [[maybe_unused]] inline constexpr auto zero3i = vec3i{0, 0, 0};

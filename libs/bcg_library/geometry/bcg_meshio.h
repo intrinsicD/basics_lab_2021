@@ -11,8 +11,8 @@
 
 namespace bcg {
 
-struct io_flags {
-    io_flags() = default;
+struct meshio_flags {
+    meshio_flags() = default;
 
     bool use_binary = false;             //!< read / write binary format
     bool use_vertex_normals = false;     //!< read / write vertex normals
@@ -24,7 +24,7 @@ struct io_flags {
 };
 
 struct meshio {
-    meshio(const std::string &filename, const io_flags &flags);
+    meshio(const std::string &filename, const meshio_flags &flags);
 
     bool read(halfedge_mesh &mesh);
 
@@ -62,7 +62,7 @@ private:
 
 private:
     std::string filename;
-    io_flags flags;
+    meshio_flags flags;
 };
 
 }

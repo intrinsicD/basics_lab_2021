@@ -735,7 +735,7 @@ struct property_container {
 };
 
 
-std::ostream &operator<<(std::ostream &stream, const property_container &container) {
+inline std::ostream &operator<<(std::ostream &stream, const property_container &container) {
     stream << "num properties: " << container.num_properties() << "\n";
     for (const auto &p : container.container) {
         stream << p.second << "\n";
