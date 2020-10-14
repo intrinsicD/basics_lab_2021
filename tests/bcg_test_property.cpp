@@ -159,7 +159,7 @@ TEST(TestSuiteProperty, Property) {
 
     EXPECT_EQ(Map(scalarfield).mean(), 1);
     EXPECT_EQ((Map(scalarfield).array() - Map(scalarfield).mean()).square().sum() / scalarfield.size(), 0);
-    
+
     float eps = 1e-6f;
     EXPECT_LE(Map(vectorfield).colwise().mean().mean(), 1);
     EXPECT_LE((Map(vectorfield).rowwise() - Map(vectorfield).colwise().mean()).sum() / vectorfield.size(), eps);

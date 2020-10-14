@@ -13,6 +13,9 @@ set(TEST_SOURCES
         bcg_glm_vector_test.cpp
         bcg_test_property.cpp
         bcg_test_point_cloud.cpp
+        bcg_test_point_cloudio.cpp
+        bcg_test_mesh.cpp
+        bcg_test_meshio.cpp
         )
 
 add_executable(bcg_library_test ${TEST_SOURCES})

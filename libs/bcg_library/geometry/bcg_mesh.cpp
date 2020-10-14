@@ -14,7 +14,7 @@ halfedge_mesh::halfedge_mesh() : halfedge_graph(),
                                  faces_deleted(faces.add<bool, 1>("deleted")),
                                  size_faces_deleted(0) {
     halfedges.remove("connectivity"); //unlink graph h_connectivity
-    halfedges.get_or_add<halfedge_connectivity, 1>("connectivity");
+    hconn = halfedges.get_or_add<halfedge_connectivity, 1>("connectivity");
 }
 
 void halfedge_mesh::assign(const halfedge_mesh &other) {
@@ -80,6 +80,28 @@ halfedge_mesh &halfedge_mesh::operator=(const halfedge_mesh &other) {
         size_faces_deleted = other.size_faces_deleted;
     }
     return *this;
+}
+
+bool halfedge_mesh::operator==(const halfedge_mesh &other) const{
+    size_t num_verts = std::min(vertices.size(), other.vertices.size());
+    for(size_t i = 0; i < num_verts; ++i){
+        if(positions[i] != other.positions[i]) return false;
+        if(vconn[i].h != other.vconn[i].h) return false;
+    }
+
+    size_t num_edges = std::min(edges.size(), other.edges.size());
+    for(size_t i = 0; i < num_edges; ++i){
+        if(hconn[i].f != other.hconn[i].f) return false;
+        if(hconn[i].ph != other.hconn[i].ph) return false;
+        if(hconn[i].nh != other.hconn[i].nh) return false;
+    }
+
+    size_t num_faces = std::min(faces.size(), other.faces.size());
+    for(size_t i = 0; i < num_faces; ++i){
+        if(fconn[i].h != other.fconn[i].h) return false;
+    }
+
+    return true;
 }
 
 size_t halfedge_mesh::num_faces() const{
@@ -433,14 +455,14 @@ face_handle halfedge_mesh::add_face(const std::vector<vertex_handle> &f_vertices
     // test for topological errors
     for (size_t i = 0, ii = 1; i < n; ++i, ++ii, ii %= n) {
         if (!is_boundary(f_vertices[i])) {
-            std::cerr << "add_face: complex vertex!";
+            std::cerr << "add_face: complex vertex!\n";
             return face_handle();
         }
 
         f_halfedges[i] = halfedge_graph::find_halfedge(f_vertices[i], f_vertices[ii]);
         h_is_new[i] = !f_halfedges[i];
         if (!h_is_new[i] && !is_boundary(f_halfedges[i])) {
-            std::cerr << "add_face: complex edge!";
+            std::cerr << "add_face: complex edge!\n";
             return face_handle();
         }
     }
@@ -466,13 +488,15 @@ face_handle halfedge_mesh::add_face(const std::vector<vertex_handle> &f_vertices
                     boundary_prev = halfedge_graph::get_opposite(halfedge_graph::get_next(boundary_prev));
                 } while (!is_boundary(boundary_prev) || boundary_prev == inner_prev);
                 boundary_next = halfedge_graph::get_next(boundary_prev);
-                if (is_boundary(boundary_prev))
-                    std::cerr << "boundary_prev should be boundary!";
-                if (is_boundary(boundary_next))
-                    std::cerr << "boundary_next should be boundary!";
+                if (!is_boundary(boundary_prev)){
+                    std::cerr << "boundary_prev should be boundary!\n";
+                }
+                if (!is_boundary(boundary_next)){
+                    std::cerr << "boundary_next should be boundary!\n";
+                }
 
                 if (boundary_next == inner_next) {
-                    std::cerr << "add_face: patch re-linking failed!";
+                    std::cerr << "add_face: patch re-linking failed!\n";
                     return face_handle();
                 }
 
@@ -767,6 +791,66 @@ void halfedge_mesh::delete_vertex(vertex_handle v) {
         delete_face(f);
     }
     mark_vertex_deleted(v);
+}
+
+halfedge_mesh::face_around_vertex_circulator::face_around_vertex_circulator(const halfedge_mesh *ds , vertex_handle v ) :
+        ds(ds), active(false){
+    if (ds) {
+        halfedge = ds->halfedge_graph::get_halfedge(v);
+        if (halfedge && ds->is_boundary(halfedge)) {
+            operator++();
+        }
+    }
+}
+
+bool halfedge_mesh::face_around_vertex_circulator::operator==(const face_around_vertex_circulator &rhs) const{
+    assert(ds);
+    assert(ds == rhs.ds);
+    return (active && (halfedge == rhs.halfedge));
+}
+
+bool halfedge_mesh::face_around_vertex_circulator::operator!=(const face_around_vertex_circulator &rhs) const{
+    return !operator==(rhs);
+}
+
+halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::operator++(){
+    assert(ds && halfedge);
+    do {
+        halfedge = ds->rotate_ccw(halfedge);
+    } while (ds->is_boundary(halfedge));
+    active = true;
+    return *this;
+}
+
+halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::operator--(){
+    assert(ds && halfedge);
+    do {
+        halfedge = ds->rotate_cw(halfedge);
+    } while (ds->is_boundary(halfedge));
+    return *this;
+}
+
+face_handle halfedge_mesh::face_around_vertex_circulator::operator*() const{
+    assert(ds && halfedge);
+    return ds->get_face(halfedge);
+}
+
+halfedge_mesh::face_around_vertex_circulator::operator bool() const{
+    return halfedge;
+}
+
+halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::begin(){
+    active = !halfedge;
+    return *this;
+}
+
+halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::end(){
+    active = true;
+    return *this;
+}
+
+halfedge_mesh::face_around_vertex_circulator halfedge_mesh::get_faces(vertex_handle v) const{
+    return face_around_vertex_circulator(this, v);
 }
 
 halfedge_mesh::vertex_around_face_circulator::vertex_around_face_circulator(const halfedge_mesh *ds, face_handle f)

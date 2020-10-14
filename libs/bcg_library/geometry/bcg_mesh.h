@@ -10,19 +10,11 @@
 namespace bcg {
 
 struct halfedge_mesh : public halfedge_graph {
-    struct halfedge_connectivity {
-        vertex_handle v;
-        halfedge_handle nh;
-        halfedge_handle ph;
-        face_handle f;
-    };
-
     struct face_connectivity {
         halfedge_handle h;
     };
 
     face_container faces;
-    property<halfedge_connectivity, 1> hconn; //unlink in graph_base
     property<face_connectivity, 1> fconn;
     property<bool, 1> faces_deleted;
     size_t size_faces_deleted;
@@ -34,6 +26,8 @@ struct halfedge_mesh : public halfedge_graph {
     void assign(const halfedge_mesh &other);
 
     halfedge_mesh &operator=(const halfedge_mesh &other);
+
+    bool operator==(const halfedge_mesh &other) const;
 
     size_t num_faces() const;
 

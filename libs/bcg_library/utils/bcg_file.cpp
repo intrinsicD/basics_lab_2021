@@ -107,7 +107,7 @@ bool file_stream::check_valid() const {
     return fs.is_open();
 }
 
-std::time_t file_stream::last_write_time() const{
+time_t file_stream::last_write_time() const{
     auto tp = std::filesystem::last_write_time(make_path(filename));
     auto sctp = time_point_cast<std::chrono::system_clock::duration>(tp - std::filesystem::file_time_type::clock::now()
                                                         + std::chrono::system_clock::now());

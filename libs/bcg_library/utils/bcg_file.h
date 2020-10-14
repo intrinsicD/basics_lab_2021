@@ -47,7 +47,7 @@ struct file_stream {
 
     bool check_valid() const;
 
-    std::time_t last_write_time() const;
+    time_t last_write_time() const;
 
     std::string current_path() const;
 

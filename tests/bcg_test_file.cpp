@@ -200,6 +200,6 @@ TEST_F(TestFileFixture, list) {
     EXPECT_TRUE(test_dir.exists());
     auto result = list_directory(test_dir);
     EXPECT_TRUE(result.size() >= 2);
-    EXPECT_EQ(result[0], test_data_path + "empty_file.txt");
-    EXPECT_EQ(result[1], test_data_path + "test_file.txt");
+    EXPECT_EQ(result[0], test_data_path + "test.xyz");
+    EXPECT_EQ(result[1], test_data_path + "empty_file.txt");
 }

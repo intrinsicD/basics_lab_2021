@@ -18,6 +18,7 @@ struct halfedge_graph : public point_cloud {
         vertex_handle v;
         halfedge_handle nh;
         halfedge_handle ph;
+        face_handle f;
     };
 
     halfedge_container halfedges;

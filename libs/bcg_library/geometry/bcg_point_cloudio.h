@@ -22,6 +22,7 @@ struct point_cloudio {
 
     bool read(point_cloud &pc);
 
+    //TODO implement point cloud writing!
     bool write(point_cloud &pc);
 
 private:
