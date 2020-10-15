@@ -90,7 +90,7 @@ vertex_handle point_cloud::new_vertex() {
 
 vertex_handle point_cloud::add_vertex(const position_t &point) {
     auto v = new_vertex();
-    positions[v] = point;
+    if (v) positions[v] = point;
     return v;
 }
 
@@ -98,11 +98,11 @@ void point_cloud::delete_vertex(vertex_handle v) {
     mark_vertex_deleted(v);
 }
 
-size_t point_cloud::num_vertices() const{
+size_t point_cloud::num_vertices() const {
     return vertices.size() - size_vertices_deleted;
 }
 
-void point_cloud::mark_vertex_deleted(vertex_handle v){
+void point_cloud::mark_vertex_deleted(vertex_handle v) {
     if (vertices_deleted[v]) return;
 
     vertices_deleted[v] = true;

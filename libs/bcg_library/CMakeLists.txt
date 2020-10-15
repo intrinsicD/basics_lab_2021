@@ -9,7 +9,7 @@ add_library(bcg_graphics
         utils/bcg_stl_utils.h
         utils/bcg_string_utils.h utils/bcg_string_utils.cpp
         math/bcg_linalg.h
-        geometry/bcg_aligned_box.h
+        geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
         geometry/bcg_property.h
         geometry/bcg_property_map_eigen.h
         geometry/bcg_transforms.h

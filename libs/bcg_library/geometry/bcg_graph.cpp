@@ -23,7 +23,6 @@ void halfedge_graph::assign(const halfedge_graph &other) {
         point_cloud::assign(other);
         halfedges.remove_all();
         edges.remove_all();
-        positions = vertices.get_or_add<position_t, 3>("position");
 
         vconn = vertices.get_or_add<vertex_connectivity, 1>("connectivity");
         hconn = halfedges.get_or_add<halfedge_connectivity, 1>("connectivity");
@@ -37,7 +36,6 @@ void halfedge_graph::assign(const halfedge_graph &other) {
         halfedges_deleted.vector() = other.halfedges_deleted.vector();
         edges_deleted.vector() = other.edges_deleted.vector();
 
-        vertices.resize(other.vertices.size());
         edges.resize(other.edges.size());
         halfedges.resize(other.halfedges.size());
 
@@ -158,10 +156,6 @@ void halfedge_graph::garbage_collection() {
             set_next(h, hmap[next]);
         }
     }
-
-    vertices.remove(vertices_deleted);
-    halfedges.remove(halfedges_deleted);
-    edges.remove(edges_deleted);
 
     vertices.remove(vmap);
     halfedges.remove(hmap);
@@ -539,12 +533,12 @@ void halfedge_graph::mark_edge_deleted(edge_handle e){
     edges_deleted.set_dirty();
 }
 
-edge_handle find_closest_edge(const halfedge_graph &graph, const halfedge_graph::position_t &point) {
+edge_handle halfedge_graph::find_closest_edge(const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
     float min_sqr_dist_yet = FLT_MAX;
-    for (const auto e : graph.edges) {
-        float sqr_dist = dot(graph.positions[graph.get_vertex(e, 0)] - point,
-                             graph.positions[graph.get_vertex(e, 1)] - point);
+    for (const auto e : edges) {
+        float sqr_dist = dot(positions[get_vertex(e, 0)] - point,
+                             positions[get_vertex(e, 1)] - point);
         if (sqr_dist < min_sqr_dist_yet) {
             min_sqr_dist_yet = sqr_dist;
             closest_yet = e;
@@ -553,14 +547,13 @@ edge_handle find_closest_edge(const halfedge_graph &graph, const halfedge_graph:
     return closest_yet;
 }
 
-std::vector<edge_handle>
-find_closest_k_edges(const halfedge_graph &graph, const halfedge_graph::position_t &point, size_t k) {
+std::vector<edge_handle> halfedge_graph::find_closest_k_edges(const halfedge_graph::position_t &point, size_t k) {
     using DistIndex = std::pair<float, edge_handle>;
     std::vector<DistIndex> closest_k;
 
-    for (const auto e : graph.edges) {
-        float sqr_dist = dot(graph.positions[graph.get_vertex(e, 0)] - point,
-                             graph.positions[graph.get_vertex(e, 1)] - point);
+    for (const auto e : edges) {
+        float sqr_dist = dot(positions[get_vertex(e, 0)] - point,
+                             positions[get_vertex(e, 1)] - point);
         if (closest_k.size() < k + 1) {
             closest_k.emplace_back(sqr_dist, e);
             if (closest_k.size() == k) {
@@ -585,12 +578,12 @@ find_closest_k_edges(const halfedge_graph &graph, const halfedge_graph::position
 }
 
 std::vector<edge_handle>
-find_closest_edges_radius(const halfedge_graph &graph, const halfedge_graph::position_t &point, float radius) {
+halfedge_graph::find_closest_edges_radius( const halfedge_graph::position_t &point, float radius) {
     using DistIndex = std::pair<float, edge_handle>;
     std::vector<DistIndex> closest;
-    for (const auto e : graph.edges) {
-        float sqr_dist = dot(graph.positions[graph.get_vertex(e, 0)] - point,
-                             graph.positions[graph.get_vertex(e, 1)] - point);
+    for (const auto e : edges) {
+        float sqr_dist = dot(positions[get_vertex(e, 0)] - point,
+                             positions[get_vertex(e, 1)] - point);
         if (sqr_dist <= radius) {
             closest.emplace_back(sqr_dist, e);
         }
@@ -603,16 +596,16 @@ find_closest_edges_radius(const halfedge_graph &graph, const halfedge_graph::pos
     return indices;
 }
 
-edge_handle find_closest_edge_in_neighborhood(const halfedge_graph &graph, vertex_handle v,
+edge_handle halfedge_graph::find_closest_edge_in_neighborhood(vertex_handle v,
                                               const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
     float min_dist_yet = FLT_MAX;
-    for (const auto h : graph.get_halfedges(v)) {
-        float sqr_dist = dot(graph.positions[graph.get_from_vertex(h)] - point,
-                             graph.positions[graph.get_to_vertex(h)] - point);
+    for (const auto h : get_halfedges(v)) {
+        float sqr_dist = dot(positions[get_from_vertex(h)] - point,
+                             positions[get_to_vertex(h)] - point);
         if (sqr_dist < min_dist_yet) {
             min_dist_yet = sqr_dist;
-            closest_yet = graph.get_edge(h);
+            closest_yet = get_edge(h);
         }
     }
     return closest_yet;

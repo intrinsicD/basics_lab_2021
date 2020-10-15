@@ -23,11 +23,11 @@ struct triangle {
 
     }
 
-    explicit triangle(const std::array<vec3f, 3> &points) : points(points) {
+    explicit triangle(const std::array<vecf, 3> &points) : points(points) {
 
     }
 
-    operator std::array<vecf, 3>() const {
+    explicit operator std::array<vecf, 3>() const {
         return points;
     }
 
@@ -65,6 +65,7 @@ struct triangle {
         std::string output = "p0: " + glm::to_string(points[0]) + "\n" +
                              "p1: " + glm::to_string(points[1]) + "\n" +
                              "p2: " + glm::to_string(points[2]) + "\n";
+        return output;
     }
 };
 

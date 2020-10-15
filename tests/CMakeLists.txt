@@ -14,6 +14,7 @@ set(TEST_SOURCES
         bcg_test_property.cpp
         bcg_test_point_cloud.cpp
         bcg_test_point_cloudio.cpp
+        bcg_test_graph.cpp
         bcg_test_mesh.cpp
         bcg_test_meshio.cpp
         )

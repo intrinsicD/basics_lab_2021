@@ -24,7 +24,7 @@ struct meshio_flags {
 };
 
 struct meshio {
-    meshio(const std::string &filename, const meshio_flags &flags);
+    meshio(std::string filename, const meshio_flags &flags);
 
     bool read(halfedge_mesh &mesh);
 

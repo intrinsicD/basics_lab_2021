@@ -25,6 +25,10 @@ public:
 TEST_F(TestPointCloudFixture, empty) {
     EXPECT_TRUE(pc_empty.empty());
     EXPECT_FALSE(pc_full.empty());
+    EXPECT_TRUE(pc_empty.positions);
+    EXPECT_TRUE(pc_empty.vertices_deleted);
+    EXPECT_EQ(pc_empty.vertices.num_properties(), 2);
+    EXPECT_EQ(pc_full.vertices_deleted.size(), 5);
 }
 
 TEST_F(TestPointCloudFixture, has_garbage) {
@@ -32,6 +36,8 @@ TEST_F(TestPointCloudFixture, has_garbage) {
     EXPECT_FALSE(pc_full.has_garbage());
     EXPECT_EQ(pc_full.num_vertices(), pc_full.vertices.size());
     pc_full.delete_vertex(4);
+    EXPECT_FALSE(pc_full.vertices_deleted[3]);
+    EXPECT_TRUE(pc_full.vertices_deleted[4]);
     EXPECT_EQ(pc_full.num_vertices(), pc_full.vertices.size() - 1);
     EXPECT_TRUE(pc_full.has_garbage());
 }

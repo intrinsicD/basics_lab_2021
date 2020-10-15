@@ -13,7 +13,6 @@ static std::string test_data_path = "..\\..\\tests\\data\\";
 static std::string test_data_path = "../../tests/data/";
 #endif
 
-
 using namespace bcg;
 
 class TestMeshIoFixture : public ::testing::Test{
@@ -24,7 +23,7 @@ public:
 };
 
 TEST_F(TestMeshIoFixture, read_write_off){
-    meshio read_io(test_data_path + "test_mesh.off", meshio_flags());
+    meshio read_io(test_data_path + "test_read_mesh.off", meshio_flags());
     read_io.read(mesh);
 
     EXPECT_EQ(mesh.num_vertices(), 3835);
@@ -32,33 +31,57 @@ TEST_F(TestMeshIoFixture, read_write_off){
 
     mesh_factory factory;
     halfedge_mesh mesh_write_triangle = factory.make_triangle();
-    meshio write_io(test_data_path + "test_triangle.off", meshio_flags());
-    write_io.write(mesh_write_triangle);
+    meshio io(test_data_path + "test_write_mesh.off", meshio_flags());
+    io.write(mesh_write_triangle);
     halfedge_mesh mesh_read_triangle;
-    write_io.read(mesh_read_triangle);
+    io.read(mesh_read_triangle);
     EXPECT_EQ(mesh_write_triangle, mesh_read_triangle);
 }
 
 TEST_F(TestMeshIoFixture, obj){
-    meshio io(test_data_path + "test_mesh.obj", meshio_flags());
-    io.read(mesh);
+    meshio read_io(test_data_path + "test_read_mesh.obj", meshio_flags());
+    read_io.read(mesh);
 
     EXPECT_EQ(mesh.num_vertices(), 33);
     EXPECT_EQ(mesh.num_faces(), 32);
+
+    mesh_factory factory;
+    halfedge_mesh mesh_write_triangle = factory.make_triangle();
+    meshio io(test_data_path + "test_write_mesh.obj", meshio_flags());
+    io.write(mesh_write_triangle);
+    halfedge_mesh mesh_read_triangle;
+    io.read(mesh_read_triangle);
+    EXPECT_EQ(mesh_write_triangle, mesh_read_triangle);
 }
 
 TEST_F(TestMeshIoFixture, stl){
-    meshio io(test_data_path + "test_mesh.stl", meshio_flags());
-    io.read(mesh);
+    meshio read_io(test_data_path + "test_read_mesh.stl", meshio_flags());
+    read_io.read(mesh);
 
     EXPECT_EQ(mesh.num_vertices(), 44020);
     EXPECT_EQ(mesh.num_faces(), 88040);
+
+    mesh_factory factory;
+    halfedge_mesh mesh_write_triangle = factory.make_triangle();
+    meshio io(test_data_path + "test_write_mesh.stl", meshio_flags());
+    io.write(mesh_write_triangle);
+    halfedge_mesh mesh_read_triangle;
+    io.read(mesh_read_triangle);
+    EXPECT_EQ(mesh_write_triangle, mesh_read_triangle);
 }
 
 TEST_F(TestMeshIoFixture, ply){
-    meshio io(test_data_path + "test_mesh.ply", meshio_flags());
-    io.read(mesh);
+    meshio read_io(test_data_path + "test_read_mesh.ply", meshio_flags());
+    read_io.read(mesh);
 
     EXPECT_EQ(mesh.num_vertices(), 16243);
     EXPECT_EQ(mesh.num_faces(), 31532);
+
+    mesh_factory factory;
+    halfedge_mesh mesh_write_triangle = factory.make_triangle();
+    meshio io(test_data_path + "test_write_mesh.ply", meshio_flags());
+    io.write(mesh_write_triangle);
+    halfedge_mesh mesh_read_triangle;
+    io.read(mesh_read_triangle);
+    EXPECT_EQ(mesh_write_triangle, mesh_read_triangle);
 }

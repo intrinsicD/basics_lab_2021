@@ -161,21 +161,18 @@ struct halfedge_graph : public point_cloud {
 
     halfedge_handle new_edge(vertex_handle v0, vertex_handle v1);
 
+
+    edge_handle find_closest_edge(const halfedge_graph::position_t &point);
+
+    std::vector<edge_handle> find_closest_k_edges(const halfedge_graph::position_t &point, size_t k);
+
+    std::vector<edge_handle> find_closest_edges_radius(const halfedge_graph::position_t &point, float radius);
+
+    edge_handle find_closest_edge_in_neighborhood(vertex_handle v, const halfedge_graph::position_t &point);
+
 protected:
     void mark_edge_deleted(edge_handle e);
 };
-
-
-edge_handle find_closest_edge(const halfedge_graph &graph, const halfedge_graph::position_t &point);
-
-std::vector<edge_handle>
-find_closest_k_edges(const halfedge_graph &graph, const halfedge_graph::position_t &point, size_t k);
-
-std::vector<edge_handle>
-find_closest_edges_radius(const halfedge_graph &graph, const halfedge_graph::position_t &point, float radius);
-
-edge_handle find_closest_edge_in_neighborhood(const halfedge_graph &graph, vertex_handle v,
-                                              const halfedge_graph::position_t &point);
 
 
 }

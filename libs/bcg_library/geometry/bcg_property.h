@@ -174,12 +174,12 @@ struct property_vector : public base_property {
 
     inline void swap(size_t i0, size_t i1) override {
         std::swap(container[i0], container[i1]);
-        dirty = true;
+        set_dirty();
     }
 
     inline void clear() override {
         container.clear();
-        dirty = true;
+        set_dirty();
     }
 
     inline void free_unused_memory() override {
@@ -192,7 +192,7 @@ struct property_vector : public base_property {
 
     inline void resize(size_t n) override {
         container.resize(n, default_value);
-        dirty = true;
+        set_dirty();
     }
 
     inline void push_back() override {
@@ -201,7 +201,7 @@ struct property_vector : public base_property {
 
     inline void push_back(const T &value) {
         container.push_back(value);
-        dirty = true;
+        set_dirty();
     }
 
     inline void set_dirty() override { dirty = true; }
