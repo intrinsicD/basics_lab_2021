@@ -1,5 +1,5 @@
 //
-// Created by alex on 09.10.20.
+// Created by alex on 16.10.20.
 //
 
 #ifndef BCG_GRAPHICS_BCG_OPENGL_H
@@ -8,412 +8,400 @@
 #include <string>
 #include <array>
 #include <vector>
-#include "bcg_library/math/bcg_linalg.h"
 
 namespace bcg {
+
+#ifndef BCG_GL_INVALID_ID
+#define BCG_GL_INVALID_ID (unsigned int)(-1)
+#endif
 
 // forward declaration
 struct GLFWwindow;
 
-bool init_ogl(std::string &error);
+bool init_glad(std::string &error);
 
 void assert_ogl_error();
 
-bool check_ogl_error(std::string &error);
+void ogl_version(int &major, int &minor);
 
-void clear_ogl_framebuffer(const VectorS<4> &color, bool clear_depth = true);
+std::string ogl_version_string();
 
-// OpenGL texture
-struct ogl_texture {
-    // Texture properties
-    VectorI<2> size = {0, 0};
-    int num_channels = 0;
-    bool is_srgb = false;
-    bool is_float = false;
-    bool linear = false;
-    bool mipmap = false;
+std::string glsl_version_string();
 
-    // OpenGL state
-    uint texture_id = 0;
+std::string ogl_renderer_string();
 
-    // Disable copy construction
-    ogl_texture() = default;
 
-    ogl_texture(const ogl_texture &) = delete;
+struct ogl_types {
+    enum Type {
+        TYPE_UBYTE = 0,
+        TYPE_USHORT,
+        TYPE_HALF,
+        TYPE_FLOAT,
+        TYPE_INT8,
+        TYPE_UINT8,
+        TYPE_INT16,
+        TYPE_UINT16,
+        TYPE_INT32,
+        TYPE_UINT32,
+    };
 
-    ogl_texture &operator=(const ogl_texture &) = delete;
+    // Returns the OpenGL type identifier that corresponds to unsigned byte.
+    static unsigned int GetGLType(const unsigned char *);
 
-    // cleanup
-    ~ogl_texture();
+    // Returns the OpenGL type identifier that corresponds to unsigned short.
+    static unsigned int GetGLType(const unsigned short *);
+
+    // Returns the OpenGL type identifier that corresponds to float.
+    static unsigned int GetGLType(const float *);
+
+    // Returns the OpenGL type identifier that corresponds to byte.
+    static unsigned int GetGLType(const signed char *);
+
+    // Returns the OpenGL type identifier that corresponds to short.
+    static unsigned int GetGLType(const short *);
+
+    // Returns the OpenGL type identifier that corresponds to int.
+    static unsigned int GetGLType(const int *);
+
+    // Returns the OpenGL type identifier that corresponds to unsigned int.
+    static unsigned int GetGLType(const unsigned int *);
+
+    // Returns the Type that corresponds to unsigned byte.
+    static Type GetType(const unsigned char *);
+
+    // Returns the Type that corresponds to unsigned short.
+    static Type GetType(const unsigned short *);
+
+    // Returns the Type that corresponds to float.
+    static Type GetType(const float *);
+
+    // Returns the Type that corresponds to byte.
+    static Type GetType(const signed char *);
+
+    // Returns the Type that corresponds to short.
+    static Type GetType(const short *);
+
+    // Returns the Type that corresponds to int.
+    static Type GetType(const int *);
+
+    // Returns the Type that corresponds to unsigned int.
+    static Type GetType(const unsigned int *);
 };
 
-// set texture
-void set_texture(ogl_texture *texture, const VectorI<2> &size, int num_channels,
-                 const byte *img, bool as_srgb = false, bool linear = true,
-                 bool mipmap = true, bool wrap_repeat = true);
+unsigned int TextureFormat(ogl_types::Type type, int numChannels);
 
-void set_texture(ogl_texture *texture, const VectorI<2> &size, int num_channels,
-                 const float *img, bool as_float = false, bool linear = true,
-                 bool mipmap = true, bool wrap_repeat = true);
+unsigned int TextureDataFormat(ogl_types::Type type, int numChannels);
 
-// check if texture is initialized
-bool is_initialized(const ogl_texture *texture);
+std::string GlfwKeyToString(int key);
 
-// clear texture
-void clear_texture(ogl_texture *texture);
+struct ogl_handle {
+    unsigned int handle = BCG_GL_INVALID_ID;
+    std::string name;
 
-// OpenGL cubemap
-struct ogl_cubemap {
-    // Cubemap properties
-    int size = 0;
-    int num_channels = 0;
-    bool is_srgb = false;
-    bool is_float = false;
-    bool linear = false;
-    bool mipmap = false;
+    ogl_handle();
 
-    // OpenGL state
-    uint cubemap_id = 0;
+    ogl_handle(unsigned int handle);
 
-    // Disable copy construction
-    ogl_cubemap() = default;
+    ogl_handle(unsigned int handle, std::string name);
 
-    ogl_cubemap(const ogl_cubemap &) = delete;
+    bool is_valid() const;
 
-    ogl_cubemap &operator=(const ogl_cubemap &) = delete;
-
-    // cleanup
-    ~ogl_cubemap();
+    operator bool() const;
 };
 
-// set cubemap
-void set_cubemap(ogl_cubemap *cubemap, int size, int num_channels,
-                 const std::array<byte *, 6> &img, bool as_srgb = false, bool linear = true,
-                 bool mipmap = true);
+struct glsl_shader : public ogl_handle {
+    unsigned int type;
+    std::string source, filename;
 
-void set_cubemap(ogl_cubemap *cubemap, int size, int num_channels,
-                 const std::array<float *, 6> &img, bool as_float = false, bool linear = true,
-                 bool mipmap = true);
+    glsl_shader();
 
-// check if cubemap is initialized
-bool is_initialized(const ogl_cubemap *cubemap);
+    glsl_shader(unsigned int handle, unsigned int type);
 
-// clear cubemap
-void clear_cubemap(ogl_cubemap *cubemap);
+    glsl_shader(unsigned int handle, unsigned int type, std::string name);
 
+    void create();
 
-// Opengl array/element buffer
-struct ogl_arraybuffer {
-    size_t capacity = 0;
-    size_t num_elements = 0;
-    int element_size = 0;
-    bool dynamic = false;
+    void destroy();
 
-    // OpenGL state
-    uint buffer_id = 0;
+    void replace_source(int count, const char **string, const int *length);
 
-    // Disable copy construction
-    ogl_arraybuffer() = default;
+    bool compile_file(const char *filename, unsigned int type);
 
-    ogl_arraybuffer(const ogl_arraybuffer &) = delete;
+    bool compile_file(const char *filename, unsigned int type, const char *prepend_source);
 
-    ogl_arraybuffer &operator=(const ogl_arraybuffer &) = delete;
+    bool compile_file(const char *filename, unsigned int type, int prepend_count, const char **prepend_sources);
 
-    // Cleanup
-    ~ogl_arraybuffer();
+    bool load_source(const char *filename);
+
+    bool compile(const char *source, unsigned int type);
+
+    bool compile(const char *source, unsigned int type, const char *prepend_source);
+
+    bool compile(const char *source, unsigned int type, int prepend_count, const char **prepend_sources);
+
+    int get_compile_status() const;
+
+    int get_info_log_length() const;
+
+    std::string get_info_log(int length) const;
+
+    void check_compile_status() const;
+
+    bool check_eq_shader_type(unsigned int type) const;
 };
 
+struct glsl_program : public ogl_handle {
+    glsl_program();
 
-// set buffer
-void set_arraybuffer(ogl_arraybuffer *buffer, size_t size, int esize,
-                     const float *data, bool dynamic = false);
+    explicit glsl_program(unsigned int handle);
 
-// check if buffer is initialized
-bool is_initialized(const ogl_arraybuffer *buffer);
+    explicit glsl_program(unsigned int handle, unsigned int type, std::string name);
 
-// clear buffer
-void clear_arraybuffer(ogl_arraybuffer *buffer);
+    void create();
 
-// set buffer
-void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<float> &data, bool dynamic = false);
+    void destroy();
 
-void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<VectorS<2>> &data, bool dynamic = false);
+    void attach(const glsl_shader &shader) const;
 
-void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<VectorS<3>> &data, bool dynamic = false);
+    void detach(const glsl_shader &shader) const;
 
-void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<VectorS<4>> &data, bool dynamic = false);
+    bool build(const std::vector<glsl_shader> &shaders);
 
+    bool build(const glsl_shader *vertex_shader, const glsl_shader *fragment_shader, const glsl_shader *geometry_shader,
+               const glsl_shader *tess_control_shader = nullptr, const glsl_shader *tess_eval_shader = nullptr);
 
-// Opengl array/element buffer
-struct ogl_elementbuffer {
-    size_t capacity = 0;
-    size_t num_elements = 0;
-    int element_size = 0;
-    bool dynamic = false;
+    bool build_files(const char *vertex_shader_file, const char *fragment_shader_file, const char *geometry_shader_file,
+                     const char *tess_control_shader_file, const char *tess_eval_shader_file);
 
-    // OpenGL state
-    uint buffer_id = 0;
+    bool build_files(const char *vertex_shader_file, const char *fragment_shader_file, const char *geometry_shader_file,
+                     const char *tess_control_shader_file, const char *tess_eval_shader_file,
+                     const char *prepend_source);
 
-    // Disable copy construction
-    ogl_elementbuffer() = default;
+    bool build_files(const char *vertex_shader_file, const char *fragment_shader_file, const char *geometry_shader_file,
+                     const char *tess_control_shader_file, const char *tess_eval_shader_file,
+                     int prepend_count, const char **prepend_sources);
 
-    ogl_elementbuffer(const ogl_elementbuffer &) = delete;
+    bool build_sources(const char *vertex_shader_source, const char *fragment_shader_source,
+                       const char *geometry_shader_source, const char *tess_control_shader_source,
+                       const char *tess_eval_shader_source);
 
-    ogl_elementbuffer &operator=(const ogl_elementbuffer &) = delete;
+    bool build_sources(const char *vertex_shader_source, const char *fragment_shader_source,
+                       const char *geometry_shader_source, const char *tess_control_shader_source,
+                       const char *tess_eval_shader_source, const char *prepend_source);
 
-    // Cleanup
-    ~ogl_elementbuffer();
+    bool build_sources(const char *vertex_shader_source, const char *fragment_shader_source,
+                       const char *geometry_shader_source, const char *tess_control_shader_source,
+                       const char *tess_eval_shader_source, int prepend_count,
+                       const char **prepend_sources);
+
+#if GL_VERSION_4_3
+
+    bool build_compute_file(const char *compute_shader_file);
+
+#endif
+
+    bool link() const;
+
+    bool get_link_status() const;
+
+    int get_info_log_length() const;
+
+    std::string get_info_log(int length) const;
+
+    void check_link_status() const;
+
+    void bind() const;
+
+    void release() const;
+
+    void print_active_attrinutes() const;
+
+    void print_active_uniforms() const;
+
+    unsigned int get_attribute_location(const char *name) const;
+
+    int get_uniform_location(const char *name) const;
+
+    int get_uniform_block_location(const char *name) const;
+
+    int get_uniform_block_size(int index) const;
+
+    void set_uniform_f(const char *name, float x) const;
+
+    void set_uniform_f(const char *name, float x, float y) const;
+
+    void set_uniform_f(const char *name, float x, float y, float z) const;
+
+    void set_uniform_f(const char *name, float x, float y, float z, float w) const;
+
+    void set_uniform_1f(const char *name, int count, const float *data) const;
+
+    void set_uniform_2f(const char *name, int count, const float *data) const;
+
+    void set_uniform_3f(const char *name, int count, const float *data) const;
+
+    void set_uniform_4f(const char *name, int count, const float *data) const;
+
+    void set_uniform_i(const char *name, int x) const;
+
+    void set_uniform_i(const char *name, int x, int y) const;
+
+    void set_uniform_i(const char *name, int x, int y, int z) const;
+
+    void set_uniform_i(const char *name, int x, int y, int z, int w) const;
+
+    void set_uniform_1i(const char *name, int count, const int *data) const;
+
+    void set_uniform_2i(const char *name, int count, const int *data) const;
+
+    void set_uniform_3i(const char *name, int count, const int *data) const;
+
+    void set_uniform_4i(const char *name, int count, const int *data) const;
+
+#ifdef GL_VERSION_3_0
+
+    void set_uniform_u(const char *name, GLuint x) const;
+
+    void set_uniform_u(const char *name, GLuint x, GLuint y) const;
+
+    void set_uniform_u(const char *name, GLuint x, GLuint y, GLuint z) const;
+
+    void set_uniform_u(const char *name, GLuint x, GLuint y, GLuint z, GLuint w) const;
+
+    void set_uniform_1u(const char *name, int count, const GLuint *data) const;
+
+    void set_uniform_2u(const char *name, int count, const GLuint *data) const;
+
+    void set_uniform_3u(const char *name, int count, const GLuint *data) const;
+
+    void set_uniform_4u(const char *name, int count, const GLuint *data) const;
+
+#endif
+#ifdef GL_VERSION_4_0
+
+    void set_uniform_d(const char *name, double x) const;
+
+    void set_uniform_d(const char *name, double x, double y) const;
+
+    void set_uniform_d(const char *name, double x, double y, double z) const;
+
+    void set_uniform_d(const char *name, double x, double y, double z, double w) const;
+
+    void set_uniform_1d(const char *name, int count, const double *data) const;
+
+    void set_uniform_2d(const char *name, int count, const double *data) const;
+
+    void set_uniform_3d(const char *name, int count, const double *data) const;
+
+    void set_uniform_4d(const char *name, int count, const double *data) const;
+
+#endif
+
+    void set_uniform_matrix_2f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_3f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_4f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+#ifdef GL_VERSION_2_1
+
+    void set_uniform_matrix_2x3f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_2x4f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_3x2f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_3x4f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_4x2f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_4x3f(const char *name, const float *m, int count = 1, bool transpose = false) const;
+
+#endif
+#ifdef GL_VERSION_4_0
+
+    void set_uniform_matrix_2d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_3d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_4d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_2x3d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_2x4d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_3x2d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_3x4d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_4x2d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+    void set_uniform_matrix_4x3d(const char *name, const double *m, int count = 1, bool transpose = false) const;
+
+#endif
 };
 
+struct ogl_texture : public ogl_handle {
+    unsigned int target;
+    int width, height, channels;
+    int unit, mipmap_level;
+    unsigned int internal_format, format, type;
+    float border_color_rgba[4];
 
-// set buffer
-void set_elementbuffer(ogl_elementbuffer *buffer, size_t size, const int *data,
-                       bool dynamic = false);
+    ogl_texture();
 
-// check if buffer is initialized
-bool is_initialized(const ogl_elementbuffer *buffer);
+    ogl_texture(std::string name);
 
-// clear buffer
-void clear_elementbuffer(ogl_elementbuffer *buffer);
+    ogl_texture(unsigned int target, std::string name);
 
-// set buffer
-void set_elementbuffer(ogl_elementbuffer *buffer, const std::vector<int> &points,
-                       bool dynamic = false);
+    ogl_texture(unsigned int handle, unsigned int target);
 
-void set_elementbuffer(ogl_elementbuffer *buffer, const std::vector<VectorI<2>> &lines,
-                       bool dynamic = false);
+    ogl_texture(unsigned int handle, unsigned int target, std::string name);
 
-void set_elementbuffer(ogl_elementbuffer *buffer,
-                       const std::vector<VectorI<3>> &triangles, bool dynamic = false);
+    void create();
 
+    void destroy();
 
-// Opengl program
-struct ogl_program {
-    // program code
-    std::string vertex_code = {};
-    std::string fragment_code = {};
+    void bind() const;
 
-    // OpenGL state
-    uint program_id = 0;
-    uint vertex_id = 0;
-    uint fragment_id = 0;
+    void release() const;
 
-    // Debugging
-    static inline uint bound_program_id = 0;
+    void activate(int unit);
 
-    // Disable copy construction
-    ogl_program() = default;
+    void activate() const;
 
-    ogl_program(const ogl_program &) = delete;
+    void set_wrap_repeat();
 
-    ogl_program &operator=(const ogl_program &) = delete;
+    void set_wrap_mirror_repeat();
 
-    // Cleanup
-    ~ogl_program();
+    void set_wrap_clamp_to_edge();
+
+    void set_wrap_clamp_to_border();
+
+    void set_filter_linear();
+
+    void set_filter_nearest();
+
+    void generate_mipmaps();
+
+    void set_mipmaps_filter_nearest_nearest();
+
+    void set_mipmaps_filter_linear_nearest();
+
+    void set_mipmaps_filter_nearest_linear();
+
+    void set_mipmaps_filter_linear_linear();
+
+    void set_image_data(unsigned int target, int mipmap_level, unsigned int internal_format, int width, int height,
+                        unsigned int format, unsigned int type, void *data);
+
+    void update_data(void *data, int width, int height);
+
+    void download_data(void *data);
+
+    void resize(int width, int height);
 };
-
-
-// initialize program
-bool set_program(ogl_program *program, const std::string &vertex,
-                 const std::string &fragment, std::string &error);
-
-bool set_program(ogl_program *program, const std::string &vertex,
-                 const std::string &fragment, std::string &error, std::string &errorlog);
-
-bool set_program(ogl_program *program, const std::string &vertex,
-                 const std::string &fragment, bool exceptions = true);
-
-bool is_initialized(const ogl_program *program);
-
-// clear program
-void clear_program(ogl_program *program);
-
-// bind program
-void bind_program(ogl_program *program);
-
-// unbind program
-void unbind_program();
-
-// get uniform location
-int get_uniform_location(const ogl_program *program, const char *name);
-
-// set uniforms
-void set_uniform(const ogl_program *program, int location, int value);
-
-void set_uniform(const ogl_program *program, int location, const VectorI<2> &value);
-
-void set_uniform(const ogl_program *program, int location, const VectorI<3> &value);
-
-void set_uniform(const ogl_program *program, int location, const VectorI<4> &value);
-
-void set_uniform(const ogl_program *program, int location, float value);
-
-void set_uniform(const ogl_program *program, int location, const VectorS<2> &value);
-
-void set_uniform(const ogl_program *program, int location, const VectorS<3> &value);
-
-void set_uniform(const ogl_program *program, int location, const VectorS<4> &value);
-
-void set_uniform(const ogl_program *program, int location, const MatrixS<2, 2> &value);
-
-void set_uniform(const ogl_program *program, int location, const MatrixS<3, 3> &value);
-
-void set_uniform(const ogl_program *program, int location, const MatrixS<4, 4> &value);
-
-template<typename T>
-inline void set_uniform(const ogl_program *program, const char *name, const T &value) {
-    return set_uniform(program, get_uniform_location(program, name), value);
-}
-
-// set uniform texture
-void set_uniform(const ogl_program *program, int location,
-                 const ogl_texture *texture, int unit);
-
-void set_uniform(const ogl_program *program, const char *name,
-                 const ogl_texture *texture, int unit);
-
-void set_uniform(const ogl_program *program, int location, int location_on,
-                 const ogl_texture *texture, int unit);
-
-void set_uniform(const ogl_program *program, const char *name,
-                 const char *name_on, const ogl_texture *texture, int unit);
-
-// set uniform cubemap
-void set_uniform(const ogl_program *program, int location,
-                 const ogl_cubemap *cubemap, int unit);
-
-void set_uniform(const ogl_program *program, const char *name,
-                 const ogl_cubemap *cubemap, int unit);
-
-void set_uniform(ogl_program *program, int location, int location_on,
-                 const ogl_cubemap *cubemap, int unit);
-
-void set_uniform(ogl_program *program, const char *name, const char *name_on,
-                 const ogl_cubemap *cubemap, int unit);
-
-
-struct ogl_framebuffer {
-    // framebuffer properties
-    VectorI<2> size = {0, 0};
-
-    // opengl state
-    uint framebuffer_id = 0;
-    uint renderbuffer_id = 0;
-
-    // Denugging
-    static inline uint bound_framebuffer_id = 0;
-
-    // Disable copy construction
-    ogl_framebuffer() = default;
-
-    ogl_framebuffer(const ogl_framebuffer &) = delete;
-
-    ogl_framebuffer &operator=(const ogl_framebuffer &) = delete;
-
-    // Cleanup
-    ~ogl_framebuffer();
-};
-
-void set_framebuffer(ogl_framebuffer *framebuffer, const VectorI<2> &size);
-
-void set_framebuffer_texture(const ogl_framebuffer *framebuffer,
-                             const ogl_texture *texture, uint mipmap_level = 0);
-
-void set_framebuffer_texture(const ogl_framebuffer *framebuffer,
-                             const ogl_cubemap *cubemap, uint face, uint mipmap_level = 0);
-
-void bind_framebuffer(const ogl_framebuffer *target);
-
-void unbind_framebuffer();
-
-void clear_framebuffer(ogl_framebuffer *target);
-
-// Opengl draw elements
-enum struct ogl_element_type {
-    points,
-    lines,
-    line_strip,
-    triangles,
-    triangle_strip,
-    triangle_fan,
-};
-
-// Opengl shape
-struct ogl_shape {
-    // OpenGL objects
-    std::vector<ogl_arraybuffer *> vertex_buffers = {};
-    ogl_elementbuffer *index_buffer = new ogl_elementbuffer{};
-    ogl_element_type elements = ogl_element_type::triangles;
-    size_t num_instances = 0;
-
-    // OpenGl state
-    uint shape_id = 0;
-
-    // Disable copy construction
-    ogl_shape() = default;
-
-    ogl_shape(const ogl_shape &) = delete;
-
-    ogl_shape &operator=(const ogl_shape &) = delete;
-
-    // Cleanup
-    ~ogl_shape();
-};
-
-// set vertex buffer
-void set_vertex_buffer(
-        ogl_shape *shape, const std::vector<float> &values, int location);
-
-void set_vertex_buffer(
-        ogl_shape *shape, const std::vector <VectorS<2>> &values, int location);
-
-void set_vertex_buffer(
-        ogl_shape *shape, const std::vector <VectorS<3>> &values, int location);
-
-void set_vertex_buffer(
-        ogl_shape *shape, const std::vector <VectorS<4>> &values, int location);
-
-// set vertex buffer with constant value
-void set_vertex_buffer(ogl_shape *shape, float attribute, int location);
-
-void set_vertex_buffer(ogl_shape *shape, const VectorS<2> &attribute, int location);
-
-void set_vertex_buffer(ogl_shape *shape, const VectorS<3> &attribute, int location);
-
-void set_vertex_buffer(ogl_shape *shape, const VectorS<4> &attribute, int location);
-
-// set vertex buffer instance
-void set_instance_buffer(ogl_shape *shape, int location, bool is_instance);
-
-// set element buffer
-void set_index_buffer(ogl_shape *shape, const std::vector<int> &indices);
-
-void set_index_buffer(ogl_shape *shape, const std::vector<VectorI<2>> &indices);
-
-void set_index_buffer(ogl_shape *shape, const std::vector<VectorI<3>> &indices);
-
-// check if shape is initialized
-bool is_initialized(const ogl_shape *shape);
-
-// clear buffer
-void clear_shape(ogl_shape *shape);
-
-// bind shape
-void bind_shape(const ogl_shape *shape);
-
-// draw shape
-void draw_shape(const ogl_shape *shape);
-
-// init common shapes
-void set_cube_shape(ogl_shape *shape);
-
-void set_quad_shape(ogl_shape *shape);
 
 }
-
 
 #endif //BCG_GRAPHICS_BCG_OPENGL_H

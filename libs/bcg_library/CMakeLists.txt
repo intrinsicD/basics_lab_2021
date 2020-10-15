@@ -1,5 +1,4 @@
 add_library(bcg_graphics
-        bcg_commonio.h
         color/bcg_colors.h color/bcg_colors.cpp
         utils/bcg_file.h utils/bcg_file.cpp
         utils/bcg_dynamic_bitset.h
@@ -30,6 +29,7 @@ set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 1
 target_include_directories(bcg_graphics PRIVATE ./exts/entt/single_include)
 target_include_directories(bcg_graphics PUBLIC ./exts/glm)
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
+target_include_directories(bcg_graphics PUBLIC . ./math)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)

@@ -19,6 +19,7 @@ set(TEST_SOURCES
         bcg_test_meshio.cpp
         bcg_test_triangle.cpp
         bcg_test_sphere.cpp
+        bcg_test_gte_map.cpp
         )
 
 add_executable(bcg_library_test ${TEST_SOURCES})

@@ -4,7 +4,7 @@ if (BCG_OPENGL)
 
     add_library(bcg_opengl
             bcg_imgui.h bcg_imgui.cpp
-            bcg_opengl.h bcg_opengl.cpp
+            bcg_opengl_yocto.h bcg_opengl_yocto.cpp
             bcg_viewer.h
             exts/imgui/imgui.cpp
             exts/imgui/imgui_draw.cpp
