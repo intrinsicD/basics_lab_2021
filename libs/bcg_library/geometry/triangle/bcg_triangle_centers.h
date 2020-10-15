@@ -9,21 +9,21 @@
 
 namespace bcg {
 
-template<int N>
-inline vec<N, float> incenter(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> incenter(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     auto p = abc[0] + abc[1] + abc[2];
     return from_barycentric_coords(t, abc[0] / p, abc[1] / p, abc[2] / p);
 }
 
-template<int N>
-inline vec<N, float> centroid(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> centroid(const triangle<N> &t) {
     auto w = 1.0 / 3.0;
     return from_barycentric_coords(t, w, w, w);
 }
 
-template<int N>
-inline vec<N, float> circumcenter(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> circumcenter(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     auto aa = abc[0] * abc[0];
     auto bb = abc[1] * abc[1];
@@ -33,8 +33,8 @@ inline vec<N, float> circumcenter(const triangle<N> &t) {
                                    cc * (aa + bb - cc));
 }
 
-template<int N>
-inline vec<N, float> orthocenter(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> orthocenter(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     auto aa = abc[0] * abc[0];
     auto bb = abc[1] * abc[1];
@@ -47,8 +47,8 @@ inline vec<N, float> orthocenter(const triangle<N> &t) {
                                    ambpc * bpcma);
 }
 
-template<int N>
-inline vec<N, float> nine_point_center(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> nine_point_center(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     auto aa = abc[0] * abc[0];
     auto bb = abc[1] * abc[1];
@@ -61,40 +61,40 @@ inline vec<N, float> nine_point_center(const triangle<N> &t) {
                                    cc * (aa + bb) - aambb * aambb);
 }
 
-template<int N>
-inline vec<N, float> symmedian_point(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> symmedian_point(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     return from_barycentric_coords(t, abc[0] * abc[0],
                                    abc[1] * abc[1],
                                    abc[2] * abc[2]);
 }
 
-template<int N>
-inline vec<N, float> gergonne_point(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> gergonne_point(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     return from_barycentric_coords(t, 1.0 / (abc[1] + abc[2] - abc[0]),
                                    1.0 / (abc[2] + abc[0] - abc[1]),
                                    1.0 / (abc[0] + abc[1] - abc[2]));
 }
 
-template<int N>
-inline vec<N, float> nagel_point(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> nagel_point(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     return from_barycentric_coords(t, abc[1] + abc[2] - abc[0],
                                    abc[2] + abc[0] - abc[1],
                                    abc[0] + abc[1] - abc[2]);
 }
 
-template<int N>
-inline vec<N, float> mitten_point(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> mitten_point(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     return from_barycentric_coords(t, abc[0] * (abc[1] + abc[2] - abc[0]),
                                    abc[1] * (abc[2] + abc[0] - abc[1]),
                                    abc[2] * (abc[0] + abc[1] - abc[2]));
 }
 
-template<int N>
-inline vec<N, float> spieker_point(const triangle<N> &t) {
+template<bcg_index_t N>
+inline VectorS<N> spieker_point(const triangle<N> &t) {
     auto abc = t.edge_lengths();
     return from_barycentric_coords(t, abc[1] + abc[2],
                                    abc[2] + abc[0],

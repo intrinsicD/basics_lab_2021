@@ -1,6 +1,6 @@
 add_library(bcg_graphics
         bcg_commonio.h
-        bcg_colors.h bcg_colors.cpp
+        color/bcg_colors.h color/bcg_colors.cpp
         utils/bcg_file.h utils/bcg_file.cpp
         utils/bcg_dynamic_bitset.h
         utils/bcg_file_watcher.h
@@ -8,15 +8,16 @@ add_library(bcg_graphics
         utils/bcg_path.h utils/bcg_path.cpp
         utils/bcg_stl_utils.h
         utils/bcg_string_utils.h utils/bcg_string_utils.cpp
-        math/bcg_linalg.h
+        math/bcg_math_common.h math/bcg_linalg.h
         geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
         geometry/bcg_property.h
         geometry/bcg_property_map_eigen.h
-        geometry/bcg_transforms.h
         geometry/bcg_point_cloud.h geometry/bcg_point_cloud.cpp geometry/bcg_point_cloudio.h geometry/bcg_point_cloudio.cpp
         geometry/bcg_graph.h geometry/bcg_graph.cpp
         geometry/bcg_mesh.h geometry/bcg_mesh.cpp geometry/bcg_meshio.h geometry/bcg_meshio.cpp
         geometry/bcg_mesh_factory.h geometry/bcg_mesh_factory.cpp
+        geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
+        geometry/sphere/bcg_sphere.h geometry/sphere/bcg_sphere_fit.h geometry/sphere/bcg_sphere_sampling_fibunacci.h
         exts/cgltf/cgltf.h exts/cgltf/cgltf_write.h
         exts/entt/single_include/entt/entt.hpp
         exts/stb/stb_image.h exts/stb/stb_image_resize.h exts/stb/stb_image_write.h
@@ -28,6 +29,7 @@ add_library(bcg_graphics
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(bcg_graphics PRIVATE ./exts/entt/single_include)
 target_include_directories(bcg_graphics PUBLIC ./exts/glm)
+target_include_directories(bcg_graphics PUBLIC . ./geometry)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)

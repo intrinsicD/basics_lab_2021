@@ -9,15 +9,15 @@
 
 namespace bcg {
 
-inline float signed_distance(const triangle3 &t, const vec3f &point) {
-    return dot(point - t.points[0], normal(t));
+inline bcg_scalar_t signed_distance(const triangle3 &t, const VectorS<3> &point) {
+    return (point - t.points[0]).dot(normal(t));
 }
 
-inline float distance(const triangle3 &t, const vec3f &point) {
+inline bcg_scalar_t distance(const triangle3 &t, const VectorS<3> &point) {
     return std::abs(signed_distance(t, point));
 }
 
-inline float squared_distance(const triangle3 &t, const vec3f &point) {
+inline bcg_scalar_t squared_distance(const triangle3 &t, const VectorS<3> &point) {
     return std::pow(signed_distance(t, point), 2);
 }
 

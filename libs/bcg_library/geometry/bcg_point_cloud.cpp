@@ -4,8 +4,7 @@
 
 #include <cassert>
 #include "bcg_point_cloud.h"
-#include "../utils/bcg_stl_utils.h"
-#include "../math/bcg_math_common.h"
+#include "utils/bcg_stl_utils.h"
 
 namespace bcg {
 
@@ -123,14 +122,14 @@ std::ostream &operator<<(std::ostream &stream, const point_cloud &pc) {
 
 vertex_handle point_cloud::find_closest_vertex(const point_cloud::position_t &point) {
     vertex_handle closest_yet(0);
-    auto min_dist_yet = flt_max;
+    auto min_dist_yet = scalar_max;
     for (const auto v : vertices) {
-        auto dist = distance(positions[v], point);
+        auto dist = (positions[v] - point).norm();
         if (dist < min_dist_yet) {
             min_dist_yet = dist;
             closest_yet = v;
 
-            if (dist < flt_eps) break;
+            if (dist < scalar_eps) break;
         }
     }
     return closest_yet;
@@ -138,11 +137,11 @@ vertex_handle point_cloud::find_closest_vertex(const point_cloud::position_t &po
 
 std::vector<vertex_handle>
 point_cloud::find_closest_k_vertices(const point_cloud::position_t &point, size_t k) {
-    using DistIndex = std::pair<float, vertex_handle>;
+    using DistIndex = std::pair<bcg_scalar_t, vertex_handle>;
     std::vector<DistIndex> closest_k;
 
     for (const auto v : vertices) {
-        auto dist = distance(positions[v], point);
+        auto dist = (positions[v] - point).norm();
         if (closest_k.size() < k) {
             closest_k.emplace_back(dist, v);
         } else {
@@ -159,16 +158,16 @@ point_cloud::find_closest_k_vertices(const point_cloud::position_t &point, size_
 
     std::sort(closest_k.begin(), closest_k.end());
     std::vector<vertex_handle> indices;
-    unzip<float, vertex_handle>(closest_k, nullptr, &indices);
+    unzip<bcg_scalar_t, vertex_handle>(closest_k, nullptr, &indices);
     return indices;
 }
 
 std::vector<vertex_handle>
-point_cloud::find_closest_vertices_radius(const point_cloud::position_t &point, float radius) {
-    using DistIndex = std::pair<float, vertex_handle>;
+point_cloud::find_closest_vertices_radius(const point_cloud::position_t &point, bcg_scalar_t radius) {
+    using DistIndex = std::pair<bcg_scalar_t, vertex_handle>;
     std::vector<DistIndex> closest;
     for (const auto v: vertices) {
-        auto dist = distance(positions[v], point);
+        auto dist = (positions[v] - point).norm();
         if (dist <= radius) {
             closest.emplace_back(dist, v);
         }
@@ -176,7 +175,7 @@ point_cloud::find_closest_vertices_radius(const point_cloud::position_t &point, 
 
     std::sort(closest.begin(), closest.end());
     std::vector<vertex_handle> indices;
-    unzip<float, vertex_handle>(closest, nullptr, &indices);
+    unzip<bcg_scalar_t, vertex_handle>(closest, nullptr, &indices);
     return indices;
 }
 

@@ -86,7 +86,7 @@ struct halfedge_graph : public point_cloud {
 
     size_t get_valence(vertex_handle v) const;
 
-    float get_length(edge_handle e) const;
+    bcg_scalar_t get_length(edge_handle e) const;
 
     point_cloud::position_t get_center(halfedge_handle h) const;
 
@@ -157,7 +157,7 @@ struct halfedge_graph : public point_cloud {
 
     halfedge_around_vertex_circulator get_halfedges(vertex_handle v) const;
 
-    std::vector<vec2i> get_connectivity() const;
+    std::vector<VectorI<2>> get_connectivity() const;
 
     halfedge_handle new_edge(vertex_handle v0, vertex_handle v1);
 
@@ -166,7 +166,7 @@ struct halfedge_graph : public point_cloud {
 
     std::vector<edge_handle> find_closest_k_edges(const halfedge_graph::position_t &point, size_t k);
 
-    std::vector<edge_handle> find_closest_edges_radius(const halfedge_graph::position_t &point, float radius);
+    std::vector<edge_handle> find_closest_edges_radius(const halfedge_graph::position_t &point, bcg_scalar_t radius);
 
     edge_handle find_closest_edge_in_neighborhood(vertex_handle v, const halfedge_graph::position_t &point);
 

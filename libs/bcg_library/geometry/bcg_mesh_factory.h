@@ -8,6 +8,7 @@
 #include "bcg_mesh.h"
 #include "triangle/bcg_triangle.h"
 #include "quad/bcg_quad.h"
+#include "aligned_box/bcg_aligned_box.h"
 
 namespace bcg{
     struct mesh_factory{
@@ -22,6 +23,10 @@ namespace bcg{
         halfedge_mesh make_quad(const quad3 &quad);
 
         halfedge_mesh make_icosahedron();
+
+        halfedge_mesh make_box();
+
+        halfedge_mesh make_box(const aligned_box3 &aabb);
     };
 }
 

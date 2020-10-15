@@ -9,21 +9,21 @@
 
 namespace bcg{
 
-template<int N>
+template<IndexType N>
 struct aligned_box;
 
-template<int N>
+template<IndexType N>
 typename aligned_box<N>::vecf child_center(const aligned_box<N> &alignedBox, uint8_t i) {
     typename aligned_box<N>::vecf childCenter, center, halfExtent;
     alignedBox.get_centered_form(center, halfExtent);
     for (unsigned int j = 0, mask = 1; j < N; ++j, mask <<= (unsigned int) 1) {
-        float sign = ((i & mask) ? (float) 0.5 : (float) -0.5);
+        ScalarType sign = ((i & mask) ? (ScalarType) 0.5 : (ScalarType) -0.5);
         childCenter[j] = center[j] + sign * halfExtent[j];
     }
     return childCenter;
 }
 
-template<int N>
+template<IndexType N>
 aligned_box<N> child_box(const aligned_box<N> &alignedBox, uint8_t i) {
     typename aligned_box<N>::vecf center, halfExtent;
     alignedBox.get_centered_form(center, halfExtent);
@@ -32,18 +32,18 @@ aligned_box<N> child_box(const aligned_box<N> &alignedBox, uint8_t i) {
     return child;
 }
 
-template<int N>
+template<IndexType N>
 typename aligned_box<N>::vecf parent_center(const aligned_box<N> &alignedBox, uint8_t i) {
     typename aligned_box<N>::vecf parentCenter, center, halfExtent;
     alignedBox.get_centered_form(center, halfExtent);
     for (unsigned int j = 0, mask = 1; j < N; ++j, mask <<= (unsigned int) 1) {
-        float sign = (i & mask ? (float) 1 : (float) -1);
+        ScalarType sign = (i & mask ? (ScalarType) 1 : (ScalarType) -1);
         parentCenter[j] = center[j] + sign * halfExtent[j];
     }
     return parentCenter;
 }
 
-template<int N>
+template<IndexType N>
 aligned_box<N> parent_box(const aligned_box<N> &alignedBox, uint8_t i) {
     aligned_box<N> parent;
     parent.set_centered_form(parent_center(alignedBox, i), alignedBox.halfextent() * 2);

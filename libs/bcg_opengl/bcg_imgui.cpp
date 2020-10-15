@@ -38,7 +38,7 @@ namespace bcg {
 using namespace std::string_literals;
 
 // run the user interface with the give callbacks
-void run_ui(const vec2i &size, const std::string &title,
+void run_ui(const VectorI<2> &size, const std::string &title,
             const gui_callbacks &callbacks, int widgets_width, bool widgets_left) {
     auto win_guard = std::make_unique<gui_window>();
     auto win = win_guard.get();
@@ -72,22 +72,22 @@ void run_ui(const vec2i &size, const std::string &title,
 namespace bcg {
 
 static void draw_window(gui_window *win) {
-    glClearColor(win->background.x, win->background.y, win->background.z,
-                 win->background.w);
+    glClearColor(win->background[0], win->background[1], win->background[2], win->background[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (win->draw_cb) win->draw_cb(win, win->input);
     if (win->widgets_cb) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        auto window = zero2i;
-        glfwGetWindowSize(win->win, &window.x, &window.y);
+        //auto window = zero2i;
+        int window[2];
+        glfwGetWindowSize(win->win, &window[0], &window[1]);
         if (win->widgets_left) {
             ImGui::SetNextWindowPos({0, 0});
-            ImGui::SetNextWindowSize({(float) win->widgets_width, (float) window.y});
+            ImGui::SetNextWindowSize({(float) win->widgets_width, (float) window[1]});
         } else {
-            ImGui::SetNextWindowPos({(float) (window.x - win->widgets_width), 0});
-            ImGui::SetNextWindowSize({(float) win->widgets_width, (float) window.y});
+            ImGui::SetNextWindowPos({(float) (window[0] - win->widgets_width), 0});
+            ImGui::SetNextWindowSize({(float) win->widgets_width, (float) window[1]});
         }
         ImGui::SetNextWindowCollapsed(false);
         ImGui::SetNextWindowBgAlpha(1);
@@ -104,7 +104,7 @@ static void draw_window(gui_window *win) {
     glfwSwapBuffers(win->win);
 }
 
-void init_window(gui_window *win, const vec2i &size, const std::string &title,
+void init_window(gui_window *win, const VectorI<2> &size, const std::string &title,
                  bool widgets, int widgets_width, bool widgets_left) {
     // init glfw
     if (!glfwInit())
@@ -118,7 +118,7 @@ void init_window(gui_window *win, const vec2i &size, const std::string &title,
 
     // create window
     win->title = title;
-    win->win = glfwCreateWindow(size.x, size.y, title.c_str(), nullptr, nullptr);
+    win->win = glfwCreateWindow(size[0], size[1], title.c_str(), nullptr, nullptr);
     if (win->win == nullptr)
         throw std::runtime_error{"cannot initialize windowing system"};
     glfwMakeContextCurrent(win->win);
@@ -166,20 +166,20 @@ void init_window(gui_window *win, const vec2i &size, const std::string &title,
             win->win, [](GLFWwindow *glfw, int width, int height) {
                 auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
                 glfwGetWindowSize(
-                        win->win, &win->input.window_size.x, &win->input.window_size.y);
-                if (win->widgets_width) win->input.window_size.x -= win->widgets_width;
-                glfwGetFramebufferSize(win->win, &win->input.framebuffer_viewport.z,
-                                       &win->input.framebuffer_viewport.w);
-                win->input.framebuffer_viewport.x = 0;
-                win->input.framebuffer_viewport.y = 0;
+                        win->win, reinterpret_cast<int *>(&win->input.window_size[0]), reinterpret_cast<int *>(&win->input.window_size[1]));
+                if (win->widgets_width) win->input.window_size[0] -= win->widgets_width;
+                glfwGetFramebufferSize(win->win, reinterpret_cast<int *>(&win->input.framebuffer_viewport[2]),
+                                       reinterpret_cast<int *>(&win->input.framebuffer_viewport[3]));
+                win->input.framebuffer_viewport[0] = 0;
+                win->input.framebuffer_viewport[1] = 0;
                 if (win->widgets_width) {
-                    auto win_size = zero2i;
-                    glfwGetWindowSize(win->win, &win_size.x, &win_size.y);
+                    int win_size[2];
+                    glfwGetWindowSize(win->win, &win_size[0], &win_size[1]);
                     auto offset = (int) (win->widgets_width *
-                                         (float) win->input.framebuffer_viewport.z /
-                                         win_size.x);
-                    win->input.framebuffer_viewport.z -= offset;
-                    if (win->widgets_left) win->input.framebuffer_viewport.x += offset;
+                                         (float) win->input.framebuffer_viewport[2] /
+                                         win_size[0]);
+                    win->input.framebuffer_viewport[2] -= offset;
+                    if (win->widgets_left) win->input.framebuffer_viewport[0] += offset;
                 }
             });
 
@@ -221,9 +221,9 @@ void run_ui(gui_window *win) {
         win->input.mouse_last = win->input.mouse_pos;
         auto mouse_posx = 0.0, mouse_posy = 0.0;
         glfwGetCursorPos(win->win, &mouse_posx, &mouse_posy);
-        win->input.mouse_pos = vec2f{(float) mouse_posx, (float) mouse_posy};
+        win->input.mouse_pos = VectorS<2>{(float) mouse_posx, (float) mouse_posy};
         if (win->widgets_width && win->widgets_left)
-            win->input.mouse_pos.x -= win->widgets_width;
+            win->input.mouse_pos[0] -= win->widgets_width;
         win->input.mouse_left = glfwGetMouseButton(win->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
         win->input.mouse_right = glfwGetMouseButton(win->win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
         win->input.modifier_alt = glfwGetKey(win->win, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
@@ -232,17 +232,17 @@ void run_ui(gui_window *win) {
                                     glfwGetKey(win->win, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
         win->input.modifier_ctrl = glfwGetKey(win->win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
                                    glfwGetKey(win->win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
-        glfwGetWindowSize(win->win, &win->input.window_size.x, &win->input.window_size.y);
-        if (win->widgets_width) win->input.window_size.x -= win->widgets_width;
-        glfwGetFramebufferSize(win->win, &win->input.framebuffer_viewport.z, &win->input.framebuffer_viewport.w);
-        win->input.framebuffer_viewport.x = 0;
-        win->input.framebuffer_viewport.y = 0;
+        glfwGetWindowSize(win->win, reinterpret_cast<int *>(&win->input.window_size[0]), reinterpret_cast<int *>(&win->input.window_size[1]));
+        if (win->widgets_width) win->input.window_size[0] -= win->widgets_width;
+        glfwGetFramebufferSize(win->win, reinterpret_cast<int *>(&win->input.framebuffer_viewport[2]), reinterpret_cast<int *>(&win->input.framebuffer_viewport[3]));
+        win->input.framebuffer_viewport[0] = 0;
+        win->input.framebuffer_viewport[1] = 0;
         if (win->widgets_width) {
-            auto win_size = zero2i;
-            glfwGetWindowSize(win->win, &win_size.x, &win_size.y);
-            auto offset = (int) (win->widgets_width * (float) win->input.framebuffer_viewport.z / win_size.x);
-            win->input.framebuffer_viewport.z -= offset;
-            if (win->widgets_left) win->input.framebuffer_viewport.x += offset;
+            int win_size[2];
+            glfwGetWindowSize(win->win, &win_size[0], &win_size[1]);
+            auto offset = (int) (win->widgets_width * (float) win->input.framebuffer_viewport[2] / win_size[0]);
+            win->input.framebuffer_viewport[2] -= offset;
+            if (win->widgets_left) win->input.framebuffer_viewport[0] += offset;
         }
         if (win->widgets_width) {
             auto io = &ImGui::GetIO();
@@ -566,18 +566,18 @@ bool draw_slider(
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec2f &value, float min, float max) {
-    return ImGui::SliderFloat2(lbl, &value.x, min, max);
+        gui_window *win, const char *lbl, VectorS<2> &value, float min, float max) {
+    return ImGui::SliderFloat2(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec3f &value, float min, float max) {
-    return ImGui::SliderFloat3(lbl, &value.x, min, max);
+        gui_window *win, const char *lbl, VectorS<3> &value, float min, float max) {
+    return ImGui::SliderFloat3(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec4f &value, float min, float max) {
-    return ImGui::SliderFloat4(lbl, &value.x, min, max);
+        gui_window *win, const char *lbl, VectorS<4> &value, float min, float max) {
+    return ImGui::SliderFloat4(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
@@ -586,18 +586,18 @@ bool draw_slider(
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec2i &value, int min, int max) {
-    return ImGui::SliderInt2(lbl, &value.x, min, max);
+        gui_window *win, const char *lbl, VectorI<2> &value, int min, int max) {
+    return ImGui::SliderInt2(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec3i &value, int min, int max) {
-    return ImGui::SliderInt3(lbl, &value.x, min, max);
+        gui_window *win, const char *lbl, VectorI<3> &value, int min, int max) {
+    return ImGui::SliderInt3(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec4i &value, int min, int max) {
-    return ImGui::SliderInt4(lbl, &value.x, min, max);
+        gui_window *win, const char *lbl, VectorI<4> &value, int min, int max) {
+    return ImGui::SliderInt4(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_dragger(gui_window *win, const char *lbl, float &value, float speed,
@@ -605,19 +605,19 @@ bool draw_dragger(gui_window *win, const char *lbl, float &value, float speed,
     return ImGui::DragFloat(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, vec2f &value, float speed,
+bool draw_dragger(gui_window *win, const char *lbl, VectorS<2> &value, float speed,
                   float min, float max) {
-    return ImGui::DragFloat2(lbl, &value.x, speed, min, max);
+    return ImGui::DragFloat2(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, vec3f &value, float speed,
+bool draw_dragger(gui_window *win, const char *lbl, VectorS<3> &value, float speed,
                   float min, float max) {
-    return ImGui::DragFloat3(lbl, &value.x, speed, min, max);
+    return ImGui::DragFloat3(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, vec4f &value, float speed,
+bool draw_dragger(gui_window *win, const char *lbl, VectorS<4> &value, float speed,
                   float min, float max) {
-    return ImGui::DragFloat4(lbl, &value.x, speed, min, max);
+    return ImGui::DragFloat4(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
 bool draw_dragger(gui_window *win, const char *lbl, int &value, float speed,
@@ -625,19 +625,19 @@ bool draw_dragger(gui_window *win, const char *lbl, int &value, float speed,
     return ImGui::DragInt(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, vec2i &value, float speed,
+bool draw_dragger(gui_window *win, const char *lbl, VectorI<2> &value, float speed,
                   int min, int max) {
-    return ImGui::DragInt2(lbl, &value.x, speed, min, max);
+    return ImGui::DragInt2(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, vec3i &value, float speed,
+bool draw_dragger(gui_window *win, const char *lbl, VectorI<3> &value, float speed,
                   int min, int max) {
-    return ImGui::DragInt3(lbl, &value.x, speed, min, max);
+    return ImGui::DragInt3(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, vec4i &value, float speed,
+bool draw_dragger(gui_window *win, const char *lbl, VectorI<4> &value, float speed,
                   int min, int max) {
-    return ImGui::DragInt4(lbl, &value.x, speed, min, max);
+    return ImGui::DragInt4(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
 bool draw_checkbox(gui_window *win, const char *lbl, bool &value) {
@@ -655,20 +655,20 @@ bool draw_checkbox(gui_window *win, const char *lbl, bool &value, bool invert) {
     }
 }
 
-bool draw_coloredit(gui_window *win, const char *lbl, vec3f &value) {
+bool draw_coloredit(gui_window *win, const char *lbl, VectorS<3> &value) {
     auto flags = ImGuiColorEditFlags_Float;
-    return ImGui::ColorEdit3(lbl, &value.x, flags);
+    return ImGui::ColorEdit3(lbl, reinterpret_cast<float *>(value.data()), flags);
 }
 
-bool draw_coloredit(gui_window *win, const char *lbl, vec4f &value) {
+bool draw_coloredit(gui_window *win, const char *lbl, VectorS<4> &value) {
     auto flags = ImGuiColorEditFlags_Float;
-    return ImGui::ColorEdit4(lbl, &value.x, flags);
+    return ImGui::ColorEdit4(lbl, reinterpret_cast<float *>(value.data()), flags);
 }
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec3f &value) {
+bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<3> &value) {
     auto color = value;
     auto exposure = 0.0f;
-    auto scale = glm::compMax(color);
+    auto scale = color.maxCoeff();
     if (scale > 1) {
         color /= scale;
         exposure = log2(scale);
@@ -684,24 +684,24 @@ bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec3f &value) {
     }
 }
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec4f &value) {
+bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<4> &value) {
     auto color = value;
     auto exposure = 0.0f;
-    auto scale = glm::compMax(vec3f(color));
+    auto scale = color.head<3>().maxCoeff();
     if (scale > 1) {
-        color.x /= scale;
-        color.y /= scale;
-        color.z /= scale;
+        color[0] /= scale;
+        color[1] /= scale;
+        color[2] /= scale;
         exposure = log2(scale);
     }
     auto edit_exposure = draw_slider(
             win, (lbl + " [exp]"s).c_str(), exposure, 0, 10);
     auto edit_color = draw_coloredit(win, (lbl + " [col]"s).c_str(), color);
     if (edit_exposure || edit_color) {
-        value.x = color.x * exp2(exposure);
-        value.y = color.y * exp2(exposure);
-        value.z = color.z * exp2(exposure);
-        value.w = color.w;
+        value[0] = color[0] * exp2(exposure);
+        value[1] = color[1] * exp2(exposure);
+        value[2] = color[2] * exp2(exposure);
+        value[3] = color[3];
         return true;
     } else {
         return false;
@@ -786,37 +786,37 @@ void draw_histogram(
 void draw_histogram(
         gui_window *win, const char *lbl, const std::vector<float> &values) {
     ImGui::PlotHistogram(lbl, values.data(), (int) values.size(), 0, nullptr,
-                         flt_max, flt_max, {0, 0}, 4);
+                         scalar_max, scalar_max, {0, 0}, 4);
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<vec2f> &values) {
+        gui_window *win, const char *lbl, const std::vector<VectorS<2>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec2f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<2>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec2f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<2>));
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<vec3f> &values) {
+        gui_window *win, const char *lbl, const std::vector<VectorS<3>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec3f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec3f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
     ImGui::PlotHistogram((lbl + " z"s).c_str(), (const float *) values.data() + 2,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec3f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<vec4f> &values) {
+        gui_window *win, const char *lbl, const std::vector<VectorS<4>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec4f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec4f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
     ImGui::PlotHistogram((lbl + " z"s).c_str(), (const float *) values.data() + 2,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec4f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
     ImGui::PlotHistogram((lbl + " w"s).c_str(), (const float *) values.data() + 3,
-                         (int) values.size(), 0, nullptr, flt_max, flt_max, {0, 0}, sizeof(vec4f));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
 }
 
 // https://github.com/ocornut/imgui/issues/300

@@ -5,29 +5,27 @@
 #ifndef BCG_GRAPHICS_BCG_CAMERA_H
 #define BCG_GRAPHICS_BCG_CAMERA_H
 
-#include "bcg_library/math/bcg_linalg.h"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/matrix_inverse.hpp"
+#include "math/bcg_linalg.h"
 
 namespace bcg {
 
 struct camera {
-    mat4f projection_matrix;
-    mat4f model_matrix;
-    vec3f target_point;
-    float near, far, aspect, fovy;
+    MatrixS<4, 4> projection_matrix;
+    MatrixS<4, 4> model_matrix;
+    VectorS<3> target_point;
+    bcg_scalar_t near, far, aspect, fovy;
 
     virtual void init();
 
-    vec3f inline front();
+    VectorS<3> inline front();
 
-    vec3f inline up();
+    VectorS<3> inline up();
 
-    vec3f inline left();
+    VectorS<3> inline left();
 
-    vec3f inline position();
+    VectorS<3> inline position();
 
-    mat4f inline view_matrix();
+    MatrixS<4, 4> inline view_matrix();
 
     virtual void update_projection() {};
 
@@ -40,7 +38,7 @@ struct perspective_camera : public camera {
 };
 
 struct orthographic_camera : public camera {
-    float l, r, t, b;
+    bcg_scalar_t l, r, t, b;
 
     void init() override;
 
@@ -52,7 +50,7 @@ struct orthographic_camera : public camera {
 namespace bcg {
 
 void camera::init() {
-    target_point = zero3f;
+    target_point = zero3s;
     near = 0.01;
     far = 10.0;
     aspect = 1.0;
@@ -60,24 +58,24 @@ void camera::init() {
     update_projection();
 }
 
-vec3f inline camera::front() {
-    return vec3f(model_matrix[2]);
+VectorS<3> inline camera::front() {
+    return VectorS<3>(model_matrix[2]);
 }
 
-vec3f inline camera::up() {
-    return vec3f(model_matrix[1]);
+VectorS<3> inline camera::up() {
+    return VectorS<3>(model_matrix[1]);
 }
 
-vec3f inline camera::left() {
-    return vec3f(model_matrix[0]);
+VectorS<3> inline camera::left() {
+    return VectorS<3>(model_matrix[0]);
 }
 
-vec3f inline camera::position() {
-    return vec3f(model_matrix[3]);
+VectorS<3> inline camera::position() {
+    return VectorS<3>(model_matrix[3]);
 }
 
-mat4f inline camera::view_matrix() {
-    return glm::inverse(model_matrix);
+MatrixS<4, 4> inline camera::view_matrix() {
+    return model_matrix.inverse();
 }
 
 void perspective_camera::init() {

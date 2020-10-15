@@ -7,20 +7,20 @@
 
 #include "bcg_imgui.h"
 
-namespace bcg{
+namespace bcg {
 
-struct viewer{
+struct viewer {
     gui_callbacks callbacks;
 
-    void run(vec2i size = {800, 600}, std::string title = "default");
+    void run(VectorI<2> size = {800, 600}, std::string title = "default");
 };
 
 }
 
-namespace bcg{
-    void viewer::run(vec2i size, std::string title) {
-        run_ui(size, title, callbacks);
-    }
+namespace bcg {
+void viewer::run(VectorI<2> size, std::string title) {
+    run_ui(size, title, callbacks);
+}
 }
 
 #endif //BCG_GRAPHICS_BCG_VIEWER_H

@@ -29,17 +29,17 @@ public:
     }
 
     void add_triangle() {
-        v0 = mesh.add_vertex(vec3f(0, 0, 0));
-        v1 = mesh.add_vertex(vec3f(1, 0, 0));
-        v2 = mesh.add_vertex(vec3f(0, 1, 0));
+        v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+        v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+        v2 = mesh.add_vertex(VectorS<3>(0, 1, 0));
         f0 = mesh.add_triangle(v0, v1, v2);
     }
 
     void add_quad() {
-        v0 = mesh.add_vertex(vec3f(0, 0, 0));
-        v1 = mesh.add_vertex(vec3f(1, 0, 0));
-        v2 = mesh.add_vertex(vec3f(1, 1, 0));
-        v3 = mesh.add_vertex(vec3f(0, 1, 0));
+        v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+        v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+        v2 = mesh.add_vertex(VectorS<3>(1, 1, 0));
+        v3 = mesh.add_vertex(VectorS<3>(0, 1, 0));
         f0 = mesh.add_quad(v0, v1, v2, v3);
     }
 };
@@ -51,7 +51,7 @@ TEST_F(HalfedgeMeshTest, emptyMesh) {
 }
 
 TEST_F(HalfedgeMeshTest, insert_remove_single_vertex) {
-    auto v0 = mesh.add_vertex(vec3f(0, 0, 0));
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
     EXPECT_EQ(mesh.num_vertices(), size_t(1));
     mesh.delete_vertex(v0);
     mesh.garbage_collection();
@@ -59,9 +59,9 @@ TEST_F(HalfedgeMeshTest, insert_remove_single_vertex) {
 }
 
 TEST_F(HalfedgeMeshTest, insert_remove_single_triangle) {
-    auto v0 = mesh.add_vertex(vec3f(0, 0, 0));
-    auto v1 = mesh.add_vertex(vec3f(1, 0, 0));
-    auto v2 = mesh.add_vertex(vec3f(0, 1, 0));
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    auto v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    auto v2 = mesh.add_vertex(VectorS<3>(0, 1, 0));
     auto f0 = mesh.add_triangle(v0, v1, v2);
     EXPECT_EQ(mesh.num_vertices(), size_t(3));
     EXPECT_EQ(mesh.num_edges(), size_t(3));
@@ -74,10 +74,10 @@ TEST_F(HalfedgeMeshTest, insert_remove_single_triangle) {
 }
 
 TEST_F(HalfedgeMeshTest, insert_remove_single_quad) {
-    auto v0 = mesh.add_vertex(vec3f(0, 0, 0));
-    auto v1 = mesh.add_vertex(vec3f(1, 0, 0));
-    auto v2 = mesh.add_vertex(vec3f(1, 1, 0));
-    auto v3 = mesh.add_vertex(vec3f(0, 1, 0));
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    auto v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    auto v2 = mesh.add_vertex(VectorS<3>(1, 1, 0));
+    auto v3 = mesh.add_vertex(VectorS<3>(0, 1, 0));
     auto f0 = mesh.add_quad(v0, v1, v2, v3);
     EXPECT_EQ(mesh.num_vertices(), size_t(4));
     EXPECT_EQ(mesh.num_edges(), size_t(4));
@@ -91,10 +91,10 @@ TEST_F(HalfedgeMeshTest, insert_remove_single_quad) {
 
 TEST_F(HalfedgeMeshTest, insert_remove_single_polygonal_face) {
     std::vector<vertex_handle> vertices(4);
-    vertices[0] = mesh.add_vertex(vec3f(0, 0, 0));
-    vertices[1] = mesh.add_vertex(vec3f(1, 0, 0));
-    vertices[2] = mesh.add_vertex(vec3f(1, 1, 0));
-    vertices[3] = mesh.add_vertex(vec3f(0, 1, 0));
+    vertices[0] = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    vertices[1] = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    vertices[2] = mesh.add_vertex(VectorS<3>(1, 1, 0));
+    vertices[3] = mesh.add_vertex(VectorS<3>(0, 1, 0));
 
     auto f0 = mesh.add_face(vertices);
     EXPECT_EQ(mesh.num_vertices(), size_t(4));
@@ -134,9 +134,9 @@ TEST_F(HalfedgeMeshTest, delete_center_edge) {
 }
 
 TEST_F(HalfedgeMeshTest, copy) {
-    auto v0 = mesh.add_vertex(vec3f(0, 0, 0));
-    auto v1 = mesh.add_vertex(vec3f(1, 0, 0));
-    auto v2 = mesh.add_vertex(vec3f(0, 1, 0));
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    auto v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    auto v2 = mesh.add_vertex(VectorS<3>(0, 1, 0));
     f0 = mesh.add_triangle(v0, v1, v2);
 
     halfedge_mesh m2 = mesh;
@@ -146,9 +146,9 @@ TEST_F(HalfedgeMeshTest, copy) {
 }
 
 TEST_F(HalfedgeMeshTest, assignment) {
-    auto v0 = mesh.add_vertex(vec3f(0, 0, 0));
-    auto v1 = mesh.add_vertex(vec3f(1, 0, 0));
-    auto v2 = mesh.add_vertex(vec3f(0, 1, 0));
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    auto v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    auto v2 = mesh.add_vertex(VectorS<3>(0, 1, 0));
     f0 = mesh.add_triangle(v0, v1, v2);
 
     halfedge_mesh m2;
@@ -272,10 +272,10 @@ TEST_F(HalfedgeMeshTest, is_triangle_mesh) {
 }
 
 TEST_F(HalfedgeMeshTest, is_quad_mesh) {
-    auto v0 = mesh.add_vertex(vec3f(0, 0, 0));
-    auto v1 = mesh.add_vertex(vec3f(1, 0, 0));
-    auto v2 = mesh.add_vertex(vec3f(1, 1, 0));
-    auto v3 = mesh.add_vertex(vec3f(0, 1, 0));
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    auto v1 = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    auto v2 = mesh.add_vertex(VectorS<3>(1, 1, 0));
+    auto v3 = mesh.add_vertex(VectorS<3>(0, 1, 0));
     f0 = mesh.add_quad(v0, v1, v2, v3);
     EXPECT_TRUE(mesh.is_quad_mesh());
     EXPECT_FALSE(mesh.is_triangle_mesh());
@@ -285,11 +285,11 @@ TEST_F(HalfedgeMeshTest, is_quad_mesh) {
 
 TEST_F(HalfedgeMeshTest, poly_mesh) {
     std::vector<vertex_handle> vertices(5);
-    vertices[0] = mesh.add_vertex(vec3f(0, 0, 0));
-    vertices[1] = mesh.add_vertex(vec3f(1, 0, 0));
-    vertices[2] = mesh.add_vertex(vec3f(1, 1, 0));
-    vertices[3] = mesh.add_vertex(vec3f(0.5, 1, 0));
-    vertices[4] = mesh.add_vertex(vec3f(0, 1, 0));
+    vertices[0] = mesh.add_vertex(VectorS<3>(0, 0, 0));
+    vertices[1] = mesh.add_vertex(VectorS<3>(1, 0, 0));
+    vertices[2] = mesh.add_vertex(VectorS<3>(1, 1, 0));
+    vertices[3] = mesh.add_vertex(VectorS<3>(0.5, 1, 0));
+    vertices[4] = mesh.add_vertex(VectorS<3>(0, 1, 0));
     f0 = mesh.add_face(vertices);
     EXPECT_FALSE(mesh.is_triangle_mesh());
     EXPECT_FALSE(mesh.is_quad_mesh());
@@ -320,7 +320,7 @@ TEST_F(HalfedgeMeshTest, collapse) {
 TEST_F(HalfedgeMeshTest, face_split) {
     add_quad();
     EXPECT_EQ(mesh.num_faces(), size_t(1));
-    vec3f p(0.5, 0.5, 0);
+    VectorS<3> p(0.5, 0.5, 0);
     v0 = mesh.split(f0, p);
     EXPECT_EQ(mesh.num_faces(), size_t(4));
 }
@@ -329,9 +329,9 @@ TEST_F(HalfedgeMeshTest, edge_split) {
     add_triangle();
     EXPECT_EQ(mesh.num_faces(), size_t(1));
     auto e = mesh.find_edge(v0, v1);
-    vec3f p0 = mesh.positions[v0];
-    vec3f p1 = mesh.positions[v1];
-    vec3f p = (p0 + p1) * 0.5f;
+    VectorS<3> p0 = mesh.positions[v0];
+    VectorS<3> p1 = mesh.positions[v1];
+    VectorS<3> p = (p0 + p1) * 0.5f;
     h0 = mesh.split(e, p);
     EXPECT_EQ(mesh.num_faces(), size_t(2));
 }

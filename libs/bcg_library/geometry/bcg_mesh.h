@@ -196,7 +196,7 @@ struct halfedge_mesh : public halfedge_graph {
 
     std::vector<face_handle> find_closest_k_face(const position_t &point, size_t k) const;
 
-    std::vector<face_handle> find_closest_faces(const position_t &point, float radius) const;
+    std::vector<face_handle> find_closest_faces(const position_t &point, bcg_scalar_t radius) const;
 
     face_handle find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const;
 

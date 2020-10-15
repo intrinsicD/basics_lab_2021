@@ -1,9 +1,9 @@
 solid stl
-  facet normal 0 0 -1
+  facet normal 0.0000000000 0.0000000000 -1.0000000000
     outer loop
-      vertex 0 0 0
-      vertex 0 1 0
-      vertex 1 0 0
+      vertex 0.0000000000 0.0000000000 0.0000000000
+      vertex 0.0000000000 1.0000000000 0.0000000000
+      vertex 1.0000000000 0.0000000000 0.0000000000
     endloop
   endfacet
 endsolid

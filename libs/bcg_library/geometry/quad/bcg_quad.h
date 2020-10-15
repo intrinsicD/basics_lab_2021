@@ -9,44 +9,50 @@
 
 namespace bcg {
 
-template<int N>
+template<bcg_index_t N>
 struct quad {
-    using vecf = vec<N, float>;
-    std::array<vecf, 4> points;
+    std::array<VectorS<N>, 4> points;
 
-    quad(const vecf &p0, const vecf &p1, const vecf &p2, const vecf &p3) : points{p0, p1, p2, p3} {
+    quad() : points{zeros<N>, zeros<N>, zeros<N>, zeros<N>}{
+        points[1][0] = 1;
+        points[2][0] = 1;
+        points[2][1] = 1;
+        points[3][1] = 1;
+    }
+
+    quad(const VectorS<N> &p0, const VectorS<N> &p1, const VectorS<N> &p2, const VectorS<N> &p3) : points{p0, p1, p2, p3} {
 
     }
 
-    explicit quad(const std::array<vecf, 4> &points) : points(points) {
+    explicit quad(const std::array<VectorS<N>, 4> &points) : points(points) {
 
     }
 
-    explicit operator std::array<vecf, 4>() const {
+    explicit operator std::array<VectorS<N>, 4>() const {
         return points;
     }
 
-    inline vec3 angles() const {
+    inline VectorS<3> angles() const {
         auto a0 = triangle0().angles();
         auto a1 = triangle1().angles();
         return {a0[0], a0[1] + a1[0], a1[1], a1[2] + a0[2]};
     };
 
-    inline float area() const {
+    inline bcg_scalar_t area() const {
         return triangle0().area() + triangle1().area();
     }
 
-    inline vecf edge0() const { return points[1] - points[0]; }
+    inline VectorS<N> edge0() const { return points[1] - points[0]; }
 
-    inline vecf edge1() const { return points[3] - points[1]; }
+    inline VectorS<N> edge1() const { return points[3] - points[1]; }
 
-    inline vecf edge2() const { return points[2] - points[3]; }
+    inline VectorS<N> edge2() const { return points[2] - points[3]; }
 
-    inline vecf edge3() const { return points[0] - points[2]; }
+    inline VectorS<N> edge3() const { return points[0] - points[2]; }
 
-    inline vecf diagonal() const { return points[2] - points[1]; }
+    inline VectorS<N> diagonal() const { return points[2] - points[1]; }
 
-    inline vecf offdiagonal() const { return points[3] - points[0]; }
+    inline VectorS<N> offdiagonal() const { return points[3] - points[0]; }
 
     inline triangle <N> triangle0() const {
         return triangle<N>(points[0], points[1], points[2]);
@@ -56,29 +62,29 @@ struct quad {
         return triangle<N>(points[1], points[3], points[2]);
     }
 
-    inline vec4f edge_lengths() const {
+    inline VectorS<4> edge_lengths() const {
         return {length(edge0()), length(edge1()), length(edge2()), length(edge3())};
     }
 
-    inline float perimeter() const {
+    inline bcg_scalar_t perimeter() const {
         return length(edge0()) + length(edge1()) + length(edge2()) + length(edge3());
     }
 
-    inline bool contains(const vecf &point) const {
+    inline bool contains(const VectorS<N> &point) const {
         return triangle0().contains(point) || triangle1().contains(point);
     }
 
     std::string to_string() const {
-        std::string output = "p0: " + glm::to_string(points[0]) + "\n" +
-                             "p1: " + glm::to_string(points[1]) + "\n" +
-                             "p2: " + glm::to_string(points[2]) + "\n" +
-                             "p3: " + glm::to_string(points[3]) + "\n" +
+        std::string output = "p0: " + points[0].transport() + "\n" +
+                             "p1: " + points[1].transport() + "\n" +
+                             "p2: " + points[2].transport() + "\n" +
+                             "p3: " + points[3].transport() + "\n" +
                              "diagonal split from p1 to p2 - z order!\n";
         return output;
     }
 };
 
-template<int N>
+template<bcg_index_t N>
 std::ostream &operator<<(std::ostream &stream, const quad<N> &quad) {
     stream << quad.to_string();
     return stream;
@@ -88,8 +94,8 @@ using quad2 = quad<2>;
 
 using quad3 = quad<3>;
 
-inline vec3f normal(const quad3 &t) {
-    return normalize(cross(t.diagonal(), t.offdiagonal()));
+inline VectorS<3> normal(const quad3 &t) {
+    return t.diagonal().cross(t.offdiagonal()).normalized();
 }
 
 }

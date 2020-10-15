@@ -11,54 +11,51 @@
 
 #include <vector>
 #include <iostream>
-#include "bcg_library/math/bcg_math_common.h"
-#include "bcg_library/math/bcg_linalg.h"
-#include "bcg_library/utils/bcg_bits.h"
+#include "math/bcg_linalg.h"
+#include "utils/bcg_bits.h"
 
 namespace bcg {
 
-template<int N>
+template<bcg_index_t N>
 struct aligned_box {
-    using vecf = vec<N, float>;
+    VectorS<N> min, max;
 
-    vecf min, max;
+    aligned_box(const VectorS<N> &min, const VectorS<N> &max) : min(min), max(max) {}
 
-    aligned_box(const vecf &min, const vecf &max) : min(min), max(max) {}
-
-    explicit aligned_box(const std::vector<vecf> &points) : aligned_box() {
+    explicit aligned_box(const std::vector<VectorS<N>> &points) : aligned_box() {
         for (const auto &p : points) {
             grow(p);
         }
     }
 
     inline static aligned_box unit() {
-        return aligned_box(-one < N > , one < N > );
+        return aligned_box(-ones<N>, ones<N>);
     }
 
-    inline void set_centered_form(const vecf &center, const vecf &half_extent) {
+    inline void set_centered_form(const VectorS<N> &center, const VectorS<N> &half_extent) {
         min = center - half_extent;
         max = center + half_extent;
     }
 
-    inline void get_centered_form(vecf &center, vecf &half_extent) const {
+    inline void get_centered_form(VectorS<N> &center, VectorS<N> &half_extent) const {
         center = this->center();
         half_extent = halfextent();
     }
 
-    inline vecf center() const {
+    inline VectorS<N> center() const {
         return (max + min) / 2;
     }
 
-    inline vecf halfextent() const {
+    inline VectorS<N> halfextent() const {
         return diagonal() / 2;
     }
 
-    inline void grow(const vecf &p) {
+    inline void grow(const VectorS<N> &p) {
         min = min.cwiseMin(p);
         max = max.cwiseMax(p);
     }
 
-    inline vecf diagonal() const {
+    inline VectorS<N> diagonal() const {
         return max - min;
     }
 
@@ -67,33 +64,74 @@ struct aligned_box {
     }
 
     inline void make_cubic() {
-        vecf center, halfextent;
+        VectorS<N> center, halfextent;
         get_centered_form(center, halfextent);
-        set_centered_form(center, vecf::Constant(halfextent.maxCoeff()));
+        set_centered_form(center, VectorS<N>::Constant(halfextent.maxCoeff()));
+    }
+
+    inline bool contains(const VectorS<N> &point) const {
+        for (size_t i = 0; i < N; ++i) {
+            if (point[i] < min[i] || point[i] > max[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator==(const aligned_box &box) const {
+        return min == box.min && max == box.max;
+    }
+
+    bool operator!=(const aligned_box &box) const {
+        return !operator==(box);
+    }
+
+    bool operator<(const aligned_box &box) const {
+        if (min < box.min) {
+            return true;
+        }
+
+        if (min > box.min) {
+            return false;
+        }
+
+        return max < box.max;
+    }
+
+    bool operator<=(const aligned_box &box) const {
+        return !box.operator<(*this);
+    }
+
+    bool operator>(const aligned_box &box) const {
+        return box.operator<(*this);
+    }
+
+    bool operator>=(const aligned_box &box) const {
+        return !operator<(box);
     }
 };
 
-template<int N>
+template<bcg_index_t N>
 inline std::ostream &operator<<(std::ostream &stream, const aligned_box<N> &alignedBox) {
     stream << "min: " << alignedBox.min << "\n";
     stream << "max: " << alignedBox.max << "\n";
-    typename aligned_box<N>::vecf center, halfextent;
+    VectorS<N> center, halfextent;
     alignedBox.get_centered_form(center, halfextent);
     stream << "center: " << center << "\n";
     stream << "halfextent: " << halfextent << "\n";
     return stream;
 }
 
-template<int N>
-std::vector<typename aligned_box<N>::vecf> get_vetices(const aligned_box<N> &alignedBox) {
-    typename aligned_box<N>::vecf center, halfextent;
+template<bcg_index_t N>
+std::vector<VectorS<N>> get_vetices(const aligned_box<N> &alignedBox) {
+    VectorS<N> center, halfextent;
     alignedBox.get_centered_form(center, halfextent);
 
-    std::vector<typename aligned_box<N>::vecf> vertices;
+    std::vector<VectorS<N>> vertices;
     for (unsigned int i = 0; i < alignedBox.NumVertices(); ++i) {
         vertices.push_back(center);
         for (unsigned int d = 0, mask = 1; d < N; ++d, mask <<= (unsigned int) 1) {
-            float sign = (i & mask ? (float) 1 : (float) - 1);
+            bcg_scalar_t sign = (i & mask ? (bcg_scalar_t) 1 : (bcg_scalar_t) -1);
             vertices[i][d] += sign * halfextent[d];
         }
     }
@@ -101,9 +139,9 @@ std::vector<typename aligned_box<N>::vecf> get_vetices(const aligned_box<N> &ali
     return vertices;
 }
 
-template<int N>
-std::vector<vec2i> fet_edges(const aligned_box<N> &alignedBox, size_t offset = 0) {
-    std::vector<vec2i> edges;
+template<bcg_index_t N>
+std::vector<VectorI<2>> fet_edges(const aligned_box<N> &alignedBox, size_t offset = 0) {
+    std::vector<VectorI<2>> edges;
     size_t n = alignedBox.NumVertices();
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i; j < n; ++j) {
@@ -116,31 +154,31 @@ std::vector<vec2i> fet_edges(const aligned_box<N> &alignedBox, size_t offset = 0
     return edges;
 }
 
-template<int N>
-std::vector<vec3i> get_triangles(const aligned_box<N> &, size_t offset = 0) {
-    std::vector<vec3i> tris;
-    vec3i o(offset, offset, offset);
+template<bcg_index_t N>
+std::vector<VectorI<3>> get_triangles(const aligned_box<N> &, size_t offset = 0) {
+    std::vector<VectorI<3>> tris;
+    VectorI<3> o(offset, offset, offset);
 
-    tris.push_back(vec3i({1, 0, 3}) + o);
-    tris.push_back(vec3i({3, 0, 2}) + o);
-    tris.push_back(vec3i({3, 2, 7}) + o);
-    tris.push_back(vec3i({7, 2, 6}) + o);
-    tris.push_back(vec3i({0, 4, 2}) + o);
-    tris.push_back(vec3i({2, 4, 6}) + o);
-    tris.push_back(vec3i({5, 1, 7}) + o);
-    tris.push_back(vec3i({7, 1, 3}) + o);
-    tris.push_back(vec3i({5, 4, 1}) + o);
-    tris.push_back(vec3i({1, 4, 0}) + o);
-    tris.push_back(vec3i({7, 6, 5}) + o);
-    tris.push_back(vec3i({5, 6, 4}) + o);
+    tris.push_back(VectorI<3>({1, 0, 3}) + o);
+    tris.push_back(VectorI<3>({3, 0, 2}) + o);
+    tris.push_back(VectorI<3>({3, 2, 7}) + o);
+    tris.push_back(VectorI<3>({7, 2, 6}) + o);
+    tris.push_back(VectorI<3>({0, 4, 2}) + o);
+    tris.push_back(VectorI<3>({2, 4, 6}) + o);
+    tris.push_back(VectorI<3>({5, 1, 7}) + o);
+    tris.push_back(VectorI<3>({7, 1, 3}) + o);
+    tris.push_back(VectorI<3>({5, 4, 1}) + o);
+    tris.push_back(VectorI<3>({1, 4, 0}) + o);
+    tris.push_back(VectorI<3>({7, 6, 5}) + o);
+    tris.push_back(VectorI<3>({5, 6, 4}) + o);
 
     return tris;
 }
 
-template<int N>
-std::vector<vec4i> get_faces(const aligned_box<N> &, size_t offset = 0) {
-    std::vector<vec4i> faces;
-    vec3i o(offset, offset, offset);
+template<bcg_index_t N>
+std::vector<VectorI<4>> get_faces(const aligned_box<N> &, size_t offset = 0) {
+    std::vector<VectorI<4>> faces;
+    VectorI<3> o(offset, offset, offset);
 
     faces.emplace_back(0, 1, 3, 2);
     faces.emplace_back(1, 5, 7, 3);

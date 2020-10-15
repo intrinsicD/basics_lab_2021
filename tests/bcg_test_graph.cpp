@@ -19,13 +19,13 @@ TEST(TestSuiteGraph, first){
     EXPECT_FALSE(graph.edges.is_dirty());
     EXPECT_FALSE(graph.halfedges.is_dirty());
 
-    auto v0 = graph.add_vertex(vec3f(0, 0, 0));
-    auto v1 = graph.add_vertex(vec3f(1, 1, 0));
-    auto v2 = graph.add_vertex(vec3f(-2, 2, -1));
-    auto v3 = graph.add_vertex(vec3f(0.5, 2, 0));
-    auto v4 = graph.add_vertex(vec3f(2, 1.5, 0));
-    auto v5 = graph.add_vertex(vec3f(1, 2.5, 1));
-    auto v6 = graph.add_vertex(vec3f(1.5, -0.5, 1));
+    auto v0 = graph.add_vertex(VectorS<3>(0, 0, 0));
+    auto v1 = graph.add_vertex(VectorS<3>(1, 1, 0));
+    auto v2 = graph.add_vertex(VectorS<3>(-2, 2, -1));
+    auto v3 = graph.add_vertex(VectorS<3>(0.5, 2, 0));
+    auto v4 = graph.add_vertex(VectorS<3>(2, 1.5, 0));
+    auto v5 = graph.add_vertex(VectorS<3>(1, 2.5, 1));
+    auto v6 = graph.add_vertex(VectorS<3>(1.5, -0.5, 1));
 
     auto h0 = graph.add_edge(v0, v1);
     auto h1 = graph.get_opposite(h0);
@@ -208,6 +208,6 @@ TEST(TestSuiteGraph, first){
     EXPECT_TRUE(graph.edges.is_dirty());
     EXPECT_FALSE(graph.has_garbage());
 
-    auto v_isolated = graph.add_vertex(vec3f(10,11,1));
+    auto v_isolated = graph.add_vertex(VectorS<3>(10,11,1));
     EXPECT_TRUE(graph.is_isolated(v_isolated));
 }

@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include "bcg_graph.h"
-#include "../utils/bcg_stl_utils.h"
+#include "utils/bcg_stl_utils.h"
 
 namespace bcg {
 
@@ -65,11 +65,11 @@ halfedge_graph &halfedge_graph::operator=(const halfedge_graph &other) {
     return *this;
 }
 
-size_t halfedge_graph::num_edges() const{
+size_t halfedge_graph::num_edges() const {
     return edges.size() - size_edges_deleted;
 }
 
-size_t halfedge_graph::num_halfedges() const{
+size_t halfedge_graph::num_halfedges() const {
     return halfedges.size() - size_halfedges_deleted;
 }
 
@@ -180,22 +180,22 @@ bool halfedge_graph::is_isolated(vertex_handle v) const {
     return !halfedges.is_valid(get_halfedge(v));
 }
 
-bool halfedge_graph::is_boundary(vertex_handle v) const{
+bool halfedge_graph::is_boundary(vertex_handle v) const {
     size_t count(0);
     for (const auto vj : get_vertices(v)) {
         if (vj) {
             ++count;
         }
-        if(count > 1) return false;
+        if (count > 1) return false;
     }
     return true;
 }
 
-bool halfedge_graph::is_boundary(halfedge_handle h) const{
+bool halfedge_graph::is_boundary(halfedge_handle h) const {
     return get_next(h) == get_opposite(h);
 }
 
-bool halfedge_graph::is_boundary(edge_handle e) const{
+bool halfedge_graph::is_boundary(edge_handle e) const {
     return is_boundary(get_halfedge(e, 0)) || is_boundary(get_halfedge(e, 1));
 }
 
@@ -276,8 +276,8 @@ size_t halfedge_graph::get_valence(vertex_handle v) const {
     return count;
 }
 
-float halfedge_graph::get_length(edge_handle e) const {
-    return length(get_vector(e));
+bcg_scalar_t halfedge_graph::get_length(edge_handle e) const {
+    return get_vector(e).norm();
 }
 
 point_cloud::position_t halfedge_graph::get_center(halfedge_handle h) const {
@@ -494,8 +494,8 @@ halfedge_graph::halfedge_around_vertex_circulator halfedge_graph::get_halfedges(
     return halfedge_around_vertex_circulator(this, v);
 }
 
-std::vector<vec2i> halfedge_graph::get_connectivity() const {
-    std::vector<vec2i> connectivity;
+std::vector<VectorI<2>> halfedge_graph::get_connectivity() const {
+    std::vector<VectorI<2>> connectivity;
     for (const auto e : edges) {
         auto v0 = get_to_vertex(get_halfedge(e, 1));
         auto v1 = get_to_vertex(get_halfedge(e, 0));
@@ -521,8 +521,8 @@ halfedge_handle halfedge_graph::new_edge(vertex_handle v0, vertex_handle v1) {
     return h;
 }
 
-void halfedge_graph::mark_edge_deleted(edge_handle e){
-    if(edges_deleted[e]) return;
+void halfedge_graph::mark_edge_deleted(edge_handle e) {
+    if (edges_deleted[e]) return;
 
     edges_deleted[e] = true;
     halfedges_deleted[get_halfedge(e, 0)] = true;
@@ -535,10 +535,10 @@ void halfedge_graph::mark_edge_deleted(edge_handle e){
 
 edge_handle halfedge_graph::find_closest_edge(const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
-    float min_sqr_dist_yet = FLT_MAX;
+    bcg_scalar_t min_sqr_dist_yet = scalar_max;
     for (const auto e : edges) {
-        float sqr_dist = dot(positions[get_vertex(e, 0)] - point,
-                             positions[get_vertex(e, 1)] - point);
+        bcg_scalar_t sqr_dist = (positions[get_vertex(e, 0)] - point).dot(
+                positions[get_vertex(e, 1)] - point);
         if (sqr_dist < min_sqr_dist_yet) {
             min_sqr_dist_yet = sqr_dist;
             closest_yet = e;
@@ -548,12 +548,12 @@ edge_handle halfedge_graph::find_closest_edge(const halfedge_graph::position_t &
 }
 
 std::vector<edge_handle> halfedge_graph::find_closest_k_edges(const halfedge_graph::position_t &point, size_t k) {
-    using DistIndex = std::pair<float, edge_handle>;
+    using DistIndex = std::pair<bcg_scalar_t, edge_handle>;
     std::vector<DistIndex> closest_k;
 
     for (const auto e : edges) {
-        float sqr_dist = dot(positions[get_vertex(e, 0)] - point,
-                             positions[get_vertex(e, 1)] - point);
+        bcg_scalar_t sqr_dist = (positions[get_vertex(e, 0)] - point).dot(
+                positions[get_vertex(e, 1)] - point);
         if (closest_k.size() < k + 1) {
             closest_k.emplace_back(sqr_dist, e);
             if (closest_k.size() == k) {
@@ -573,16 +573,16 @@ std::vector<edge_handle> halfedge_graph::find_closest_k_edges(const halfedge_gra
         }
     }
     std::vector<edge_handle> indices;
-    unzip<float, edge_handle>(closest_k, nullptr, &indices);
+    unzip<bcg_scalar_t, edge_handle>(closest_k, nullptr, &indices);
     return indices;
 }
 
 std::vector<edge_handle>
-halfedge_graph::find_closest_edges_radius( const halfedge_graph::position_t &point, float radius) {
-    using DistIndex = std::pair<float, edge_handle>;
+halfedge_graph::find_closest_edges_radius(const halfedge_graph::position_t &point, bcg_scalar_t radius) {
+    using DistIndex = std::pair<bcg_scalar_t, edge_handle>;
     std::vector<DistIndex> closest;
     for (const auto e : edges) {
-        float sqr_dist = dot(positions[get_vertex(e, 0)] - point,
+        bcg_scalar_t sqr_dist = (positions[get_vertex(e, 0)] - point).dot(
                              positions[get_vertex(e, 1)] - point);
         if (sqr_dist <= radius) {
             closest.emplace_back(sqr_dist, e);
@@ -592,17 +592,17 @@ halfedge_graph::find_closest_edges_radius( const halfedge_graph::position_t &poi
         return lhs.first < rhs.first;
     });
     std::vector<edge_handle> indices;
-    unzip<float, edge_handle>(closest, nullptr, &indices);
+    unzip<bcg_scalar_t, edge_handle>(closest, nullptr, &indices);
     return indices;
 }
 
 edge_handle halfedge_graph::find_closest_edge_in_neighborhood(vertex_handle v,
-                                              const halfedge_graph::position_t &point) {
+                                                              const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
-    float min_dist_yet = FLT_MAX;
+    bcg_scalar_t min_dist_yet = scalar_max;
     for (const auto h : get_halfedges(v)) {
-        float sqr_dist = dot(positions[get_from_vertex(h)] - point,
-                             positions[get_to_vertex(h)] - point);
+        bcg_scalar_t sqr_dist = (positions[get_from_vertex(h)] - point).dot(
+                positions[get_to_vertex(h)] - point);
         if (sqr_dist < min_dist_yet) {
             min_dist_yet = sqr_dist;
             closest_yet = get_edge(h);

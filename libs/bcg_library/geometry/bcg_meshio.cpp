@@ -5,9 +5,9 @@
 #include <map>
 #include <fstream>
 #include <utility>
-#include "../exts/rply/rply.h"
+#include "exts/rply/rply.h"
 #include "bcg_meshio.h"
-#include "../utils/bcg_path.h"
+#include "utils/bcg_path.h"
 
 namespace bcg {
 
@@ -79,17 +79,17 @@ bool read_off_ascii(halfedge_mesh &mesh, FILE *in, const bool has_normals,
     vertex_handle v;
 
     // properties
-    property<vec3f, 3> normals;
-    property<vec2f, 2> texcoords;
-    property<vec3f, 3> colors;
+    property<VectorS<3>, 3> normals;
+    property<VectorS<2>, 2> texcoords;
+    property<VectorS<3>, 3> colors;
     if (has_normals) {
-        normals = mesh.vertices.get_or_add<vec3f, 3>("normal");
+        normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
     }
     if (has_texcoords) {
-        texcoords = mesh.vertices.get_or_add<vec2f, 2>("tex");
+        texcoords = mesh.vertices.get_or_add<VectorS<2>, 2>("tex");
     }
     if (has_colors) {
-        colors = mesh.vertices.get_or_add<vec3f, 3>("color");
+        colors = mesh.vertices.get_or_add<VectorS<3>, 3>("color");
     }
 
     // #Vertice, #Faces, #Edges
@@ -112,13 +112,13 @@ bool read_off_ascii(halfedge_mesh &mesh, FILE *in, const bool has_normals,
         // position
         items = sscanf(lp, "%f %f %f%n", &x, &y, &z, &nc);
         assert(items == 3);
-        v = mesh.add_vertex(vec3f(x, y, z));
+        v = mesh.add_vertex(VectorS<3>(x, y, z));
         lp += nc;
 
         // normal
         if (has_normals) {
             if (sscanf(lp, "%f %f %f%n", &x, &y, &z, &nc) == 3) {
-                normals[v] = vec3f(x, y, z);
+                normals[v] = VectorS<3>(x, y, z);
             }
             lp += nc;
         }
@@ -126,12 +126,12 @@ bool read_off_ascii(halfedge_mesh &mesh, FILE *in, const bool has_normals,
         // color
         if (has_colors) {
             if (sscanf(lp, "%f %f %f%n", &r, &g, &b, &nc) == 3) {
-                if (r > 1.0f || g > 1.0f || b > 1.0f) {
-                    r /= 255.0f;
-                    g /= 255.0f;
-                    b /= 255.0f;
+                if (r > 1.0 || g > 1.0 || b > 1.0) {
+                    r /= 255.0;
+                    g /= 255.0;
+                    b /= 255.0;
                 }
-                colors[v] = vec3f(r, g, b);
+                colors[v] = VectorS<3>(r, g, b);
             }
             lp += nc;
         }
@@ -202,8 +202,8 @@ bool read_off_binary(halfedge_mesh &mesh, FILE *in, const bool has_normals,
                      const bool has_texcoords, const bool has_colors) {
     int i, j, idx(0);
     int nv(0), nf(0), ne(0);
-    vec3f p, n, c;
-    vec2f t;
+    VectorS<3> p, n, c;
+    VectorS<2> t;
     vertex_handle v;
 
     // binary cannot (yet) read colors
@@ -212,13 +212,13 @@ bool read_off_binary(halfedge_mesh &mesh, FILE *in, const bool has_normals,
     }
 
     // properties
-    property<vec3f, 3> normals;
-    property<vec2f, 2> texcoords;
+    property<VectorS<3>, 3> normals;
+    property<VectorS<2>, 2> texcoords;
     if (has_normals) {
-        normals = mesh.vertices.get_or_add<vec3f, 3>("normal");
+        normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
     }
     if (has_texcoords) {
-        texcoords = mesh.vertices.get_or_add<vec2f, 2>("tex");
+        texcoords = mesh.vertices.get_or_add<VectorS<2>, 2>("tex");
     }
 
     // #Vertice, #Faces, #Edges
@@ -339,9 +339,9 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
     char s[200];
     float x, y, z;
     std::vector<vertex_handle> vertices;
-    std::vector<vec2f> all_tex_coords; //individual texture coordinates
+    std::vector<VectorS<2>> all_tex_coords; //individual texture coordinates
     std::vector<int> halfedge_tex_idx; //texture coordinates sorted for halfedges
-    property<vec2f, 2> tex_coords = mesh.halfedges.get_or_add<vec2f, 2>("tex");
+    property<VectorS<2>, 2> tex_coords = mesh.halfedges.get_or_add<VectorS<2>, 2>("tex");
     bool with_tex_coord = false;
 
     // open file (in ASCII mode)
@@ -363,14 +363,14 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
 
             // vertex
         else if (strncmp(s, "v ", 2) == 0) {
-            if (sscanf(s, "v %f %f %f", &x, &y, &z)) {
+            if (sscanf(s, "v %f %f %f", &x, &y, &z) == 3) {
                 v = mesh.add_vertex({x, y, z});
             }
         }
 
             // normal
         else if (strncmp(s, "vn ", 3) == 0) {
-            if (sscanf(s, "vn %f %f %f", &x, &y, &z)) {
+            if (sscanf(s, "v %f %f %f", &x, &y, &z) == 3) {
                 // problematic as it can be either a vertex property when interpolated
                 // or a halfedge property for hard edges
             }
@@ -378,7 +378,7 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
 
             // texture coordinate
         else if (strncmp(s, "vt ", 3) == 0) {
-            if (sscanf(s, "vt %f %f", &x, &y)) {
+            if (sscanf(s, "v %f %f", &x, &y) == 2) {
                 all_tex_coords.emplace_back(x, y);
             }
         }
@@ -479,9 +479,9 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
 
 class CmpVec {
 public:
-    explicit CmpVec(float eps = FLT_MIN) : eps_(eps) {}
+    explicit CmpVec(bcg_scalar_t eps = scalar_eps) : eps_(eps) {}
 
-    bool operator()(const vec3f &v0, const vec3f &v1) const {
+    bool operator()(const VectorS<3> &v0, const VectorS<3> &v1) const {
         if (std::abs(v0[0] - v1[0]) <= eps_) {
             if (std::abs(v0[1] - v1[1]) <= eps_) {
                 return (v0[2] < v1[2] - eps_);
@@ -494,20 +494,20 @@ public:
     }
 
 private:
-    float eps_;
+    bcg_scalar_t eps_;
 };
 
 bool meshio::read_stl(halfedge_mesh &mesh) {
     char line[100], *c;
     unsigned int i, nT(0);
-    vec3f p;
+    Vector<float, 3> p;
     vertex_handle v;
     std::vector<vertex_handle> vertices(3);
 
 
-    CmpVec comp(FLT_MIN);
-    std::map<vec3f, vertex_handle, CmpVec> vMap(comp);
-    std::map<vec3f, vertex_handle, CmpVec>::iterator vMapIt;
+    CmpVec comp(scalar_min);
+    std::map<VectorS<3>, vertex_handle, CmpVec> vMap(comp);
+    std::map<VectorS<3>, vertex_handle, CmpVec>::iterator vMapIt;
 
     // open file (in ASCII mode)
     FILE *in = fopen(filename.c_str(), "r");
@@ -545,11 +545,11 @@ bool meshio::read_stl(halfedge_mesh &mesh) {
                 tfread(in, p);
 
                 // has vector been referenced before?
-                if ((vMapIt = vMap.find(p)) == vMap.end()) {
+                if ((vMapIt = vMap.find(p.cast<bcg_scalar_t>())) == vMap.end()) {
                     // No : add vertex and remember idx/vector mapping
-                    v = mesh.add_vertex(p);
+                    v = mesh.add_vertex(p.cast<bcg_scalar_t>());
                     vertices[i] = v;
-                    vMap[p] = v;
+                    vMap[p.cast<bcg_scalar_t>()] = v;
                 } else {
                     // Yes : get index from map
                     vertices[i] = vMapIt->second;
@@ -592,11 +592,11 @@ bool meshio::read_stl(halfedge_mesh &mesh) {
                     sscanf(c + 6, "%f %f %f", &p[0], &p[1], &p[2]);
 
                     // has vector been referenced before?
-                    if ((vMapIt = vMap.find(p)) == vMap.end()) {
+                    if ((vMapIt = vMap.find(p.cast<bcg_scalar_t>())) == vMap.end()) {
                         // No : add vertex and remember idx/vector mapping
-                        v = mesh.add_vertex(p);
+                        v = mesh.add_vertex(p.cast<bcg_scalar_t>());
                         vertices[i] = v;
-                        vMap[p] = v;
+                        vMap[p.cast<bcg_scalar_t>()] = v;
                     } else {
                         // Yes : get index from map
                         vertices[i] = vMapIt->second;
@@ -625,9 +625,9 @@ static int vertexCallback(p_ply_argument argument) {
     ply_get_argument_user_data(argument, &pdata, &idx);
 
     auto *mesh = (halfedge_mesh *) pdata;
-    auto point = mesh->object_properties.get<vec3f, 3>("position");
+    auto point = mesh->object_properties.get<VectorS<3>, 3>("position");
 
-    point[0][idx] = (float) ply_get_argument_value(argument);
+    point[0][idx] = (bcg_scalar_t) ply_get_argument_value(argument);
 
     vertex_handle v;
     if (idx == 2) {
@@ -668,7 +668,7 @@ static int faceCallback(p_ply_argument argument) {
 
 bool meshio::read_ply(halfedge_mesh &mesh) {
     // add object properties to hold temporary data
-    auto point = mesh.object_properties.add<vec3f, 3>("position");
+    auto point = mesh.object_properties.add<VectorS<3>, 3>("position");
     point.resize(1);
     auto vertices = mesh.object_properties.add<std::vector<vertex_handle>, 1>("vertices");
 
@@ -732,13 +732,13 @@ bool meshio::read_pmp(halfedge_mesh &mesh) {
     auto vconn = mesh.vertices.get_or_add<halfedge_mesh::vertex_connectivity, 1>("connectivity");
     auto hconn = mesh.halfedges.get_or_add<halfedge_mesh::halfedge_connectivity, 1>("connectivity");
     auto fconn = mesh.faces.get_or_add<halfedge_mesh::face_connectivity, 1>("connectivity");
-    auto point = mesh.vertices.get_or_add<vec3f, 3>("position");
+    auto point = mesh.vertices.get_or_add<VectorS<3>, 3>("position");
 
     // read properties from file
     size_t nvc = fread((char *) vconn.data(), sizeof(halfedge_mesh::vertex_connectivity), nv, in);
     size_t nhc = fread((char *) hconn.data(), sizeof(halfedge_mesh::halfedge_connectivity), nh, in);
     size_t nfc = fread((char *) fconn.data(), sizeof(halfedge_mesh::face_connectivity), nf, in);
-    size_t np = fread((char *) point.data(), sizeof(vec3f), nv, in);
+    size_t np = fread((char *) point.data(), sizeof(VectorS<3>), nv, in);
     if (nvc != nv) {
         std::cerr << "nvc != nv";
         fclose(in);
@@ -762,8 +762,8 @@ bool meshio::read_pmp(halfedge_mesh &mesh) {
 
     // read texture coordiantes
     if (has_htex) {
-        auto htex = mesh.halfedges.get_or_add<vec2f, 2>("tex");
-        size_t nhtc = fread((char *) htex.data(), sizeof(vec2f), nh, in);
+        auto htex = mesh.halfedges.get_or_add<VectorS<2>, 2>("tex");
+        size_t nhtc = fread((char *) htex.data(), sizeof(VectorS<2>), nh, in);
         if (nhtc != nh) {
             std::cerr << "nhtc != nh";
             fclose(in);
@@ -784,17 +784,19 @@ bool meshio::read_xyz(halfedge_mesh &mesh) {
 
     // add normal property
     // \todo this adds property even if no normals present. change it.
-    auto vnormal = mesh.vertices.get_or_add<vec3f, 3>("normal");
+    auto vnormal = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
 
     char line[200];
-    float x, y, z;
-    float nx, ny, nz;
+    bcg_scalar_t x, y, z;
+    bcg_scalar_t nx, ny, nz;
     int n;
     vertex_handle v;
 
     // read data
     while (in && !feof(in) && fgets(line, 200, in)) {
-        n = sscanf(line, "%f %f %f %f %f %f", &x, &y, &z, &nx, &ny, &nz);
+        n = sscanf(line, "%lf %lf %lf %lf %lf %lf", reinterpret_cast<double *>(&x), reinterpret_cast<double *>(&y),
+                   reinterpret_cast<double *>(&z), reinterpret_cast<double *>(&nx), reinterpret_cast<double *>(&ny),
+                   reinterpret_cast<double *>(&nz));
         if (n >= 3) {
             v = mesh.add_vertex({x, y, z});
             if (n >= 6) {
@@ -815,20 +817,22 @@ bool meshio::read_agi(halfedge_mesh &mesh) {
     }
 
     // add normal property
-    auto normal = mesh.vertices.get_or_add<vec3f, 3>("normal");
-    auto color = mesh.vertices.get_or_add<vec3f, 3>("color");
+    auto normal = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
+    auto color = mesh.vertices.get_or_add<VectorS<3>, 3>("color");
 
     char line[200];
-    float x, y, z;
-    float nx, ny, nz;
-    float r, g, b;
+    bcg_scalar_t x, y, z;
+    bcg_scalar_t nx, ny, nz;
+    bcg_scalar_t r, g, b;
     int n;
     vertex_handle v;
 
     // read data
     while (in && !feof(in) && fgets(line, 200, in)) {
-        n = sscanf(line, "%f %f %f %f %f %f %f %f %f", &x, &y, &z, &r, &g, &b,
-                   &nx, &ny, &nz);
+        n = sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", reinterpret_cast<double *>(&x),
+                   reinterpret_cast<double *>(&y), reinterpret_cast<double *>(&z), reinterpret_cast<double *>(&r),
+                   reinterpret_cast<double *>(&g), reinterpret_cast<double *>(&b),
+                   reinterpret_cast<double *>(&nx), reinterpret_cast<double *>(&ny), reinterpret_cast<double *>(&nz));
         if (n >= 3) {
             v = mesh.add_vertex({x, y, z});
             if (n >= 6) {
@@ -858,9 +862,9 @@ bool meshio::write_off(const halfedge_mesh &mesh) {
     bool has_texcoords = false;
     bool has_colors = false;
 
-    auto normals = mesh.vertices.get<vec3f, 3>("normal");
-    auto texcoords = mesh.vertices.get<vec3f, 2>("tex");
-    auto colors = mesh.vertices.get<vec3f, 3>("color");
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("normal");
+    auto texcoords = mesh.vertices.get<VectorS<3>, 2>("tex");
+    auto colors = mesh.vertices.get<VectorS<3>, 3>("color");
 
     if (normals && flags.use_vertex_normals) {
         has_normals = true;
@@ -885,7 +889,7 @@ bool meshio::write_off(const halfedge_mesh &mesh) {
     fprintf(out, "OFF\n%zu %zu 0\n", mesh.num_vertices(), mesh.num_faces());
 
     // vertices, and optionally normals and texture coordinates
-    auto position = mesh.vertices.get<vec3f, 3>("position");
+    auto position = mesh.vertices.get<VectorS<3>, 3>("position");
     for (const auto v : mesh.vertices) {
         fprintf(out, "%.10f %.10f %.10f", position[v][0], position[v][1], position[v][2]);
 
@@ -926,24 +930,24 @@ bool meshio::write_off_binary(const halfedge_mesh &mesh) {
 
     fprintf(out, "OFF BINARY\n");
     fclose(out);
-    using IndexType = int;
-    IndexType nv = mesh.num_vertices();
-    IndexType nf = mesh.num_faces();
-    IndexType ne = 0;
+
+    bcg_index_t nv = mesh.num_vertices();
+    bcg_index_t nf = mesh.num_faces();
+    bcg_index_t ne = 0;
 
     out = fopen(filename.c_str(), "ab");
     tfwrite(out, nv);
     tfwrite(out, nf);
     tfwrite(out, ne);
-    auto positions = mesh.vertices.get<vec3f, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
     for (const auto v : mesh.vertices) {
         tfwrite(out, positions[v]);
     }
 
     for (const auto f : mesh.faces) {
-        tfwrite(out, (IndexType) mesh.get_valence(f));
+        tfwrite(out, (bcg_index_t) mesh.get_valence(f));
         for (const auto fv : mesh.get_vertices(f)) {
-            tfwrite(out, (IndexType) fv.idx);
+            tfwrite(out, (bcg_index_t) fv.idx);
         }
     }
     fclose(out);
@@ -960,13 +964,13 @@ bool meshio::write_obj(const halfedge_mesh &mesh) {
     fprintf(out, "# OBJ export from SurfaceMesh\n");
 
     //vertices
-    auto positions = mesh.vertices.get<vec3f, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
     for (const auto v : mesh.vertices) {
         fprintf(out, "v %.10f %.10f %.10f\n", positions[v][0], positions[v][1], positions[v][2]);
     }
 
     //normals
-    auto normals = mesh.vertices.get<vec3f, 3>("normal");
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("normal");
     if (normals) {
         for (const auto v : mesh.vertices) {
             fprintf(out, "vn %.10f %.10f %.10f\n", normals[v][0], normals[v][1], normals[v][2]);
@@ -988,7 +992,7 @@ bool meshio::write_obj(const halfedge_mesh &mesh) {
 
     //if so then add
     if (with_tex_coord) {
-        auto texCoord = mesh.halfedges.get<vec2f, 2>("tex");
+        auto texCoord = mesh.halfedges.get<VectorS<2>, 2>("tex");
         for (const auto h: mesh.halfedges) {
             fprintf(out, "vt %.10f %.10f \n", texCoord[h][0], texCoord[h][1]);
         }
@@ -1024,17 +1028,19 @@ bool meshio::write_stl(const halfedge_mesh &mesh) {
         return false;
     }
 
-    auto fnormals = mesh.faces.get<vec3f, 3>("normal");
+    auto fnormals = mesh.faces.get<VectorS<3>, 3>("normal");
     if (!fnormals) {
         std::cerr << "write_stl: no face normals present!\n";
         return false;
     }
 
     std::ofstream ofs(filename.c_str());
-    auto positions = mesh.vertices.get<vec3f, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
 
     ofs << "solid stl" << std::endl;
-    vec3f n, p;
+    ofs.precision(10);
+    ofs.setf(std::ios::fixed);
+    VectorS<3> n, p;
     for (const auto f : mesh.faces) {
         n = fnormals[f];
         ofs << "  facet normal ";
@@ -1067,7 +1073,7 @@ bool meshio::write_ply(const halfedge_mesh &mesh) {
     ply_write_header(ply);
 
     // write vertices
-    auto positions = mesh.vertices.get<vec3f, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
     for (const auto v : mesh.vertices) {
         ply_write(ply, positions[v][0]);
         ply_write(ply, positions[v][1]);
@@ -1097,8 +1103,8 @@ bool meshio::write_pmp(const halfedge_mesh &mesh) {
     auto vconn = mesh.vertices.get<halfedge_mesh::vertex_connectivity, 1>("connectivity");
     auto hconn = mesh.halfedges.get<halfedge_mesh::halfedge_connectivity, 1>("connectivity");
     auto fconn = mesh.faces.get<halfedge_mesh::face_connectivity, 1>("connectivity");
-    auto point = mesh.vertices.get<vec3f, 3>("position");
-    auto htex = mesh.halfedges.get<vec2f, 2>("tex");
+    auto point = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto htex = mesh.halfedges.get<VectorS<2>, 2>("tex");
 
     // how many elements?
     unsigned int nv = mesh.num_vertices();
@@ -1116,11 +1122,11 @@ bool meshio::write_pmp(const halfedge_mesh &mesh) {
     fwrite((char *) vconn.data(), sizeof(halfedge_mesh::vertex_connectivity), nv, out);
     fwrite((char *) hconn.data(), sizeof(halfedge_mesh::halfedge_connectivity), nh, out);
     fwrite((char *) fconn.data(), sizeof(halfedge_mesh::face_connectivity), nf, out);
-    fwrite((char *) point.data(), sizeof(vec3f), nv, out);
+    fwrite((char *) point.data(), sizeof(VectorS<3>), nv, out);
 
     // texture coordinates
     if (htex) {
-        fwrite((char *) htex.data(), sizeof(vec2f), nh, out);
+        fwrite((char *) htex.data(), sizeof(VectorS<2>), nh, out);
     }
 
     fclose(out);
@@ -1133,14 +1139,14 @@ bool meshio::write_xyz(const halfedge_mesh &mesh) {
         return false;
     }
 
-    auto positions = mesh.vertices.get<vec3f, 3>("position");
-    auto vnormal = mesh.vertices.get<vec3f, 3>("normal");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto vnormal = mesh.vertices.get<VectorS<3>, 3>("normal");
 
     for (const auto v : mesh.vertices) {
-        ofs << to_string(positions[v]);
+        ofs << positions[v].transpose();
         ofs << " ";
         if (vnormal) {
-            ofs << to_string(vnormal[v]);
+            ofs << vnormal[v].transpose();
         }
         ofs << std::endl;
     }

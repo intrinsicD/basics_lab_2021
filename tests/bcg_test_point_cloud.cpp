@@ -118,11 +118,11 @@ TEST_F(TestPointCloudFixture, operator_assign){
 }
 
 TEST_F(TestPointCloudFixture, find_closest) {
-    EXPECT_EQ(pc_full.find_closest_vertex(vec3f(0, 0, 1-1e-6f)), vertex_handle(0));
+    EXPECT_EQ(pc_full.find_closest_vertex(VectorS<3>(0, 0, 1-1e-6f)), vertex_handle(0));
     auto result = pc_full.find_closest_k_vertices(pc_full.positions[0], 2);
     EXPECT_EQ(result[0], vertex_handle(0));
     EXPECT_EQ(result[1], vertex_handle(4));
-    result = pc_full.find_closest_vertices_radius(vec3f(0, 0, 1-1e-6f), 0.01);
+    result = pc_full.find_closest_vertices_radius(VectorS<3>(0, 0, 1-1e-6f), 0.01);
     EXPECT_EQ(result[0], vertex_handle(0));
     EXPECT_EQ(result[1], vertex_handle(4));
     EXPECT_EQ(result.size(), 2);

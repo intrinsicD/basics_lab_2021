@@ -27,9 +27,9 @@ struct gui_input {
     bool mouse_left = false;  // left button
     bool mouse_right = false;  // right button
     bool mouse_middle = false;  // middle button
-    vec2f mouse_pos = {};     // position excluding widgets
-    vec2f mouse_last = {};  // last mouse position excluding widgets
-    vec2f mouse_delta = {};  // last mouse delta excluding widgets
+    VectorS<2> mouse_pos = {};     // position excluding widgets
+    VectorS<2> mouse_last = {};  // last mouse position excluding widgets
+    VectorS<2> mouse_delta = {};  // last mouse delta excluding widgets
     bool modifier_alt = false;         // alt modifier
     bool modifier_ctrl = false;         // ctrl modifier
     bool modifier_shift = false;         // shift modifier
@@ -38,8 +38,8 @@ struct gui_input {
     uint64_t clock_last = 0;             // clock last
     double time_now = 0;             // time now
     double time_delta = 0;             // time delta
-    vec2i window_size = {0, 0};        // window size
-    vec4i framebuffer_viewport = {0, 0, 0, 0};  // framebuffer viewport
+    VectorI<2> window_size = {0, 0};        // window size
+    VectorI<4> framebuffer_viewport = {0, 0, 0, 0};  // framebuffer viewport
 };
 
 // Init callback called after the window has opened
@@ -82,7 +82,7 @@ struct gui_callbacks {
 };
 
 // run the user interface with the given callbacks
-void run_ui(const vec2i &size, const std::string &title,
+void run_ui(const VectorI<2> &size, const std::string &title,
             const gui_callbacks &callbaks, int widgets_width = 320,
             bool widgets_left = true);
 
@@ -111,11 +111,11 @@ struct gui_window {
     int widgets_width = 0;
     bool widgets_left = true;
     gui_input input = {};
-    vec4f background = {0.15f, 0.15f, 0.15f, 1.0f};
+    VectorS<4> background = {0.15f, 0.15f, 0.15f, 1.0f};
 };
 
 // Windows initialization
-void init_window(gui_window *win, const vec2i &size, const std::string &title,
+void init_window(gui_window *win, const VectorI<2> &size, const std::string &title,
                  bool widgets, int widgets_width = 320, bool widgets_left = true);
 
 // Window cleanup
@@ -174,61 +174,61 @@ bool draw_slider(
         gui_window *win, const char *lbl, float &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec2f &value, float min, float max);
+        gui_window *win, const char *lbl, VectorS<2> &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec3f &value, float min, float max);
+        gui_window *win, const char *lbl, VectorS<3> &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec4f &value, float min, float max);
+        gui_window *win, const char *lbl, VectorS<4> &value, float min, float max);
 
 bool draw_slider(
         gui_window *win, const char *lbl, int &value, int min, int max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec2i &value, int min, int max);
+        gui_window *win, const char *lbl, VectorI<2> &value, int min, int max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec3i &value, int min, int max);
+        gui_window *win, const char *lbl, VectorI<3> &value, int min, int max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, vec4i &value, int min, int max);
+        gui_window *win, const char *lbl, VectorI<4> &value, int min, int max);
 
 bool draw_dragger(gui_window *win, const char *lbl, float &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, vec2f &value,
+bool draw_dragger(gui_window *win, const char *lbl, VectorS<2> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, vec3f &value,
+bool draw_dragger(gui_window *win, const char *lbl, VectorS<3> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, vec4f &value,
+bool draw_dragger(gui_window *win, const char *lbl, VectorS<4> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
 bool draw_dragger(gui_window *win, const char *lbl, int &value, float speed = 1,
                   int min = 0, int max = 0);
 
-bool draw_dragger(gui_window *win, const char *lbl, vec2i &value,
+bool draw_dragger(gui_window *win, const char *lbl, VectorI<2> &value,
                   float speed = 1, int min = 0, int max = 0);
 
-bool draw_dragger(gui_window *win, const char *lbl, vec3i &value,
+bool draw_dragger(gui_window *win, const char *lbl, VectorI<3> &value,
                   float speed = 1, int min = 0, int max = 0);
 
-bool draw_dragger(gui_window *win, const char *lbl, vec4i &value,
+bool draw_dragger(gui_window *win, const char *lbl, VectorI<4> &value,
                   float speed = 1, int min = 0, int max = 0);
 
 bool draw_checkbox(gui_window *win, const char *lbl, bool &value);
 
 bool draw_checkbox(gui_window *win, const char *lbl, bool &value, bool invert);
 
-bool draw_coloredit(gui_window *win, const char *lbl, vec3f &value);
+bool draw_coloredit(gui_window *win, const char *lbl, VectorS<3> &value);
 
-bool draw_coloredit(gui_window *win, const char *lbl, vec4f &value);
+bool draw_coloredit(gui_window *win, const char *lbl, VectorS<4> &value);
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec3f &value);
+bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<3> &value);
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, vec4f &value);
+bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<4> &value);
 
 bool draw_combobox(gui_window *win, const char *lbl, int &idx, const std::vector<std::string> &labels);
 
@@ -276,13 +276,13 @@ void draw_histogram(
         gui_window *win, const char *lbl, const std::vector<float> &values);
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<vec2f> &values);
+        gui_window *win, const char *lbl, const std::vector<VectorS<2>> &values);
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<vec3f> &values);
+        gui_window *win, const char *lbl, const std::vector<VectorS<3>> &values);
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<vec4f> &values);
+        gui_window *win, const char *lbl, const std::vector<VectorS<4>> &values);
 
 bool draw_filedialog(gui_window *win, const char *lbl, std::string &path, bool save,
                      const std::string &dirname, const std::string &filename, const std::string &filter);

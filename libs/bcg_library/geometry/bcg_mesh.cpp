@@ -5,7 +5,7 @@
 #include "bcg_mesh.h"
 #include "triangle/bcg_triangle.h"
 #include "triangle/bcg_triangle_distance.h"
-#include "../utils/bcg_stl_utils.h"
+#include "utils/bcg_stl_utils.h"
 
 namespace bcg {
 
@@ -72,7 +72,7 @@ bool halfedge_mesh::operator==(const halfedge_mesh &other) const {
     if (edges.size() != other.edges.size()) return false;
     if (faces.size() != other.faces.size()) return false;
     for (const auto v : vertices) {
-        if (positions[v] != other.positions[v]) return false;
+        if ((positions[v] - other.positions[v]).squaredNorm() > scalar_eps) return false;
         if (vconn[v].h != other.vconn[v].h) return false;
     }
     for (const auto e : edges) {
@@ -1402,7 +1402,7 @@ std::vector<int> halfedge_mesh::get_triangles_adjacencies() {
 
 face_handle halfedge_mesh::find_closest_face(const position_t &point) const {
     face_handle closest_yet;
-    auto min_distance = flt_max;
+    auto min_distance = scalar_max;
     for (const auto f : faces) {
         auto h = get_halfedge(f);
 
@@ -1421,7 +1421,7 @@ face_handle halfedge_mesh::find_closest_face(const position_t &point) const {
 }
 
 std::vector<face_handle> halfedge_mesh::find_closest_k_face(const position_t &point, size_t k) const {
-    using DistIndex = std::pair<float, face_handle>;
+    using DistIndex = std::pair<bcg_scalar_t, face_handle>;
     std::vector<DistIndex> closest_k;
 
     for (const auto f : faces) {
@@ -1452,12 +1452,12 @@ std::vector<face_handle> halfedge_mesh::find_closest_k_face(const position_t &po
 
     }
     std::vector<face_handle> indices;
-    unzip<float, face_handle>(closest_k, nullptr, &indices);
+    unzip<bcg_scalar_t, face_handle>(closest_k, nullptr, &indices);
     return indices;
 }
 
-std::vector<face_handle> halfedge_mesh::find_closest_faces(const position_t &point, float radius) const {
-    using DistIndex = std::pair<float, face_handle>;
+std::vector<face_handle> halfedge_mesh::find_closest_faces(const position_t &point, bcg_scalar_t radius) const {
+    using DistIndex = std::pair<bcg_scalar_t, face_handle>;
     std::vector<DistIndex> closest;
     for (const auto v : this->vertices) {
         for (const auto h : halfedge_graph::get_halfedges(v)) {
@@ -1476,13 +1476,13 @@ std::vector<face_handle> halfedge_mesh::find_closest_faces(const position_t &poi
         return lhs.first < rhs.first;
     });
     std::vector<face_handle> indices;
-    unzip<float, face_handle>(closest, nullptr, &indices);
+    unzip<bcg_scalar_t, face_handle>(closest, nullptr, &indices);
     return indices;
 }
 
 face_handle halfedge_mesh::find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const {
     face_handle closest_yet;
-    float min_dist_yet = flt_max;
+    bcg_scalar_t min_dist_yet = scalar_max;
 
     auto valence = halfedge_graph::get_valence(v);
     size_t count = 0;

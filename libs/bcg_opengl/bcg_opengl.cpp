@@ -57,8 +57,8 @@ GLenum _assert_ogl_error() {
 
 void assert_ogl_error() { assert(_assert_ogl_error() == GL_NO_ERROR); }
 
-void clear_ogl_framebuffer(const vec4f &color, bool clear_depth) {
-    glClearColor(color.x, color.y, color.z, color.w);
+void clear_ogl_framebuffer(const VectorS<4> &color, bool clear_depth) {
+    glClearColor(color[0], color[1], color[2], color[3]);
     if (clear_depth) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
@@ -68,7 +68,7 @@ void clear_ogl_framebuffer(const vec4f &color, bool clear_depth) {
 }
 
 
-void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
+void set_texture(ogl_texture *texture, const VectorI<2> &size, int num_channels,
                  const byte *img, bool as_srgb, bool linear, bool mipmap, bool wrap_repeat) {
     static auto sformat = std::vector<uint>{
             0, GL_SRGB, GL_SRGB, GL_SRGB, GL_SRGB_ALPHA};
@@ -87,8 +87,8 @@ void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
         texture->linear != linear || texture->mipmap != mipmap) {
         glBindTexture(GL_TEXTURE_2D, texture->texture_id);
         glTexImage2D(GL_TEXTURE_2D, 0,
-                     as_srgb ? sformat.at(num_channels) : iformat.at(num_channels), size.x,
-                     size.y, 0, cformat.at(num_channels), GL_UNSIGNED_BYTE, img);
+                     as_srgb ? sformat.at(num_channels) : iformat.at(num_channels), size[0],
+                     size[1], 0, cformat.at(num_channels), GL_UNSIGNED_BYTE, img);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                         mipmap ? (linear ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST)
                                : (linear ? GL_LINEAR : GL_NEAREST));
@@ -97,7 +97,7 @@ void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
         if (mipmap && img) glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         glBindTexture(GL_TEXTURE_2D, texture->texture_id);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y,
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size[0], size[1],
                         cformat.at(num_channels), GL_UNSIGNED_BYTE, img);
         if (mipmap && img) glGenerateMipmap(GL_TEXTURE_2D);
     }
@@ -117,7 +117,7 @@ void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
     assert_ogl_error();
 }
 
-void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
+void set_texture(ogl_texture *texture, const VectorI<2> &size, int num_channels,
                  const float *img, bool as_float, bool linear, bool mipmap,
                  bool wrap_repeat) {
     static auto fformat = std::vector<uint>{
@@ -137,8 +137,8 @@ void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
         texture->linear != linear || texture->mipmap != mipmap) {
         glBindTexture(GL_TEXTURE_2D, texture->texture_id);
         glTexImage2D(GL_TEXTURE_2D, 0,
-                     as_float ? fformat.at(num_channels) : iformat.at(num_channels), size.x,
-                     size.y, 0, iformat.at(num_channels), GL_FLOAT, img);
+                     as_float ? fformat.at(num_channels) : iformat.at(num_channels), size[0],
+                     size[1], 0, iformat.at(num_channels), GL_FLOAT, img);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                         mipmap ? (linear ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST)
                                : (linear ? GL_LINEAR : GL_NEAREST));
@@ -147,7 +147,7 @@ void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
         if (mipmap && img) glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         glBindTexture(GL_TEXTURE_2D, texture->texture_id);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y,
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size[0], size[1],
                         iformat.at(num_channels), GL_FLOAT, img);
         if (mipmap && img) glGenerateMipmap(GL_TEXTURE_2D);
     }
@@ -389,17 +389,17 @@ void set_arraybuffer(
 }
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<vec2f> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<VectorS<2>> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 2, 2, (float *) data.data(), dynamic);
 }
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<vec3f> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<VectorS<3>> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 3, 3, (float *) data.data(), dynamic);
 }
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<vec4f> &data, bool dynamic) {
+        ogl_arraybuffer *buffer, const std::vector<VectorS<4>> &data, bool dynamic) {
     set_arraybuffer(buffer, data.size() * 4, 4, (float *) data.data(), dynamic);
 }
 
@@ -463,12 +463,12 @@ void set_elementbuffer(
 }
 
 void set_elementbuffer(
-        ogl_elementbuffer *buffer, const std::vector<vec2i> &lines, bool dynamic) {
+        ogl_elementbuffer *buffer, const std::vector<VectorI<2>> &lines, bool dynamic) {
     set_elementbuffer(buffer, lines.size() * 2, 2, (int *) lines.data(), dynamic);
 }
 
 void set_elementbuffer(
-        ogl_elementbuffer *buffer, const std::vector<vec3i> &triangles, bool dynamic) {
+        ogl_elementbuffer *buffer, const std::vector<VectorI<3>> &triangles, bool dynamic) {
     set_elementbuffer(
             buffer, triangles.size() * 3, 3, (int *) triangles.data(), dynamic);
 }
@@ -611,18 +611,18 @@ void set_uniform(const ogl_program *program, int location, int value) {
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const vec2i &value) {
-    glUniform2i(location, value.x, value.y);
+void set_uniform(const ogl_program *program, int location, const VectorI<2> &value) {
+    glUniform2i(location, value[0], value[1]);
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const vec3i &value) {
-    glUniform3i(location, value.x, value.y, value.z);
+void set_uniform(const ogl_program *program, int location, const VectorI<3> &value) {
+    glUniform3i(location, value[0], value[1], value[2]);
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const vec4i &value) {
-    glUniform4i(location, value.x, value.y, value.z, value.w);
+void set_uniform(const ogl_program *program, int location, const VectorI<4> &value) {
+    glUniform4i(location, value[0], value[1], value[2], value[3]);
     assert_ogl_error();
 }
 
@@ -631,33 +631,33 @@ void set_uniform(const ogl_program *program, int location, float value) {
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const vec2f &value) {
-    glUniform2f(location, value.x, value.y);
+void set_uniform(const ogl_program *program, int location, const VectorS<2> &value) {
+    glUniform2f(location, value[0], value[1]);
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const vec3f &value) {
-    glUniform3f(location, value.x, value.y, value.z);
+void set_uniform(const ogl_program *program, int location, const VectorS<3> &value) {
+    glUniform3f(location, value[0], value[1], value[2]);
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const vec4f &value) {
-    glUniform4f(location, value.x, value.y, value.z, value.w);
+void set_uniform(const ogl_program *program, int location, const VectorS<4> &value) {
+    glUniform4f(location, value[0], value[1], value[2], value[3]);
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const mat2f &value) {
-    glUniformMatrix2fv(location, 1, false, glm::value_ptr(value));
+void set_uniform(const ogl_program *program, int location, const MatrixS<2, 2> &value) {
+    glUniformMatrix2fv(location, 1, false, reinterpret_cast<const GLfloat *>(value.data()));
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const mat3f &value) {
-    glUniformMatrix3fv(location, 1, false, glm::value_ptr(value));
+void set_uniform(const ogl_program *program, int location, const MatrixS<3, 3> &value) {
+    glUniformMatrix3fv(location, 1, false, reinterpret_cast<const GLfloat *>(value.data()));
     assert_ogl_error();
 }
 
-void set_uniform(const ogl_program *program, int location, const mat4f &value) {
-    glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
+void set_uniform(const ogl_program *program, int location, const MatrixS<4, 4> &value) {
+    glUniformMatrix4fv(location, 1, false, reinterpret_cast<const GLfloat *>(value.data()));
     assert_ogl_error();
 }
 
@@ -746,7 +746,7 @@ void set_uniform(const ogl_program *program, const char *name,
 // cleanup
 ogl_framebuffer::~ogl_framebuffer() { clear_framebuffer(this); }
 
-void set_framebuffer(ogl_framebuffer *framebuffer, const vec2i &size) {
+void set_framebuffer(ogl_framebuffer *framebuffer, const VectorI<2> &size) {
     if (size == zero2i) {
         clear_framebuffer(framebuffer);
         return;
@@ -771,7 +771,7 @@ void set_framebuffer(ogl_framebuffer *framebuffer, const vec2i &size) {
         // create render buffer for depth and stencil
         // TODO(giacomo): We put STENCIL here for the same reason...
         glBindRenderbuffer(GL_RENDERBUFFER, framebuffer->renderbuffer_id);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size[0], size[1]);
         framebuffer->size = size;
     }
 
@@ -877,19 +877,19 @@ void set_vertex_buffer(
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const std::vector<vec2f> &values, int location) {
+        ogl_shape *shape, const std::vector<VectorS<2>> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const std::vector<vec3f> &values, int location) {
+        ogl_shape *shape, const std::vector<VectorS<3>> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
 
 void set_vertex_buffer(
-        ogl_shape *shape, const std::vector<vec4f> &values, int location) {
+        ogl_shape *shape, const std::vector<VectorS<4>> &values, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     set_vertex_buffer_impl(shape, values, location);
 }
@@ -901,24 +901,24 @@ void set_vertex_buffer(ogl_shape *shape, float value, int location) {
     assert_ogl_error();
 }
 
-void set_vertex_buffer(ogl_shape *shape, const vec2f &value, int location) {
+void set_vertex_buffer(ogl_shape *shape, const VectorS<2> &value, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     glBindVertexArray(shape->shape_id);
-    glVertexAttrib2f(location, value.x, value.y);
+    glVertexAttrib2f(location, value[0], value[1]);
     assert_ogl_error();
 }
 
-void set_vertex_buffer(ogl_shape *shape, const vec3f &value, int location) {
+void set_vertex_buffer(ogl_shape *shape, const VectorS<3> &value, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     glBindVertexArray(shape->shape_id);
-    glVertexAttrib3f(location, value.x, value.y, value.z);
+    glVertexAttrib3f(location, value[0], value[1], value[2]);
     assert_ogl_error();
 }
 
-void set_vertex_buffer(ogl_shape *shape, const vec4f &value, int location) {
+void set_vertex_buffer(ogl_shape *shape, const VectorS<4> &value, int location) {
     if (!shape->shape_id) glGenVertexArrays(1, &shape->shape_id);
     glBindVertexArray(shape->shape_id);
-    glVertexAttrib4f(location, value.x, value.y, value.z, value.w);
+    glVertexAttrib4f(location, value[0], value[1], value[2], value[3]);
     assert_ogl_error();
 }
 
@@ -940,12 +940,12 @@ void set_index_buffer(ogl_shape *shape, const std::vector<int> &indices) {
     shape->elements = ogl_element_type::points;
 }
 
-void set_index_buffer(ogl_shape *shape, const std::vector<vec2i> &indices) {
+void set_index_buffer(ogl_shape *shape, const std::vector<VectorI<2>> &indices) {
     set_elementbuffer(shape->index_buffer, indices);
     shape->elements = ogl_element_type::lines;
 }
 
-void set_index_buffer(ogl_shape *shape, const std::vector<vec3i> &indices) {
+void set_index_buffer(ogl_shape *shape, const std::vector<VectorI<3>> &indices) {
     set_elementbuffer(shape->index_buffer, indices);
     shape->elements = ogl_element_type::triangles;
 }
@@ -996,7 +996,7 @@ void draw_shape(const ogl_shape *shape) {
 
 void set_cube_shape(ogl_shape *shape) {
     // clang-format off
-    static const auto positions = std::vector<vec3f>{
+    static const auto positions = std::vector<VectorS<3>>{
             {1,  -1, -1},
             {1,  -1, 1},
             {-1, -1, 1},
@@ -1006,7 +1006,7 @@ void set_cube_shape(ogl_shape *shape) {
             {-1, 1,  1},
             {-1, 1,  -1},
     };
-    static const auto triangles = std::vector<vec3i>{
+    static const auto triangles = std::vector<VectorI<3>>{
             {1, 3, 0},
             {7, 5, 4},
             {4, 1, 0},
@@ -1027,13 +1027,13 @@ void set_cube_shape(ogl_shape *shape) {
 
 void set_quad_shape(ogl_shape *shape) {
     // clang-format off
-    static const auto positions = std::vector<vec3f>{
+    static const auto positions = std::vector<VectorS<3>>{
             {-1, -1, 0},
             {1,  -1, 0},
             {1,  1,  0},
             {-1, 1,  0},
     };
-    static const auto triangles = std::vector<vec3i>{
+    static const auto triangles = std::vector<VectorI<3>>{
             {0, 1, 3},
             {3, 2, 1}
     };

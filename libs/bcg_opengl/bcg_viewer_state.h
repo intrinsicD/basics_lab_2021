@@ -11,20 +11,20 @@
 namespace bcg{
 
 struct viewer_colors{
-    vec3f overlay;
-    vec3f entity_selection;
-    vec3f vertex_selection;
-    vec3f edge_selection;
-    vec3f face_selection;
-    vec3f boundary;
-    vec3f vectorfield;
-    vec3f wireframe;
+    VectorS<3> overlay;
+    VectorS<3> entity_selection;
+    VectorS<3> vertex_selection;
+    VectorS<3> edge_selection;
+    VectorS<3> face_selection;
+    VectorS<3> boundary;
+    VectorS<3> vectorfield;
+    VectorS<3> wireframe;
 };
 
 struct viewer_mouse{
     dynamic_bitset buttons;
     bool is_moving, is_scrolling, is_captured_by_gui;
-    vec2f last_left_click, last_middle_click, last_right_click, cursor_pos;
+    VectorS<2> last_left_click, last_middle_click, last_right_click, cursor_pos;
     float scroll_value;
 };
 

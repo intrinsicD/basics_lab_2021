@@ -58,7 +58,7 @@ TEST_F(TestMeshIoFixture, stl){
     meshio read_io(test_data_path + "test_read_mesh.stl", meshio_flags());
     read_io.read(mesh);
 
-    EXPECT_EQ(mesh.num_vertices(), 44020);
+    EXPECT_EQ(mesh.num_vertices(), 264120);
     EXPECT_EQ(mesh.num_faces(), 88040);
 
     mesh_factory factory;

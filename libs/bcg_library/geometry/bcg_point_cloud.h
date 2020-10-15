@@ -5,13 +5,13 @@
 #ifndef BCG_GRAPHICS_BCG_POINT_CLOUD_H
 #define BCG_GRAPHICS_BCG_POINT_CLOUD_H
 
-#include "../math/bcg_linalg.h"
+#include "math/bcg_linalg.h"
 #include "bcg_property.h"
 
 namespace bcg {
 
 struct point_cloud {
-    using position_t = vec3f;
+    using position_t = VectorS<3>;
     vertex_container vertices;
     property_container object_properties;
     property<position_t, 3> positions;
@@ -46,7 +46,7 @@ struct point_cloud {
     find_closest_k_vertices(const point_cloud::position_t &point, size_t k);
 
     std::vector<vertex_handle>
-    find_closest_vertices_radius(const point_cloud::position_t &point, float radius);
+    find_closest_vertices_radius(const point_cloud::position_t &point, bcg_scalar_t radius);
 
 
 protected:

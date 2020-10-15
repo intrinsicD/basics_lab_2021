@@ -21,12 +21,12 @@ void assert_ogl_error();
 
 bool check_ogl_error(std::string &error);
 
-void clear_ogl_framebuffer(const vec4f &color, bool clear_depth = true);
+void clear_ogl_framebuffer(const VectorS<4> &color, bool clear_depth = true);
 
 // OpenGL texture
 struct ogl_texture {
     // Texture properties
-    vec2i size = {0, 0};
+    VectorI<2> size = {0, 0};
     int num_channels = 0;
     bool is_srgb = false;
     bool is_float = false;
@@ -48,11 +48,11 @@ struct ogl_texture {
 };
 
 // set texture
-void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
+void set_texture(ogl_texture *texture, const VectorI<2> &size, int num_channels,
                  const byte *img, bool as_srgb = false, bool linear = true,
                  bool mipmap = true, bool wrap_repeat = true);
 
-void set_texture(ogl_texture *texture, const vec2i &size, int num_channels,
+void set_texture(ogl_texture *texture, const VectorI<2> &size, int num_channels,
                  const float *img, bool as_float = false, bool linear = true,
                  bool mipmap = true, bool wrap_repeat = true);
 
@@ -139,13 +139,13 @@ void set_arraybuffer(
         ogl_arraybuffer *buffer, const std::vector<float> &data, bool dynamic = false);
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<vec2f> &data, bool dynamic = false);
+        ogl_arraybuffer *buffer, const std::vector<VectorS<2>> &data, bool dynamic = false);
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<vec3f> &data, bool dynamic = false);
+        ogl_arraybuffer *buffer, const std::vector<VectorS<3>> &data, bool dynamic = false);
 
 void set_arraybuffer(
-        ogl_arraybuffer *buffer, const std::vector<vec4f> &data, bool dynamic = false);
+        ogl_arraybuffer *buffer, const std::vector<VectorS<4>> &data, bool dynamic = false);
 
 
 // Opengl array/element buffer
@@ -184,11 +184,11 @@ void clear_elementbuffer(ogl_elementbuffer *buffer);
 void set_elementbuffer(ogl_elementbuffer *buffer, const std::vector<int> &points,
                        bool dynamic = false);
 
-void set_elementbuffer(ogl_elementbuffer *buffer, const std::vector<vec2i> &lines,
+void set_elementbuffer(ogl_elementbuffer *buffer, const std::vector<VectorI<2>> &lines,
                        bool dynamic = false);
 
 void set_elementbuffer(ogl_elementbuffer *buffer,
-                       const std::vector<vec3i> &triangles, bool dynamic = false);
+                       const std::vector<VectorI<3>> &triangles, bool dynamic = false);
 
 
 // Opengl program
@@ -244,25 +244,25 @@ int get_uniform_location(const ogl_program *program, const char *name);
 // set uniforms
 void set_uniform(const ogl_program *program, int location, int value);
 
-void set_uniform(const ogl_program *program, int location, const vec2i &value);
+void set_uniform(const ogl_program *program, int location, const VectorI<2> &value);
 
-void set_uniform(const ogl_program *program, int location, const vec3i &value);
+void set_uniform(const ogl_program *program, int location, const VectorI<3> &value);
 
-void set_uniform(const ogl_program *program, int location, const vec4i &value);
+void set_uniform(const ogl_program *program, int location, const VectorI<4> &value);
 
 void set_uniform(const ogl_program *program, int location, float value);
 
-void set_uniform(const ogl_program *program, int location, const vec2f &value);
+void set_uniform(const ogl_program *program, int location, const VectorS<2> &value);
 
-void set_uniform(const ogl_program *program, int location, const vec3f &value);
+void set_uniform(const ogl_program *program, int location, const VectorS<3> &value);
 
-void set_uniform(const ogl_program *program, int location, const vec4f &value);
+void set_uniform(const ogl_program *program, int location, const VectorS<4> &value);
 
-void set_uniform(const ogl_program *program, int location, const mat2f &value);
+void set_uniform(const ogl_program *program, int location, const MatrixS<2, 2> &value);
 
-void set_uniform(const ogl_program *program, int location, const mat3f &value);
+void set_uniform(const ogl_program *program, int location, const MatrixS<3, 3> &value);
 
-void set_uniform(const ogl_program *program, int location, const mat4f &value);
+void set_uniform(const ogl_program *program, int location, const MatrixS<4, 4> &value);
 
 template<typename T>
 inline void set_uniform(const ogl_program *program, const char *name, const T &value) {
@@ -298,7 +298,7 @@ void set_uniform(ogl_program *program, const char *name, const char *name_on,
 
 struct ogl_framebuffer {
     // framebuffer properties
-    vec2i size = {0, 0};
+    VectorI<2> size = {0, 0};
 
     // opengl state
     uint framebuffer_id = 0;
@@ -318,7 +318,7 @@ struct ogl_framebuffer {
     ~ogl_framebuffer();
 };
 
-void set_framebuffer(ogl_framebuffer *framebuffer, const vec2i &size);
+void set_framebuffer(ogl_framebuffer *framebuffer, const VectorI<2> &size);
 
 void set_framebuffer_texture(const ogl_framebuffer *framebuffer,
                              const ogl_texture *texture, uint mipmap_level = 0);
@@ -369,22 +369,22 @@ void set_vertex_buffer(
         ogl_shape *shape, const std::vector<float> &values, int location);
 
 void set_vertex_buffer(
-        ogl_shape *shape, const std::vector <vec2f> &values, int location);
+        ogl_shape *shape, const std::vector <VectorS<2>> &values, int location);
 
 void set_vertex_buffer(
-        ogl_shape *shape, const std::vector <vec3f> &values, int location);
+        ogl_shape *shape, const std::vector <VectorS<3>> &values, int location);
 
 void set_vertex_buffer(
-        ogl_shape *shape, const std::vector <vec4f> &values, int location);
+        ogl_shape *shape, const std::vector <VectorS<4>> &values, int location);
 
 // set vertex buffer with constant value
 void set_vertex_buffer(ogl_shape *shape, float attribute, int location);
 
-void set_vertex_buffer(ogl_shape *shape, const vec2f &attribute, int location);
+void set_vertex_buffer(ogl_shape *shape, const VectorS<2> &attribute, int location);
 
-void set_vertex_buffer(ogl_shape *shape, const vec3f &attribute, int location);
+void set_vertex_buffer(ogl_shape *shape, const VectorS<3> &attribute, int location);
 
-void set_vertex_buffer(ogl_shape *shape, const vec4f &attribute, int location);
+void set_vertex_buffer(ogl_shape *shape, const VectorS<4> &attribute, int location);
 
 // set vertex buffer instance
 void set_instance_buffer(ogl_shape *shape, int location, bool is_instance);
@@ -392,9 +392,9 @@ void set_instance_buffer(ogl_shape *shape, int location, bool is_instance);
 // set element buffer
 void set_index_buffer(ogl_shape *shape, const std::vector<int> &indices);
 
-void set_index_buffer(ogl_shape *shape, const std::vector<vec2i> &indices);
+void set_index_buffer(ogl_shape *shape, const std::vector<VectorI<2>> &indices);
 
-void set_index_buffer(ogl_shape *shape, const std::vector<vec3i> &indices);
+void set_index_buffer(ogl_shape *shape, const std::vector<VectorI<3>> &indices);
 
 // check if shape is initialized
 bool is_initialized(const ogl_shape *shape);

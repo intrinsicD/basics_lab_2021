@@ -24,17 +24,17 @@ TEST_F(TestPointCloudIoFixture, pts) {
     point_cloudio io(test_data_path + "test.pts", point_cloudio_flags());
     io.read(pc);
     EXPECT_EQ(pc.vertices.size(), 7);
-    auto colors = pc.vertices.get<vec3f, 3>("color");
-    auto intensities = pc.vertices.get<float, 1>("intensity");
+    auto colors = pc.vertices.get<VectorS<3>, 3>("color");
+    auto intensities = pc.vertices.get<bcg_scalar_t, 1>("intensity");
     EXPECT_TRUE(colors);
     EXPECT_TRUE(intensities);
-    EXPECT_EQ(pc.positions[0], vec3f(1.185287, -1.583054, -1.004562));
-    EXPECT_EQ(pc.positions[1], vec3f(1.186020, -1.585068, -1.004837));
-    EXPECT_EQ(pc.positions[2], vec3f(1.184158, -1.582596, -1.000168));
-    EXPECT_EQ(pc.positions[3], vec3f(1.184586, -1.583145, -1.002060));
-    EXPECT_EQ(pc.positions[4], vec3f(1.183914, -1.581223, -1.002609));
-    EXPECT_EQ(pc.positions[5], vec3f(1.182663, -1.579544, -1.000778));
-    EXPECT_EQ(pc.positions[6], vec3f(1.188553, -1.589493, -1.003494));
+    EXPECT_LE((pc.positions[0]- VectorS<3>(1.185287, -1.583054, -1.004562)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[1]- VectorS<3>(1.186020, -1.585068, -1.004837)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[2]- VectorS<3>(1.184158, -1.582596, -1.000168)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[3]- VectorS<3>(1.184586, -1.583145, -1.002060)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[4]- VectorS<3>(1.183914, -1.581223, -1.002609)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[5]- VectorS<3>(1.182663, -1.579544, -1.000778)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[6]- VectorS<3>(1.188553, -1.589493, -1.003494)).squaredNorm(), scalar_eps);
     EXPECT_EQ(intensities[0], -1407);
     EXPECT_EQ(intensities[1], -1458);
     EXPECT_EQ(intensities[2], -1393);
@@ -49,11 +49,11 @@ TEST_F(TestPointCloudIoFixture, xyz) {
     io.read(pc);
     EXPECT_EQ(pc.vertices.size(), 5);
 
-    EXPECT_EQ(pc.positions[0], vec3f(-72.501282, -748.387634, 23.167999));
-    EXPECT_EQ(pc.positions[1], vec3f(-72.171761, -749.74646, 22.738632));
-    EXPECT_EQ(pc.positions[2], vec3f(-71.282188, -748.033752, 23.631813));
-    EXPECT_EQ(pc.positions[3], vec3f(-70.919182, -749.559692, 23.178967));
-    EXPECT_EQ(pc.positions[4], vec3f(-69.76049, -750.247253, 23.340618));
+    EXPECT_LE((pc.positions[0] - VectorS<3>(-72.501282, -748.387634, 23.167999)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[1] - VectorS<3>(-72.171761, -749.74646, 22.738632)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[2] - VectorS<3>(-71.282188, -748.033752, 23.631813)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[3] - VectorS<3>(-70.919182, -749.559692, 23.178967)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[4] - VectorS<3>(-69.76049, -750.247253, 23.340618)).squaredNorm(), scalar_eps);
 }
 
 TEST_F(TestPointCloudIoFixture, csv) {
@@ -61,26 +61,26 @@ TEST_F(TestPointCloudIoFixture, csv) {
     io.read(pc);
     EXPECT_EQ(pc.vertices.size(), 5);
 
-    EXPECT_EQ(pc.positions[0], vec3f(2.567080,104.889321,-180.636716));
-    EXPECT_EQ(pc.positions[1], vec3f(2.561510,104.928386,-180.411959));
-    EXPECT_EQ(pc.positions[2], vec3f(2.556899,105.004835,-180.252099));
-    EXPECT_EQ(pc.positions[3], vec3f(2.547219,104.880118,-179.746425));
-    EXPECT_EQ(pc.positions[4], vec3f(2.548666,105.193961,-179.997706));
+    EXPECT_LE((pc.positions[0] - VectorS<3>(2.567080, 104.889321, -180.636716)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[1] - VectorS<3>(2.561510, 104.928386, -180.411959)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[2] - VectorS<3>(2.556899, 105.004835, -180.252099)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[3] - VectorS<3>(2.547219, 104.880118, -179.746425)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[4] - VectorS<3>(2.548666, 105.193961, -179.997706)).squaredNorm(), scalar_eps);
 }
 
 
 TEST_F(TestPointCloudIoFixture, tree_d) {
     point_cloudio io(test_data_path + "test.3d", point_cloudio_flags());
     io.read(pc);
-    auto intensities = pc.vertices.get<float, 1>("intensity");
+    auto intensities = pc.vertices.get<bcg_scalar_t, 1>("intensity");
     EXPECT_EQ(pc.vertices.size(), 5);
     EXPECT_TRUE(intensities);
 
-    EXPECT_EQ(pc.positions[0], vec3f(-253.651, 48.707, 307.166));
-    EXPECT_EQ(pc.positions[1], vec3f(-254.041, 48.213, 307.641));
-    EXPECT_EQ(pc.positions[2], vec3f(-253.829, 47.6285, 307.387));
-    EXPECT_EQ(pc.positions[3], vec3f(-253.887, 47.0711, 307.459));
-    EXPECT_EQ(pc.positions[4], vec3f(-254.086, 46.5395, 307.703));
+    EXPECT_LE((pc.positions[0] - VectorS<3>(-253.651, 48.707, 307.166)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[1] - VectorS<3>(-254.041, 48.213, 307.641)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[2] - VectorS<3>(-253.829, 47.6285, 307.387)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[3] - VectorS<3>(-253.887, 47.0711, 307.459)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[4] - VectorS<3>(-254.086, 46.5395, 307.703)).squaredNorm(), scalar_eps);
 
     EXPECT_FLOAT_EQ(intensities[0], 22.9);
     EXPECT_FLOAT_EQ(intensities[1], 22.9);
@@ -92,23 +92,23 @@ TEST_F(TestPointCloudIoFixture, tree_d) {
 TEST_F(TestPointCloudIoFixture, txt) {
     point_cloudio io(test_data_path + "test.txt", point_cloudio_flags());
     io.read(pc);
-    auto colors = pc.vertices.get<vec3f, 3>("color");
-    auto reflectances = pc.vertices.get<float, 1>("reflectance");
+    auto colors = pc.vertices.get<VectorS<3>, 3>("color");
+    auto reflectances = pc.vertices.get<bcg_scalar_t, 1>("reflectance");
     EXPECT_EQ(pc.vertices.size(), 5);
     EXPECT_TRUE(colors);
     EXPECT_TRUE(reflectances);
 
-    EXPECT_EQ(pc.positions[0], vec3f(-275.599, -32.170, -0.009));
-    EXPECT_EQ(pc.positions[1], vec3f(-275.599, -32.168, -0.205));
-    EXPECT_EQ(pc.positions[2], vec3f(-275.599, -32.170, -0.393));
-    EXPECT_EQ(pc.positions[3], vec3f(-281.322, -32.838, -0.009));
-    EXPECT_EQ(pc.positions[4], vec3f(-281.321, -32.836, -0.209));
+    EXPECT_LE((pc.positions[0] - VectorS<3>(-275.599, -32.170, -0.009)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[1] - VectorS<3>(-275.599, -32.168, -0.205)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[2] - VectorS<3>(-275.599, -32.170, -0.393)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[3] - VectorS<3>(-281.322, -32.838, -0.009)).squaredNorm(), scalar_eps);
+    EXPECT_LE((pc.positions[4] - VectorS<3>(-281.321, -32.836, -0.209)).squaredNorm(), scalar_eps);
 
-    EXPECT_EQ(colors[0], vec3f(277.471, 90.002, 186.658));
-    EXPECT_EQ(colors[1], vec3f(277.471, 90.042, 186.658));
-    EXPECT_EQ(colors[2], vec3f(277.470, 90.081, 186.658));
-    EXPECT_EQ(colors[3], vec3f(283.232, 90.002, 186.658));
-    EXPECT_EQ(colors[4], vec3f(283.231, 90.042, 186.658));
+    EXPECT_LE((colors[0] - VectorS<3>(277.471, 90.002, 186.658)).squaredNorm(), scalar_eps);
+    EXPECT_LE((colors[1] - VectorS<3>(277.471, 90.042, 186.658)).squaredNorm(), scalar_eps);
+    EXPECT_LE((colors[2] - VectorS<3>(277.470, 90.081, 186.658)).squaredNorm(), scalar_eps);
+    EXPECT_LE((colors[3] - VectorS<3>(283.232, 90.002, 186.658)).squaredNorm(), scalar_eps);
+    EXPECT_LE((colors[4] - VectorS<3>(283.231, 90.042, 186.658)).squaredNorm(), scalar_eps);
 
     EXPECT_FLOAT_EQ(reflectances[0], -0.533);
     EXPECT_FLOAT_EQ(reflectances[1], -0.223);

@@ -7,69 +7,72 @@
 
 #include <array>
 #include <ostream>
-#include "../../math/bcg_math_common.h"
-#include "../../math/bcg_linalg.h"
+#include "math/bcg_linalg.h"
 #include "bcg_triangle_metric.h"
 #include "bcg_barycentric_coordinates.h"
 
 namespace bcg {
 
-template<int N>
+template<bcg_index_t N>
 struct triangle {
-    using vecf = vec<N, float>;
-    std::array<vecf, 3> points;
+    std::array<VectorS<N>, 3> points;
 
-    triangle(const vecf &p0, const vecf &p1, const vecf &p2) : points{p0, p1, p2} {
-
-    }
-
-    explicit triangle(const std::array<vecf, 3> &points) : points(points) {
+    triangle() : points{zeros<N>, unit<N>(0), unit<N>(1)} {
 
     }
 
-    explicit operator std::array<vecf, 3>() const {
+    triangle(const VectorS<N> &p0, const VectorS<N> &p1, const VectorS<N> &p2) : points{p0, p1, p2} {
+
+    }
+
+    explicit triangle(const std::array<VectorS<N>, 3> &points) : points(points) {
+
+    }
+
+    explicit operator std::array<VectorS<N>, 3>() const {
         return points;
     }
 
-    inline vec3 angles() const {
+    inline VectorS<3> angles() const {
         auto el = edge_lengths();
         return {angle_from_metric(el[2], el[0], el[1]),
                 angle_from_metric(el[0], el[1], el[2]),
                 angle_from_metric(el[1], el[2], el[0])};
     };
 
-    inline float area() const {
-        return area_from_metric(length(edge0()), length(edge1()), length(edge2()));
+    inline bcg_scalar_t area() const {
+        return area_from_metric(edge0().norm(), edge1().norm(), edge2().norm());
     }
 
-    inline vecf edge0() const { return points[1] - points[0]; }
+    inline VectorS<N> edge0() const { return points[1] - points[0]; }
 
-    inline vecf edge1() const { return points[2] - points[1]; }
+    inline VectorS<N> edge1() const { return points[2] - points[1]; }
 
-    inline vecf edge2() const { return points[0] - points[2]; }
+    inline VectorS<N> edge2() const { return points[0] - points[2]; }
 
-    inline vec3f edge_lengths() const {
-        return {length(edge0()), length(edge1()), length(edge2())};
+    inline VectorS<3> edge_lengths() const {
+        return {edge0().norm(), edge1().norm(), edge2().norm()};
     }
 
-    inline float perimeter() const {
-        return length(edge0()) + length(edge1()) + length(edge2());
+    inline bcg_scalar_t perimeter() const {
+        return edge0().norm() + edge1().norm() + edge2().norm();
     }
 
-    inline bool contains(const vecf &point) const {
-        auto bc = barycentric_coordinates(*this, point);
+    inline bool contains(const VectorS<N> &point) const {
+        auto bc = to_barycentric_coordinates(*this, point);
         return (bc[0] >= 0 && bc[1] >= 0 && bc[2] >= 0);
     }
 
     std::string to_string() const {
-        std::string output = "p0: " + glm::to_string(points[0]) + "\n" +
-                             "p1: " + glm::to_string(points[1]) + "\n" +
-                             "p2: " + glm::to_string(points[2]) + "\n";
-        return output;
+        std::stringstream ss;
+        ss << "p0: " << points[0].transpose() << "\n" <<
+           "p1: " << points[1].transpose() << "\n" <<
+           "p2: " << points[2].transpose() << "\n";
+        return ss.str();
     }
 };
 
-template<int N>
+template<bcg_index_t N>
 std::ostream &operator<<(std::ostream &stream, const triangle<N> &triangle) {
     stream << triangle.to_string();
     return stream;
@@ -79,8 +82,8 @@ using triangle2 = triangle<2>;
 
 using triangle3 = triangle<3>;
 
-inline vec3f normal(const triangle3 &t) {
-    return normalize(cross(t.edge0(), t.edge1()));
+inline VectorS<3> normal(const triangle3 &t) {
+    return (t.edge0().cross(t.edge1())).normalized();
 }
 
 }

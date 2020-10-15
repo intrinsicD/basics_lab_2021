@@ -3,11 +3,11 @@
 //
 
 #include "bcg_point_cloudio.h"
-#include "../utils/bcg_path.h"
-#include "../utils/bcg_file.h"
-#include "../utils/bcg_string_utils.h"
-#include "../bcg_colors.h"
-#include "../../exts/rply/rply.h"
+#include "utils/bcg_path.h"
+#include "utils/bcg_file.h"
+#include "utils/bcg_string_utils.h"
+#include "color/bcg_colors.h"
+#include "exts/rply/rply.h"
 
 namespace bcg {
 
@@ -77,22 +77,22 @@ bool point_cloudio::read_pts(point_cloud &pc) {
 
     };
 
-    auto colors = pc.vertices.get_or_add<vec3f, 3>("color", color::white);
-    auto intensities = pc.vertices.get_or_add<float, 1>("intensity", 1.0);
+    auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("color", color::white);
+    auto intensities = pc.vertices.get_or_add<bcg_scalar_t, 1>("intensity", 1.0);
     vertex_handle v;
-    auto insertLambda = [&v, &pc, &colors, &intensities](float result, size_t lineCount, size_t floatPerLineCount) {
+    auto insertLambda = [&v, &pc, &colors, &intensities](bcg_scalar_t result, size_t lineCount, size_t ScalarTypePerLineCount) {
         if (lineCount == 0) {
             pc.vertices.reserve(result);
         } else {
-            if (floatPerLineCount == 0) {
-                v = pc.add_vertex(zero3f);
+            if (ScalarTypePerLineCount == 0) {
+                v = pc.add_vertex(zero3s);
             }
-            if (floatPerLineCount < 3) {
-                pc.positions[v][floatPerLineCount] = result;
-            } else if (floatPerLineCount < 4) {
-                intensities[v] = float(result);
-            } else if (floatPerLineCount < 7) {
-                colors[v][floatPerLineCount - 4] = float(result) / 255.0f;
+            if (ScalarTypePerLineCount < 3) {
+                pc.positions[v][ScalarTypePerLineCount] = result;
+            } else if (ScalarTypePerLineCount < 4) {
+                intensities[v] = bcg_scalar_t(result);
+            } else if (ScalarTypePerLineCount < 7) {
+                colors[v][ScalarTypePerLineCount - 4] = bcg_scalar_t(result) / 255.0f;
             }
         }
     };
@@ -100,7 +100,7 @@ bool point_cloudio::read_pts(point_cloud &pc) {
     std::string txt;
     file_stream(filename).load_text(txt);
     if (txt.empty()) return false;
-    parse_numbers<float>(txt, processText, insertLambda);
+    parse_numbers<bcg_scalar_t>(txt, processText, insertLambda);
     return true;
 }
 
@@ -116,23 +116,23 @@ bool point_cloudio::read_xyz(point_cloud &pc) {
         }
     };
     vertex_handle v;
-    auto insertLambda = [&v, &pc, &skipCount](float result, size_t, size_t floatPerLineCount) {
+    auto insertLambda = [&v, &pc, &skipCount](bcg_scalar_t result, size_t, size_t ScalarTypePerLineCount) {
         if (skipCount > 0) {
             skipCount -= 1;
             return;
         }
-        if (floatPerLineCount == 0) {
-            v = pc.add_vertex(zero3f);
+        if (ScalarTypePerLineCount == 0) {
+            v = pc.add_vertex(zero3s);
         }
-        if (floatPerLineCount < 3) {
-            pc.positions.back()[floatPerLineCount] = result;
+        if (ScalarTypePerLineCount < 3) {
+            pc.positions.back()[ScalarTypePerLineCount] = result;
         }
     };
 
     std::string txt;
     file_stream(filename).load_text(txt);
     if (txt.empty()) return false;
-    parse_numbers<float>(txt, processText, insertLambda);
+    parse_numbers<bcg_scalar_t>(txt, processText, insertLambda);
     return true;
 }
 
@@ -155,17 +155,17 @@ bool point_cloudio::read_pwn(point_cloud &pc) {
 
     pc.vertices.reserve(size);
 
-    vec3f p;
+    VectorS<3> p;
     vertex_handle v;
     for (unsigned int i = 0; i < size; ++i) {
-        res = fscanf(in, "%f %f %f", &p[0], &p[1], &p[2]);
+        res = fscanf(in, "%lf %lf %lf", reinterpret_cast<double*>(&p[0]), reinterpret_cast<double*>(&p[1]), reinterpret_cast<double*>(&p[2]));
         v = pc.add_vertex(p);
     }
 
-    auto normals = pc.vertices.get_or_add<vec3f, 3>("normal");
+    auto normals = pc.vertices.get_or_add<VectorS<3>, 3>("normal");
     for (unsigned int i = 0; i < size; ++i) {
-        res = fscanf(in, "%f %f %f", &normals[i][0], &normals[i][1], &normals[i][2]);
-        normals[i] = normalize(normals[i]);
+        res = fscanf(in, "%lf %lf %lf", reinterpret_cast<double*>(&normals[0]), reinterpret_cast<double*>(&normals[1]), reinterpret_cast<double*>(&normals[2]));
+        normals[i] = normals[i].normalized();
     }
 
     fclose(in);
@@ -184,34 +184,34 @@ bool point_cloudio::read_pb(point_cloud &pc) {
 
     pc.vertices.reserve(size);
 
-    float s;
+    bcg_scalar_t s;
     // points
-    vec3f p;
+    VectorS<3> p;
     vertex_handle v;
     for (size_t k = 0; k < size; ++k) {
         for (unsigned int j = 0; j < 3; ++j) {
-            i.read((char *) &s, sizeof(float));
+            i.read((char *) &s, sizeof(bcg_scalar_t));
             p[j] = s;
         }
         v = pc.add_vertex(p);
     }
 
     if (i.fail()) {
-        auto normals = pc.vertices.get_or_add<vec3f, 3>("normal");
+        auto normals = pc.vertices.get_or_add<VectorS<3>, 3>("normal");
         for (size_t k = 0; k < size; ++k) {
             for (unsigned int j = 0; j < 3; ++j) {
-                i.read((char *) &s, sizeof(float));
+                i.read((char *) &s, sizeof(bcg_scalar_t));
                 normals[k][j] = s;
             }
-            normals[k] = normalize(normals[k]);
+            normals[k] = normals[k].normalized();
         }
     }
 
     if (i.fail()) {
-        auto colors = pc.vertices.get_or_add<vec3f, 3>("color");
+        auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("color");
         for (size_t k = 0; k < size; ++k) {
             for (unsigned int j = 0; j < 3; ++j) {
-                i.read((char *) &s, sizeof(float));
+                i.read((char *) &s, sizeof(bcg_scalar_t));
                 colors[k][j] = s;
             }
         }
@@ -225,19 +225,19 @@ bool point_cloudio::read_csv(point_cloud &pc) {
 
     };
     vertex_handle v;
-    auto insertLambda = [&v, &pc](float result, size_t, size_t floatPerLineCount) {
-        if (floatPerLineCount == 0) {
-            v = pc.add_vertex(zero3f);
+    auto insertLambda = [&v, &pc](bcg_scalar_t result, size_t, size_t ScalarTypePerLineCount) {
+        if (ScalarTypePerLineCount == 0) {
+            v = pc.add_vertex(zero3s);
         }
-        if (floatPerLineCount < 3) {
-            pc.positions[v][floatPerLineCount] = result;
+        if (ScalarTypePerLineCount < 3) {
+            pc.positions[v][ScalarTypePerLineCount] = result;
         }
     };
 
     std::string txt;
     file_stream(filename).load_text(txt);
     if (txt.empty()) return false;
-    parse_numbers<float>(txt, processText, insertLambda);
+    parse_numbers<bcg_scalar_t>(txt, processText, insertLambda);
     return true;
 }
 
@@ -247,16 +247,16 @@ bool point_cloudio::read_3d(point_cloud &pc) {
 
     };
 
-    std::vector<float> position, intensity;
-    auto intensities = pc.vertices.get_or_add<float, 1>("intensity");
+    std::vector<bcg_scalar_t> position, intensity;
+    auto intensities = pc.vertices.get_or_add<bcg_scalar_t, 1>("intensity");
     vertex_handle v;
-    auto insertLambda = [&v, &pc, &intensities](float result, size_t, size_t floatPerLineCount) {
-        if (floatPerLineCount == 0) {
-            v = pc.add_vertex(zero3f);
+    auto insertLambda = [&v, &pc, &intensities](bcg_scalar_t result, size_t, size_t ScalarTypePerLineCount) {
+        if (ScalarTypePerLineCount == 0) {
+            v = pc.add_vertex(zero3s);
         }
-        if (floatPerLineCount < 3) {
-            pc.positions[v][floatPerLineCount] = result;
-        } else if (floatPerLineCount < 4) {
+        if (ScalarTypePerLineCount < 3) {
+            pc.positions[v][ScalarTypePerLineCount] = result;
+        } else if (ScalarTypePerLineCount < 4) {
             intensities[v] = result;
         }
     };
@@ -264,7 +264,7 @@ bool point_cloudio::read_3d(point_cloud &pc) {
     std::string txt;
     file_stream(filename).load_text(txt);
     if (txt.empty()) return false;
-    parse_numbers<float>(txt, processText, insertLambda);
+    parse_numbers<bcg_scalar_t>(txt, processText, insertLambda);
     return true;
 }
 
@@ -274,22 +274,22 @@ bool point_cloudio::read_txt(point_cloud &pc) {
 
     };
 
-    auto colors = pc.vertices.get_or_add<vec3f, 3>("color");
-    auto reflectances = pc.vertices.get_or_add<float, 1>("reflectance");
+    auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("color");
+    auto reflectances = pc.vertices.get_or_add<bcg_scalar_t, 1>("reflectance");
     vertex_handle v;
-    auto insertLambda = [&v, &pc, &colors, &reflectances](float result, size_t lineCount,
-                                                      size_t floatPerLineCount) {
+    auto insertLambda = [&v, &pc, &colors, &reflectances](bcg_scalar_t result, size_t lineCount,
+                                                          size_t ScalarTypePerLineCount) {
         if (lineCount == 0) {
             pc.vertices.reserve(result);
         } else {
-            if (floatPerLineCount == 0) {
-                v = pc.add_vertex(zero3f);
+            if (ScalarTypePerLineCount == 0) {
+                v = pc.add_vertex(zero3s);
             }
-            if (floatPerLineCount < 3) {
-                pc.positions[v][floatPerLineCount] = result;
-            } else if (floatPerLineCount < 6) {
-                colors[v][floatPerLineCount - 3] = result;
-            } else if (floatPerLineCount < 7) {
+            if (ScalarTypePerLineCount < 3) {
+                pc.positions[v][ScalarTypePerLineCount] = result;
+            } else if (ScalarTypePerLineCount < 6) {
+                colors[v][ScalarTypePerLineCount - 3] = result;
+            } else if (ScalarTypePerLineCount < 7) {
                 reflectances[v] = result;
             }
         }
@@ -298,7 +298,7 @@ bool point_cloudio::read_txt(point_cloud &pc) {
     std::string txt;
     file_stream(filename).load_text(txt);
     if (txt.empty()) return false;
-    parse_numbers<float>(txt, processText, insertLambda);
+    parse_numbers<bcg_scalar_t>(txt, processText, insertLambda);
     return true;
 }
 
@@ -310,9 +310,9 @@ static int PCvertexCallback(p_ply_argument argument) {
     ply_get_argument_user_data(argument, &pdata, &idx);
 
     auto *mesh = (point_cloud *) pdata;
-    auto point = mesh->object_properties.get<vec3f, 3>("point");
+    auto point = mesh->object_properties.get<VectorS<3>, 3>("point");
 
-    point[0][idx] = (float) ply_get_argument_value(argument);
+    point[0][idx] = (bcg_scalar_t) ply_get_argument_value(argument);
 
     vertex_handle v;
     if (idx == 2) {
@@ -324,7 +324,7 @@ static int PCvertexCallback(p_ply_argument argument) {
 
 bool point_cloudio::read_ply(point_cloud &pc) {
     // add object properties to hold temporary data
-    auto point = pc.object_properties.add<vec3f, 3>("point");
+    auto point = pc.object_properties.add<VectorS<3>, 3>("point");
     point.resize(1);
 
     // open file, read header

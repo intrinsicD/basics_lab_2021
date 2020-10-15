@@ -18,18 +18,18 @@ TEST(TestSuiteProperty, all) {
     EXPECT_FALSE(container.has("scalarfield"));
     EXPECT_FALSE(container.has("vectorfield"));
 
-    property<float, 1> scalarfield;
-    property<vec3f, 3> vectorfield;
+    property<bcg_scalar_t, 1> scalarfield;
+    property<VectorS<3>, 3> vectorfield;
 
     EXPECT_FALSE(scalarfield);
     EXPECT_FALSE(vectorfield);
 
-    scalarfield = container.add<float, 1>("scalarfield");
+    scalarfield = container.add<bcg_scalar_t, 1>("scalarfield");
 
     EXPECT_TRUE(scalarfield);
     EXPECT_FALSE(vectorfield);
 
-    vectorfield = container.add<vec3f, 3>("vectorfield", zero3f);
+    vectorfield = container.add<VectorS<3>, 3>("vectorfield", zero3s);
 
     EXPECT_TRUE(scalarfield);
     EXPECT_TRUE(vectorfield);
@@ -37,7 +37,7 @@ TEST(TestSuiteProperty, all) {
     container.resize(10);
 
     container.push_back();
-    vectorfield.back() = vec3f(1, 2, 3);
+    vectorfield.back() = VectorS<3>(1, 2, 3);
     scalarfield.back() = 1;
     container.resize(container.size());
 
@@ -46,20 +46,20 @@ TEST(TestSuiteProperty, all) {
     EXPECT_EQ(vectorfield.size(), 12);
     EXPECT_EQ(scalarfield.size(), 12);
 
-    EXPECT_EQ(vectorfield[vectorfield.size() - 2], vec3f(1, 2, 3));
+    EXPECT_EQ(vectorfield[vectorfield.size() - 2], VectorS<3>(1, 2, 3));
 
     property<bool, 1> conditions = container.add<bool, 1>("conditions");
     conditions[0] = true;
 
-    auto test = container.get_or_add<vec3f, 3>("normals", one3f);
+    auto test = container.get_or_add<VectorS<3>, 3>("normals", one3s);
     EXPECT_TRUE(container.has("normals"));
     container.remove(test);
     EXPECT_FALSE(test);
     EXPECT_FALSE(container.has("normals"));
 
-    EXPECT_NE(vectorfield.back(), vec3f(1, 2, 3));
+    EXPECT_NE(vectorfield.back(), VectorS<3>(1, 2, 3));
     container.swap(vectorfield.size() - 2, vectorfield.size() - 1);
-    EXPECT_EQ(vectorfield.back(), vec3f(1, 2, 3));
+    EXPECT_EQ(vectorfield.back(), VectorS<3>(1, 2, 3));
 }
 
 TEST(TestSuiteProperty, property_container) {
@@ -68,26 +68,26 @@ TEST(TestSuiteProperty, property_container) {
     EXPECT_FALSE(container.has("scalarfield"));
     EXPECT_FALSE(container.has("vectorfield"));
 
-    property<float, 1> scalarfield;
-    property<vec3f, 3> vectorfield;
+    property<bcg_scalar_t, 1> scalarfield;
+    property<VectorS<3>, 3> vectorfield;
 
     EXPECT_FALSE(scalarfield);
     EXPECT_FALSE(vectorfield);
 
-    scalarfield = container.add<float, 1>("scalarfield");
+    scalarfield = container.add<bcg_scalar_t, 1>("scalarfield");
 
     EXPECT_TRUE(scalarfield);
     EXPECT_FALSE(vectorfield);
 
-    vectorfield = container.add<vec3f, 3>("vectorfield",zero3f);
+    vectorfield = container.add<VectorS<3>, 3>("vectorfield",zero3s);
 
     EXPECT_TRUE(scalarfield);
     EXPECT_TRUE(vectorfield);
 
-    auto test1 = container.get_or_add<float, 1>("test1");
+    auto test1 = container.get_or_add<bcg_scalar_t, 1>("test1");
     EXPECT_TRUE(test1);
     EXPECT_TRUE(container.has("test1"));
-    auto test2 = container.get_or_add<vec4f, 4>("test2", one4f);
+    auto test2 = container.get_or_add<VectorS<4>, 4>("test2", one4s);
     EXPECT_TRUE(test2);
     EXPECT_TRUE(container.has("test2"));
 
@@ -128,8 +128,8 @@ TEST(TestSuiteProperty, property_container) {
 
 TEST(TestSuiteProperty, Property) {
     property_container container;
-    auto scalarfield = container.get_or_add<float, 1>("scalarfield");
-    auto vectorfield = container.get_or_add<vec3f, 3>("vectorfield", one3f);
+    auto scalarfield = container.get_or_add<bcg_scalar_t, 1>("scalarfield");
+    auto vectorfield = container.get_or_add<VectorS<3>, 3>("vectorfield", one3s);
 
     EXPECT_FALSE(scalarfield.is_dirty());
     EXPECT_FALSE(vectorfield.is_dirty());
@@ -151,16 +151,16 @@ TEST(TestSuiteProperty, Property) {
     EXPECT_EQ(vectorfield.dims(), 3);
     EXPECT_EQ(conditions.dims(), 1);
 
-    EXPECT_EQ(scalarfield.size_bytes(), 1 * 10 * sizeof(float));
-    EXPECT_EQ(vectorfield.size_bytes(), 3 * 10 * sizeof(float));
+    EXPECT_EQ(scalarfield.size_bytes(), 1 * 10 * sizeof(bcg_scalar_t));
+    EXPECT_EQ(vectorfield.size_bytes(), 3 * 10 * sizeof(bcg_scalar_t));
     EXPECT_EQ(conditions.size_bytes(), 1 * 10 * sizeof(bool));
 
-    Map(scalarfield) = Eigen::MatrixXf::Ones(10, 1);
+    Map(scalarfield) = VectorS<-1>::Ones(10);
 
     EXPECT_EQ(Map(scalarfield).mean(), 1);
     EXPECT_EQ((Map(scalarfield).array() - Map(scalarfield).mean()).square().sum() / scalarfield.size(), 0);
 
-    float eps = 1e-6f;
+    bcg_scalar_t eps = 1e-6f;
     EXPECT_LE(Map(vectorfield).colwise().mean().mean(), 1);
     EXPECT_LE((Map(vectorfield).rowwise() - Map(vectorfield).colwise().mean()).sum() / vectorfield.size(), eps);
 
@@ -172,7 +172,7 @@ TEST(TestSuiteProperty, Property) {
         EXPECT_FLOAT_EQ(scalarfield[i], scalarfield2[i]);
     }
 
-    std::vector<vec3f> data(100, one3f);
+    std::vector<VectorS<3>> data(100, one3s);
     vectorfield.set(data);
     EXPECT_EQ(vectorfield.size(), 100);
     vectorfield.append(data);

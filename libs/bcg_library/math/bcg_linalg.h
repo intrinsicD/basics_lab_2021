@@ -5,82 +5,63 @@
 #ifndef BCG_GRAPHICS_BCG_LINALG_H
 #define BCG_GRAPHICS_BCG_LINALG_H
 
-// -----------------------------------------------------------------------------
-// INCLUDES
-// -----------------------------------------------------------------------------
+#include "exts/eigen/Eigen/Core"
+#include "exts/eigen/Eigen/Geometry"
+#include "bcg_math_common.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
+namespace bcg {
 
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/component_wise.hpp"
-#include "glm/gtx/string_cast.hpp"
+template<typename T, bcg_index_t M, bcg_index_t N>
+using Matrix = Eigen::Matrix<T, M, N>;
 
-using namespace glm;
+template<bcg_index_t M, bcg_index_t N>
+using MatrixS = Matrix<bcg_scalar_t, M, N>;
 
-using byte = unsigned char;
-using uint = unsigned int;
-using ushort = uint16_t;
+template<typename T, bcg_index_t N>
+using Vector = Matrix<T, N, 1>;
 
-using mat2f = glm::fmat2;
-using mat2d = glm::dmat2;
+template<bcg_index_t N>
+using VectorS = Vector<bcg_scalar_t, N>;
 
-using mat3f = glm::fmat3;
-using mat3d = glm::dmat3;
+template<bcg_index_t N>
+using VectorI = Vector<bcg_index_t, N>;
 
-using mat4f = glm::fmat4;
-using mat4d = glm::dmat4;
+// Zero vector constants.
+template<bcg_index_t N>
+[[maybe_unused]] inline const auto zeroi = VectorI<N>::Zero();
+[[maybe_unused]] inline const auto zero2i = VectorI<2>::Zero();
+[[maybe_unused]] inline const auto zero3i = VectorI<3>::Zero();
+[[maybe_unused]] inline const auto zero4i = VectorI<4>::Zero();
 
-using vec2i = glm::ivec2;
-using vec2f = glm::fvec2;
-using vec2d = glm::dvec2;
+// One vector constants.
+template<bcg_index_t N>
+[[maybe_unused]] inline const auto onei = VectorI<N>::Ones();
+[[maybe_unused]] inline const auto one2i = VectorI<2>::Ones();
+[[maybe_unused]] inline const auto one3i = VectorI<3>::Ones();
+[[maybe_unused]] inline const auto one4i = VectorI<4>::Ones();
 
-using vec3i = glm::ivec3;
-using vec3f = glm::fvec3;
-using vec3d = glm::dvec3;
+// Zero vector constants.
+template<bcg_index_t N>
+[[maybe_unused]] inline const auto zeros = VectorS<N>::Zero();
+[[maybe_unused]] inline const auto zero2s = VectorS<2>::Zero();
+[[maybe_unused]] inline const auto zero3s = VectorS<3>::Zero();
+[[maybe_unused]] inline const auto zero4s = VectorS<4>::Zero();
 
-using vec4i = glm::ivec4;
-using vec4f = glm::fvec4;
-using vec4d = glm::dvec4;
+// One vector constants.
+template<bcg_index_t N>
+[[maybe_unused]] inline const auto ones = VectorS<N>::Ones();
+[[maybe_unused]] inline const auto one2s = VectorS<2>::Ones();
+[[maybe_unused]] inline const auto one3s = VectorS<3>::Ones();
+[[maybe_unused]] inline const auto one4s = VectorS<4>::Ones();
 
-template<int L, typename T, qualifier Q>
-inline std::ostream &operator<<(std::ostream &stream, const glm::vec<L, T, Q> &vec){
-    stream << to_string(vec) << "\n";
-    return stream;
+template<bcg_index_t N>
+inline auto unit(bcg_index_t i) {
+    VectorS<N> u(zeros<N>);
+    u[i] = 1;
+    return u;
 }
 
-// Zero vector constants.
-[[maybe_unused]] inline constexpr auto zero2i = vec2i{0, 0};
-[[maybe_unused]] inline constexpr auto zero3i = vec3i{0, 0, 0};
-[[maybe_unused]] inline const auto zero4i = vec4i{0, 0, 0, 0};
-
-// One vector constants.
-[[maybe_unused]] inline constexpr auto one2i = vec2i{1, 1};
-[[maybe_unused]] inline constexpr auto one3i = vec3i{1, 1, 1};
-[[maybe_unused]] inline const auto one4i = vec4i{1, 1, 1, 1};
-
-
-// Zero vector constants.
-[[maybe_unused]] inline constexpr auto zero2f = vec2f{0, 0};
-[[maybe_unused]] inline constexpr auto zero3f = vec3f{0, 0, 0};
-[[maybe_unused]] inline const auto zero4f = vec4f{0, 0, 0, 0};
-
-// One vector constants.
-[[maybe_unused]] inline constexpr auto one2f = vec2f{1, 1};
-[[maybe_unused]] inline constexpr auto one3f = vec3f{1, 1, 1};
-[[maybe_unused]] inline const auto one4f = vec4f{1, 1, 1, 1};
-
-// Zero vector constants.
-[[maybe_unused]] inline constexpr auto zero2d = vec2d{0, 0};
-[[maybe_unused]] inline constexpr auto zero3d = vec3d{0, 0, 0};
-[[maybe_unused]] inline const auto zero4d = vec4d{0, 0, 0, 0};
-
-// One vector constants.
-[[maybe_unused]] inline constexpr auto one2d = vec2d{1, 1};
-[[maybe_unused]] inline constexpr auto one3d = vec3d{1, 1, 1};
-[[maybe_unused]] inline const auto one4d = vec4d{1, 1, 1, 1};
-
-
+}
 
 
 #endif //BCG_GRAPHICS_BCG_LINALG_H
