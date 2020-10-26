@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_VIEWER_H
 #define BCG_GRAPHICS_BCG_VIEWER_H
 
-#include "bcg_imgui.h"
+#include "bcg_linalg.h"
 
 namespace bcg {
 
@@ -15,12 +15,6 @@ struct viewer {
     void run(VectorI<2> size = {800, 600}, std::string title = "default");
 };
 
-}
-
-namespace bcg {
-void viewer::run(VectorI<2> size, std::string title) {
-    run_ui(size, title, callbacks);
-}
 }
 
 #endif //BCG_GRAPHICS_BCG_VIEWER_H

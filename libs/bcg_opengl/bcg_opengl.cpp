@@ -77,11 +77,14 @@ void assert_ogl_error() { assert(_assert_ogl_error() == GL_NO_ERROR); }
 
 void ogl_version(int &major, int &minor) {
     glGetIntegerv(GL_MAJOR_VERSION, &major);
+    assert_ogl_error();
     glGetIntegerv(GL_MINOR_VERSION, &minor);
+    assert_ogl_error();
 }
 
 std::string ogl_version_string() {
     const unsigned char *version = glGetString(GL_VERSION);
+    assert_ogl_error();
     if (version) {
         return std::string(reinterpret_cast<const char *>(version));
     } else {
@@ -98,12 +101,15 @@ std::string ogl_version_string() {
 }
 
 std::string glsl_version_string() {
-    return reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+    std::string version_string = reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+    assert_ogl_error();
+    return version_string;
 }
 
 std::string ogl_renderer_string() {
-    const GLubyte *renderer = glGetString(GL_RENDERER);
-    return std::string(reinterpret_cast<const char *>(renderer));
+    std::string renderer_string = reinterpret_cast<const char *>(glGetString(GL_RENDERER));
+    assert_ogl_error();
+    return renderer_string;
 }
 
 
@@ -188,11 +194,15 @@ unsigned int TextureDataFormat(ogl_types::Type type, int numChannels) {
     return formats[type >= ogl_types::TYPE_INT8][numChannels - 1];
 }
 
-ogl_handle::ogl_handle : handle(BCG_GL_INVALID_ID), name("") {
+ogl_handle::ogl_handle() : ogl_handle(BCG_GL_INVALID_ID, "") {
 
 }
 
-ogl_handle::ogl_handle(unsigned int handle) : handle(handle), name("") {
+ogl_handle::ogl_handle(unsigned int handle) : ogl_handle(handle, "") {
+
+}
+
+ogl_handle::ogl_handle(std::string name) : ogl_handle(BCG_GL_INVALID_ID, name) {
 
 }
 
@@ -214,7 +224,7 @@ ogl_handle::operator bool() const {
 //----------------------------------------------------------------------------------------------------------------------
 
 
-glsl_shader::glsl_shader() : ogl_handle, type(BCG_GL_INVALID_ID), source(), filename() {
+glsl_shader::glsl_shader() : ogl_handle(), type(BCG_GL_INVALID_ID), source(), filename() {
 
 }
 
@@ -315,6 +325,7 @@ bool glsl_shader::compile(const char *source, unsigned int type, int prepend_cou
 int glsl_shader::get_compile_status() const {
     GLint comile_error(GL_FALSE);
     glGetShaderiv(handle, GL_COMPILE_STATUS, &comile_error);
+    assert_ogl_error();
     check_compile_status();
     return comile_error;
 }
@@ -322,6 +333,7 @@ int glsl_shader::get_compile_status() const {
 int glsl_shader::get_info_log_length() const {
     GLint info_log_length(0);
     glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &info_log_length);
+    assert_ogl_error();
     check_compile_status();
     return info_log_length;
 }
@@ -329,6 +341,7 @@ int glsl_shader::get_info_log_length() const {
 std::string glsl_shader::get_info_log(int length) const {
     std::vector<char> message(length);
     glGetShaderInfoLog(handle, length, nullptr, message.data());
+    assert_ogl_error();
     check_compile_status();
     return std::string(message.data());
 }
@@ -348,6 +361,7 @@ bool glsl_shader::check_eq_shader_type(unsigned int type) const {
     if (result) {
         GLint stype;
         glGetShaderiv(handle, GL_SHADER_TYPE, &stype);
+        assert_ogl_error();
         check_compile_status();
         if (stype != (GLint) type) {
             std::cerr << "Incorrect shader type.";
@@ -361,15 +375,15 @@ bool glsl_shader::check_eq_shader_type(unsigned int type) const {
 // glsl program
 //----------------------------------------------------------------------------------------------------------------------
 
-glsl_program::glsl_program(): ogl_handle(){
+glsl_program::glsl_program() : ogl_handle() {
 
 }
 
-glsl_program::glsl_program(unsigned int handle) : ogl_handle(handle){
+glsl_program::glsl_program(unsigned int handle) : ogl_handle(handle) {
 
 }
 
-glsl_program::glsl_program(unsigned int handle, std::string name): ogl_handle(handle, name){
+glsl_program::glsl_program(unsigned int handle, std::string name) : ogl_handle(handle, name) {
 
 }
 
@@ -574,8 +588,7 @@ std::string glsl_program::get_info_log(GLint length) const {
 void glsl_program::check_link_status() const {
     GLint info_log_length = get_info_log_length();
     if (info_log_length > 0)
-        Logger::BCG_ASSERT(true,
-                           "Could not link program:\nOpenGl Message: \n" + get_info_log(info_log_length));
+        std::cerr << "Could not link program:\nOpenGl Message: \n" << get_info_log(info_log_length);
 }
 
 void glsl_program::bind() const {
@@ -601,11 +614,12 @@ void glsl_program::print_active_attrinutes() const {
     glGetProgramiv(handle, GL_ACTIVE_ATTRIBUTES, &count);
     assert_ogl_error();
 
-    Logger::BCG_INFO("Active Attributes: " + std::to_string(count));
+    std::cout << "Active Attributes: " << std::to_string(count) << "\n";
     for (int i = 0; i < count; i++) {
         glGetActiveAttrib(handle, (GLuint) i, bufSize, &length, &size, &type, name);
         assert_ogl_error();
-        Logger::BCG_INFO("Attribute #" + std::to_string(i) + " Type: " + std::to_string(type) + " Name: " + name);
+        std::cout << "Attribute #" << std::to_string(i) << " Type: " << std::to_string(type) << " Name: " << name
+                  << "\n";
     }
     std::cout << "\n";
 }
@@ -623,11 +637,11 @@ void glsl_program::print_active_uniforms() const {
     glGetProgramiv(handle, GL_ACTIVE_UNIFORMS, &count);
     assert_ogl_error();
 
-    Logger::BCG_INFO("Active Uniforms: " + std::to_string(count));
+    std::cout << "Active Uniforms: " << std::to_string(count) << "\n";
     for (int i = 0; i < count; i++) {
         glGetActiveUniform(handle, (GLuint) i, bufSize, &length, &size, &type, name);
         assert_ogl_error();
-        Logger::BCG_INFO("Uniform #" + std::to_string(i) + " Type: " + std::to_string(type) + " Name: " + name);
+        std::cout << "Uniform #" << std::to_string(i) << " Type: " << std::to_string(type) << " Name: " << name << "\n";
     }
     std::cout << "\n";
 }
@@ -639,133 +653,133 @@ GLuint glsl_program::get_attribute_location(const char *name) const {
     return GLuint(index);
 }
 
-GLint glsl_program::get_uniforlocation(const char *name) const {
+GLint glsl_program::get_uniform_location(const char *name) const {
     GLint index = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (index < 0) return BCG_GL_INVALID_ID;
     return index;
 }
 
-GLint glsl_program::get_uniforblock_location(const char *name) const {
+GLint glsl_program::get_uniform_block_location(const char *name) const {
     GLint index = glGetUniformBlockIndex(handle, name);
     assert_ogl_error();
     if (index < 0) return BCG_GL_INVALID_ID;
     return index;
 }
 
-GLint glsl_program::get_uniforblock_size(GLint index) const {
+GLint glsl_program::get_uniform_block_size(GLint index) const {
     GLint size = 0;
     glGetActiveUniformBlockiv(handle, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
     assert_ogl_error();
     return size;
 }
 
-void glsl_program::set_uniforf(const char *name, float x) const {
+void glsl_program::set_uniform_f(const char *name, float x) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1f(id, x);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniforf(const char *name, float x, float y) const {
+void glsl_program::set_uniform_f(const char *name, float x, float y) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2f(id, x, y);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniforf(const char *name, float x, float y, float z) const {
+void glsl_program::set_uniform_f(const char *name, float x, float y, float z) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3f(id, x, y, z);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniforf(const char *name, float x, float y, float z, float w) const {
+void glsl_program::set_uniform_f(const char *name, float x, float y, float z, float w) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4f(id, x, y, z, w);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor1f(const char *name, int count, const float *data) const {
+void glsl_program::set_uniform_1f(const char *name, int count, const float *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1fv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor2f(const char *name, int count, const float *data) const {
+void glsl_program::set_uniform_2f(const char *name, int count, const float *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2fv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor3f(const char *name, int count, const float *data) const {
+void glsl_program::set_uniform_3f(const char *name, int count, const float *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3fv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor4f(const char *name, int count, const float *data) const {
+void glsl_program::set_uniform_4f(const char *name, int count, const float *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0)glUniform4fv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifori(const char *name, int x) const {
+void glsl_program::set_uniform_i(const char *name, int x) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1i(id, x);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifori(const char *name, int x, int y) const {
+void glsl_program::set_uniform_i(const char *name, int x, int y) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2i(id, x, y);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifori(const char *name, int x, int y, int z) const {
+void glsl_program::set_uniform_i(const char *name, int x, int y, int z) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3i(id, x, y, z);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifori(const char *name, int x, int y, int z, int w) const {
+void glsl_program::set_uniform_i(const char *name, int x, int y, int z, int w) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4i(id, x, y, z, w);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor1i(const char *name, int count, const int *data) const {
+void glsl_program::set_uniform_1i(const char *name, int count, const int *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1iv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor2i(const char *name, int count, const int *data) const {
+void glsl_program::set_uniform_2i(const char *name, int count, const int *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2iv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor3i(const char *name, int count, const int *data) const {
+void glsl_program::set_uniform_3i(const char *name, int count, const int *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3iv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor4i(const char *name, int count, const int *data) const {
+void glsl_program::set_uniform_4i(const char *name, int count, const int *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4iv(id, count, data);
@@ -774,56 +788,56 @@ void glsl_program::set_unifor4i(const char *name, int count, const int *data) co
 
 #ifdef GL_VERSION_3_0
 
-void glsl_program::set_uniforu(const char *name, GLuint x) const {
+void glsl_program::set_uniform_u(const char *name, GLuint x) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1ui(id, x);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniforu(const char *name, GLuint x, GLuint y) const {
+void glsl_program::set_uniform_u(const char *name, GLuint x, GLuint y) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2ui(id, x, y);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniforu(const char *name, GLuint x, GLuint y, GLuint z) const {
+void glsl_program::set_uniform_u(const char *name, GLuint x, GLuint y, GLuint z) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3ui(id, x, y, z);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniforu(const char *name, GLuint x, GLuint y, GLuint z, GLuint w) const {
+void glsl_program::set_uniform_u(const char *name, GLuint x, GLuint y, GLuint z, GLuint w) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4ui(id, x, y, z, w);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor1u(const char *name, int count, const GLuint *data) const {
+void glsl_program::set_uniform_1u(const char *name, int count, const GLuint *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1uiv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor2u(const char *name, int count, const GLuint *data) const {
+void glsl_program::set_uniform_2u(const char *name, int count, const GLuint *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2uiv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor3u(const char *name, int count, const GLuint *data) const {
+void glsl_program::set_uniform_3u(const char *name, int count, const GLuint *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3uiv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor4u(const char *name, int count, const GLuint *data) const {
+void glsl_program::set_uniform_4u(const char *name, int count, const GLuint *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4uiv(id, count, data);
@@ -833,56 +847,56 @@ void glsl_program::set_unifor4u(const char *name, int count, const GLuint *data)
 #endif
 #ifdef GL_VERSION_4_0
 
-void glsl_program::set_uniford(const char *name, double x) const {
+void glsl_program::set_uniform_d(const char *name, double x) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1d(id, x);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniford(const char *name, double x, double y) const {
+void glsl_program::set_uniform_d(const char *name, double x, double y) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2d(id, x, y);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniford(const char *name, double x, double y, double z) const {
+void glsl_program::set_uniform_d(const char *name, double x, double y, double z) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3d(id, x, y, z);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniford(const char *name, double x, double y, double z, double w) const {
+void glsl_program::set_uniform_d(const char *name, double x, double y, double z, double w) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4d(id, x, y, z, w);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor1d(const char *name, int count, const double *data) const {
+void glsl_program::set_uniform_1d(const char *name, int count, const double *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform1dv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor2d(const char *name, int count, const double *data) const {
+void glsl_program::set_uniform_2d(const char *name, int count, const double *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform2dv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor3d(const char *name, int count, const double *data) const {
+void glsl_program::set_uniform_3d(const char *name, int count, const double *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform3dv(id, count, data);
     assert_ogl_error();
 }
 
-void glsl_program::set_unifor4d(const char *name, int count, const double *data) const {
+void glsl_program::set_uniform_4d(const char *name, int count, const double *data) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniform4dv(id, count, data);
@@ -891,21 +905,21 @@ void glsl_program::set_unifor4d(const char *name, int count, const double *data)
 
 #endif
 
-void glsl_program::set_uniformatrix_2f(const char *name, const float *m, int count, bool transpose) const {
+void glsl_program::set_uniform_matrix_2f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix2fv(id, count, transpose, m);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniformatrix_3f(const char *name, const float *m, int count, bool transpose) const {
+void glsl_program::set_uniform_matrix_3f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix3fv(id, count, transpose, m);
     assert_ogl_error();
 }
 
-void glsl_program::set_uniformatrix_4f(const char *name, const float *m, int count, bool transpose) const {
+void glsl_program::set_uniform_matrix_4f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix4fv(id, count, transpose, m);
@@ -915,7 +929,7 @@ void glsl_program::set_uniformatrix_4f(const char *name, const float *m, int cou
 #ifdef GL_VERSION_2_1
 
 void
-glsl_program::set_uniformatrix_2x3f(const char *name, const float *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_2x3f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix2x3fv(id, count, transpose, m);
@@ -923,7 +937,7 @@ glsl_program::set_uniformatrix_2x3f(const char *name, const float *m, int count,
 }
 
 void
-glsl_program::set_uniformatrix_2x4f(const char *name, const float *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_2x4f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix2x4fv(id, count, transpose, m);
@@ -931,7 +945,7 @@ glsl_program::set_uniformatrix_2x4f(const char *name, const float *m, int count,
 }
 
 void
-glsl_program::set_uniformatrix_3x2f(const char *name, const float *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_3x2f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix3x2fv(id, count, transpose, m);
@@ -939,7 +953,7 @@ glsl_program::set_uniformatrix_3x2f(const char *name, const float *m, int count,
 }
 
 void
-glsl_program::set_uniformatrix_3x4f(const char *name, const float *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_3x4f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix3x4fv(id, count, transpose, m);
@@ -947,7 +961,7 @@ glsl_program::set_uniformatrix_3x4f(const char *name, const float *m, int count,
 }
 
 void
-glsl_program::set_uniformatrix_4x2f(const char *name, const float *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_4x2f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix4x2fv(id, count, transpose, m);
@@ -955,7 +969,7 @@ glsl_program::set_uniformatrix_4x2f(const char *name, const float *m, int count,
 }
 
 void
-glsl_program::set_uniformatrix_4x3f(const char *name, const float *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_4x3f(const char *name, const float *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix4x3fv(id, count, transpose, m);
@@ -966,7 +980,7 @@ glsl_program::set_uniformatrix_4x3f(const char *name, const float *m, int count,
 #ifdef GL_VERSION_4_0
 
 void
-glsl_program::set_uniformatrix_2d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_2d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix2dv(id, count, transpose, m);
@@ -974,7 +988,7 @@ glsl_program::set_uniformatrix_2d(const char *name, const double *m, int count, 
 }
 
 void
-glsl_program::set_uniformatrix_3d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_3d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix3dv(id, count, transpose, m);
@@ -982,7 +996,7 @@ glsl_program::set_uniformatrix_3d(const char *name, const double *m, int count, 
 }
 
 void
-glsl_program::set_uniformatrix_4d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_4d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix4dv(id, count, transpose, m);
@@ -990,7 +1004,7 @@ glsl_program::set_uniformatrix_4d(const char *name, const double *m, int count, 
 }
 
 void
-glsl_program::set_uniformatrix_2x3d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_2x3d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix2x3dv(id, count, transpose, m);
@@ -998,7 +1012,7 @@ glsl_program::set_uniformatrix_2x3d(const char *name, const double *m, int count
 }
 
 void
-glsl_program::set_uniformatrix_2x4d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_2x4d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix2x4dv(id, count, transpose, m);
@@ -1006,7 +1020,7 @@ glsl_program::set_uniformatrix_2x4d(const char *name, const double *m, int count
 }
 
 void
-glsl_program::set_uniformatrix_3x2d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_3x2d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix3x2dv(id, count, transpose, m);
@@ -1014,7 +1028,7 @@ glsl_program::set_uniformatrix_3x2d(const char *name, const double *m, int count
 }
 
 void
-glsl_program::set_uniformatrix_3x4d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_3x4d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix3x4dv(id, count, transpose, m);
@@ -1022,7 +1036,7 @@ glsl_program::set_uniformatrix_3x4d(const char *name, const double *m, int count
 }
 
 void
-glsl_program::set_uniformatrix_4x2d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_4x2d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix4x2dv(id, count, transpose, m);
@@ -1030,7 +1044,7 @@ glsl_program::set_uniformatrix_4x2d(const char *name, const double *m, int count
 }
 
 void
-glsl_program::set_uniformatrix_4x3d(const char *name, const double *m, int count, bool transpose) const {
+glsl_program::set_uniform_matrix_4x3d(const char *name, const double *m, int count, bool transpose) const {
     int id = glGetUniformLocation(handle, name);
     assert_ogl_error();
     if (id >= 0) glUniformMatrix4x3dv(id, count, transpose, m);
@@ -1042,6 +1056,33 @@ glsl_program::set_uniformatrix_4x3d(const char *name, const double *m, int count
 //----------------------------------------------------------------------------------------------------------------------
 // ogl texture
 //----------------------------------------------------------------------------------------------------------------------
+
+ogl_texture::ogl_texture() : ogl_texture(BCG_GL_INVALID_ID, BCG_GL_INVALID_ID, "texture") {
+
+}
+
+ogl_texture::ogl_texture(std::string name) : ogl_texture(BCG_GL_INVALID_ID, BCG_GL_INVALID_ID, name) {
+
+}
+
+ogl_texture::ogl_texture(unsigned int target, std::string name) : ogl_texture(BCG_GL_INVALID_ID, target, name) {
+
+}
+
+ogl_texture::ogl_texture(unsigned int handle, unsigned int target, std::string name) : ogl_handle(handle, name),
+                                                                                       target(target),
+                                                                                       width(-1),
+                                                                                       height(-1),
+                                                                                       channels(-1),
+                                                                                       unit(-1),
+                                                                                       mipmap_level(-1),
+                                                                                       internal_format(-1),
+                                                                                       format(-1),
+                                                                                       type(-1),
+                                                                                       border_color_rgba{0.5f, 0.5f,
+                                                                                                         0.5f, 1.0f} {
+
+}
 
 void ogl_texture::create() {
     destroy();
@@ -1156,7 +1197,7 @@ void ogl_texture::set_mipmaps_filter_linear_linear() {
 }
 
 void ogl_texture::set_image_data(GLenum target, GLint mipmap_level, GLenum internal_format, int width, int height,
-                               GLenum format, GLenum type, void *data) {
+                                 GLenum format, GLenum type, void *data) {
     this->target = target;
     this->mipmap_level = mipmap_level;
     this->internal_format = internal_format;
@@ -1167,7 +1208,7 @@ void ogl_texture::set_image_data(GLenum target, GLint mipmap_level, GLenum inter
 
 void ogl_texture::update_data(void *data, int w, int h) {
     bind();
-    if(width != w || height != h){
+    if (width != w || height != h) {
         width = w;
         height = h;
         if (target == GL_TEXTURE_1D) {
@@ -1175,7 +1216,7 @@ void ogl_texture::update_data(void *data, int w, int h) {
         } else if (target == GL_TEXTURE_2D) {
             glTexImage2D(target, mipmap_level, internal_format, width, height, 0, format, type, data);
         }
-    }else{
+    } else {
         if (target == GL_TEXTURE_1D) {
             glTexSubImage1D(target, mipmap_level, 0, width, format, type, data);
         } else if (target == GL_TEXTURE_2D) {
@@ -1184,19 +1225,841 @@ void ogl_texture::update_data(void *data, int w, int h) {
     }
     assert_ogl_error();
     release();
-    assert_ogl_error();
 }
 
 void ogl_texture::download_data(void *data) {
     bind();
     glGetTexImage(target, mipmap_level, format, type, data);
-    release();
     assert_ogl_error();
+    release();
 }
 
 void ogl_texture::resize(int width, int height) {
     update_data(nullptr, width, height);
 }
+
+ogl_buffer_object::ogl_buffer_object() : ogl_buffer_object(BCG_GL_INVALID_ID, "") {
+
+}
+
+ogl_buffer_object::ogl_buffer_object(std::string name) : ogl_buffer_object(BCG_GL_INVALID_ID, name) {
+
+}
+
+ogl_buffer_object::ogl_buffer_object(unsigned int target, std::string name) : ogl_buffer_object(BCG_GL_INVALID_ID,
+                                                                                                BCG_GL_INVALID_ID,
+                                                                                                name) {
+
+}
+
+ogl_buffer_object::ogl_buffer_object(unsigned int handle, unsigned int target, std::string name) : ogl_handle(handle,
+                                                                                                              name),
+                                                                                                   target(target),
+                                                                                                   capacity(0),
+                                                                                                   num_elements(0),
+                                                                                                   dims(0),
+                                                                                                   dynamic(false) {
+
+}
+
+size_t ogl_buffer_object::get_buffer_size_gpu() const {
+    bind();
+    GLint bytes = 0;
+    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &bytes);
+    assert_ogl_error();
+    release();
+    return static_cast<size_t>(bytes);
+}
+
+void ogl_buffer_object::create() {
+    destroy();
+    glGenBuffers(1, &handle);
+    assert_ogl_error();
+}
+
+void ogl_buffer_object::destroy() {
+    if (*this) {
+        glDeleteBuffers(1, &handle);
+        assert_ogl_error();
+    }
+}
+
+void ogl_buffer_object::bind() const {
+    glBindBuffer(target, handle);
+    assert_ogl_error();
+}
+
+void ogl_buffer_object::release() const {
+    glBindBuffer(target, 0);
+    assert_ogl_error();
+}
+
+ogl_vertex_buffer::ogl_vertex_buffer() : ogl_buffer_object(GL_ARRAY_BUFFER, "vbo") {
+
+}
+
+ogl_vertex_buffer::ogl_vertex_buffer(std::string name) : ogl_buffer_object(GL_ARRAY_BUFFER, name) {
+
+}
+
+ogl_vertex_buffer::ogl_vertex_buffer(unsigned int handle, std::string name) : ogl_buffer_object(handle, GL_ARRAY_BUFFER,
+                                                                                                name) {
+
+}
+
+void ogl_vertex_buffer::upload(const std::vector<bcg_scalar_t> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 1, offset, dynamic);
+}
+
+void ogl_vertex_buffer::upload(const std::vector<VectorS<2>> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 2, offset, dynamic);
+}
+
+void ogl_vertex_buffer::upload(const std::vector<VectorS<3>> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 3, offset, dynamic);
+}
+
+void ogl_vertex_buffer::upload(const std::vector<VectorS<4>> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 4, offset, dynamic);
+}
+
+void ogl_vertex_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
+    if (size > capacity) {
+        // reallocate buffer if needed
+        destroy();
+        create();
+        bind();
+        glBufferData(target, size * sizeof(bcg_scalar_t), nullptr, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+        assert_ogl_error();
+        capacity = size;
+        num_elements = capacity / dims;
+        this->dims = dims;
+        this->dynamic = dynamic;
+    } else {
+        // we have enough space
+        bind();
+    }
+
+    glBufferSubData(target, offset * sizeof(bcg_scalar_t), size * sizeof(bcg_scalar_t), data);
+    assert_ogl_error();
+    release();
+}
+
+void ogl_vertex_buffer::download(std::vector<bcg_scalar_t> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(data.data(), size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_vertex_buffer::download(std::vector<VectorS<2>> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(&data[0][0], size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_vertex_buffer::download(std::vector<VectorS<3>> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(&data[0][0], size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_vertex_buffer::download(std::vector<VectorS<4>> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(&data[0][0], size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_vertex_buffer::download(bcg_scalar_t *data, size_t size_bytes, size_t offset_bytes) {
+    bind();
+    glGetBufferSubData(target, offset_bytes, size_bytes, data);
+    assert_ogl_error();
+    release();
+}
+
+ogl_element_buffer::ogl_element_buffer() : ogl_buffer_object(GL_ARRAY_BUFFER, "ebo") {
+
+}
+
+ogl_element_buffer::ogl_element_buffer(std::string name) : ogl_buffer_object(GL_ELEMENT_ARRAY_BUFFER, name) {
+
+}
+
+ogl_element_buffer::ogl_element_buffer(unsigned int handle, std::string name) : ogl_buffer_object(handle,
+                                                                                                  GL_ELEMENT_ARRAY_BUFFER,
+                                                                                                  name) {
+
+}
+
+void ogl_element_buffer::upload(const std::vector<bcg_index_t> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 1, offset, dynamic);
+}
+
+void ogl_element_buffer::upload(const std::vector<VectorI<2>> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 2, offset, dynamic);
+}
+
+void ogl_element_buffer::upload(const std::vector<VectorI<3>> &data, size_t offset, bool dynamic) {
+    upload(data.data(), data.size(), 3, offset, dynamic);
+}
+
+void ogl_element_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
+    if (size > capacity) {
+        // reallocate buffer if needed
+        destroy();
+        create();
+        bind();
+        glBufferData(target, size * sizeof(bcg_index_t), nullptr, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+        assert_ogl_error();
+        capacity = size;
+        num_elements = capacity / dims;
+        this->dims = dims;
+        this->dynamic = dynamic;
+    } else {
+        // we have enough space
+        bind();
+    }
+
+    glBufferSubData(target, offset * sizeof(bcg_index_t), size * sizeof(bcg_index_t), data);
+    assert_ogl_error();
+    release();
+}
+
+void ogl_element_buffer::download(std::vector<bcg_index_t> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(data.data(), size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_element_buffer::download(std::vector<VectorI<2>> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(&data[0][0], size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_element_buffer::download(std::vector<VectorI<3>> &data, size_t offset) {
+    size_t size_bytes = get_buffer_size_gpu() - offset * sizeof(bcg_scalar_t);
+    data.resize(size_bytes / sizeof(bcg_scalar_t) / dims);
+    download(&data[0][0], size_bytes, offset * sizeof(bcg_scalar_t));
+}
+
+void ogl_element_buffer::download(bcg_index_t *data, size_t size_bytes, size_t offset_bytes) {
+    bind();
+    glGetBufferSubData(target, offset_bytes, size_bytes, data);
+    assert_ogl_error();
+    release();
+}
+
+ogl_vertex_array::ogl_vertex_array() : ogl_handle("vao") {
+
+}
+
+ogl_vertex_array::ogl_vertex_array(std::string name) : ogl_handle(name) {
+
+}
+
+ogl_vertex_array::ogl_vertex_array(unsigned int handle, std::string name) : ogl_handle(handle, name) {
+
+}
+
+void ogl_vertex_array::create() {
+    destroy();
+    glGenVertexArrays(1, &handle);
+    assert_ogl_error();
+}
+
+void ogl_vertex_array::destroy() {
+    if (*this) {
+        glDeleteVertexArrays(1, &handle);
+        assert_ogl_error();
+        handle = BCG_GL_INVALID_ID;
+    }
+}
+
+void ogl_vertex_array::bind() const {
+    glBindVertexArray(handle);
+    assert_ogl_error();
+}
+
+void ogl_vertex_array::release() const {
+    glBindVertexArray(0);
+    assert_ogl_error();
+}
+
+ogl_vertex_buffer ogl_vertex_array::get_vertex_buffer(std::string name) {
+    auto iter = std::find_if(vertex_buffers.begin(), vertex_buffers.end(), [name](const ogl_vertex_buffer &vbo) {
+        return vbo.name == name;
+    });
+    if (iter != vertex_buffers.end()) {
+        return *iter;
+    }
+    return ogl_vertex_buffer();
+}
+
+void ogl_vertex_array::add_vertex_buffer(const ogl_vertex_buffer &vertex_buffer) {
+    auto vbo = get_vertex_buffer(vertex_buffer.name);
+    if (!vbo) {
+        vertex_buffers.push_back(vertex_buffer);
+    }
+}
+
+void ogl_vertex_array::set_element_buffer(const ogl_element_buffer &element_buffer) {
+    this->element_buffer = element_buffer;
+}
+
+
+ogl_renderbuffer::ogl_renderbuffer() : ogl_renderbuffer(BCG_GL_INVALID_ID, "rbo") {
+
+}
+
+ogl_renderbuffer::ogl_renderbuffer(std::string name) : ogl_renderbuffer(BCG_GL_INVALID_ID, name) {
+
+}
+
+ogl_renderbuffer::ogl_renderbuffer(unsigned int handle, std::string name) : ogl_handle(handle, name) {
+
+}
+
+void ogl_renderbuffer::create() {
+    destroy();
+    glGenRenderbuffers(1, &handle);
+    assert_ogl_error();
+}
+
+void ogl_renderbuffer::destroy() {
+    if (*this) {
+        glDeleteRenderbuffers(1, &handle);
+        assert_ogl_error();
+        handle = BCG_GL_INVALID_ID;
+    }
+}
+
+void ogl_renderbuffer::bind() const {
+    glBindRenderbuffer(GL_RENDERBUFFER, handle);
+    assert_ogl_error();
+}
+
+void ogl_renderbuffer::release() const {
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    assert_ogl_error();
+}
+
+void ogl_renderbuffer::storage(GLenum internal_format, int width, int height) const {
+    glRenderbufferStorage(GL_RENDERBUFFER, internal_format, width, height);
+    assert_ogl_error();
+}
+
+ogl_framebuffer::ogl_framebuffer() : ogl_framebuffer(BCG_GL_INVALID_ID, "fbo") {
+
+}
+
+ogl_framebuffer::ogl_framebuffer(std::string name) : ogl_framebuffer(BCG_GL_INVALID_ID, name) {
+
+}
+
+ogl_framebuffer::ogl_framebuffer(unsigned int handle, std::string name) : ogl_handle(handle, name) {
+
+}
+
+void ogl_framebuffer::create() {
+    destroy();
+    glGenFramebuffers(1, &handle);
+    assert_ogl_error();
+}
+
+void ogl_framebuffer::destroy() {
+    if (*this) {
+        glDeleteFramebuffers(1, &handle);
+        assert_ogl_error();
+        handle = BCG_GL_INVALID_ID;
+    }
+}
+
+void ogl_framebuffer::bind() {
+    glBindBuffer(GL_FRAMEBUFFER, handle);
+    assert_ogl_error();
+}
+
+void ogl_framebuffer::release() const {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    assert_ogl_error();
+}
+
+void ogl_framebuffer::attach_texture(const ogl_texture &texture, unsigned int attachment) {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target, texture.handle, 0);
+    assert_ogl_error();
+}
+
+void ogl_framebuffer::attach_renderbuffer(const ogl_renderbuffer &renderbuffer, unsigned int attachment) {
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer.handle);
+    assert_ogl_error();
+    has_depth_buffer = true;
+}
+
+bool ogl_framebuffer::check() const {
+    auto complete = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    assert_ogl_error();
+    if (!complete) {  //Check for FBO completeness
+        std::cerr << "FrameBuffer is not complete!\n";
+    }
+    return complete;
+}
+
+void ogl_framebuffer::oepngl_draw_buffers(){
+    std::vector<unsigned int> attachments;
+    for(size_t i = 0; i < textures.size(); ++i){
+        attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+    }
+    glDrawBuffers(attachments.size(), attachments.data());
+    assert_ogl_error();
+}
+
+void ogl_framebuffer::copy_to_default_framebuffer() {
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, handle);
+    assert_ogl_error();
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+    assert_ogl_error();
+    // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+    // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
+    // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    assert_ogl_error();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    assert_ogl_error();
+}
+
+
+GLstate::GLstate(){
+    gl_blend = false;
+    gl_clip_distance = false;
+    gl_color_logic_op = false;
+    gl_cull_face = false;
+#ifdef GL_VERSION_4_3
+    gl_debug_output = false;
+    gl_debug_output_synchonous = false;
+#endif
+    gl_depth_clamp = false;
+    gl_depth_test = true; //default enabled
+    gl_depth_mask = true; //default enabled
+    gl_dither = true; //default enabled
+    gl_framebuffer_srgb = false;
+    gl_line_smooth = false;
+    gl_multisample = true; //default enabled
+    gl_polygon_offset_fill = false;
+    gl_polygon_offset_line = false;
+    gl_polygon_offset_point = false;
+    gl_polygon_smooth = false;
+#ifdef GL_VERSION_3_1
+    gl_primitive_restart = false;
+#endif
+#ifdef GL_VERSION_4_3
+    gl_primitive_restart_fixed_index = false;
+#endif
+    gl_rasterizer_discard = false;
+    gl_sample_alpha_to_converge = false;
+    gl_sample_alpha_to_one = false;
+    gl_sample_converge = false;
+    gl_sample_shading = false;
+    gl_sample_mask = false;
+    gl_scissor_test = false;
+    gl_stencil_test = false;
+#ifdef GL_VERSION_3_2
+    gl_texture_cube_map_seamless = false;
+#endif
+    gl_program_point_size = false;
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    blend_func_sfactor = GL_ONE;
+    blend_func_dfactor = GL_ZERO;
+    logic_op_opcode = GL_COPY;
+    cull_face_mode = GL_BACK;
+    front_face_mode = GL_CCW;
+    depth_range_nearVal = 0.0;
+    depth_range_farVal = 1.0;
+    depth_func = GL_LESS;
+    polygon_offset_factor = 0.0f;
+    polygon_offset_units = 0.0f;
+#ifdef GL_VERSION_3_1
+    primitive_restart_index = 0;
+#endif
+    sample_coverage_value = 1.0f;
+    sample_coverage_invert = GL_FALSE;
+    multisample_value = 0.0f;
+    sample_mask_number = 0;
+    sample_maks = 0;
+    scissor_x = 0;
+    scissor_y = 0;
+    scissor_width = 1;
+    scissor_height = 1;
+    stencil_func = GL_ALWAYS;
+    stencil_ref = 0;
+    stencil_mask = 0xFF;
+    stencil_sfail = GL_KEEP;
+    stencil_dpfail = GL_KEEP;
+    stencil_dppass = GL_KEEP;
+    point_size_value = 1;
+    polygon_mode_face = GL_FRONT_AND_BACK;
+    polygon_mode = GL_FILL;
+}
+
+void GLstate::startup() {
+    //default enabled
+    set_depth_test(true);
+    set_depth_mask(true);
+    set_depth_func(GL_LESS);
+    set_dither(true);
+    set_multisample(true);
+    set_blend(true);
+    set_blend_func_factors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    set_line_smooth(true);
+    set_cull_face(true);
+}
+
+void GLstate::set_blend(bool enabled){
+    gl_blend = enabled;
+    gl_blend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+    assert_ogl_error();
+}
+
+void GLstate::set_blend_func_factors(GLenum sfactor, GLenum dfactor){
+    blend_func_sfactor = sfactor;
+    blend_func_dfactor = dfactor;
+    glBlendFunc(blend_func_sfactor, blend_func_dfactor);
+    assert_ogl_error();
+}
+
+void GLstate::set_color_logic_op(bool enabled){
+    gl_color_logic_op = enabled;
+    gl_color_logic_op ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
+    assert_ogl_error();
+}
+void GLstate::set_logic_op_opcode(GLenum opcode){
+    logic_op_opcode = opcode;
+    glLogicOp(logic_op_opcode);
+    assert_ogl_error();
+}
+
+void GLstate::set_cull_face(bool enabled){
+    gl_cull_face = enabled;
+    gl_cull_face ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+    assert_ogl_error();
+}
+void GLstate::set_cullface_mode(GLenum mode){
+    cull_face_mode = mode;
+    glCullFace(cull_face_mode);
+    assert_ogl_error();
+}
+void GLstate::set_frontface_mode(GLenum mode){
+    front_face_mode = mode;
+    glFrontFace(front_face_mode);
+    assert_ogl_error();
+}
+
+void GLstate::set_depth_clamp(bool enabled){
+    gl_depth_clamp = enabled;
+    gl_depth_clamp ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
+    assert_ogl_error();
+}
+void GLstate::set_depth_test(bool enabled){
+    gl_depth_test = enabled;
+    gl_depth_test ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+    assert_ogl_error();
+}
+void GLstate::set_depth_mask(bool enabled){
+    gl_depth_mask = enabled;
+    gl_depth_mask ? glDepthMask(GL_TRUE) : glDepthMask(GL_FALSE);
+    assert_ogl_error();
+}
+void GLstate::set_depth_range_values(GLdouble near, GLdouble far){
+    depth_range_nearVal = near;
+    depth_range_farVal = far;
+    glDepthRange(depth_range_nearVal, depth_range_farVal);
+    assert_ogl_error();
+}
+void GLstate::set_depth_func(GLenum func){
+    depth_func = func;
+    glDepthFunc(depth_func);
+    assert_ogl_error();
+}
+
+void GLstate::set_dither(bool enabled){
+    gl_dither = enabled;
+    gl_dither ? glEnable(GL_DITHER) : glDisable(GL_DITHER);
+    assert_ogl_error();
+}
+
+void GLstate::set_framebuffer_srgb(bool enabled){
+    gl_framebuffer_srgb = enabled;
+    gl_framebuffer_srgb ? glEnable(GL_FRAMEBUFFER_SRGB) : glDisable(GL_FRAMEBUFFER_SRGB);
+    assert_ogl_error();
+}
+
+void GLstate::set_line_smooth(bool enabled){
+    gl_line_smooth = enabled;
+    gl_line_smooth ? glEnable(GL_LINE_SMOOTH) : glDisable(GL_LINE_SMOOTH);
+    assert_ogl_error();
+}
+
+void GLstate::set_multisample(bool enabled){
+    gl_multisample = enabled;
+    gl_multisample ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
+    assert_ogl_error();
+}
+void GLstate::set_multisample_value(GLfloat value){
+    multisample_value = value;
+    glMinSampleShading(multisample_value);
+    assert_ogl_error();
+}
+
+void GLstate::set_polygon_offset_fill(bool enabled){
+    gl_polygon_offset_fill = enabled;
+    gl_polygon_offset_fill ? glEnable(GL_POLYGON_OFFSET_FILL) : glDisable(GL_POLYGON_OFFSET_FILL);
+    assert_ogl_error();
+}
+void GLstate::set_polygon_offset_point(bool enabled){
+    gl_polygon_offset_point = enabled;
+    gl_polygon_offset_point ? glEnable(GL_POLYGON_OFFSET_POINT) : glDisable(GL_POLYGON_OFFSET_POINT);
+    assert_ogl_error();
+}
+void GLstate::set_polygon_offset_line(bool enabled){
+    gl_polygon_offset_line = enabled;
+    gl_polygon_offset_line ? glEnable(GL_POLYGON_OFFSET_LINE) : glDisable(GL_POLYGON_OFFSET_LINE);
+    assert_ogl_error();
+}
+void GLstate::set_polygon_smooth(bool enabled){
+    gl_polygon_smooth = enabled;
+    gl_polygon_smooth ? glEnable(GL_POLYGON_SMOOTH) : glDisable(GL_POLYGON_SMOOTH);
+    assert_ogl_error();
+}
+void GLstate::set_polygon_offset_factor(GLfloat factor, GLfloat units){
+    polygon_offset_factor = factor;
+    polygon_offset_units = units;
+    glPolygonOffset(polygon_offset_factor, polygon_offset_units);
+    assert_ogl_error();
+}
+void GLstate::set_polygon_mode(GLenum mode){
+    polygon_mode = mode;
+    glPolygonMode(polygon_mode_face, polygon_mode);
+    assert_ogl_error();
+}
+
+void GLstate::set_rasterizer_discard(bool enabled){
+    gl_rasterizer_discard = enabled;
+    gl_rasterizer_discard ? glEnable(GL_RASTERIZER_DISCARD) : glDisable(GL_RASTERIZER_DISCARD);
+    assert_ogl_error();
+}
+
+void GLstate::set_alpha_to_coverage(bool enabled){
+    gl_sample_alpha_to_converge = enabled;
+    gl_sample_alpha_to_converge ? glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE) : glDisable(
+            GL_SAMPLE_ALPHA_TO_COVERAGE);
+    assert_ogl_error();
+}
+void GLstate::set_alpha_to_one(bool enabled){
+    gl_sample_alpha_to_one = enabled;
+    gl_sample_alpha_to_one ? glEnable(GL_SAMPLE_ALPHA_TO_ONE) : glDisable(GL_SAMPLE_ALPHA_TO_ONE);
+    assert_ogl_error();
+}
+
+void GLstate::set_sample_converge(bool enabled){
+    gl_sample_converge = enabled;
+    gl_sample_converge ? glEnable(GL_SAMPLE_COVERAGE) : glDisable(GL_SAMPLE_COVERAGE);
+    assert_ogl_error();
+}
+void GLstate::set_sample_converge_value(GLfloat value, GLboolean invert){
+    sample_coverage_value = value;
+    sample_coverage_invert = invert;
+    glSampleCoverage(sample_coverage_value, sample_coverage_invert);
+    assert_ogl_error();
+}
+void GLstate::set_sample_shading(bool enabled){
+    gl_sample_shading = enabled;
+    gl_sample_shading ? glEnable(GL_SAMPLE_SHADING) : glDisable(GL_SAMPLE_SHADING);
+    assert_ogl_error();
+}
+void GLstate::set_sample_mask(bool enabled){
+    gl_sample_mask = enabled;
+    gl_sample_mask ? glEnable(GL_SAMPLE_MASK) : glDisable(GL_SAMPLE_MASK);
+    assert_ogl_error();
+}
+void GLstate::set_sample_mask_number(GLuint number, GLbitfield masks){
+    sample_mask_number = number;
+    sample_maks = masks;
+    glSampleMaski(sample_mask_number, sample_maks);
+    assert_ogl_error();
+}
+
+void GLstate::set_scissor_test(bool enabled){
+    gl_scissor_test = enabled;
+    gl_scissor_test ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
+    assert_ogl_error();
+}
+void GLstate::set_scissor_values(GLint x, GLint y, GLsizei width, GLsizei height){
+    scissor_x = x;
+    scissor_y = y;
+    scissor_width = width;
+    scissor_height = height;
+    glScissor(scissor_x, scissor_y, scissor_width, scissor_height);
+    assert_ogl_error();
+}
+
+void GLstate::set_stencil_test(bool enabled){
+    gl_stencil_test = enabled;
+    gl_stencil_test ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
+    assert_ogl_error();
+}
+void GLstate::set_stencil_func(GLenum func, GLint ref, GLuint mask){
+    stencil_func = func;
+    stencil_ref = ref;
+    stencil_mask = mask;
+    glStencilFunc(stencil_func, stencil_ref, stencil_mask);
+    assert_ogl_error();
+}
+void GLstate::set_stencil_op(GLenum sfail, GLenum dpfail, GLenum dppass){
+    stencil_sfail = sfail;
+    stencil_dpfail = dpfail;
+    stencil_dppass = dppass;
+    glStencilOp(stencil_sfail, stencil_dpfail, stencil_dppass);
+    assert_ogl_error();
+}
+
+void GLstate::set_program_point_size(bool enabled){
+    gl_program_point_size = enabled;
+    gl_program_point_size ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
+    assert_ogl_error();
+}
+void GLstate::set_point_size(GLuint size){
+    point_size_value = size;
+    glPointSize(point_size_value);
+    assert_ogl_error();
+}
+
+#ifdef GL_VERSION_3_1
+void GLstate::set_primitive_restart(bool enabled){
+    gl_primitive_restart = enabled;
+    gl_primitive_restart ? glEnable(GL_PRIMITIVE_RESTART) : glDisable(GL_PRIMITIVE_RESTART);
+    assert_ogl_error();
+}
+
+void GLstate::set_primitive_restart_index(GLuint index){
+    primitive_restart_index = index;
+    glPrimitiveRestartIndex(primitive_restart_index);
+    assert_ogl_error();
+}
+#endif
+
+#ifdef GL_VERSION_3_2
+void GLstate::set_texture_cube_map_seamless(bool enabled){
+    gl_texture_cube_map_seamless = enabled;
+    gl_texture_cube_map_seamless ? glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS) : glDisable(
+            GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    assert_ogl_error();
+}
+#endif
+
+#ifdef GL_VERSION_4_3
+void GLstate::set_debug_output(bool enabled){
+    gl_debug_output = enabled;
+    gl_debug_output ? glEnable(GL_DEBUG_OUTPUT) : glDisable(GL_DEBUG_OUTPUT);
+    assert_ogl_error();
+}
+void GLstate::set_debug_output_synchonous(bool enabled){
+    gl_debug_output_synchonous = enabled;
+    gl_debug_output_synchonous ? glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS) : glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    assert_ogl_error();
+}
+
+void GLstate::set_primitive_restart_fixed_index(bool enabled){
+    gl_primitive_restart_fixed_index = enabled;
+    gl_primitive_restart_fixed_index ? glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX) : glDisable(
+            GL_PRIMITIVE_RESTART_FIXED_INDEX);
+    assert_ogl_error();
+}
+#endif
+
+#define TO_STRING(x) #x
+#define PRINTBOOL(x) #x << ": "<<  (x?"true\n":"false\n")
+#define PRINTVAL(x) #x << " = "<<  x << "\n"
+
+void GLstate::print(std::ostream &stream) const {
+    stream << PRINTBOOL(gl_blend);
+    stream << PRINTBOOL(gl_clip_distance);
+    stream << PRINTBOOL(gl_color_logic_op);
+    stream << PRINTBOOL(gl_cull_face);
+#ifdef GL_VERSION_4_3
+    stream << PRINTBOOL(gl_debug_output);
+    stream << PRINTBOOL(gl_debug_output_synchonous);
+#endif
+    stream << PRINTBOOL(gl_depth_clamp);
+    stream << PRINTBOOL(gl_depth_test);
+    stream << PRINTBOOL(gl_depth_mask);
+    stream << PRINTBOOL(gl_dither);
+    stream << PRINTBOOL(gl_framebuffer_srgb);
+    stream << PRINTBOOL(gl_line_smooth);
+    stream << PRINTBOOL(gl_multisample);
+    stream << PRINTBOOL(gl_polygon_offset_fill);
+    stream << PRINTBOOL(gl_polygon_offset_line);
+    stream << PRINTBOOL(gl_polygon_offset_point);
+    stream << PRINTBOOL(gl_polygon_smooth);
+#ifdef GL_VERSION_3_1
+    stream << PRINTBOOL(gl_primitive_restart);
+#endif
+#ifdef GL_VERSION_4_3
+    stream << PRINTBOOL(gl_primitive_restart_fixed_index);
+#endif
+    stream << PRINTBOOL(gl_rasterizer_discard);
+    stream << PRINTBOOL(gl_sample_alpha_to_converge);
+    stream << PRINTBOOL(gl_sample_alpha_to_one);
+    stream << PRINTBOOL(gl_sample_converge);
+    stream << PRINTBOOL(gl_sample_shading);
+    stream << PRINTBOOL(gl_sample_mask);
+    stream << PRINTBOOL(gl_scissor_test);
+    stream << PRINTBOOL(gl_stencil_test);
+#ifdef GL_VERSION_3_2
+    stream << PRINTBOOL(gl_texture_cube_map_seamless);
+#endif
+    stream << PRINTBOOL(gl_program_point_size);
+    stream << "\n";
+    stream << PRINTVAL(blend_func_sfactor);
+    stream << PRINTVAL(blend_func_dfactor);
+    stream << PRINTVAL(logic_op_opcode);
+    stream << PRINTVAL(cull_face_mode);
+    stream << PRINTVAL(front_face_mode);
+    stream << PRINTVAL(depth_range_nearVal);
+    stream << PRINTVAL(depth_range_farVal);
+    stream << PRINTVAL(depth_func);
+    stream << PRINTVAL(polygon_offset_factor);
+    stream << PRINTVAL(polygon_offset_units);
+#ifdef GL_VERSION_3_1
+    stream << PRINTVAL(primitive_restart_index);
+#endif
+    stream << PRINTVAL(sample_coverage_value);
+    stream << PRINTVAL(sample_coverage_invert);
+    stream << PRINTVAL(multisample_value);
+    stream << PRINTVAL(sample_mask_number);
+    stream << PRINTVAL(sample_maks);
+    stream << PRINTVAL(scissor_x);
+    stream << PRINTVAL(scissor_y);
+    stream << PRINTVAL(scissor_width);
+    stream << PRINTVAL(scissor_height);
+    stream << PRINTVAL(stencil_func);
+    stream << PRINTVAL(stencil_ref);
+    stream << PRINTVAL(stencil_mask);
+    stream << PRINTVAL(stencil_sfail);
+    stream << PRINTVAL(stencil_dpfail);
+    stream << PRINTVAL(stencil_dppass);
+    stream << PRINTVAL(point_size_value);
+    stream << PRINTVAL(polygon_mode_face);
+    stream << PRINTVAL(polygon_mode);
+}
+
+std::ostream &operator<<(std::ostream &stream, const GLstate &state) {
+    stream << "opengl::GLstate: " << std::endl;
+    state.print(stream);
+    stream << "|====================================================|" << std::endl;
+    return stream;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // glfw helper

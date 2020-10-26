@@ -144,7 +144,7 @@ void set_arraybuffer(
 void set_arraybuffer(
         ogl_arraybuffer *buffer, const std::vector<VectorS<3>> &data, bool dynamic = false);
 
-void set_arraybuffer(
+void set_araybuffer(
         ogl_arraybuffer *buffer, const std::vector<VectorS<4>> &data, bool dynamic = false);
 
 

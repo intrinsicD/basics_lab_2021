@@ -8,6 +8,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include "bcg_library/math/bcg_linalg.h"
 
 namespace bcg {
 
@@ -100,7 +101,9 @@ struct ogl_handle {
 
     ogl_handle();
 
-    ogl_handle(unsigned int handle);
+    explicit ogl_handle(unsigned int handle);
+
+    explicit ogl_handle(std::string name);
 
     ogl_handle(unsigned int handle, std::string name);
 
@@ -155,7 +158,7 @@ struct glsl_program : public ogl_handle {
 
     explicit glsl_program(unsigned int handle);
 
-    explicit glsl_program(unsigned int handle, unsigned int type, std::string name);
+    explicit glsl_program(unsigned int handle, std::string name);
 
     void create();
 
@@ -260,21 +263,21 @@ struct glsl_program : public ogl_handle {
 
 #ifdef GL_VERSION_3_0
 
-    void set_uniform_u(const char *name, GLuint x) const;
+    void set_uniform_u(const char *name, unsigned int x) const;
 
-    void set_uniform_u(const char *name, GLuint x, GLuint y) const;
+    void set_uniform_u(const char *name, unsigned int x, unsigned int y) const;
 
-    void set_uniform_u(const char *name, GLuint x, GLuint y, GLuint z) const;
+    void set_uniform_u(const char *name, unsigned int x, unsigned int y, unsigned int z) const;
 
-    void set_uniform_u(const char *name, GLuint x, GLuint y, GLuint z, GLuint w) const;
+    void set_uniform_u(const char *name, unsigned int x, unsigned int y, unsigned int z, unsigned int w) const;
 
-    void set_uniform_1u(const char *name, int count, const GLuint *data) const;
+    void set_uniform_1u(const char *name, int count, const unsigned int *data) const;
 
-    void set_uniform_2u(const char *name, int count, const GLuint *data) const;
+    void set_uniform_2u(const char *name, int count, const unsigned int *data) const;
 
-    void set_uniform_3u(const char *name, int count, const GLuint *data) const;
+    void set_uniform_3u(const char *name, int count, const unsigned int *data) const;
 
-    void set_uniform_4u(const char *name, int count, const GLuint *data) const;
+    void set_uniform_4u(const char *name, int count, const unsigned int *data) const;
 
 #endif
 #ifdef GL_VERSION_4_0
@@ -350,11 +353,9 @@ struct ogl_texture : public ogl_handle {
 
     ogl_texture();
 
-    ogl_texture(std::string name);
+    explicit ogl_texture(std::string name);
 
     ogl_texture(unsigned int target, std::string name);
-
-    ogl_texture(unsigned int handle, unsigned int target);
 
     ogl_texture(unsigned int handle, unsigned int target, std::string name);
 
@@ -400,6 +401,340 @@ struct ogl_texture : public ogl_handle {
     void download_data(void *data);
 
     void resize(int width, int height);
+};
+
+struct ogl_buffer_object : public ogl_handle {
+    unsigned int target;
+    size_t capacity;
+    size_t num_elements;
+    int dims;
+    bool dynamic;
+
+    ogl_buffer_object();
+
+    explicit ogl_buffer_object(std::string name);
+
+    ogl_buffer_object(unsigned int target, std::string name);
+
+    ogl_buffer_object(unsigned int handle, unsigned int target, std::string name);
+
+    size_t get_buffer_size_gpu() const;
+
+    void create();
+
+    void destroy();
+
+    void bind() const;
+
+    void release() const;
+};
+
+struct ogl_vertex_buffer : public ogl_buffer_object {
+    ogl_vertex_buffer();
+
+    explicit ogl_vertex_buffer(std::string name);
+
+    ogl_vertex_buffer(unsigned int handle, std::string name);
+
+    void upload(const std::vector<bcg_scalar_t> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const std::vector<VectorS<2>> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const std::vector<VectorS<3>> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const std::vector<VectorS<4>> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const void *data, size_t size, int dims, size_t offset = 0, bool dynamic = false);
+
+    void download(std::vector<bcg_scalar_t> &data, size_t offset = 0);
+
+    void download(std::vector<VectorS<2>> &data, size_t offset = 0);
+
+    void download(std::vector<VectorS<3>> &data, size_t offset = 0);
+
+    void download(std::vector<VectorS<4>> &data, size_t offset = 0);
+
+    void download(bcg_scalar_t *data, size_t size_bytes, size_t offset_bytes = 0);
+};
+
+struct ogl_element_buffer : public ogl_buffer_object {
+    ogl_element_buffer();
+
+    explicit ogl_element_buffer(std::string name);
+
+    ogl_element_buffer(unsigned int handle, std::string name);
+
+    void upload(const std::vector<bcg_index_t> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const std::vector<VectorI<2>> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const std::vector<VectorI<3>> &data, size_t offset = 0, bool dynamic = false);
+
+    void upload(const void *data, size_t size, int dims, size_t offset = 0, bool dynamic = false);
+
+    void download(std::vector<bcg_index_t> &data, size_t offset = 0);
+
+    void download(std::vector<VectorI<2>> &data, size_t offset = 0);
+
+    void download(std::vector<VectorI<3>> &data, size_t offset = 0);
+
+    void download(bcg_index_t *data, size_t size_bytes, size_t offset_bytes = 0);
+};
+
+struct ogl_vertex_array : public ogl_handle {
+    std::vector<ogl_vertex_buffer> vertex_buffers;
+    ogl_element_buffer element_buffer;
+
+    ogl_vertex_array();
+
+    explicit ogl_vertex_array(std::string name);
+
+    ogl_vertex_array(unsigned int handle, std::string name);
+
+    void create();
+
+    void destroy();
+
+    void bind() const;
+
+    void release() const;
+
+    ogl_vertex_buffer get_vertex_buffer(std::string name);
+
+    void add_vertex_buffer(const ogl_vertex_buffer &vertex_buffer);
+
+    void set_element_buffer(const ogl_element_buffer &element_buffer);
+};
+
+struct ogl_renderbuffer : public ogl_handle {
+    ogl_renderbuffer();
+
+    explicit ogl_renderbuffer(std::string name);
+
+    ogl_renderbuffer(unsigned int handle, std::string name);
+
+    void create();
+
+    void destroy();
+
+    void bind() const;
+
+    void release() const;
+
+    void storage(unsigned int internal_format, int width, int height) const;
+};
+
+struct ogl_framebuffer : public ogl_handle {
+    int width, height;
+    static inline unsigned int bound_framebuffer_id = 0;
+
+    std::vector<ogl_texture> textures;
+    bool has_depth_buffer;
+
+    ogl_framebuffer();
+
+    explicit ogl_framebuffer(std::string name);
+
+    ogl_framebuffer(unsigned int handle, std::string name);
+
+    void create();
+
+    void destroy();
+
+    void bind();
+
+    void release() const;
+
+    void attach_texture(const ogl_texture &texture, unsigned int attachment);
+
+    void attach_renderbuffer(const ogl_renderbuffer &renderbuffer, unsigned int attachment);
+
+    bool check() const;
+
+    void oepngl_draw_buffers();
+
+    void copy_to_default_framebuffer();
+};
+
+struct GLstate {
+    GLstate();
+
+    GLstate(const GLstate &) = default;
+
+    void startup();
+
+    bool gl_blend;
+    bool gl_clip_distance;
+    bool gl_color_logic_op;
+    bool gl_cull_face;
+#ifdef GL_VERSION_4_3
+    bool gl_debug_output;
+    bool gl_debug_output_synchonous;
+#endif
+    bool gl_depth_clamp;
+    bool gl_depth_test; //default enabled
+    bool gl_depth_mask; //default enabled
+    bool gl_dither; //default enabled
+    bool gl_framebuffer_srgb;
+    bool gl_line_smooth;
+    bool gl_multisample; //default enabled
+    bool gl_polygon_offset_fill;
+    bool gl_polygon_offset_line;
+    bool gl_polygon_offset_point;
+    bool gl_polygon_smooth;
+#ifdef GL_VERSION_3_1
+    bool gl_primitive_restart;
+#endif
+#ifdef GL_VERSION_4_3
+    bool gl_primitive_restart_fixed_index;
+#endif
+    bool gl_rasterizer_discard;
+    bool gl_sample_alpha_to_converge;
+    bool gl_sample_alpha_to_one;
+    bool gl_sample_converge;
+    bool gl_sample_shading;
+    bool gl_sample_mask;
+    bool gl_scissor_test;
+    bool gl_stencil_test;
+#ifdef GL_VERSION_3_2
+    bool gl_texture_cube_map_seamless;
+#endif
+    bool gl_program_point_size;
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    unsigned int blend_func_sfactor, blend_func_dfactor;
+    unsigned int logic_op_opcode;
+    unsigned int cull_face_mode, front_face_mode;
+    double depth_range_nearVal, depth_range_farVal;
+    unsigned int depth_func;
+    float polygon_offset_factor, polygon_offset_units;
+#ifdef GL_VERSION_3_1
+    unsigned int primitive_restart_index;
+#endif
+    float sample_coverage_value;
+    unsigned char sample_coverage_invert;
+    float multisample_value;
+    unsigned int sample_mask_number;
+    unsigned int sample_maks;
+    int scissor_x, scissor_y;
+    int scissor_width = 1, scissor_height;
+    unsigned int stencil_func;
+    int stencil_ref;
+    unsigned int stencil_mask;
+    unsigned int stencil_sfail;
+    unsigned int stencil_dpfail;
+    unsigned int stencil_dppass;
+    unsigned int point_size_value;
+    unsigned int polygon_mode_face;
+    unsigned int polygon_mode;
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    void set_blend(bool enabled);
+
+    void set_blend_func_factors(unsigned int sfactor, unsigned int dfactor);
+
+    void set_color_logic_op(bool enabled);
+
+    void set_logic_op_opcode(unsigned int opcode);
+
+    void set_cull_face(bool enabled);
+
+    void set_cullface_mode(unsigned int mode);
+
+    void set_frontface_mode(unsigned int mode);
+
+    void set_depth_clamp(bool enabled);
+
+    void set_depth_test(bool enabled);
+
+    void set_depth_mask(bool enabled);
+
+    void set_depth_range_values(double near, double far);
+
+    void set_depth_func(unsigned int func);
+
+    void set_dither(bool enabled);
+
+    void set_framebuffer_srgb(bool enabled);
+
+    void set_line_smooth(bool enabled);
+
+    void set_multisample(bool enabled);
+
+    void set_multisample_value(float value);
+
+    void set_polygon_offset_fill(bool enabled);
+
+    void set_polygon_offset_point(bool enabled);
+
+    void set_polygon_offset_line(bool enabled);
+
+    void set_polygon_smooth(bool enabled);
+
+    void set_polygon_offset_factor(float factor, float units);
+
+    void set_polygon_mode(unsigned int mode);
+
+    void set_rasterizer_discard(bool enabled);
+
+    void set_alpha_to_coverage(bool enabled);
+
+    void set_alpha_to_one(bool enabled);
+
+    void set_sample_converge(bool enabled);
+
+    void set_sample_converge_value(float value, unsigned char invert);
+
+    void set_sample_shading(bool enabled);
+
+    void set_sample_mask(bool enabled);
+
+    void set_sample_mask_number(unsigned int number, unsigned int masks);
+
+    void set_scissor_test(bool enabled);
+
+    void set_scissor_values(int x, int y, int width, int height);
+
+    void set_stencil_test(bool enabled);
+
+    void set_stencil_func(unsigned int func, int ref, unsigned int mask);
+
+    void set_stencil_op(unsigned int sfail, unsigned int dpfail, unsigned int dppass);
+
+    void set_program_point_size(bool enabled);
+
+    void set_point_size(unsigned int size);
+
+#ifdef GL_VERSION_3_1
+
+    void set_primitive_restart(bool enabled);
+
+    void set_primitive_restart_index(unsigned int index);
+
+#endif
+
+#ifdef GL_VERSION_3_2
+
+    void set_texture_cube_map_seamless(bool enabled);
+
+#endif
+
+#ifdef GL_VERSION_4_3
+
+    void set_debug_output(bool enabled);
+
+    void set_debug_output_synchonous(bool enabled);
+
+    void set_primitive_restart_fixed_index(bool enabled);
+
+#endif
+
+    void print(std::ostream &stream) const;
+
+    friend std::ostream &operator<<(std::ostream &stream, const GLstate &state);
+
 };
 
 }
