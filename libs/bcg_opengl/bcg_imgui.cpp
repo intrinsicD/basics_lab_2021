@@ -1,359 +1,131 @@
-#include <algorithm>
-#include <array>
-#include <cstdarg>
-#include <memory>
 #include <mutex>
-#include <stdexcept>
-#include <unordered_map>
-#include <utility>
 
 #include "bcg_imgui.h"
-#include "exts/glad/glad.h"
-#include "bcg_library/math/bcg_math_common.h"
-#include "bcg_library/utils/bcg_file.h"
+#include "bcg_viewer_state.h"
 #include "bcg_library/utils/bcg_path.h"
-
-
-#ifdef __APPLE__
-#define GL_SILENCE_DEPRECATION
-#endif
 
 #include <GLFW/glfw3.h>
 
 #include "exts/imgui/imgui.h"
-#include "exts/imgui/examples/imgui_impl_glfw.h"
-#include "exts/imgui/examples/imgui_impl_opengl3.h"
 #include "exts/imgui/imgui_internal.h"
 
-#ifdef _WIN32
-#undef near
-#undef far
-#endif
-
-// -----------------------------------------------------------------------------
-// UI APPLICATION
-// -----------------------------------------------------------------------------
 namespace bcg {
-
 using namespace std::string_literals;
 
-// run the user interface with the give callbacks
-void run_ui(const VectorI<2> &size, const std::string &title,
-            const gui_callbacks &callbacks, int widgets_width, bool widgets_left) {
-    auto win_guard = std::make_unique<gui_window>();
-    auto win = win_guard.get();
-    init_window(win, size, title, (bool) callbacks.widgets_cb, widgets_width,
-                widgets_left);
+gui_element::gui_element(std::string name) : name(name), show(nullptr), active(false) {
 
-    set_init_callback(win, callbacks.init_cb);
-    set_clear_callback(win, callbacks.clear_cb);
-    set_draw_callback(win, callbacks.draw_cb);
-    set_widgets_callback(win, callbacks.widgets_cb);
-    set_drop_callback(win, callbacks.drop_cb);
-    set_key_callback(win, callbacks.key_cb);
-    set_char_callback(win, callbacks.char_cb);
-    set_click_callback(win, callbacks.click_cb);
-    set_scroll_callback(win, callbacks.scroll_cb);
-    set_update_callback(win, callbacks.update_cb);
-    set_uiupdate_callback(win, callbacks.uiupdate_cb);
-
-    // run ui
-    run_ui(win);
-
-    // clear
-    clear_window(win);
 }
 
-}  // namespace bcg
-
-// -----------------------------------------------------------------------------
-// UI WINDOW
-// -----------------------------------------------------------------------------
-namespace bcg {
-
-static void draw_window(gui_window *win) {
-    glClearColor(win->background[0], win->background[1], win->background[2], win->background[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (win->draw_cb) win->draw_cb(win, win->input);
-    if (win->widgets_cb) {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        //auto window = zero2i;
-        int window[2];
-        glfwGetWindowSize(win->win, &window[0], &window[1]);
-        if (win->widgets_left) {
-            ImGui::SetNextWindowPos({0, 0});
-            ImGui::SetNextWindowSize({(float) win->widgets_width, (float) window[1]});
-        } else {
-            ImGui::SetNextWindowPos({(float) (window[0] - win->widgets_width), 0});
-            ImGui::SetNextWindowSize({(float) win->widgets_width, (float) window[1]});
-        }
-        ImGui::SetNextWindowCollapsed(false);
-        ImGui::SetNextWindowBgAlpha(1);
-        if (ImGui::Begin(win->title.c_str(), nullptr,
-                         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-                         ImGuiWindowFlags_NoSavedSettings)) {
-            win->widgets_cb(win, win->input);
-        }
-        ImGui::End();
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+gui_element *gui_element::get_or_add_child(std::string name) {
+    auto iter = children.find(name);
+    if (iter != children.end()) {
+        return iter->second;
     }
-    glfwSwapBuffers(win->win);
+    return children[name];
 }
 
-void init_window(gui_window *win, const VectorI<2> &size, const std::string &title,
-                 bool widgets, int widgets_width, bool widgets_left) {
-    // init glfw
-    if (!glfwInit())
-        throw std::runtime_error("cannot initialize windowing system");
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#if __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-    // create window
-    win->title = title;
-    win->win = glfwCreateWindow(size[0], size[1], title.c_str(), nullptr, nullptr);
-    if (win->win == nullptr)
-        throw std::runtime_error{"cannot initialize windowing system"};
-    glfwMakeContextCurrent(win->win);
-    glfwSwapInterval(1);  // Enable vsync
-
-    // set user data
-    glfwSetWindowUserPointer(win->win, win);
-
-    // set callbacks
-    glfwSetWindowRefreshCallback(win->win, [](GLFWwindow *glfw) {
-        auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-        draw_window(win);
-    });
-    glfwSetDropCallback(
-            win->win, [](GLFWwindow *glfw, int num, const char **paths) {
-                auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-                if (win->drop_cb) {
-                    auto pathv = std::vector<std::string>();
-                    for (auto i = 0; i < num; i++) pathv.push_back(paths[i]);
-                    win->drop_cb(win, pathv, win->input);
-                }
-            });
-    glfwSetKeyCallback(win->win,
-                       [](GLFWwindow *glfw, int key, int scancode, int action, int mods) {
-                           auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-                           if (win->key_cb) win->key_cb(win, key, (bool) action, win->input);
-                       });
-    glfwSetCharCallback(win->win, [](GLFWwindow *glfw, unsigned int key) {
-        auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-        if (win->char_cb) win->char_cb(win, key, win->input);
-    });
-    glfwSetMouseButtonCallback(
-            win->win, [](GLFWwindow *glfw, int button, int action, int mods) {
-                auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-                if (win->click_cb)
-                    win->click_cb(
-                            win, button == GLFW_MOUSE_BUTTON_LEFT, (bool) action, win->input);
-            });
-    glfwSetScrollCallback(
-            win->win, [](GLFWwindow *glfw, double xoffset, double yoffset) {
-                auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-                if (win->scroll_cb) win->scroll_cb(win, (float) yoffset, win->input);
-            });
-    glfwSetWindowSizeCallback(
-            win->win, [](GLFWwindow *glfw, int width, int height) {
-                auto win = (gui_window *) glfwGetWindowUserPointer(glfw);
-                glfwGetWindowSize(
-                        win->win, reinterpret_cast<int *>(&win->input.window_size[0]), reinterpret_cast<int *>(&win->input.window_size[1]));
-                if (win->widgets_width) win->input.window_size[0] -= win->widgets_width;
-                glfwGetFramebufferSize(win->win, reinterpret_cast<int *>(&win->input.framebuffer_viewport[2]),
-                                       reinterpret_cast<int *>(&win->input.framebuffer_viewport[3]));
-                win->input.framebuffer_viewport[0] = 0;
-                win->input.framebuffer_viewport[1] = 0;
-                if (win->widgets_width) {
-                    int win_size[2];
-                    glfwGetWindowSize(win->win, &win_size[0], &win_size[1]);
-                    auto offset = (int) (win->widgets_width *
-                                         (float) win->input.framebuffer_viewport[2] /
-                                         win_size[0]);
-                    win->input.framebuffer_viewport[2] -= offset;
-                    if (win->widgets_left) win->input.framebuffer_viewport[0] += offset;
-                }
-            });
-
-    // init gl extensions
-    if (!gladLoadGL())
-        throw std::runtime_error{"cannot initialize OpenGL extensions"};
-
-    // widgets
-    if (widgets) {
-        ImGui::CreateContext();
-        ImGui::GetIO().IniFilename = nullptr;
-        ImGui::GetStyle().WindowRounding = 0;
-        ImGui_ImplGlfw_InitForOpenGL(win->win, true);
-#ifndef __APPLE__
-        ImGui_ImplOpenGL3_Init();
-#else
-        ImGui_ImplOpenGL3_Init("#version 330");
-#endif
-        ImGui::StyleColorsDark();
-        win->widgets_width = widgets_width;
-        win->widgets_left = widgets_left;
+void gui_element::render(viewer_state *state) {
+    if (show(state, this)) {
+        for (auto &item : children) {
+            item.second->render(state);
+        }
     }
 }
 
-void clear_window(gui_window *win) {
-    glfwDestroyWindow(win->win);
-    glfwTerminate();
-    win->win = nullptr;
+void gui_element::close() {
+    active = false;
 }
 
-// Run loop
-void run_ui(gui_window *win) {
-    // init
-    if (win->init_cb) win->init_cb(win, win->input);
+gui_element::gui_element() {}
 
-    // loop
-    while (!glfwWindowShouldClose(win->win)) {
-        // update input
-        win->input.mouse_last = win->input.mouse_pos;
-        auto mouse_posx = 0.0, mouse_posy = 0.0;
-        glfwGetCursorPos(win->win, &mouse_posx, &mouse_posy);
-        win->input.mouse_pos = VectorS<2>{(float) mouse_posx, (float) mouse_posy};
-        if (win->widgets_width && win->widgets_left)
-            win->input.mouse_pos[0] -= win->widgets_width;
-        win->input.mouse_left = glfwGetMouseButton(win->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-        win->input.mouse_right = glfwGetMouseButton(win->win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-        win->input.modifier_alt = glfwGetKey(win->win, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
-                                  glfwGetKey(win->win, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
-        win->input.modifier_shift = glfwGetKey(win->win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
-                                    glfwGetKey(win->win, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
-        win->input.modifier_ctrl = glfwGetKey(win->win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
-                                   glfwGetKey(win->win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
-        glfwGetWindowSize(win->win, reinterpret_cast<int *>(&win->input.window_size[0]), reinterpret_cast<int *>(&win->input.window_size[1]));
-        if (win->widgets_width) win->input.window_size[0] -= win->widgets_width;
-        glfwGetFramebufferSize(win->win, reinterpret_cast<int *>(&win->input.framebuffer_viewport[2]), reinterpret_cast<int *>(&win->input.framebuffer_viewport[3]));
-        win->input.framebuffer_viewport[0] = 0;
-        win->input.framebuffer_viewport[1] = 0;
-        if (win->widgets_width) {
-            int win_size[2];
-            glfwGetWindowSize(win->win, &win_size[0], &win_size[1]);
-            auto offset = (int) (win->widgets_width * (float) win->input.framebuffer_viewport[2] / win_size[0]);
-            win->input.framebuffer_viewport[2] -= offset;
-            if (win->widgets_left) win->input.framebuffer_viewport[0] += offset;
+menu_element::menu_element() : gui_element("menu"){}
+
+void menu_element::render(viewer_state *state) {
+    if (children.empty()) {
+        if (ImGui::MenuItem(name.c_str())) {
+            auto iter = state->gui.active_items.find(name);
+            if (iter == state->gui.active_items.end()) {
+                active = true;
+                state->gui.active_items[name] = this;
+            }
         }
-        if (win->widgets_width) {
-            auto io = &ImGui::GetIO();
-            win->input.widgets_active = io->WantTextInput || io->WantCaptureMouse || io->WantCaptureKeyboard;
+    } else {
+        if (ImGui::BeginMenu(name.c_str())) {
+            for (auto &item : children) {
+                item.second->render(state);
+            }
+            ImGui::EndMenu();
         }
-
-        // time
-        win->input.clock_last = win->input.clock_now;
-        win->input.clock_now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        win->input.time_now = (double) win->input.clock_now / 1000000000.0;
-        win->input.time_delta = (double) (win->input.clock_now - win->input.clock_last) / 1000000000.0;
-
-        // update ui
-        if (win->uiupdate_cb && !win->input.widgets_active) win->uiupdate_cb(win, win->input);
-
-        // update
-        if (win->update_cb) win->update_cb(win, win->input);
-
-        // draw
-        draw_window(win);
-
-        // event hadling
-        glfwPollEvents();
     }
-
-    // clear
-    if (win->clear_cb) win->clear_cb(win, win->input);
 }
 
-void set_init_callback(gui_window *win, init_callback cb) { win->init_cb = cb; }
+left_panel::left_panel() : gui_element("left"){
 
-void set_clear_callback(gui_window *win, clear_callback cb) {
-    win->clear_cb = cb;
 }
 
-void set_draw_callback(gui_window *win, draw_callback cb) { win->draw_cb = cb; }
+void left_panel::render(viewer_state *state) {
+    if (!show) return;
+    int window[2];
+    glfwGetWindowSize(state->window.win, &window[0], &window[1]);
 
-void set_widgets_callback(gui_window *win, widgets_callback cb) {
-    win->widgets_cb = cb;
+    ImGui::SetNextWindowPos({0, 0});
+    ImGui::SetNextWindowSize({(float) widgets_width, (float) window[1]});
+
+    ImGui::SetNextWindowCollapsed(false);
+    ImGui::SetNextWindowBgAlpha(1);
+
+    if (ImGui::Begin(name.c_str(), &active,
+                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                     ImGuiWindowFlags_NoSavedSettings)) {
+        show(state, this);
+    }
+    ImGui::End();
 }
 
-void set_drop_callback(gui_window *win, drop_callback drop_cb) {
-    win->drop_cb = drop_cb;
+right_panel::right_panel() : gui_element("right"){
+
 }
 
-void set_key_callback(gui_window *win, key_callback cb) { win->key_cb = cb; }
+void right_panel::render(viewer_state *state) {
+    if (!show) return;
+    int window[2];
+    glfwGetWindowSize(state->window.win, &window[0], &window[1]);
 
-void set_char_callback(gui_window *win, char_callback cb) { win->char_cb = cb; }
+    ImGui::SetNextWindowPos({(float) (window[0] - state->window.widgets_width), 0});
+    ImGui::SetNextWindowSize({(float) widgets_width, (float) window[1]});
 
-void set_click_callback(gui_window *win, click_callback cb) {
-    win->click_cb = cb;
+    //ImGui::SetNextWindowCollapsed(false);
+    ImGui::SetNextWindowBgAlpha(1);
+
+    if (ImGui::Begin(name.c_str(), &active,
+                     /*ImGuiWindowFlags_NoTitleBar |*/ ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove /*| ImGuiWindowFlags_NoCollapse*/ |
+                     ImGuiWindowFlags_NoSavedSettings)) {
+        show(state, this);
+    }
+    ImGui::End();
 }
 
-void set_scroll_callback(gui_window *win, scroll_callback cb) {
-    win->scroll_cb = cb;
-}
-
-void set_uiupdate_callback(gui_window *win, uiupdate_callback cb) {
-    win->uiupdate_cb = cb;
-}
-
-void set_update_callback(gui_window *win, update_callback cb) {
-    win->update_cb = cb;
-}
-
-void set_close(gui_window *win, bool close) {
-    glfwSetWindowShouldClose(win->win, close ? GLFW_TRUE : GLFW_FALSE);
-}
-
-}  // namespace bcg
-
-// -----------------------------------------------------------------------------
-// OPENGL WIDGETS
-// -----------------------------------------------------------------------------
-namespace bcg {
-
-void init_glwidgets(gui_window *win, int width, bool left) {
-    // init widgets
-    ImGui::CreateContext();
-    ImGui::GetIO().IniFilename = nullptr;
-    ImGui::GetStyle().WindowRounding = 0;
-    ImGui_ImplGlfw_InitForOpenGL(win->win, true);
-#ifndef __APPLE__
-    ImGui_ImplOpenGL3_Init();
-#else
-    ImGui_ImplOpenGL3_Init("#version 330");
-#endif
-    ImGui::StyleColorsDark();
-    win->widgets_width = width;
-    win->widgets_left = left;
-}
-
-bool begin_header(gui_window *win, const char *lbl) {
+bool begin_header(viewer_window *win, const char *lbl) {
     if (!ImGui::CollapsingHeader(lbl)) return false;
     ImGui::PushID(lbl);
     return true;
 }
 
-void end_header(gui_window *win) { ImGui::PopID(); }
+void end_header(viewer_window *win) { ImGui::PopID(); }
 
-void open_glmodal(gui_window *win, const char *lbl) { ImGui::OpenPopup(lbl); }
+void open_glmodal(viewer_window *win, const char *lbl) { ImGui::OpenPopup(lbl); }
 
-void clear_glmodal(gui_window *win) { ImGui::CloseCurrentPopup(); }
+void clear_glmodal(viewer_window *win) { ImGui::CloseCurrentPopup(); }
 
-bool begin_glmodal(gui_window *win, const char *lbl) {
+bool begin_glmodal(viewer_window *win, const char *lbl) {
     return ImGui::BeginPopupModal(lbl);
 }
 
-void end_glmodal(gui_window *win) { ImGui::EndPopup(); }
+void end_glmodal(viewer_window *win) { ImGui::EndPopup(); }
 
-bool is_glmodal_open(gui_window *win, const char *lbl) {
+bool is_glmodal_open(viewer_window *win, const char *lbl) {
     return ImGui::IsPopupOpen(lbl);
 }
 
@@ -381,7 +153,7 @@ struct filedialog_state {
         _set_filename(filename);
     }
 
-    void _set_dirname(const std::string& name) {
+    void _set_dirname(const std::string &name) {
         if (path_exists(name) && path_isdir(name)) {
             dirname = name;
         } else if (path_exists(dirname) && path_isdir(dirname)) {
@@ -399,7 +171,7 @@ struct filedialog_state {
                 entries.push_back({path_filename(entry), false});
             }
         }
-        std::sort(entries.begin(), entries.end(), [](auto& a, auto& b) {
+        std::sort(entries.begin(), entries.end(), [](auto &a, auto &b) {
             if (a.second == b.second) return a.first < b.first;
             return a.second;
         });
@@ -452,7 +224,7 @@ struct filedialog_state {
     std::string get_path() const { return path_join(dirname, filename); }
 };
 
-bool draw_filedialog(gui_window *win, const char *lbl, std::string &path, bool save,
+bool draw_filedialog(viewer_window *win, const char *lbl, std::string &path, bool save,
                      const std::string &dirname, const std::string &filename, const std::string &filter) {
     static auto states = std::unordered_map<std::string, filedialog_state>{};
     ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
@@ -514,7 +286,7 @@ bool draw_filedialog(gui_window *win, const char *lbl, std::string &path, bool s
     }
 }
 
-bool draw_filedialog_button(gui_window *win, const char *button_lbl,
+bool draw_filedialog_button(viewer_window *win, const char *button_lbl,
                             bool button_active, const char *lbl, std::string &path, bool save,
                             const std::string &dirname, const std::string &filename, const std::string &filter) {
     if (is_glmodal_open(win, lbl)) {
@@ -528,7 +300,7 @@ bool draw_filedialog_button(gui_window *win, const char *button_lbl,
     }
 }
 
-bool draw_button(gui_window *win, const char *lbl, bool enabled) {
+bool draw_button(viewer_window *win, const char *lbl, bool enabled) {
     if (enabled) {
         return ImGui::Button(lbl);
     } else {
@@ -541,15 +313,15 @@ bool draw_button(gui_window *win, const char *lbl, bool enabled) {
     }
 }
 
-void draw_label(gui_window *win, const char *lbl, const std::string &label) {
+void draw_label(viewer_window *win, const char *lbl, const std::string &label) {
     ImGui::LabelText(lbl, "%s", label.c_str());
 }
 
-void draw_separator(gui_window *win) { ImGui::Separator(); }
+void draw_separator(viewer_window *win) { ImGui::Separator(); }
 
-void continue_line(gui_window *win) { ImGui::SameLine(); }
+void continue_line(viewer_window *win) { ImGui::SameLine(); }
 
-bool draw_textinput(gui_window *win, const char *lbl, std::string &value) {
+bool draw_textinput(viewer_window *win, const char *lbl, std::string &value) {
     auto buffer = std::array<char,
             4096>{};
     auto num = 0;
@@ -561,90 +333,90 @@ bool draw_textinput(gui_window *win, const char *lbl, std::string &value) {
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, float &value, float min, float max) {
+        viewer_window *win, const char *lbl, float &value, float min, float max) {
     return ImGui::SliderFloat(lbl, &value, min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorS<2> &value, float min, float max) {
+        viewer_window *win, const char *lbl, VectorS<2> &value, float min, float max) {
     return ImGui::SliderFloat2(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorS<3> &value, float min, float max) {
+        viewer_window *win, const char *lbl, VectorS<3> &value, float min, float max) {
     return ImGui::SliderFloat3(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorS<4> &value, float min, float max) {
+        viewer_window *win, const char *lbl, VectorS<4> &value, float min, float max) {
     return ImGui::SliderFloat4(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, int &value, int min, int max) {
+        viewer_window *win, const char *lbl, int &value, int min, int max) {
     return ImGui::SliderInt(lbl, &value, min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorI<2> &value, int min, int max) {
+        viewer_window *win, const char *lbl, VectorI<2> &value, int min, int max) {
     return ImGui::SliderInt2(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorI<3> &value, int min, int max) {
+        viewer_window *win, const char *lbl, VectorI<3> &value, int min, int max) {
     return ImGui::SliderInt3(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorI<4> &value, int min, int max) {
+        viewer_window *win, const char *lbl, VectorI<4> &value, int min, int max) {
     return ImGui::SliderInt4(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, float &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, float &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorS<2> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorS<2> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat2(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorS<3> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorS<3> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat3(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorS<4> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorS<4> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat4(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, int &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, int &value, float speed,
                   int min, int max) {
     return ImGui::DragInt(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorI<2> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorI<2> &value, float speed,
                   int min, int max) {
     return ImGui::DragInt2(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorI<3> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorI<3> &value, float speed,
                   int min, int max) {
     return ImGui::DragInt3(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorI<4> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorI<4> &value, float speed,
                   int min, int max) {
     return ImGui::DragInt4(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_checkbox(gui_window *win, const char *lbl, bool &value) {
+bool draw_checkbox(viewer_window *win, const char *lbl, bool &value) {
     return ImGui::Checkbox(lbl, &value);
 }
 
-bool draw_checkbox(gui_window *win, const char *lbl, bool &value, bool invert) {
+bool draw_checkbox(viewer_window *win, const char *lbl, bool &value, bool invert) {
     if (!invert) {
         return draw_checkbox(win, lbl, value);
     } else {
@@ -655,17 +427,29 @@ bool draw_checkbox(gui_window *win, const char *lbl, bool &value, bool invert) {
     }
 }
 
-bool draw_coloredit(gui_window *win, const char *lbl, VectorS<3> &value) {
+bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<3> &value) {
     auto flags = ImGuiColorEditFlags_Float;
-    return ImGui::ColorEdit3(lbl, reinterpret_cast<float *>(value.data()), flags);
+    Vector<float, 3> color = value.cast<float>();
+    auto edit = ImGui::ColorEdit3(lbl, color.data(), flags);
+    if (edit) {
+        value = color.cast<bcg_scalar_t>();
+        return true;
+    }
+    return false;
 }
 
-bool draw_coloredit(gui_window *win, const char *lbl, VectorS<4> &value) {
+bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<4> &value) {
     auto flags = ImGuiColorEditFlags_Float;
-    return ImGui::ColorEdit4(lbl, reinterpret_cast<float *>(value.data()), flags);
+    Vector<float, 4> color = value.cast<float>();
+    auto edit = ImGui::ColorEdit4(lbl, color.data(), flags);
+    if (edit) {
+        value = color.cast<bcg_scalar_t>();
+        return true;
+    }
+    return false;
 }
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<3> &value) {
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<3> &value) {
     auto color = value;
     auto exposure = 0.0f;
     auto scale = color.maxCoeff();
@@ -684,7 +468,7 @@ bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<3> &value) {
     }
 }
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<4> &value) {
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<4> &value) {
     auto color = value;
     auto exposure = 0.0f;
     auto scale = color.head<3>().maxCoeff();
@@ -708,7 +492,7 @@ bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<4> &value) {
     }
 }
 
-bool draw_combobox(gui_window *win, const char *lbl, int &value,
+bool draw_combobox(viewer_window *win, const char *lbl, int &value,
                    const std::vector<std::string> &labels) {
     if (!ImGui::BeginCombo(lbl, labels[value].c_str())) return false;
     auto old_val = value;
@@ -722,7 +506,7 @@ bool draw_combobox(gui_window *win, const char *lbl, int &value,
     return value != old_val;
 }
 
-bool draw_combobox(gui_window *win, const char *lbl, std::string &value,
+bool draw_combobox(viewer_window *win, const char *lbl, std::string &value,
                    const std::vector<std::string> &labels) {
     if (!ImGui::BeginCombo(lbl, value.c_str())) return false;
     auto old_val = value;
@@ -737,7 +521,7 @@ bool draw_combobox(gui_window *win, const char *lbl, std::string &value,
     return value != old_val;
 }
 
-bool draw_combobox(gui_window *win, const char *lbl, int &idx, int num,
+bool draw_combobox(viewer_window *win, const char *lbl, int &idx, int num,
                    const std::function<std::string(int)> &labels, bool include_null) {
     if (num <= 0) idx = -1;
     if (!ImGui::BeginCombo(lbl, idx >= 0 ? labels(idx).c_str() : "<none>"))
@@ -759,7 +543,7 @@ bool draw_combobox(gui_window *win, const char *lbl, int &idx, int num,
     return idx != old_idx;
 }
 
-void draw_progressbar(gui_window *win, const char *lbl, float fraction) {
+void draw_progressbar(viewer_window *win, const char *lbl, float fraction) {
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5, 0.5, 1, 0.25));
     ImGui::ProgressBar(fraction, ImVec2(0.0f, 0.0f));
     ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
@@ -768,7 +552,7 @@ void draw_progressbar(gui_window *win, const char *lbl, float fraction) {
 }
 
 void draw_progressbar(
-        gui_window *win, const char *lbl, int current, int total) {
+        viewer_window *win, const char *lbl, int current, int total) {
     auto overlay = std::to_string(current) + "/" + std::to_string(total);
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5, 0.5, 1, 0.25));
     ImGui::ProgressBar(
@@ -779,18 +563,18 @@ void draw_progressbar(
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const float *values, int count) {
+        viewer_window *win, const char *lbl, const float *values, int count) {
     ImGui::PlotHistogram(lbl, values, count);
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<float> &values) {
+        viewer_window *win, const char *lbl, const std::vector<float> &values) {
     ImGui::PlotHistogram(lbl, values.data(), (int) values.size(), 0, nullptr,
                          scalar_max, scalar_max, {0, 0}, 4);
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<VectorS<2>> &values) {
+        viewer_window *win, const char *lbl, const std::vector<VectorS<2>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
                          (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<2>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
@@ -798,7 +582,7 @@ void draw_histogram(
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<VectorS<3>> &values) {
+        viewer_window *win, const char *lbl, const std::vector<VectorS<3>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
                          (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
@@ -808,7 +592,7 @@ void draw_histogram(
 }
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<VectorS<4>> &values) {
+        viewer_window *win, const char *lbl, const std::vector<VectorS<4>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
                          (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
@@ -882,25 +666,25 @@ struct ImGuiAppLog {
 std::mutex _log_mutex;
 ImGuiAppLog _log_widget;
 
-void log_info(gui_window *win, const std::string &msg) {
+void log_info(viewer_window *win, const std::string &msg) {
     _log_mutex.lock();
     _log_widget.AddLog(msg.c_str(), "info");
     _log_mutex.unlock();
 }
 
-void log_error(gui_window *win, const std::string &msg) {
+void log_error(viewer_window *win, const std::string &msg) {
     _log_mutex.lock();
     _log_widget.AddLog(msg.c_str(), "errn");
     _log_mutex.unlock();
 }
 
-void clear_log(gui_window *win) {
+void clear_log(viewer_window *win) {
     _log_mutex.lock();
     _log_widget.Clear();
     _log_mutex.unlock();
 }
 
-void draw_log(gui_window *win) {
+void draw_log(viewer_window *win) {
     _log_mutex.lock();
     _log_widget.Draw();
     _log_mutex.unlock();

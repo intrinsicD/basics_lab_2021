@@ -6,13 +6,14 @@
 #define BCG_GRAPHICS_BCG_VIEWER_H
 
 #include "bcg_linalg.h"
+#include "bcg_viewer_state.h"
 
 namespace bcg {
 
 struct viewer {
-    gui_callbacks callbacks;
+    viewer_state state;
 
-    void run(VectorI<2> size = {800, 600}, std::string title = "default");
+    void run(const VectorI<2> &size = {800, 600}, const std::string &title = "default", int widgets_width = 320);
 };
 
 }

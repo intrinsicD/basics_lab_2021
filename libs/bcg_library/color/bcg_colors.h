@@ -10,17 +10,18 @@
 namespace bcg {
 
 struct color {
-    [[maybe_unused]] inline static const auto white = one3s;
-    [[maybe_unused]] inline static const auto yellow = {1.0f, 1.0f, 0.0f};
-    [[maybe_unused]] inline static const auto magenta = {1.0f, 0.0f, 1.0f};
-    [[maybe_unused]] inline static const auto red = {1.0f, 0.0f, 0.0f};
-    [[maybe_unused]] inline static const auto cyan = {0.0f, 1.0f, 1.0f};
-    [[maybe_unused]] inline static const auto green = {0.0f, 1.0f, 0.0f};
-    [[maybe_unused]] inline static const auto blue = {0.0f, 0.0f, 1.0f};
-    [[maybe_unused]] inline static const auto black = zero3s;
-    [[maybe_unused]] inline static const auto orange = {1.0f, 0.5f, 0.0f};
-    [[maybe_unused]] inline static const auto violet = {0.5f, 0.0f, 1.0f};
-    [[maybe_unused]] inline static const auto grey = {0.5f, 0.5f, 0.5f};
+    [[maybe_unused]] inline static const VectorS<3> white = one3s;
+    [[maybe_unused]] inline static const VectorS<3> yellow = {1.0f, 1.0f, 0.0f};
+    [[maybe_unused]] inline static const VectorS<3> magenta = {1.0f, 0.0f, 1.0f};
+    [[maybe_unused]] inline static const VectorS<3> red = {1.0f, 0.0f, 0.0f};
+    [[maybe_unused]] inline static const VectorS<3> cyan = {0.0f, 1.0f, 1.0f};
+    [[maybe_unused]] inline static const VectorS<3> green = {0.0f, 1.0f, 0.0f};
+    [[maybe_unused]] inline static const VectorS<3> blue = {0.0f, 0.0f, 1.0f};
+    [[maybe_unused]] inline static const VectorS<3> black = zero3s;
+    [[maybe_unused]] inline static const VectorS<3> orange = {1.0f, 0.5f, 0.0f};
+    [[maybe_unused]] inline static const VectorS<3> violet = {0.5f, 0.0f, 1.0f};
+    [[maybe_unused]] inline static const VectorS<3> grey = {0.5f, 0.5f, 0.5f};
+    [[maybe_unused]] inline static const VectorS<4> default_background = {0.2f, 0.4f, 0.8f, 1.0f};
 
     static VectorS<3> random();
 

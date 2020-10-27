@@ -5,8 +5,12 @@
 #ifndef BCG_GRAPHICS_BCG_VIEWER_CORE_H
 #define BCG_GRAPHICS_BCG_VIEWER_CORE_H
 
+#include <memory>
+
 #include "bcg_camera.h"
 #include "bcg_picker.h"
+#include "bcg_imgui.h"
+#include "color/bcg_colors.h"
 #include "bcg_library/utils/bcg_dynamic_bitset.h"
 
 struct GLFWwindow;
@@ -14,6 +18,7 @@ struct GLFWwindow;
 namespace bcg {
 
 struct viewer_colors {
+    VectorS<4> background = color::default_background;
     VectorS<3> overlay;
     VectorS<3> entity_selection;
     VectorS<3> vertex_selection;
@@ -25,8 +30,8 @@ struct viewer_colors {
 
 struct viewer_mouse {
     dynamic_bitset buttons;
-    bool is_moving, is_scrolling, is_captured_by_gui;
-    VectorS<2> last_left_click, last_middle_click, last_right_click, cursor_pos;
+    bool is_moving, is_scrolling, is_captured_by_gui, left, middle, right;
+    VectorS<2> last_left_click, last_middle_click, last_right_click, cursor_pos, last_pos;
     float scroll_value;
 };
 
@@ -86,6 +91,20 @@ struct viewer_window{
     GLFWwindow *win = nullptr;
     std::string title = "";
     int width, height;
+    VectorI<4> framebuffer_viewport;
+    int widgets_width = 0;
+    bool widgets_left = false;
+
+};
+
+struct viewer_gui{
+    bool widgets_active = true;
+    bool show_menu = true;
+    bool hide_all = false;
+    menu_element menu;
+    left_panel left;
+    right_panel right;
+    std::unordered_map<std::string, gui_element*> active_items;
 };
 
 struct viewer_state {
@@ -96,8 +115,11 @@ struct viewer_state {
     viewer_time time;
     viewer_callbacks callbacks;
     viewer_window window;
+    viewer_gui gui;
     camera cam;
 };
+
+
 
 }
 

@@ -1,244 +1,147 @@
 #ifndef BCG_GRAPHICS_BCG_IMGUI
 #define BCG_GRAPHICS_BCG_IMGUI
 
-// -----------------------------------------------------------------------------
-// INCLUDES
-// -----------------------------------------------------------------------------
-
-#include <functional>
-#include <string>
-#include <vector>
+#include <memory>
+#include "unordered_map"
 
 #include "bcg_library/math/bcg_linalg.h"
 
-// forward declaration
-struct GLFWwindow;
-
-// -----------------------------------------------------------------------------
-// UI APPLICATION
-// -----------------------------------------------------------------------------
 namespace bcg {
 
-// Forward declaration of OpenGL window
-struct gui_window;
+struct viewer_state;
+struct viewer_window;
 
-// Input state
-struct gui_input {
-    bool mouse_left = false;  // left button
-    bool mouse_right = false;  // right button
-    bool mouse_middle = false;  // middle button
-    VectorS<2> mouse_pos = {};     // position excluding widgets
-    VectorS<2> mouse_last = {};  // last mouse position excluding widgets
-    VectorS<2> mouse_delta = {};  // last mouse delta excluding widgets
-    bool modifier_alt = false;         // alt modifier
-    bool modifier_ctrl = false;         // ctrl modifier
-    bool modifier_shift = false;         // shift modifier
-    bool widgets_active = false;         // widgets are active
-    uint64_t clock_now = 0;             // clock now
-    uint64_t clock_last = 0;             // clock last
-    double time_now = 0;             // time now
-    double time_delta = 0;             // time delta
-    VectorI<2> window_size = {0, 0};        // window size
-    VectorI<4> framebuffer_viewport = {0, 0, 0, 0};  // framebuffer viewport
+struct gui_element {
+    explicit gui_element(std::string name);
+
+    gui_element();
+
+    virtual ~gui_element() = default;
+
+    std::string name;
+
+    int widgets_width = 320;
+
+    std::function<bool(viewer_state * state, gui_element * self)> show;
+
+    std::unordered_map<std::string, gui_element*> children;
+
+    gui_element* get_or_add_child(std::string name);
+
+    virtual void render(viewer_state *state);
+
+    void close();
+
+    bool active;
 };
 
-// Init callback called after the window has opened
-using init_callback = std::function<void(gui_window *, const gui_input &input)>;
-// Clear callback called after the window is cloased
-using clear_callback = std::function<void(gui_window *, const gui_input &input)>;
-// Draw callback called every frame and when resizing
-using draw_callback = std::function<void(gui_window *, const gui_input &input)>;
-// Draw callback for drawing widgets
-using widgets_callback = std::function<void(gui_window *, const gui_input &input)>;
-// Drop callback that returns that list of dropped std::strings.
-using drop_callback = std::function<void(gui_window *, const std::vector<std::string> &, const gui_input &input)>;
-// Key callback that returns key codes, pressed/released flag and modifier keys
-using key_callback = std::function<void(gui_window *, int key, bool pressed, const gui_input &input)>;
-// Char callback that returns ASCII key
-using char_callback = std::function<void(gui_window *, unsigned int key, const gui_input &input)>;
-// Mouse click callback that returns left/right button, pressed/released flag,
-// modifier keys
-using click_callback = std::function<void(gui_window *, bool left, bool pressed, const gui_input &input)>;
-// Scroll callback that returns scroll amount
-using scroll_callback = std::function<void(gui_window *, float amount, const gui_input &input)>;
-// Update std::functions called every frame
-using uiupdate_callback = std::function<void(gui_window *, const gui_input &input)>;
-// Update std::functions called every frame
-using update_callback = std::function<void(gui_window *, const gui_input &input)>;
+struct menu_element : public gui_element{
+    using gui_element::gui_element;
 
-// User interface callcaks
-struct gui_callbacks {
-    init_callback init_cb = {};
-    clear_callback clear_cb = {};
-    draw_callback draw_cb = {};
-    widgets_callback widgets_cb = {};
-    drop_callback drop_cb = {};
-    key_callback key_cb = {};
-    char_callback char_cb = {};
-    click_callback click_cb = {};
-    scroll_callback scroll_cb = {};
-    update_callback update_cb = {};
-    uiupdate_callback uiupdate_cb = {};
+    menu_element();
+
+    void render(viewer_state *state) override;
 };
 
-// run the user interface with the given callbacks
-void run_ui(const VectorI<2> &size, const std::string &title,
-            const gui_callbacks &callbaks, int widgets_width = 320,
-            bool widgets_left = true);
+struct left_panel : public gui_element{
+    using gui_element::gui_element;
 
-}  // namespace bcg
+    left_panel();
 
-// -----------------------------------------------------------------------------
-// UI WINDOW
-// -----------------------------------------------------------------------------
-namespace bcg {
-
-// OpenGL window wrapper
-struct gui_window {
-    GLFWwindow *win = nullptr;
-    std::string title = "";
-    init_callback init_cb = {};
-    clear_callback clear_cb = {};
-    draw_callback draw_cb = {};
-    widgets_callback widgets_cb = {};
-    drop_callback drop_cb = {};
-    key_callback key_cb = {};
-    char_callback char_cb = {};
-    click_callback click_cb = {};
-    scroll_callback scroll_cb = {};
-    update_callback update_cb = {};
-    uiupdate_callback uiupdate_cb = {};
-    int widgets_width = 0;
-    bool widgets_left = true;
-    gui_input input = {};
-    VectorS<4> background = {0.15f, 0.15f, 0.15f, 1.0f};
+    void render(viewer_state *state) override;
 };
 
-// Windows initialization
-void init_window(gui_window *win, const VectorI<2> &size, const std::string &title,
-                 bool widgets, int widgets_width = 320, bool widgets_left = true);
+struct right_panel : public gui_element{
+    using gui_element::gui_element;
 
-// Window cleanup
-void clear_window(gui_window *win);
+    right_panel();
 
-// Set callbacks
-void set_init_callback(gui_window *win, init_callback init_cb);
+    void render(viewer_state *state) override;
+};
 
-void set_clear_callback(gui_window *win, clear_callback clear_cb);
+bool begin_header(viewer_window *win, const char *title);
 
-void set_draw_callback(gui_window *win, draw_callback draw_cb);
+void end_header(viewer_window *win);
 
-void set_widgets_callback(gui_window *win, widgets_callback widgets_cb);
+void draw_label(viewer_window *win, const char *lbl, const std::string &text);
 
-void set_drop_callback(gui_window *win, drop_callback drop_cb);
+void draw_separator(viewer_window *win);
 
-void set_key_callback(gui_window *win, key_callback cb);
+void continue_line(viewer_window *win);
 
-void set_char_callback(gui_window *win, char_callback cb);
+bool draw_button(viewer_window *win, const char *lbl, bool enabled = true);
 
-void set_click_callback(gui_window *win, click_callback cb);
-
-void set_scroll_callback(gui_window *win, scroll_callback cb);
-
-void set_uiupdate_callback(gui_window *win, uiupdate_callback cb);
-
-void set_update_callback(gui_window *win, update_callback cb);
-
-// Run loop
-void run_ui(gui_window *win);
-
-void set_close(gui_window *win, bool close);
-
-}  // namespace bcg
-
-// -----------------------------------------------------------------------------
-// OPENGL WIDGETS
-// -----------------------------------------------------------------------------
-namespace bcg {
-
-bool begin_header(gui_window *win, const char *title);
-
-void end_header(gui_window *win);
-
-void draw_label(gui_window *win, const char *lbl, const std::string &text);
-
-void draw_separator(gui_window *win);
-
-void continue_line(gui_window *win);
-
-bool draw_button(gui_window *win, const char *lbl, bool enabled = true);
-
-bool draw_textinput(gui_window *win, const char *lbl, std::string &value);
+bool draw_textinput(viewer_window *win, const char *lbl, std::string &value);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, float &value, float min, float max);
+        viewer_window *win, const char *lbl, float &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorS<2> &value, float min, float max);
+        viewer_window *win, const char *lbl, VectorS<2> &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorS<3> &value, float min, float max);
+        viewer_window *win, const char *lbl, VectorS<3> &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorS<4> &value, float min, float max);
+        viewer_window *win, const char *lbl, VectorS<4> &value, float min, float max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, int &value, int min, int max);
+        viewer_window *win, const char *lbl, int &value, int min, int max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorI<2> &value, int min, int max);
+        viewer_window *win, const char *lbl, VectorI<2> &value, int min, int max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorI<3> &value, int min, int max);
+        viewer_window *win, const char *lbl, VectorI<3> &value, int min, int max);
 
 bool draw_slider(
-        gui_window *win, const char *lbl, VectorI<4> &value, int min, int max);
+        viewer_window *win, const char *lbl, VectorI<4> &value, int min, int max);
 
-bool draw_dragger(gui_window *win, const char *lbl, float &value,
+bool draw_dragger(viewer_window *win, const char *lbl, float &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorS<2> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorS<2> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorS<3> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorS<3> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorS<4> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorS<4> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(gui_window *win, const char *lbl, int &value, float speed = 1,
+bool draw_dragger(viewer_window *win, const char *lbl, int &value, float speed = 1,
                   int min = 0, int max = 0);
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorI<2> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorI<2> &value,
                   float speed = 1, int min = 0, int max = 0);
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorI<3> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorI<3> &value,
                   float speed = 1, int min = 0, int max = 0);
 
-bool draw_dragger(gui_window *win, const char *lbl, VectorI<4> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, VectorI<4> &value,
                   float speed = 1, int min = 0, int max = 0);
 
-bool draw_checkbox(gui_window *win, const char *lbl, bool &value);
+bool draw_checkbox(viewer_window *win, const char *lbl, bool &value);
 
-bool draw_checkbox(gui_window *win, const char *lbl, bool &value, bool invert);
+bool draw_checkbox(viewer_window *win, const char *lbl, bool &value, bool invert);
 
-bool draw_coloredit(gui_window *win, const char *lbl, VectorS<3> &value);
+bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<3> &value);
 
-bool draw_coloredit(gui_window *win, const char *lbl, VectorS<4> &value);
+bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<4> &value);
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<3> &value);
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<3> &value);
 
-bool draw_hdrcoloredit(gui_window *win, const char *lbl, VectorS<4> &value);
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<4> &value);
 
-bool draw_combobox(gui_window *win, const char *lbl, int &idx, const std::vector<std::string> &labels);
+bool draw_combobox(viewer_window *win, const char *lbl, int &idx, const std::vector<std::string> &labels);
 
-bool draw_combobox(gui_window *win, const char *lbl, std::string &value, const std::vector<std::string> &labels);
+bool draw_combobox(viewer_window *win, const char *lbl, std::string &value, const std::vector<std::string> &labels);
 
-bool draw_combobox(gui_window *win, const char *lbl, int &idx, int num, const std::function<std::string(int)> &labels,
+bool draw_combobox(viewer_window *win, const char *lbl, int &idx, int num, const std::function<std::string(int)> &labels,
                    bool include_null = false);
 
 template<typename T>
-inline bool draw_combobox(gui_window *win, const char *lbl, T *&value,
+inline bool draw_combobox(viewer_window *win, const char *lbl, T *&value,
                           const std::vector<T *> &vals, bool include_null = false) {
     auto idx = -1;
     for (auto pos = 0; pos < vals.size(); pos++)
@@ -253,7 +156,7 @@ inline bool draw_combobox(gui_window *win, const char *lbl, T *&value,
 }
 
 template<typename T>
-inline bool draw_combobox(gui_window *win, const char *lbl, T *&value,
+inline bool draw_combobox(viewer_window *win, const char *lbl, T *&value,
                           const std::vector<T *> &vals, const std::vector<std::string> &labels,
                           bool include_null = false) {
     auto idx = -1;
@@ -268,36 +171,36 @@ inline bool draw_combobox(gui_window *win, const char *lbl, T *&value,
     return edited;
 }
 
-void draw_progressbar(gui_window *win, const char *lbl, float fraction);
+void draw_progressbar(viewer_window *win, const char *lbl, float fraction);
 
-void draw_progressbar(gui_window *win, const char *lbl, int current, int total);
-
-void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<float> &values);
+void draw_progressbar(viewer_window *win, const char *lbl, int current, int total);
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<VectorS<2>> &values);
+        viewer_window *win, const char *lbl, const std::vector<float> &values);
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<VectorS<3>> &values);
+        viewer_window *win, const char *lbl, const std::vector<VectorS<2>> &values);
 
 void draw_histogram(
-        gui_window *win, const char *lbl, const std::vector<VectorS<4>> &values);
+        viewer_window *win, const char *lbl, const std::vector<VectorS<3>> &values);
 
-bool draw_filedialog(gui_window *win, const char *lbl, std::string &path, bool save,
+void draw_histogram(
+        viewer_window *win, const char *lbl, const std::vector<VectorS<4>> &values);
+
+bool draw_filedialog(viewer_window *win, const char *lbl, std::string &path, bool save,
                      const std::string &dirname, const std::string &filename, const std::string &filter);
 
-bool draw_filedialog_button(gui_window *win, const char *button_lbl,
+bool draw_filedialog_button(viewer_window *win, const char *button_lbl,
                             bool button_active, const char *lbl, std::string &path, bool save,
                             const std::string &dirname, const std::string &filename, const std::string &filter);
 
-void log_info(gui_window *win, const std::string &msg);
+void log_info(viewer_window *win, const std::string &msg);
 
-void log_error(gui_window *win, const std::string &msg);
+void log_error(viewer_window *win, const std::string &msg);
 
-void clear_log(gui_window *win);
+void clear_log(viewer_window *win);
 
-void draw_log(gui_window *win);
+void draw_log(viewer_window *win);
 
 }  // namespace bcg
 

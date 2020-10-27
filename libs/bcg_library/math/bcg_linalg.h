@@ -26,6 +26,16 @@ using VectorS = Vector<bcg_scalar_t, N>;
 template<bcg_index_t N>
 using VectorI = Vector<bcg_index_t, N>;
 
+using Transform = Eigen::Transform<bcg_scalar_t, 3, Eigen::Affine>;
+
+using Translation = Eigen::Translation<bcg_scalar_t, 3>;
+
+using Rotation = Eigen::AngleAxis<bcg_scalar_t>;
+
+using Scaling = Eigen::DiagonalMatrix<bcg_scalar_t, 3>;
+
+using Quaternion = Eigen::Quaternion<bcg_scalar_t>;
+
 // Zero vector constants.
 template<bcg_index_t N>
 [[maybe_unused]] inline const auto zeroi = VectorI<N>::Zero();
