@@ -49,7 +49,7 @@ inline size_t COUNTSETBITS(size_t v) {
 
 inline size_t clz(size_t x) {
     int n = 64;
-    unsigned y;
+    size_t y;
 
     y = x >> 32;
     if (y != 0) {

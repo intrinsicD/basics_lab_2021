@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 #include "exts/imgui/imgui.h"
 #include "bcg_library/math/bcg_linalg.h"

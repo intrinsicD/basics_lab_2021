@@ -83,6 +83,7 @@ TEST_F(TestPointCloudFixture, add_vertex){
     EXPECT_TRUE(pc_empty.vertices.is_valid(v1));
     EXPECT_TRUE(pc_empty.vertices.is_valid(v2));
     EXPECT_TRUE(pc_empty.vertices.is_valid(v3));
+    EXPECT_TRUE(pc_empty.vertices.is_valid(v4));
 }
 
 TEST_F(TestPointCloudFixture, assign){

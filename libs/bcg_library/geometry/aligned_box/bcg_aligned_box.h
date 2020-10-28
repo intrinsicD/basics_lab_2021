@@ -157,20 +157,20 @@ std::vector<VectorI<2>> fet_edges(const aligned_box<N> &alignedBox, size_t offse
 template<bcg_index_t N>
 std::vector<VectorI<3>> get_triangles(const aligned_box<N> &, size_t offset = 0) {
     std::vector<VectorI<3>> tris;
-    VectorI<3> o(offset, offset, offset);
+    VectorI<3> o = VectorI<3>::Constant(bcg_index_t(offset));
 
-    tris.push_back(VectorI<3>({1, 0, 3}) + o);
-    tris.push_back(VectorI<3>({3, 0, 2}) + o);
-    tris.push_back(VectorI<3>({3, 2, 7}) + o);
-    tris.push_back(VectorI<3>({7, 2, 6}) + o);
-    tris.push_back(VectorI<3>({0, 4, 2}) + o);
-    tris.push_back(VectorI<3>({2, 4, 6}) + o);
-    tris.push_back(VectorI<3>({5, 1, 7}) + o);
-    tris.push_back(VectorI<3>({7, 1, 3}) + o);
-    tris.push_back(VectorI<3>({5, 4, 1}) + o);
-    tris.push_back(VectorI<3>({1, 4, 0}) + o);
-    tris.push_back(VectorI<3>({7, 6, 5}) + o);
-    tris.push_back(VectorI<3>({5, 6, 4}) + o);
+    tris.emplace_back(VectorI<3>({1, 0, 3}) + o);
+    tris.emplace_back(VectorI<3>({3, 0, 2}) + o);
+    tris.emplace_back(VectorI<3>({3, 2, 7}) + o);
+    tris.emplace_back(VectorI<3>({7, 2, 6}) + o);
+    tris.emplace_back(VectorI<3>({0, 4, 2}) + o);
+    tris.emplace_back(VectorI<3>({2, 4, 6}) + o);
+    tris.emplace_back(VectorI<3>({5, 1, 7}) + o);
+    tris.emplace_back(VectorI<3>({7, 1, 3}) + o);
+    tris.emplace_back(VectorI<3>({5, 4, 1}) + o);
+    tris.emplace_back(VectorI<3>({1, 4, 0}) + o);
+    tris.emplace_back(VectorI<3>({7, 6, 5}) + o);
+    tris.emplace_back(VectorI<3>({5, 6, 4}) + o);
 
     return tris;
 }
@@ -178,14 +178,14 @@ std::vector<VectorI<3>> get_triangles(const aligned_box<N> &, size_t offset = 0)
 template<bcg_index_t N>
 std::vector<VectorI<4>> get_faces(const aligned_box<N> &, size_t offset = 0) {
     std::vector<VectorI<4>> faces;
-    VectorI<3> o(offset, offset, offset);
+    VectorI<4> o = VectorI<4>::Constant(bcg_index_t(offset));
 
-    faces.emplace_back(0, 1, 3, 2);
-    faces.emplace_back(1, 5, 7, 3);
-    faces.emplace_back(2, 3, 7, 6);
-    faces.emplace_back(4, 5, 1, 0);
-    faces.emplace_back(4, 0, 2, 6);
-    faces.emplace_back(6, 7, 5, 4);
+    faces.emplace_back(VectorI<4>(0, 1, 3, 2) + o);
+    faces.emplace_back(VectorI<4>(1, 5, 7, 3) + o);
+    faces.emplace_back(VectorI<4>(2, 3, 7, 6) + o);
+    faces.emplace_back(VectorI<4>(4, 5, 1, 0) + o);
+    faces.emplace_back(VectorI<4>(4, 0, 2, 6) + o);
+    faces.emplace_back(VectorI<4>(6, 7, 5, 4) + o);
 
     return faces;
 }

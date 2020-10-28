@@ -748,8 +748,8 @@ struct property_iterator {
     explicit property_iterator(Handle handle = Handle(),
                                const Container *container = nullptr,
                                property<bool, 1> deleted = {}) : handle(handle),
-                                                                 container(container),
-                                                                 deleted(deleted) {
+                                                                 deleted(deleted),
+                                                                 container(container){
         if (container) {
             if (deleted) {
                 while (container->is_valid(handle) && deleted[handle]) {
@@ -800,8 +800,8 @@ struct vertex_container : public property_container {
     struct vertex_iterator : public property_iterator<vertex_iterator, vertex_handle, vertex_container> {
         explicit vertex_iterator(vertex_handle v = vertex_handle(),
                                  property<bool, 1> deleted = {},
-                                 const vertex_container *container = nullptr) : property_iterator(v, container,
-                                                                                                  deleted) {}
+                                 const vertex_container *container = nullptr) : property_iterator(std::move(v), container,
+                                                                                                  std::move(deleted)) {}
     };
 
     inline vertex_iterator begin() const { return vertex_iterator(0, get<bool, 1>("deleted"), this); }
@@ -830,8 +830,8 @@ struct edge_container : public property_container {
     struct edge_iterator : public property_iterator<edge_iterator, edge_handle, edge_container> {
         explicit edge_iterator(edge_handle e = edge_handle(),
                                property<bool, 1> deleted = {},
-                               const edge_container *container = nullptr) : property_iterator(e, container,
-                                                                                              deleted) {}
+                               const edge_container *container = nullptr) : property_iterator(std::move(e), container,
+                                                                                              std::move(deleted)) {}
     };
 
     inline edge_iterator begin() const { return edge_iterator(0, get<bool, 1>("deleted"), this); }
@@ -845,8 +845,8 @@ struct face_container : public property_container {
     struct face_iterator : public property_iterator<face_iterator, face_handle, face_container> {
         explicit face_iterator(face_handle f = face_handle(),
                                property<bool, 1> deleted = {},
-                               const face_container *container = nullptr) : property_iterator(f, container,
-                                                                                              deleted) {}
+                               const face_container *container = nullptr) : property_iterator(std::move(f), container,
+                                                                                              std::move(deleted)) {}
     };
 
     inline face_iterator begin() const { return face_iterator(0, get<bool, 1>("deleted"), this); }
