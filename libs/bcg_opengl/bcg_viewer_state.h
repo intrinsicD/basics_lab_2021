@@ -8,10 +8,14 @@
 #include <memory>
 
 #include "bcg_camera.h"
-#include "bcg_picker.h"
 #include "bcg_imgui.h"
+#include "bcg_opengl.h"
+#include "systems/bcg_events.h"
 #include "color/bcg_colors.h"
+#include "bcg_opengl/systems/bcg_systems.h"
 #include "bcg_library/utils/bcg_dynamic_bitset.h"
+#include "bcg_library/utils/bcg_file_watcher.h"
+#include "entt/entt.hpp"
 
 struct GLFWwindow;
 
@@ -30,12 +34,13 @@ struct viewer_colors {
 
 struct viewer_mouse {
     dynamic_bitset buttons;
-    bool is_moving, is_scrolling, is_captured_by_gui, left, middle, right;
+    bool is_moving, is_scrolling, is_dragging, is_captured_by_gui, left, middle, right;
     VectorS<2> last_left_click = zero2s;
     VectorS<2> last_middle_click = zero2s;
     VectorS<2> last_right_click = zero2s;
     VectorS<2> cursor_position = zero2s;
     VectorS<2> last_cursor_position = zero2s;
+    VectorS<2> cursor_delta = zero2s;
     float scroll_value = 0;
 };
 
@@ -54,9 +59,9 @@ struct viewer_time {
 struct viewer_state;
 
 // Init callback called after the window has opened
-using init_callback = std::function<void(viewer_state *)>;
+using startup_callback = std::function<void(viewer_state *)>;
 // Clear callback called after the window is cloased
-using clear_callback = std::function<void(viewer_state *)>;
+using shutdown_callback = std::function<void(viewer_state *)>;
 // Draw callback called every frame and when resizing
 using draw_callback = std::function<void(viewer_state *)>;
 // Draw callback for drawing widgets
@@ -78,8 +83,8 @@ using uiupdate_callback = std::function<void(viewer_state *)>;
 using update_callback = std::function<void(viewer_state *)>;
 
 struct viewer_callbacks {
-    init_callback init_cb = {};
-    clear_callback clear_cb = {};
+    startup_callback startup_cb = {};
+    shutdown_callback shutdown_cb = {};
     draw_callback draw_cb = {};
     widgets_callback widgets_cb = {};
     drop_callback drop_cb = {};
@@ -108,6 +113,42 @@ struct viewer_gui {
     left_panel left;
 };
 
+struct viewer_systems {
+    std::unordered_map<std::string, system> systems;
+
+    bool has(const std::string &name) const;
+
+    system &operator[](const std::string &name);
+
+    const system &operator[](const std::string &name) const;
+};
+
+struct viewer_shaders {
+    std::unordered_map<std::string, glsl_program> programs;
+    file_watcher watcher;
+
+    void load(std::string name,
+              std::string vertex_shader_file,
+              std::string fragment_shader_file,
+              std::string *geometry_shader_file = nullptr,
+              std::string *tess_control_shader_file = nullptr,
+              std::string *tess_eval_shader_file = nullptr);
+
+    glsl_program &operator[](const std::string &name);
+
+    const glsl_program &operator[](const std::string &name) const;
+
+private:
+    glsl_shader load_shader(std::string filename, unsigned int type) const;
+};
+
+struct viewer_picker{
+    size_t entity_id, vertex_id, edge_id, face_id;
+    VectorS<3> model_space_point;
+    VectorS<3> world_space_point;
+    VectorS<3> view_space_point;
+};
+
 struct viewer_state {
     viewer_colors colors;
     viewer_keyboard keyboard;
@@ -117,7 +158,11 @@ struct viewer_state {
     viewer_callbacks callbacks;
     viewer_window window;
     viewer_gui gui;
+    viewer_systems systems;
+    viewer_shaders shaders;
     camera cam;
+    entt::registry scene;
+    entt::dispatcher dispatcher;
 };
 
 

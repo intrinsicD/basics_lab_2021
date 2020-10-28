@@ -56,7 +56,7 @@ void left_panel::render(viewer_state *state) {
     ImGui::End();
 }
 
-void settings(viewer_state *state) {
+void gui_settings(viewer_state *state) {
     if (ImGui::CollapsingHeader("Colors")) {
         draw_coloredit(&state->window, "background", state->colors.background);
         draw_coloredit(&state->window, "overlay", state->colors.overlay);
@@ -109,6 +109,9 @@ void settings(viewer_state *state) {
         ss.str("");
         ss << state->mouse.last_cursor_position.transpose();
         draw_label(&state->window, "last_cursor_position", ss.str());
+        ss.str("");
+        ss << state->mouse.cursor_delta.transpose();
+        draw_label(&state->window, "cursor_delta", ss.str());
         draw_label(&state->window, "scroll_value", std::to_string(state->mouse.scroll_value));
     }
     if (ImGui::CollapsingHeader("Time")) {
@@ -179,15 +182,20 @@ void settings(viewer_state *state) {
         draw_label(&state->window, "target_point", ss.str());
         ss.str("");
         ss << state->cam.model_matrix.matrix();
-        draw_label(&state->window, "model_matrix", ss.str());
+
+        draw_label(&state->window, "model\n\n\n\n",  ss.str());
         ss.str("");
         ss << state->cam.view_matrix();
-        draw_label(&state->window, "view_matrix", ss.str());
+        draw_label(&state->window, "view\n\n\n\n", ss.str());
         ss.str("");
         ss << state->cam.projection_matrix;
-        draw_label(&state->window, "projection_matrix", ss.str());
+        draw_label(&state->window, "projection\n\n\n\n", ss.str());
         ss.str("");
     }
+}
+
+void gui_mesh_factory(viewer_state *state){
+    ImGui::Button("Make Triangle");
 }
 
 bool begin_header(viewer_window *win, const char *lbl) {

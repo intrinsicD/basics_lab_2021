@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <stdexcept>
+#include <algorithm>
 #include "bcg_path.h"
 
 namespace bcg {
@@ -73,6 +74,7 @@ std::vector<std::string> list_directory(const std::string &filename) {
     for (auto entry : std::filesystem::directory_iterator(make_path(filename))) {
         entries.push_back(entry.path().generic_u8string());
     }
+    std::sort(entries.begin(), entries.end());
     return entries;
 }
 

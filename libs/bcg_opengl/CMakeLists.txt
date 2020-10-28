@@ -6,9 +6,16 @@ if (BCG_OPENGL)
             bcg_imgui.h bcg_imgui.cpp
             bcg_opengl.h bcg_opengl.cpp
             bcg_camera.h bcg_camera.cpp
-            bcg_picker.h
-            bcg_viewer.h bcg_viewer.cpp bcg_viewer_state.h
-            bcg_viewer.h
+            bcg_viewer.h bcg_viewer.cpp
+            bcg_viewer_state.h bcg_viewer_state.cpp
+            systems/bcg_camera_system.h systems/bcg_camera_system.cpp
+            systems/bcg_events.h
+            systems/bcg_graph_system.h systems/bcg_graph_system.cpp
+            systems/bcg_mesh_system.h systems/bcg_mesh_system.cpp
+            systems/bcg_picker_system.h systems/bcg_picker_system.cpp
+            systems/bcg_point_cloud_system.h systems/bcg_point_cloud_system.cpp
+            systems/bcg_systems.h
+            systems/bcg_transform_system.h systems/bcg_transform_system.cpp
             exts/imgui/imgui.cpp
             exts/imgui/imgui_draw.cpp
             exts/imgui/imgui_widgets.cpp
@@ -21,7 +28,10 @@ if (BCG_OPENGL)
     target_compile_definitions(bcg_opengl PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
     set_target_properties(bcg_opengl PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 
-    target_include_directories(bcg_opengl PRIVATE ${CMAKE_SOURCE_DIR}/exts/glfw/include ./exts/imgui ./exts)
+    target_include_directories(bcg_opengl PUBLIC ${CMAKE_SOURCE_DIR}/exts/glfw/include)
+    target_include_directories(bcg_opengl PUBLIC ./exts/imgui)
+    target_include_directories(bcg_opengl PUBLIC ./exts)
+    target_include_directories(bcg_opengl PUBLIC ${CMAKE_SOURCE_DIR}/exts/entt/single_include)
     target_link_libraries(bcg_opengl glfw ${OPENGL_gl_LIBRARY} bcg_graphics)
 
     if (UNIX AND NOT APPLE)

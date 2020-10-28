@@ -10,14 +10,14 @@
 #include <vector>
 #include "bcg_library/math/bcg_linalg.h"
 
+// forward declaration
+struct GLFWwindow;
+
 namespace bcg {
 
 #ifndef BCG_GL_INVALID_ID
 #define BCG_GL_INVALID_ID (unsigned int)(-1)
 #endif
-
-// forward declaration
-struct GLFWwindow;
 
 bool init_glad(std::string &error);
 
@@ -118,6 +118,8 @@ struct glsl_shader : public ogl_handle {
 
     glsl_shader();
 
+    glsl_shader(unsigned int type, std::string name);
+
     glsl_shader(unsigned int handle, unsigned int type);
 
     glsl_shader(unsigned int handle, unsigned int type, std::string name);
@@ -155,6 +157,8 @@ struct glsl_shader : public ogl_handle {
 
 struct glsl_program : public ogl_handle {
     glsl_program();
+
+    explicit glsl_program(std::string name);
 
     explicit glsl_program(unsigned int handle);
 

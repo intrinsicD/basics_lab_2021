@@ -228,6 +228,10 @@ glsl_shader::glsl_shader() : ogl_handle(), type(BCG_GL_INVALID_ID), source(), fi
 
 }
 
+glsl_shader::glsl_shader(unsigned int type, std::string name) : ogl_handle(BCG_GL_INVALID_ID, name), type(type){
+
+}
+
 glsl_shader::glsl_shader(unsigned int handle, unsigned int type) : ogl_handle(handle), type(type), source(),
                                                                    filename() {}
 
@@ -376,6 +380,10 @@ bool glsl_shader::check_eq_shader_type(unsigned int type) const {
 //----------------------------------------------------------------------------------------------------------------------
 
 glsl_program::glsl_program() : ogl_handle() {
+
+}
+
+glsl_program::glsl_program(std::string name) : ogl_handle(BCG_GL_INVALID_ID, name){
 
 }
 

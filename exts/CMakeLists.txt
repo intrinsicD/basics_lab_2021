@@ -5,7 +5,7 @@ if (BCG_APPS)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)
     set(GLFW_INSTALL OFF CACHE BOOL " " FORCE)
     add_subdirectory(glfw)
-
+    include_directories(entt/single_include)
 endif (BCG_APPS)
 
 if(BCG_TESTS)

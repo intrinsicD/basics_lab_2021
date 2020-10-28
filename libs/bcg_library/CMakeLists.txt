@@ -18,7 +18,6 @@ add_library(bcg_graphics
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
         geometry/sphere/bcg_sphere.h geometry/sphere/bcg_sphere_fit.h geometry/sphere/bcg_sphere_sampling_fibunacci.h
         exts/cgltf/cgltf.h exts/cgltf/cgltf_write.h
-        exts/entt/single_include/entt/entt.hpp
         exts/stb/stb_image.h exts/stb/stb_image_resize.h exts/stb/stb_image_write.h
         exts/json/include/nlohmann/json.hpp
         exts/tinyexr/tinyexr.h
@@ -26,7 +25,7 @@ add_library(bcg_graphics
         )
 
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
-target_include_directories(bcg_graphics PRIVATE ./exts/entt/single_include)
+target_include_directories(bcg_graphics PUBLIC ${CMAKE_SOURCE_DIR}/exts/entt/single_include)
 target_include_directories(bcg_graphics PUBLIC ./exts/glm)
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
 target_include_directories(bcg_graphics PUBLIC . ./math)
