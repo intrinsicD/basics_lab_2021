@@ -11,10 +11,9 @@ namespace bcg{
 
 struct viewer_picker{
     size_t entity_id, vertex_id, edge_id, face_id;
-    VectorS<2> window_space_point;
+    VectorS<3> model_space_point;
     VectorS<3> world_space_point;
     VectorS<3> view_space_point;
-    VectorS<3> model_space_point;
 };
 
 }

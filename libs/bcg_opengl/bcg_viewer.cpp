@@ -43,22 +43,8 @@ static void draw_window(viewer_state *state) {
         if (state->gui.show_menu && state->gui.menu.show) {
             state->gui.menu.render(state);
         }
-        std::vector<std::string> to_remove;
-        for (auto &item : state->gui.active_items) {
-            item.second->render(state);
-            if (!item.second->active) {
-                to_remove.push_back(item.second->name);
-            }
-        }
-        for (auto &item : to_remove) {
-            state->gui.active_items.erase(item);
-        }
-
-        if (state->gui.left.show) {
+        if(state->gui.left.show && state->gui.left.active){
             state->gui.left.render(state);
-        }
-        if (state->gui.right.show) {
-            state->gui.right.render(state);
         }
 
         ImGui::Render();
@@ -67,19 +53,19 @@ static void draw_window(viewer_state *state) {
     glfwSwapBuffers(state->window.win);
 }
 
-void init_widgets(viewer_window &window, int width) {
+void init_widgets(viewer_state *state, int width) {
     // init widgets
     ImGui::CreateContext();
     ImGui::GetIO().IniFilename = nullptr;
     ImGui::GetStyle().WindowRounding = 0;
-    ImGui_ImplGlfw_InitForOpenGL(window.win, true);
+    ImGui_ImplGlfw_InitForOpenGL(state->window.win, true);
 #ifndef __APPLE__
     ImGui_ImplOpenGL3_Init();
 #else
     ImGui_ImplOpenGL3_Init("#version 330");
 #endif
     ImGui::StyleColorsDark();
-    window.widgets_width = width;
+    state->window.widgets_width = width;
 }
 
 void
@@ -172,8 +158,8 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
         throw std::runtime_error{"cannot initialize OpenGL extensions"};
     }
 
-    if (widgets || state->gui.left.show || state->gui.right.show || state->gui.menu.show) {
-        init_widgets(state->window, widgets_width);
+    if (widgets || state->gui.left.show || state->gui.menu.show) {
+        init_widgets(state, widgets_width);
     }
 }
 
@@ -193,16 +179,26 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
     auto win = state.window.win;
     while (!glfwWindowShouldClose(win)) {
         // update input
-        state.mouse.last_pos = state.mouse.cursor_pos;
+        state.mouse.last_cursor_position = state.mouse.cursor_position;
         auto mouse_posx = 0.0, mouse_posy = 0.0;
         glfwGetCursorPos(win, &mouse_posx, &mouse_posy);
-        state.mouse.cursor_pos = VectorS<2>{(float) mouse_posx, (float) mouse_posy};
+        state.mouse.cursor_position[0] = mouse_posx;
+        state.mouse.cursor_position[1] = mouse_posy;
         if (state.window.widgets_width && state.gui.left.show) {
-            state.mouse.cursor_pos[0] -= state.window.widgets_width;
+            state.mouse.cursor_position[0] -= state.window.widgets_width;
         }
         state.mouse.left = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+        if(state.mouse.left){
+            state.mouse.last_left_click = state.mouse.cursor_position;
+        }
         state.mouse.middle = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+        if(state.mouse.middle){
+            state.mouse.last_middle_click = state.mouse.cursor_position;
+        }
         state.mouse.right = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+        if(state.mouse.right){
+            state.mouse.last_right_click = state.mouse.cursor_position;
+        }
         state.keyboard.alt_pressed = glfwGetKey(win, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
                                      glfwGetKey(win, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
         state.keyboard.shift_pressed = glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||

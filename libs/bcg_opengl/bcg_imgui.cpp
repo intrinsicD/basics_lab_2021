@@ -6,61 +6,33 @@
 
 #include <GLFW/glfw3.h>
 
-#include "exts/imgui/imgui.h"
+
 #include "exts/imgui/imgui_internal.h"
 
 namespace bcg {
 using namespace std::string_literals;
 
-gui_element::gui_element(std::string name) : name(name), show(nullptr), active(false) {
+gui_element::gui_element() : show(nullptr), active(false) {
 
-}
-
-gui_element *gui_element::get_or_add_child(std::string name) {
-    auto iter = children.find(name);
-    if (iter != children.end()) {
-        return iter->second;
-    }
-    return children[name];
 }
 
 void gui_element::render(viewer_state *state) {
-    if (show(state, this)) {
-        for (auto &item : children) {
-            item.second->render(state);
-        }
+    if (show) show(state);
+}
+
+void gui_menu::render(viewer_state *state) {
+    if (show) {
+        ImGui::BeginMainMenuBar();
+        state->gui.menu_height = (int) ImGui::GetWindowSize()[1];
+        show(state, this);
+        ImGui::EndMainMenuBar();
     }
 }
 
-void gui_element::close() {
-    active = false;
-}
-
-gui_element::gui_element() {}
-
-menu_element::menu_element() : gui_element("menu"){}
-
-void menu_element::render(viewer_state *state) {
-    if (children.empty()) {
-        if (ImGui::MenuItem(name.c_str())) {
-            auto iter = state->gui.active_items.find(name);
-            if (iter == state->gui.active_items.end()) {
-                active = true;
-                state->gui.active_items[name] = this;
-            }
-        }
-    } else {
-        if (ImGui::BeginMenu(name.c_str())) {
-            for (auto &item : children) {
-                item.second->render(state);
-            }
-            ImGui::EndMenu();
-        }
-    }
-}
-
-left_panel::left_panel() : gui_element("left"){
-
+left_panel &left_panel::operator=(const std::function<void(viewer_state *)> &cb) {
+    active = true;
+    show = cb;
+    return *this;
 }
 
 void left_panel::render(viewer_state *state) {
@@ -68,43 +40,154 @@ void left_panel::render(viewer_state *state) {
     int window[2];
     glfwGetWindowSize(state->window.win, &window[0], &window[1]);
 
-    ImGui::SetNextWindowPos({0, 0});
-    ImGui::SetNextWindowSize({(float) widgets_width, (float) window[1]});
+    if (state->gui.menu.show) {
+        ImGui::SetNextWindowPos({0, (float) state->gui.menu_height});
+    } else {
+        ImGui::SetNextWindowPos({0, 0});
+    }
+    ImGui::SetNextWindowSize({(float) state->window.widgets_width, (float) (window[1] - state->gui.menu_height)});
 
-    ImGui::SetNextWindowCollapsed(false);
     ImGui::SetNextWindowBgAlpha(1);
 
-    if (ImGui::Begin(name.c_str(), &active,
-                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-                     ImGuiWindowFlags_NoSavedSettings)) {
-        show(state, this);
+    if (ImGui::Begin(" ", &active,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings)) {
+        show(state);
     }
     ImGui::End();
 }
 
-right_panel::right_panel() : gui_element("right"){
-
-}
-
-void right_panel::render(viewer_state *state) {
-    if (!show) return;
-    int window[2];
-    glfwGetWindowSize(state->window.win, &window[0], &window[1]);
-
-    ImGui::SetNextWindowPos({(float) (window[0] - state->window.widgets_width), 0});
-    ImGui::SetNextWindowSize({(float) widgets_width, (float) window[1]});
-
-    //ImGui::SetNextWindowCollapsed(false);
-    ImGui::SetNextWindowBgAlpha(1);
-
-    if (ImGui::Begin(name.c_str(), &active,
-                     /*ImGuiWindowFlags_NoTitleBar |*/ ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoMove /*| ImGuiWindowFlags_NoCollapse*/ |
-                     ImGuiWindowFlags_NoSavedSettings)) {
-        show(state, this);
+void settings(viewer_state *state) {
+    if (ImGui::CollapsingHeader("Colors")) {
+        draw_coloredit(&state->window, "background", state->colors.background);
+        draw_coloredit(&state->window, "overlay", state->colors.overlay);
+        draw_coloredit(&state->window, "entity_selection", state->colors.entity_selection);
+        draw_coloredit(&state->window, "vertex_selection", state->colors.vertex_selection);
+        draw_coloredit(&state->window, "edge_selection", state->colors.edge_selection);
+        draw_coloredit(&state->window, "face_selection", state->colors.face_selection);
+        draw_coloredit(&state->window, "boundary", state->colors.boundary);
+        draw_coloredit(&state->window, "wireframe", state->colors.wireframe);
     }
-    ImGui::End();
+
+    if (ImGui::CollapsingHeader("Window")) {
+        draw_label(&state->window, "title", state->window.title);
+        draw_label(&state->window, "width", std::to_string(state->window.width));
+        draw_label(&state->window, "height", std::to_string(state->window.height));
+        std::stringstream ss;
+        ss << state->window.framebuffer_viewport.transpose();
+        draw_label(&state->window, "framebuffer_viewport", ss.str());
+        ImGui::InputInt("widget_width", &state->window.widgets_width, 1, 10);
+    }
+
+    if (ImGui::CollapsingHeader("Keyboard")) {
+        ImGui::Checkbox("shift pressed", &state->keyboard.shift_pressed);
+        ImGui::Checkbox("alt pressed", &state->keyboard.alt_pressed);
+        ImGui::Checkbox("ctrl pressed", &state->keyboard.ctrl_pressed);
+        ImGui::Checkbox("command pressed", &state->keyboard.command_pressed);
+        ImGui::Checkbox("no modifier", &state->keyboard.no_modifier);
+        ImGui::Checkbox("captured by gui", &state->keyboard.is_captured_by_gui);
+    }
+    if (ImGui::CollapsingHeader("Mouse")) {
+        ImGui::Checkbox("moving", &state->mouse.is_moving);
+        ImGui::Checkbox("scrolling", &state->mouse.is_scrolling);
+        ImGui::Checkbox("captured by gui", &state->mouse.is_captured_by_gui);
+        ImGui::Checkbox("left pressed", &state->mouse.left);
+        ImGui::Checkbox("middle pressed", &state->mouse.middle);
+        ImGui::Checkbox("right pressed", &state->mouse.right);
+        ImGui::Separator();
+        std::stringstream ss;
+        ss << state->mouse.last_left_click.transpose();
+        draw_label(&state->window, "last left click", ss.str());
+        ss.str("");
+        ss << state->mouse.last_middle_click.transpose();
+        draw_label(&state->window, "last middle click", ss.str());
+        ss.str("");
+        ss << state->mouse.last_right_click.transpose();
+        draw_label(&state->window, "last right click", ss.str());
+        ss.str("");
+        ss << state->mouse.cursor_position.transpose();
+        draw_label(&state->window, "cursor_position", ss.str());
+        ss.str("");
+        ss << state->mouse.last_cursor_position.transpose();
+        draw_label(&state->window, "last_cursor_position", ss.str());
+        draw_label(&state->window, "scroll_value", std::to_string(state->mouse.scroll_value));
+    }
+    if (ImGui::CollapsingHeader("Time")) {
+        draw_label(&state->window, "clock_now", std::to_string(state->time.clock_now));
+        draw_label(&state->window, "clock_last", std::to_string(state->time.clock_last));
+        draw_label(&state->window, "time_now", std::to_string(state->time.time_now));
+        draw_label(&state->window, "time_delta", std::to_string(state->time.time_delta));
+    }
+    if (ImGui::CollapsingHeader("Gui")) {
+        ImGui::Checkbox("widgets_active", &state->gui.widgets_active);
+        ImGui::Checkbox("show_menu", &state->gui.show_menu);
+        ImGui::Checkbox("hide_all", &state->gui.hide_all);
+        draw_label(&state->window, "menu_height", std::to_string(state->gui.menu_height));
+    }
+    if (ImGui::CollapsingHeader("Picker")) {
+        draw_label(&state->window, "entity_id", std::to_string(state->picker.entity_id));
+        draw_label(&state->window, "vertex_id", std::to_string(state->picker.vertex_id));
+        draw_label(&state->window, "edge_id", std::to_string(state->picker.edge_id));
+        draw_label(&state->window, "face_id", std::to_string(state->picker.face_id));
+        ImGui::Separator();
+        std::stringstream ss;
+        ss << state->picker.model_space_point.transpose();
+        draw_label(&state->window, "model_space_point", ss.str());
+        ss.str("");
+        ss << state->picker.world_space_point.transpose();
+        draw_label(&state->window, "world_space_point", ss.str());
+        ss.str("");
+        ss << state->picker.view_space_point.transpose();
+        draw_label(&state->window, "view_space_point", ss.str());
+    }
+    if (ImGui::CollapsingHeader("Camera")) {
+        float near = state->cam.near;
+        if(ImGui::InputFloat("near", &near)){
+            state->cam.near = near;
+        }
+        float far = state->cam.far;
+        if(ImGui::InputFloat("far", &far)){
+            state->cam.far = far;
+        }
+        float aspect = state->cam.aspect;
+        if(ImGui::InputFloat("aspect", &aspect)){
+            state->cam.aspect = aspect;
+        }
+        float fovy = state->cam.fovy;
+        if(ImGui::InputFloat("fovy degrees", &fovy)){
+            state->cam.fovy = fovy;
+        }
+        ImGui::Separator();
+        float left = state->cam.left;
+        if(ImGui::InputFloat("left", &left)){
+            state->cam.left = left;
+        }
+        float right = state->cam.right;
+        if(ImGui::InputFloat("right", &right)){
+            state->cam.right = right;
+        }
+        float top = state->cam.top;
+        if(ImGui::InputFloat("top", &top)){
+            state->cam.top = top;
+        }
+        float bottom = state->cam.bottom;
+        if(ImGui::InputFloat("bottom", &bottom)){
+            state->cam.bottom = bottom;
+        }
+        ImGui::Separator();
+        std::stringstream ss;
+        ss << state->cam.target_point.transpose();
+        draw_label(&state->window, "target_point", ss.str());
+        ss.str("");
+        ss << state->cam.model_matrix.matrix();
+        draw_label(&state->window, "model_matrix", ss.str());
+        ss.str("");
+        ss << state->cam.view_matrix();
+        draw_label(&state->window, "view_matrix", ss.str());
+        ss.str("");
+        ss << state->cam.projection_matrix;
+        draw_label(&state->window, "projection_matrix", ss.str());
+        ss.str("");
+    }
 }
 
 bool begin_header(viewer_window *win, const char *lbl) {

@@ -6,17 +6,27 @@
 int main() {
     using namespace bcg;
     viewer viewer;
+    viewer.state.gui.menu.show = [](viewer_state *state, gui_menu *self) {
+        if (ImGui::BeginMenu("Viewer")) {
+            if (ImGui::MenuItem("Settings")) {
+                state->gui.left = settings;
+            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Examples")) {
+            ImGui::MenuItem("Main menu bar", NULL, &self->show_app_main_menu_bar);
+            ImGui::MenuItem("Console", NULL, &self->show_app_console);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Tools")) {
+            ImGui::MenuItem("Metrics", NULL, &self->show_app_metrics);
+            ImGui::EndMenu();
+        }
 
-    viewer.state.gui.left.show = [](viewer_state *state, gui_element *self) {
-        draw_label(&state->window, "mouse left", std::to_string(state->mouse.left));
-        draw_coloredit(&state->window, "background", state->colors.background);
         return true;
     };
 
-    viewer.state.gui.right.show = [](viewer_state *state, gui_element *self) {
-        draw_label(&state->window, "mouse right", std::to_string(state->mouse.right));
-        return true;
-    };
+
     viewer.run();
     return 0;
 }

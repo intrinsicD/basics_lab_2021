@@ -32,23 +32,23 @@ void camera::set_target(const VectorS<3> &target) {
     model_matrix = Translation(diff - front * front.dot(diff)) * model_matrix;
 }
 
-VectorS<3> inline camera::front_vec() {
+VectorS<3> camera::front_vec() {
     return model_matrix.matrix().col(2).head<3>();
 }
 
-VectorS<3> inline camera::up_vec() {
+VectorS<3> camera::up_vec() {
     return model_matrix.matrix().col(1).head<3>();
 }
 
-VectorS<3> inline camera::left_vec() {
+VectorS<3> camera::left_vec() {
     return model_matrix.matrix().col(0).head<3>();
 }
 
-VectorS<3> inline camera::position() {
+VectorS<3> camera::position() {
     return model_matrix.translation();
 }
 
-MatrixS<4, 4> inline camera::view_matrix() {
+MatrixS<4, 4> camera::view_matrix() {
     return model_matrix.inverse().matrix();
 }
 

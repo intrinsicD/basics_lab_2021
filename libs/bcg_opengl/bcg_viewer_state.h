@@ -31,8 +31,12 @@ struct viewer_colors {
 struct viewer_mouse {
     dynamic_bitset buttons;
     bool is_moving, is_scrolling, is_captured_by_gui, left, middle, right;
-    VectorS<2> last_left_click, last_middle_click, last_right_click, cursor_pos, last_pos;
-    float scroll_value;
+    VectorS<2> last_left_click = zero2s;
+    VectorS<2> last_middle_click = zero2s;
+    VectorS<2> last_right_click = zero2s;
+    VectorS<2> cursor_position = zero2s;
+    VectorS<2> last_cursor_position = zero2s;
+    float scroll_value = 0;
 };
 
 struct viewer_keyboard {
@@ -40,7 +44,7 @@ struct viewer_keyboard {
     bool shift_pressed, alt_pressed, ctrl_pressed, command_pressed, no_modifier, is_captured_by_gui;
 };
 
-struct viewer_time{
+struct viewer_time {
     size_t clock_now = 0;
     size_t clock_last = 0;
     double time_now = 0;
@@ -73,7 +77,7 @@ using uiupdate_callback = std::function<void(viewer_state *)>;
 // Update std::functions called every frame
 using update_callback = std::function<void(viewer_state *)>;
 
-struct viewer_callbacks{
+struct viewer_callbacks {
     init_callback init_cb = {};
     clear_callback clear_cb = {};
     draw_callback draw_cb = {};
@@ -87,24 +91,21 @@ struct viewer_callbacks{
     uiupdate_callback uiupdate_cb = {};
 };
 
-struct viewer_window{
+struct viewer_window {
     GLFWwindow *win = nullptr;
     std::string title = "";
     int width, height;
     VectorI<4> framebuffer_viewport;
     int widgets_width = 0;
-    bool widgets_left = false;
-
 };
 
-struct viewer_gui{
+struct viewer_gui {
     bool widgets_active = true;
     bool show_menu = true;
     bool hide_all = false;
-    menu_element menu;
+    int menu_height = 0;
+    gui_menu menu;
     left_panel left;
-    right_panel right;
-    std::unordered_map<std::string, gui_element*> active_items;
 };
 
 struct viewer_state {
@@ -118,7 +119,6 @@ struct viewer_state {
     viewer_gui gui;
     camera cam;
 };
-
 
 
 }

@@ -2,8 +2,10 @@
 #define BCG_GRAPHICS_BCG_IMGUI
 
 #include <memory>
-#include "unordered_map"
+#include <unordered_map>
+#include <string>
 
+#include "exts/imgui/imgui.h"
 #include "bcg_library/math/bcg_linalg.h"
 
 namespace bcg {
@@ -12,52 +14,33 @@ struct viewer_state;
 struct viewer_window;
 
 struct gui_element {
-    explicit gui_element(std::string name);
-
     gui_element();
 
     virtual ~gui_element() = default;
 
-    std::string name;
-
-    int widgets_width = 320;
-
-    std::function<bool(viewer_state * state, gui_element * self)> show;
-
-    std::unordered_map<std::string, gui_element*> children;
-
-    gui_element* get_or_add_child(std::string name);
+    std::function<void(viewer_state *state)> show;
 
     virtual void render(viewer_state *state);
-
-    void close();
 
     bool active;
 };
 
-struct menu_element : public gui_element{
+struct gui_menu {
+    std::function<bool(viewer_state *state, gui_menu *self)> show;
+    bool show_app_main_menu_bar = false, show_app_console = false, show_app_metrics = true;
+
+    void render(viewer_state *state);
+};
+
+struct left_panel : public gui_element {
     using gui_element::gui_element;
 
-    menu_element();
+    left_panel &operator=(const std::function<void(viewer_state *state)> &cb);
 
     void render(viewer_state *state) override;
 };
 
-struct left_panel : public gui_element{
-    using gui_element::gui_element;
-
-    left_panel();
-
-    void render(viewer_state *state) override;
-};
-
-struct right_panel : public gui_element{
-    using gui_element::gui_element;
-
-    right_panel();
-
-    void render(viewer_state *state) override;
-};
+void settings(viewer_state *state);
 
 bool begin_header(viewer_window *win, const char *title);
 
@@ -137,8 +120,9 @@ bool draw_combobox(viewer_window *win, const char *lbl, int &idx, const std::vec
 
 bool draw_combobox(viewer_window *win, const char *lbl, std::string &value, const std::vector<std::string> &labels);
 
-bool draw_combobox(viewer_window *win, const char *lbl, int &idx, int num, const std::function<std::string(int)> &labels,
-                   bool include_null = false);
+bool
+draw_combobox(viewer_window *win, const char *lbl, int &idx, int num, const std::function<std::string(int)> &labels,
+              bool include_null = false);
 
 template<typename T>
 inline bool draw_combobox(viewer_window *win, const char *lbl, T *&value,
@@ -179,13 +163,19 @@ void draw_histogram(
         viewer_window *win, const char *lbl, const std::vector<float> &values);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS<2>> &values);
+        viewer_window *win, const char *lbl, const std::vector<VectorS < 2>>
+
+&values);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS<3>> &values);
+        viewer_window *win, const char *lbl, const std::vector<VectorS < 3>>
+
+&values);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS<4>> &values);
+        viewer_window *win, const char *lbl, const std::vector<VectorS < 4>>
+
+&values);
 
 bool draw_filedialog(viewer_window *win, const char *lbl, std::string &path, bool save,
                      const std::string &dirname, const std::string &filename, const std::string &filter);
