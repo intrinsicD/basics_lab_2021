@@ -114,20 +114,20 @@ struct viewer_gui {
 };
 
 struct viewer_systems {
-    std::unordered_map<std::string, system> systems;
+    std::unordered_map<std::string, std::unique_ptr<system>> systems;
 
     bool has(const std::string &name) const;
 
-    system &operator[](const std::string &name);
+    std::unique_ptr<system> &operator[](const std::string &name);
 
-    const system &operator[](const std::string &name) const;
+    const  std::unique_ptr<system> &operator[](const std::string &name) const;
 };
 
 struct viewer_shaders {
     std::unordered_map<std::string, glsl_program> programs;
     file_watcher watcher;
 
-    void load(std::string name,
+    glsl_program load(std::string name,
               std::string vertex_shader_file,
               std::string fragment_shader_file,
               std::string *geometry_shader_file = nullptr,
@@ -149,7 +149,12 @@ struct viewer_picker{
     VectorS<3> view_space_point;
 };
 
+struct viewer_config{
+    std::string renderers_path = "../../libs/bcg_opengl/renderers/";
+};
+
 struct viewer_state {
+    viewer_config config;
     viewer_colors colors;
     viewer_keyboard keyboard;
     viewer_mouse mouse;

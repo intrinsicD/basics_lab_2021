@@ -5,6 +5,7 @@
 #include "bcg_viewer_state.h"
 
 #include <utility>
+#include <iostream>
 #include "exts/glad/glad.h"
 
 namespace bcg{
@@ -13,15 +14,15 @@ bool viewer_systems::has(const std::string &name) const {
     return systems.find(name) != systems.end();
 }
 
-system &viewer_systems::operator[](const std::string &name) {
+std::unique_ptr<system> &viewer_systems::operator[](const std::string &name) {
     return systems[name];
 }
 
-const system &viewer_systems::operator[](const std::string &name) const {
+const  std::unique_ptr<system> &viewer_systems::operator[](const std::string &name) const {
     return systems.at(name);
 }
 
-void viewer_shaders::load(std::string name,
+glsl_program viewer_shaders::load(std::string name,
           std::string vertex_shader_file,
           std::string fragment_shader_file,
           std::string *geometry_shader_file,
@@ -41,6 +42,8 @@ void viewer_shaders::load(std::string name,
         shaders.push_back(load_shader(*tess_eval_shader_file, GL_TESS_EVALUATION_SHADER));
     }
 
+    std::cout << vertex_shader_file ;
+
     program.build(shaders);
 
     for (const auto &shader : shaders) {
@@ -54,6 +57,7 @@ void viewer_shaders::load(std::string name,
         });
     }
     programs[name] = program;
+    return program;
 }
 
 glsl_shader viewer_shaders::load_shader(std::string filename, unsigned int type) const{

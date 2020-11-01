@@ -33,9 +33,13 @@ static void draw_window(viewer_state *state) {
                  state->colors.background[2],
                  state->colors.background[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    state->dispatcher.trigger<event::begin_frame>();
     if (state->callbacks.draw_cb) {
         state->callbacks.draw_cb(state);
+    }else{
+        state->dispatcher.trigger<event::render>();
     }
+    state->dispatcher.trigger<event::end_frame>();
     if (!state->gui.hide_all) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();

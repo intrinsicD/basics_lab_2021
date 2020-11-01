@@ -7,8 +7,6 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include "exts/glad/glad.h"
-#include "GLFW/glfw3.h"
 #include "bcg_opengl.h"
 
 #ifdef _WIN32
@@ -218,6 +216,10 @@ ogl_handle::operator bool() const {
     return is_valid();
 }
 
+ogl_handle::operator unsigned int() const{
+    return handle;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // glsl shader
@@ -288,7 +290,7 @@ bool glsl_shader::load_source(const char *filename) {
 
     long s = end - begin;
     if (s == 0 || !in.good()) {
-        std::cerr << "Cannot compile shader file: " + std::string(filename);
+        std::cerr << "Cannot compile shader file: " << std::string(filename) << "\n";
         return false;
     }
 
@@ -309,7 +311,7 @@ bool glsl_shader::compile(const char *source, unsigned int type, const char *pre
 
 bool glsl_shader::compile(const char *source, unsigned int type, int prepend_count, const char **prepend_sources) {
     if (!is_valid()) {
-        type = type;
+        this->type = type;
         create();
     }
     if (prepend_count > 0) {
@@ -330,7 +332,6 @@ int glsl_shader::get_compile_status() const {
     GLint comile_error(GL_FALSE);
     glGetShaderiv(handle, GL_COMPILE_STATUS, &comile_error);
     assert_ogl_error();
-    check_compile_status();
     return comile_error;
 }
 
@@ -338,7 +339,6 @@ int glsl_shader::get_info_log_length() const {
     GLint info_log_length(0);
     glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &info_log_length);
     assert_ogl_error();
-    check_compile_status();
     return info_log_length;
 }
 
@@ -346,7 +346,6 @@ std::string glsl_shader::get_info_log(int length) const {
     std::vector<char> message(length);
     glGetShaderInfoLog(handle, length, nullptr, message.data());
     assert_ogl_error();
-    check_compile_status();
     return std::string(message.data());
 }
 
@@ -1332,7 +1331,7 @@ void ogl_vertex_buffer::upload(const std::vector<VectorS<4>> &data, size_t offse
 }
 
 void ogl_vertex_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
-    if (size > capacity) {
+    if (size > capacity || !(*this)) {
         // reallocate buffer if needed
         destroy();
         create();
@@ -1506,14 +1505,23 @@ ogl_vertex_buffer ogl_vertex_array::get_vertex_buffer(std::string name) {
 void ogl_vertex_array::add_vertex_buffer(const ogl_vertex_buffer &vertex_buffer) {
     auto vbo = get_vertex_buffer(vertex_buffer.name);
     if (!vbo) {
+        bind();
+        vertex_buffer.bind();
+        release();
+        vertex_buffer.release();
         vertex_buffers.push_back(vertex_buffer);
     }
 }
 
-void ogl_vertex_array::set_element_buffer(const ogl_element_buffer &element_buffer) {
-    this->element_buffer = element_buffer;
+void ogl_vertex_array::set_element_buffer(const ogl_element_buffer &buffer) {
+    element_buffer = buffer;
+    if(!element_buffer){
+        element_buffer.create();
+    }
+    bind();
+    element_buffer.bind();
+    release();
 }
-
 
 ogl_renderbuffer::ogl_renderbuffer() : ogl_renderbuffer(BCG_GL_INVALID_ID, "rbo") {
 
@@ -1636,7 +1644,7 @@ void ogl_framebuffer::copy_to_default_framebuffer() {
 }
 
 
-GLstate::GLstate(){
+ogl_state::ogl_state(){
     gl_blend = false;
     gl_clip_distance = false;
     gl_color_logic_op = false;
@@ -1710,7 +1718,7 @@ GLstate::GLstate(){
     polygon_mode = GL_FILL;
 }
 
-void GLstate::startup() {
+void ogl_state::startup() {
     //default enabled
     set_depth_test(true);
     set_depth_mask(true);
@@ -1723,186 +1731,186 @@ void GLstate::startup() {
     set_cull_face(true);
 }
 
-void GLstate::set_blend(bool enabled){
+void ogl_state::set_blend(bool enabled){
     gl_blend = enabled;
     gl_blend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
     assert_ogl_error();
 }
 
-void GLstate::set_blend_func_factors(GLenum sfactor, GLenum dfactor){
+void ogl_state::set_blend_func_factors(GLenum sfactor, GLenum dfactor){
     blend_func_sfactor = sfactor;
     blend_func_dfactor = dfactor;
     glBlendFunc(blend_func_sfactor, blend_func_dfactor);
     assert_ogl_error();
 }
 
-void GLstate::set_color_logic_op(bool enabled){
+void ogl_state::set_color_logic_op(bool enabled){
     gl_color_logic_op = enabled;
     gl_color_logic_op ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
     assert_ogl_error();
 }
-void GLstate::set_logic_op_opcode(GLenum opcode){
+void ogl_state::set_logic_op_opcode(GLenum opcode){
     logic_op_opcode = opcode;
     glLogicOp(logic_op_opcode);
     assert_ogl_error();
 }
 
-void GLstate::set_cull_face(bool enabled){
+void ogl_state::set_cull_face(bool enabled){
     gl_cull_face = enabled;
     gl_cull_face ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
     assert_ogl_error();
 }
-void GLstate::set_cullface_mode(GLenum mode){
+void ogl_state::set_cullface_mode(GLenum mode){
     cull_face_mode = mode;
     glCullFace(cull_face_mode);
     assert_ogl_error();
 }
-void GLstate::set_frontface_mode(GLenum mode){
+void ogl_state::set_frontface_mode(GLenum mode){
     front_face_mode = mode;
     glFrontFace(front_face_mode);
     assert_ogl_error();
 }
 
-void GLstate::set_depth_clamp(bool enabled){
+void ogl_state::set_depth_clamp(bool enabled){
     gl_depth_clamp = enabled;
     gl_depth_clamp ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
     assert_ogl_error();
 }
-void GLstate::set_depth_test(bool enabled){
+void ogl_state::set_depth_test(bool enabled){
     gl_depth_test = enabled;
     gl_depth_test ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
     assert_ogl_error();
 }
-void GLstate::set_depth_mask(bool enabled){
+void ogl_state::set_depth_mask(bool enabled){
     gl_depth_mask = enabled;
     gl_depth_mask ? glDepthMask(GL_TRUE) : glDepthMask(GL_FALSE);
     assert_ogl_error();
 }
-void GLstate::set_depth_range_values(GLdouble near, GLdouble far){
+void ogl_state::set_depth_range_values(GLdouble near, GLdouble far){
     depth_range_nearVal = near;
     depth_range_farVal = far;
     glDepthRange(depth_range_nearVal, depth_range_farVal);
     assert_ogl_error();
 }
-void GLstate::set_depth_func(GLenum func){
+void ogl_state::set_depth_func(GLenum func){
     depth_func = func;
     glDepthFunc(depth_func);
     assert_ogl_error();
 }
 
-void GLstate::set_dither(bool enabled){
+void ogl_state::set_dither(bool enabled){
     gl_dither = enabled;
     gl_dither ? glEnable(GL_DITHER) : glDisable(GL_DITHER);
     assert_ogl_error();
 }
 
-void GLstate::set_framebuffer_srgb(bool enabled){
+void ogl_state::set_framebuffer_srgb(bool enabled){
     gl_framebuffer_srgb = enabled;
     gl_framebuffer_srgb ? glEnable(GL_FRAMEBUFFER_SRGB) : glDisable(GL_FRAMEBUFFER_SRGB);
     assert_ogl_error();
 }
 
-void GLstate::set_line_smooth(bool enabled){
+void ogl_state::set_line_smooth(bool enabled){
     gl_line_smooth = enabled;
     gl_line_smooth ? glEnable(GL_LINE_SMOOTH) : glDisable(GL_LINE_SMOOTH);
     assert_ogl_error();
 }
 
-void GLstate::set_multisample(bool enabled){
+void ogl_state::set_multisample(bool enabled){
     gl_multisample = enabled;
     gl_multisample ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
     assert_ogl_error();
 }
-void GLstate::set_multisample_value(GLfloat value){
+void ogl_state::set_multisample_value(GLfloat value){
     multisample_value = value;
     glMinSampleShading(multisample_value);
     assert_ogl_error();
 }
 
-void GLstate::set_polygon_offset_fill(bool enabled){
+void ogl_state::set_polygon_offset_fill(bool enabled){
     gl_polygon_offset_fill = enabled;
     gl_polygon_offset_fill ? glEnable(GL_POLYGON_OFFSET_FILL) : glDisable(GL_POLYGON_OFFSET_FILL);
     assert_ogl_error();
 }
-void GLstate::set_polygon_offset_point(bool enabled){
+void ogl_state::set_polygon_offset_point(bool enabled){
     gl_polygon_offset_point = enabled;
     gl_polygon_offset_point ? glEnable(GL_POLYGON_OFFSET_POINT) : glDisable(GL_POLYGON_OFFSET_POINT);
     assert_ogl_error();
 }
-void GLstate::set_polygon_offset_line(bool enabled){
+void ogl_state::set_polygon_offset_line(bool enabled){
     gl_polygon_offset_line = enabled;
     gl_polygon_offset_line ? glEnable(GL_POLYGON_OFFSET_LINE) : glDisable(GL_POLYGON_OFFSET_LINE);
     assert_ogl_error();
 }
-void GLstate::set_polygon_smooth(bool enabled){
+void ogl_state::set_polygon_smooth(bool enabled){
     gl_polygon_smooth = enabled;
     gl_polygon_smooth ? glEnable(GL_POLYGON_SMOOTH) : glDisable(GL_POLYGON_SMOOTH);
     assert_ogl_error();
 }
-void GLstate::set_polygon_offset_factor(GLfloat factor, GLfloat units){
+void ogl_state::set_polygon_offset_factor(GLfloat factor, GLfloat units){
     polygon_offset_factor = factor;
     polygon_offset_units = units;
     glPolygonOffset(polygon_offset_factor, polygon_offset_units);
     assert_ogl_error();
 }
-void GLstate::set_polygon_mode(GLenum mode){
+void ogl_state::set_polygon_mode(GLenum mode){
     polygon_mode = mode;
     glPolygonMode(polygon_mode_face, polygon_mode);
     assert_ogl_error();
 }
 
-void GLstate::set_rasterizer_discard(bool enabled){
+void ogl_state::set_rasterizer_discard(bool enabled){
     gl_rasterizer_discard = enabled;
     gl_rasterizer_discard ? glEnable(GL_RASTERIZER_DISCARD) : glDisable(GL_RASTERIZER_DISCARD);
     assert_ogl_error();
 }
 
-void GLstate::set_alpha_to_coverage(bool enabled){
+void ogl_state::set_alpha_to_coverage(bool enabled){
     gl_sample_alpha_to_converge = enabled;
     gl_sample_alpha_to_converge ? glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE) : glDisable(
             GL_SAMPLE_ALPHA_TO_COVERAGE);
     assert_ogl_error();
 }
-void GLstate::set_alpha_to_one(bool enabled){
+void ogl_state::set_alpha_to_one(bool enabled){
     gl_sample_alpha_to_one = enabled;
     gl_sample_alpha_to_one ? glEnable(GL_SAMPLE_ALPHA_TO_ONE) : glDisable(GL_SAMPLE_ALPHA_TO_ONE);
     assert_ogl_error();
 }
 
-void GLstate::set_sample_converge(bool enabled){
+void ogl_state::set_sample_converge(bool enabled){
     gl_sample_converge = enabled;
     gl_sample_converge ? glEnable(GL_SAMPLE_COVERAGE) : glDisable(GL_SAMPLE_COVERAGE);
     assert_ogl_error();
 }
-void GLstate::set_sample_converge_value(GLfloat value, GLboolean invert){
+void ogl_state::set_sample_converge_value(GLfloat value, GLboolean invert){
     sample_coverage_value = value;
     sample_coverage_invert = invert;
     glSampleCoverage(sample_coverage_value, sample_coverage_invert);
     assert_ogl_error();
 }
-void GLstate::set_sample_shading(bool enabled){
+void ogl_state::set_sample_shading(bool enabled){
     gl_sample_shading = enabled;
     gl_sample_shading ? glEnable(GL_SAMPLE_SHADING) : glDisable(GL_SAMPLE_SHADING);
     assert_ogl_error();
 }
-void GLstate::set_sample_mask(bool enabled){
+void ogl_state::set_sample_mask(bool enabled){
     gl_sample_mask = enabled;
     gl_sample_mask ? glEnable(GL_SAMPLE_MASK) : glDisable(GL_SAMPLE_MASK);
     assert_ogl_error();
 }
-void GLstate::set_sample_mask_number(GLuint number, GLbitfield masks){
+void ogl_state::set_sample_mask_number(GLuint number, GLbitfield masks){
     sample_mask_number = number;
     sample_maks = masks;
     glSampleMaski(sample_mask_number, sample_maks);
     assert_ogl_error();
 }
 
-void GLstate::set_scissor_test(bool enabled){
+void ogl_state::set_scissor_test(bool enabled){
     gl_scissor_test = enabled;
     gl_scissor_test ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
     assert_ogl_error();
 }
-void GLstate::set_scissor_values(GLint x, GLint y, GLsizei width, GLsizei height){
+void ogl_state::set_scissor_values(GLint x, GLint y, GLsizei width, GLsizei height){
     scissor_x = x;
     scissor_y = y;
     scissor_width = width;
@@ -1911,19 +1919,19 @@ void GLstate::set_scissor_values(GLint x, GLint y, GLsizei width, GLsizei height
     assert_ogl_error();
 }
 
-void GLstate::set_stencil_test(bool enabled){
+void ogl_state::set_stencil_test(bool enabled){
     gl_stencil_test = enabled;
     gl_stencil_test ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
     assert_ogl_error();
 }
-void GLstate::set_stencil_func(GLenum func, GLint ref, GLuint mask){
+void ogl_state::set_stencil_func(GLenum func, GLint ref, GLuint mask){
     stencil_func = func;
     stencil_ref = ref;
     stencil_mask = mask;
     glStencilFunc(stencil_func, stencil_ref, stencil_mask);
     assert_ogl_error();
 }
-void GLstate::set_stencil_op(GLenum sfail, GLenum dpfail, GLenum dppass){
+void ogl_state::set_stencil_op(GLenum sfail, GLenum dpfail, GLenum dppass){
     stencil_sfail = sfail;
     stencil_dpfail = dpfail;
     stencil_dppass = dppass;
@@ -1931,25 +1939,25 @@ void GLstate::set_stencil_op(GLenum sfail, GLenum dpfail, GLenum dppass){
     assert_ogl_error();
 }
 
-void GLstate::set_program_point_size(bool enabled){
+void ogl_state::set_program_point_size(bool enabled){
     gl_program_point_size = enabled;
     gl_program_point_size ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
     assert_ogl_error();
 }
-void GLstate::set_point_size(GLuint size){
+void ogl_state::set_point_size(GLuint size){
     point_size_value = size;
     glPointSize(point_size_value);
     assert_ogl_error();
 }
 
 #ifdef GL_VERSION_3_1
-void GLstate::set_primitive_restart(bool enabled){
+void ogl_state::set_primitive_restart(bool enabled){
     gl_primitive_restart = enabled;
     gl_primitive_restart ? glEnable(GL_PRIMITIVE_RESTART) : glDisable(GL_PRIMITIVE_RESTART);
     assert_ogl_error();
 }
 
-void GLstate::set_primitive_restart_index(GLuint index){
+void ogl_state::set_primitive_restart_index(GLuint index){
     primitive_restart_index = index;
     glPrimitiveRestartIndex(primitive_restart_index);
     assert_ogl_error();
@@ -1957,7 +1965,7 @@ void GLstate::set_primitive_restart_index(GLuint index){
 #endif
 
 #ifdef GL_VERSION_3_2
-void GLstate::set_texture_cube_map_seamless(bool enabled){
+void ogl_state::set_texture_cube_map_seamless(bool enabled){
     gl_texture_cube_map_seamless = enabled;
     gl_texture_cube_map_seamless ? glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS) : glDisable(
             GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -1966,18 +1974,18 @@ void GLstate::set_texture_cube_map_seamless(bool enabled){
 #endif
 
 #ifdef GL_VERSION_4_3
-void GLstate::set_debug_output(bool enabled){
+void ogl_state::set_debug_output(bool enabled){
     gl_debug_output = enabled;
     gl_debug_output ? glEnable(GL_DEBUG_OUTPUT) : glDisable(GL_DEBUG_OUTPUT);
     assert_ogl_error();
 }
-void GLstate::set_debug_output_synchonous(bool enabled){
+void ogl_state::set_debug_output_synchonous(bool enabled){
     gl_debug_output_synchonous = enabled;
     gl_debug_output_synchonous ? glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS) : glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     assert_ogl_error();
 }
 
-void GLstate::set_primitive_restart_fixed_index(bool enabled){
+void ogl_state::set_primitive_restart_fixed_index(bool enabled){
     gl_primitive_restart_fixed_index = enabled;
     gl_primitive_restart_fixed_index ? glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX) : glDisable(
             GL_PRIMITIVE_RESTART_FIXED_INDEX);
@@ -1989,7 +1997,7 @@ void GLstate::set_primitive_restart_fixed_index(bool enabled){
 #define PRINTBOOL(x) #x << ": "<<  (x?"true\n":"false\n")
 #define PRINTVAL(x) #x << " = "<<  x << "\n"
 
-void GLstate::print(std::ostream &stream) const {
+void ogl_state::print(std::ostream &stream) const {
     stream << PRINTBOOL(gl_blend);
     stream << PRINTBOOL(gl_clip_distance);
     stream << PRINTBOOL(gl_color_logic_op);
@@ -2061,7 +2069,7 @@ void GLstate::print(std::ostream &stream) const {
     stream << PRINTVAL(polygon_mode);
 }
 
-std::ostream &operator<<(std::ostream &stream, const GLstate &state) {
+std::ostream &operator<<(std::ostream &stream, const ogl_state &state) {
     stream << "opengl::GLstate: " << std::endl;
     state.print(stream);
     stream << "|====================================================|" << std::endl;

@@ -8,6 +8,8 @@
 #include <string>
 #include <array>
 #include <vector>
+#include "exts/glad/glad.h"
+#include "GLFW/glfw3.h"
 #include "bcg_library/math/bcg_linalg.h"
 
 // forward declaration
@@ -110,6 +112,8 @@ struct ogl_handle {
     bool is_valid() const;
 
     operator bool() const;
+
+    operator unsigned int() const;
 };
 
 struct glsl_shader : public ogl_handle {
@@ -487,7 +491,7 @@ struct ogl_element_buffer : public ogl_buffer_object {
 
 struct ogl_vertex_array : public ogl_handle {
     std::vector<ogl_vertex_buffer> vertex_buffers;
-    ogl_element_buffer element_buffer;
+    ogl_element_buffer element_buffer, adjacency_buffer;
 
     ogl_vertex_array();
 
@@ -560,10 +564,10 @@ struct ogl_framebuffer : public ogl_handle {
     void copy_to_default_framebuffer();
 };
 
-struct GLstate {
-    GLstate();
+struct ogl_state {
+    ogl_state();
 
-    GLstate(const GLstate &) = default;
+    ogl_state(const ogl_state &) = default;
 
     void startup();
 
@@ -737,7 +741,7 @@ struct GLstate {
 
     void print(std::ostream &stream) const;
 
-    friend std::ostream &operator<<(std::ostream &stream, const GLstate &state);
+    friend std::ostream &operator<<(std::ostream &stream, const ogl_state &state);
 
 };
 

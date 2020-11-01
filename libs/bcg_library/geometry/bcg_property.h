@@ -168,7 +168,7 @@ struct property_vector : public base_property {
 
     ~property_vector() override = default;
 
-    const std::string &name() const override{
+    const std::string &name() const override {
         return property_name;
     }
 
@@ -605,7 +605,7 @@ struct property_container {
         return d ? d : add<T, N>(name, t);
     }
 
-    const base_property *get_base_ptr(const std::string &name) const {
+    base_property *get_base_ptr(const std::string &name) const{
         auto iter = container.find(name);
         if (iter == container.end()) {
             return nullptr;
@@ -622,7 +622,7 @@ struct property_container {
 
     template<typename T, int N>
     inline void remove(property<T, N> &prop) {
-        if(prop){
+        if (prop) {
             remove(prop.name());
             prop.reset_ptr();
         }
@@ -749,7 +749,7 @@ struct property_iterator {
                                const Container *container = nullptr,
                                property<bool, 1> deleted = {}) : handle(handle),
                                                                  deleted(deleted),
-                                                                 container(container){
+                                                                 container(container) {
         if (container) {
             if (deleted) {
                 while (container->is_valid(handle) && deleted[handle]) {
@@ -800,7 +800,8 @@ struct vertex_container : public property_container {
     struct vertex_iterator : public property_iterator<vertex_iterator, vertex_handle, vertex_container> {
         explicit vertex_iterator(vertex_handle v = vertex_handle(),
                                  property<bool, 1> deleted = {},
-                                 const vertex_container *container = nullptr) : property_iterator(std::move(v), container,
+                                 const vertex_container *container = nullptr) : property_iterator(std::move(v),
+                                                                                                  container,
                                                                                                   std::move(deleted)) {}
     };
 

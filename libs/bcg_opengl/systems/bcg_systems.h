@@ -8,6 +8,8 @@
 #include <string>
 #include <utility>
 
+#include "bcg_events.h"
+
 namespace bcg {
 
 struct viewer_state;

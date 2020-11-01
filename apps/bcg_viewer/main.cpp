@@ -4,6 +4,7 @@
 #include "bcg_opengl/bcg_imgui.h"
 #include "bcg_opengl/systems/bcg_camera_system.h"
 #include "bcg_opengl/systems/bcg_mesh_system.h"
+#include "bcg_opengl/renderers/bcg_render_system.h"
 
 int main() {
     using namespace bcg;
@@ -30,8 +31,9 @@ int main() {
         return true;
     };
 
-    viewer.state.systems["camera_system"] = camera_system(&viewer.state);
-    viewer.state.systems["mesh_system"] = mesh_system(&viewer.state);
+    viewer.state.systems["camera_system"] = std::make_unique<camera_system>(&viewer.state);
+    viewer.state.systems["mesh_system"] = std::make_unique<mesh_system>(&viewer.state);
+    viewer.state.systems["render_system"] = std::make_unique<render_system>(&viewer.state);
     viewer.run();
     return 0;
 }
