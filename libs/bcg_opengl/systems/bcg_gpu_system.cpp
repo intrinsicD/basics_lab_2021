@@ -44,6 +44,8 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
                 }
                 auto *base_ptr = vertices->get_base_ptr(name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+                auto sb = base_ptr->size_bytes();
+                assert(buffer.get_buffer_size_gpu() == sb);
                 vertices->get_base_ptr(name)->set_clean();
             }
         }

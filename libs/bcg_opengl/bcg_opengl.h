@@ -507,6 +507,7 @@ struct ogl_vertex_array : public ogl_handle {
 
     void release() const;
 
+    //TODO this here fails because when changed we have to readd it
     ogl_vertex_buffer get_vertex_buffer(std::string name);
 
     void add_vertex_buffer(const ogl_vertex_buffer &vertex_buffer);

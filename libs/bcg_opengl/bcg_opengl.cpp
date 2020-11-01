@@ -1254,7 +1254,7 @@ ogl_buffer_object::ogl_buffer_object(std::string name) : ogl_buffer_object(BCG_G
 }
 
 ogl_buffer_object::ogl_buffer_object(unsigned int target, std::string name) : ogl_buffer_object(BCG_GL_INVALID_ID,
-                                                                                                BCG_GL_INVALID_ID,
+                                                                                                target,
                                                                                                 name) {
 
 }
@@ -1336,7 +1336,7 @@ void ogl_vertex_buffer::upload(const void *data, size_t size, int dims, size_t o
         destroy();
         create();
         bind();
-        glBufferData(target, size * sizeof(bcg_scalar_t), nullptr, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+        glBufferData(target, size * dims * sizeof(bcg_scalar_t), nullptr, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
         assert_ogl_error();
         capacity = size;
         num_elements = capacity / dims;
@@ -1492,7 +1492,7 @@ void ogl_vertex_array::release() const {
     assert_ogl_error();
 }
 
-ogl_vertex_buffer ogl_vertex_array::get_vertex_buffer(std::string name) {
+ogl_vertex_buffer *ogl_vertex_array::get_vertex_buffer(std::string name) {
     auto iter = std::find_if(vertex_buffers.begin(), vertex_buffers.end(), [name](const ogl_vertex_buffer &vbo) {
         return vbo.name == name;
     });
