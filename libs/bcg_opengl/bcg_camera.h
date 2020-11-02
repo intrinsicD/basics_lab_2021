@@ -15,6 +15,7 @@ struct camera {
     VectorS<3> target_point;
     bcg_scalar_t near, far, aspect, fovy;
     bcg_scalar_t left, right, top, bottom;
+    bool orthographic;
 
     camera();
 
@@ -32,20 +33,8 @@ struct camera {
 
     MatrixS<4, 4> view_matrix();
 
-    virtual void update_projection() {};
+    void update_projection(bool orthographic = false);
 
-};
-
-struct perspective_camera : public camera {
-    void init() override;
-
-    void update_projection() override;
-};
-
-struct orthographic_camera : public camera {
-    void init() override;
-
-    void update_projection() override;
 };
 
 }

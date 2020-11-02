@@ -37,10 +37,11 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
 
         for (const auto &name : event.attributes_names) {
             if (vertices->has(name) && vertices->get_base_ptr(name)->is_dirty()) {
-                auto buffer = vao.get_vertex_buffer(name);
+                auto &buffer = vao.vertex_buffers[name];
                 if (!buffer) {
+                    buffer.name = name;
                     buffer.create();
-                    vao.add_vertex_buffer(buffer);
+                    vao.capture_vertex_buffer(buffer);
                 }
                 auto *base_ptr = vertices->get_base_ptr(name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
@@ -73,10 +74,11 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
 
         for (const auto &name : event.attributes_names) {
             if (edges->has(name) && edges->get_base_ptr(name)->is_dirty()) {
-                auto buffer = vao.get_vertex_buffer(name);
+                auto &buffer = vao.vertex_buffers[name];
                 if (!buffer) {
+                    buffer.name = name;
                     buffer.create();
-                    vao.add_vertex_buffer(buffer);
+                    vao.capture_vertex_buffer(buffer);
                 }
                 auto *base_ptr = edges->get_base_ptr(name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
@@ -121,10 +123,11 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
                 }
             }
             if (faces->has(name) && faces->get_base_ptr(name)->is_dirty()) {
-                auto buffer = vao.get_vertex_buffer(name);
+                auto &buffer = vao.vertex_buffers[name];
                 if (!buffer) {
+                    buffer.name = name;
                     buffer.create();
-                    vao.add_vertex_buffer(buffer);
+                    vao.capture_vertex_buffer(buffer);
                 }
                 auto *base_ptr = faces->get_base_ptr(name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);

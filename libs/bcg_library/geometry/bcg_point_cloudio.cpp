@@ -82,7 +82,7 @@ bool point_cloudio::read_pts(point_cloud &pc) {
     vertex_handle v;
     auto insertLambda = [&v, &pc, &colors, &intensities](bcg_scalar_t result, size_t lineCount, size_t ScalarTypePerLineCount) {
         if (lineCount == 0) {
-            pc.vertices.reserve(result);
+            pc.vertices.reserve((size_t)result);
         } else {
             if (ScalarTypePerLineCount == 0) {
                 v = pc.add_vertex(zero3s);
@@ -280,7 +280,7 @@ bool point_cloudio::read_txt(point_cloud &pc) {
     auto insertLambda = [&v, &pc, &colors, &reflectances](bcg_scalar_t result, size_t lineCount,
                                                           size_t ScalarTypePerLineCount) {
         if (lineCount == 0) {
-            pc.vertices.reserve(result);
+            pc.vertices.reserve((size_t)result);
         } else {
             if (ScalarTypePerLineCount == 0) {
                 v = pc.add_vertex(zero3s);

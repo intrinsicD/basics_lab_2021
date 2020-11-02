@@ -654,7 +654,7 @@ static int faceCallback(p_ply_argument argument) {
         vertices[0].clear();
     }
 
-    int idx = ply_get_argument_value(argument);
+    int idx = (int)ply_get_argument_value(argument);
 
     vertices[0].push_back(idx);
 
@@ -910,7 +910,7 @@ bool meshio::write_off(const halfedge_mesh &mesh) {
 
     // faces
     for (const auto f : mesh.faces) {
-        int nv = mesh.get_valence(f);
+        int nv = (int) mesh.get_valence(f);
         fprintf(out, "%d", nv);
         for (const auto fv : mesh.get_vertices(f)) {
             fprintf(out, " %zu", fv.idx);
@@ -931,8 +931,8 @@ bool meshio::write_off_binary(const halfedge_mesh &mesh) {
     fprintf(out, "OFF BINARY\n");
     fclose(out);
 
-    bcg_index_t nv = mesh.num_vertices();
-    bcg_index_t nf = mesh.num_faces();
+    bcg_index_t nv = (int) mesh.num_vertices();
+    bcg_index_t nf = (int) mesh.num_faces();
     bcg_index_t ne = 0;
 
     out = fopen(filename.c_str(), "ab");
@@ -1107,10 +1107,10 @@ bool meshio::write_pmp(const halfedge_mesh &mesh) {
     auto htex = mesh.halfedges.get<VectorS<2>, 2>("tex");
 
     // how many elements?
-    unsigned int nv = mesh.num_vertices();
-    unsigned int ne = mesh.num_edges();
-    unsigned int nh = mesh.num_halfedges();
-    unsigned int nf = mesh.num_faces();
+    unsigned int nv = (unsigned int) mesh.num_vertices();
+    unsigned int ne = (unsigned int) mesh.num_edges();
+    unsigned int nh = (unsigned int) mesh.num_halfedges();
+    unsigned int nf = (unsigned int) mesh.num_faces();
 
     // write header
     tfwrite(out, nv);

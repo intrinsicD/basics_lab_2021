@@ -77,8 +77,8 @@ void points_renderer::on_render(const event::render &event) {
         program.set_uniform_i("use_uniform_color", material.use_uniform_color);
         Vector<float, 4> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_4f("uniform_color", 1, uniform_color.data());
-
-        glDrawArrays(GL_POINTS, 0, vao.vertex_buffers.front().num_elements);
+        auto &pos = vao.vertex_buffers["position"];
+        glDrawArrays(GL_POINTS, 0, pos.num_elements);
         assert_ogl_error();
     }
 

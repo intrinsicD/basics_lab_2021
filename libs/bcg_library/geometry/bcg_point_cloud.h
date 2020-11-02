@@ -48,13 +48,13 @@ struct point_cloud {
     std::vector<vertex_handle>
     find_closest_vertices_radius(const point_cloud::position_t &point, bcg_scalar_t radius);
 
+    virtual std::string to_string() const;
 
 protected:
     void mark_vertex_deleted(vertex_handle v);
 };
 
 std::ostream &operator<<(std::ostream &stream, const point_cloud &pc);
-
 
 }
 

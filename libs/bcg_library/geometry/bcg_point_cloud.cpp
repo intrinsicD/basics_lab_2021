@@ -111,15 +111,6 @@ void point_cloud::mark_vertex_deleted(vertex_handle v) {
     assert(has_garbage());
 }
 
-std::ostream &operator<<(std::ostream &stream, const point_cloud &pc) {
-    stream << "point cloud\n";
-    if (pc.has_garbage()) {
-        stream << "size_vertices_deleted: " << pc.size_vertices_deleted << "\n";
-    }
-    stream << pc.vertices << "\n";
-    return stream;
-}
-
 vertex_handle point_cloud::find_closest_vertex(const point_cloud::position_t &point) {
     vertex_handle closest_yet(0);
     auto min_dist_yet = scalar_max;
@@ -177,6 +168,21 @@ point_cloud::find_closest_vertices_radius(const point_cloud::position_t &point, 
     std::vector<vertex_handle> indices;
     unzip<bcg_scalar_t, vertex_handle>(closest, nullptr, &indices);
     return indices;
+}
+
+std::string point_cloud::to_string() const{
+    std::stringstream stream;
+    stream << "point cloud\n";
+    if (has_garbage()) {
+        stream << "size_vertices_deleted: " << size_vertices_deleted << "\n";
+    }
+    stream << "vertex properties:\n" << vertices << "\n";
+    return stream.str();
+}
+
+std::ostream &operator<<(std::ostream &stream, const point_cloud &pc) {
+    stream << pc.to_string() << "\n";
+    return stream;
 }
 
 }

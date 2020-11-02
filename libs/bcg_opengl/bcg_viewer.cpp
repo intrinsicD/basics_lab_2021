@@ -36,7 +36,7 @@ static void draw_window(viewer_state *state) {
     state->dispatcher.trigger<event::begin_frame>();
     if (state->callbacks.draw_cb) {
         state->callbacks.draw_cb(state);
-    }else{
+    } else {
         state->dispatcher.trigger<event::render>();
     }
     state->dispatcher.trigger<event::end_frame>();
@@ -108,7 +108,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                             }
                             if (state->callbacks.drop_cb) {
                                 state->callbacks.drop_cb(state, pathv);
-                            }else{
+                            } else {
                                 state->dispatcher.trigger<event::file_drop>(pathv);
                             }
                         });
@@ -181,7 +181,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
 
     if (state.callbacks.startup_cb) {
         state.callbacks.startup_cb(&state);
-    }else{
+    } else {
         state.dispatcher.trigger<event::startup>();
     }
 
@@ -208,7 +208,8 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
             state.mouse.last_right_click = state.mouse.cursor_position;
         }
 
-        state.mouse.is_dragging = state.mouse.is_moving && (state.mouse.left || state.mouse.middle || state.mouse.right);
+        state.mouse.is_dragging =
+                state.mouse.is_moving && (state.mouse.left || state.mouse.middle || state.mouse.right);
 
         state.keyboard.alt_pressed = glfwGetKey(win, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
                                      glfwGetKey(win, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
@@ -226,7 +227,8 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
                                        state.keyboard.command_pressed);
 
         glfwGetWindowSize(win, &state.window.width, &state.window.height);
-        glfwGetFramebufferSize(win, &state.window.framebuffer_viewport[2],
+        glfwGetFramebufferSize(win,
+                               &state.window.framebuffer_viewport[2],
                                &state.window.framebuffer_viewport[3]);
         state.window.framebuffer_viewport[0] = 0;
         state.window.framebuffer_viewport[1] = 0;
@@ -252,7 +254,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         // update
         if (state.callbacks.update_cb) {
             state.callbacks.update_cb(&state);
-        }else{
+        } else {
             state.dispatcher.trigger<event::update>();
         }
 
@@ -270,7 +272,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
     // clear
     if (state.callbacks.shutdown_cb) {
         state.callbacks.shutdown_cb(&state);
-    }else{
+    } else {
         state.dispatcher.trigger<event::shutdown>();
     }
 }

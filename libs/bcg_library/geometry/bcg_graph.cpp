@@ -611,4 +611,26 @@ edge_handle halfedge_graph::find_closest_edge_in_neighborhood(vertex_handle v,
     return closest_yet;
 }
 
+std::string halfedge_graph::to_string() const{
+    std::stringstream stream;
+    stream << point_cloud::to_string();
+    stream << "graph\n";
+
+    if (has_garbage()) {
+        stream << "size_halfedges_deleted: " << size_halfedges_deleted << "\n";
+    }
+    stream << "halfedge properties:\n" << halfedges << "\n";
+
+    if (has_garbage()) {
+        stream << "size_edges_deleted: " << size_edges_deleted << "\n";
+    }
+    stream << "edge properties:\n" << edges << "\n";
+    return stream.str();
+}
+
+std::ostream &operator<<(std::ostream &stream, const halfedge_graph &graph){
+    stream << graph.to_string();
+    return stream;
+}
+
 }

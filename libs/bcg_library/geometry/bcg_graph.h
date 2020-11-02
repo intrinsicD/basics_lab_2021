@@ -170,10 +170,12 @@ struct halfedge_graph : public point_cloud {
 
     edge_handle find_closest_edge_in_neighborhood(vertex_handle v, const halfedge_graph::position_t &point);
 
+    std::string to_string() const override;
 protected:
     void mark_edge_deleted(edge_handle e);
 };
 
+std::ostream &operator<<(std::ostream &stream, const halfedge_graph &graph);
 
 }
 

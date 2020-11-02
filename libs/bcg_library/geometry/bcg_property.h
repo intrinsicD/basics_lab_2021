@@ -26,6 +26,8 @@ struct base_handle {
 
     }
 
+    virtual ~base_handle() = default;
+
     virtual base_handle &operator=(const base_handle &other) {
         idx = other.idx;
         return *this;
@@ -136,20 +138,10 @@ struct base_property {
     virtual void push_back() = 0;
 };
 
-template<typename T>
-std::string to_string(const base_property &property) {
-    std::stringstream ss;
-    T *ptr = (T *) property.void_ptr();
-
-    for (size_t i = 0; i < property.size(); ++i) {
-        for (size_t j = 0; j < property.dims(); ++j) {
-            ss << *(ptr + i * property.dims() + j) << " ";
-        }
-        ss << "\n";
-    }
-    return ss.str();
+inline std::ostream &operator<<(std::ostream &stream, const base_property &property) {
+    stream << property.name() << " dims:" << property.dims() << " dirty:" << (property.is_dirty()?"true":"false") << "\n";
+    return stream;
 }
-
 
 template<typename T, int N>
 struct property_vector : public base_property {
@@ -734,11 +726,10 @@ struct property_container {
     }
 };
 
-
 inline std::ostream &operator<<(std::ostream &stream, const property_container &container) {
-    stream << "num properties: " << container.num_properties() << "\n";
+    stream << "num properties: " << container.num_properties() << " size: " << container.size() << "\n";
     for (const auto &p : container.container) {
-        stream << p.second << "\n";
+        stream << *p.second;
     }
     return stream;
 }

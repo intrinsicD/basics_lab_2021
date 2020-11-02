@@ -14,6 +14,8 @@ namespace bcg{
 struct camera_system : public system {
     explicit camera_system(viewer_state *state);
 
+    void on_startup(const event::startup &event);
+
     void on_update(const event::update &event);
 };
 

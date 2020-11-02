@@ -22,7 +22,7 @@ void mesh_system::on_file_drop(const event::file_drop &event){
         io.read(mesh);
         auto id = state->scene.create();
         state->scene.emplace<halfedge_mesh>(id, mesh);
-        std::cout << item << "\n";
+        std::cout << mesh << "\n";
     }
 }
 

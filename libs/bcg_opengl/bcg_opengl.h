@@ -8,6 +8,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <unordered_map>
 #include "exts/glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "bcg_library/math/bcg_linalg.h"
@@ -490,7 +491,7 @@ struct ogl_element_buffer : public ogl_buffer_object {
 };
 
 struct ogl_vertex_array : public ogl_handle {
-    std::vector<ogl_vertex_buffer> vertex_buffers;
+    std::unordered_map<std::string, ogl_vertex_buffer> vertex_buffers;
     ogl_element_buffer element_buffer, adjacency_buffer;
 
     ogl_vertex_array();
@@ -507,10 +508,7 @@ struct ogl_vertex_array : public ogl_handle {
 
     void release() const;
 
-    //TODO this here fails because when changed we have to readd it
-    ogl_vertex_buffer get_vertex_buffer(std::string name);
-
-    void add_vertex_buffer(const ogl_vertex_buffer &vertex_buffer);
+    void capture_vertex_buffer(const ogl_vertex_buffer &vertex_buffer);
 
     void set_element_buffer(const ogl_element_buffer &element_buffer);
 };

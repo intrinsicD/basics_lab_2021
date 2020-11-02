@@ -200,6 +200,7 @@ struct halfedge_mesh : public halfedge_graph {
 
     face_handle find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const;
 
+    std::string to_string() const override;
 protected:
     face_handle new_face();
 
@@ -212,6 +213,8 @@ protected:
     using NextCache = std::vector<NextCacheEntry>;
     NextCache m_add_face_next_cache;
 };
+
+std::ostream &operator<<(std::ostream &stream, const halfedge_mesh &mesh);
 
 }
 

@@ -1492,24 +1492,12 @@ void ogl_vertex_array::release() const {
     assert_ogl_error();
 }
 
-ogl_vertex_buffer *ogl_vertex_array::get_vertex_buffer(std::string name) {
-    auto iter = std::find_if(vertex_buffers.begin(), vertex_buffers.end(), [name](const ogl_vertex_buffer &vbo) {
-        return vbo.name == name;
-    });
-    if (iter != vertex_buffers.end()) {
-        return *iter;
-    }
-    return ogl_vertex_buffer();
-}
-
-void ogl_vertex_array::add_vertex_buffer(const ogl_vertex_buffer &vertex_buffer) {
-    auto vbo = get_vertex_buffer(vertex_buffer.name);
-    if (!vbo) {
+void ogl_vertex_array::capture_vertex_buffer(const ogl_vertex_buffer &vertex_buffer) {
+    if (!vertex_buffer) {
         bind();
         vertex_buffer.bind();
         release();
         vertex_buffer.release();
-        vertex_buffers.push_back(vertex_buffer);
     }
 }
 

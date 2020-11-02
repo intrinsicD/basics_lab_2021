@@ -1386,14 +1386,14 @@ std::vector<int> halfedge_mesh::get_triangles_adjacencies() {
     triangles.reserve(faces.size() * 6);
     for (const auto f : faces) {
         for (const auto h : get_halfedges(f)) {
-            triangles.push_back(halfedge_graph::get_from_vertex(h).idx);
+            triangles.push_back((int)halfedge_graph::get_from_vertex(h).idx);
             if (!is_boundary(h)) {
                 auto o = halfedge_graph::get_opposite(h);
                 auto op = halfedge_graph::get_prev(o);
-                triangles.push_back(halfedge_graph::get_from_vertex(op).idx);
+                triangles.push_back((int)halfedge_graph::get_from_vertex(op).idx);
             } else {
                 auto p = halfedge_graph::get_prev(h);
-                triangles.push_back(halfedge_graph::get_from_vertex(p).idx);
+                triangles.push_back((int)halfedge_graph::get_from_vertex(p).idx);
             }
         }
     }
@@ -1521,5 +1521,21 @@ void halfedge_mesh::mark_face_deleted(face_handle f) {
     assert(has_garbage());
 }
 
+std::string halfedge_mesh::to_string() const{
+    std::stringstream stream;
+    stream << halfedge_graph::to_string();
+    stream << "mesh\n";
+
+    if (has_garbage()) {
+        stream << "size_faces_deleted: " << size_faces_deleted << "\n";
+    }
+    stream << "face properties:\n" << faces << "\n";
+    return stream.str();
+}
+
+std::ostream &operator<<(std::ostream &stream, const halfedge_mesh &mesh){
+    stream << mesh.to_string();
+    return stream;
+}
 
 }
