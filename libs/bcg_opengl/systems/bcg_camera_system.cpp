@@ -16,6 +16,11 @@ void camera_system::on_startup(const event::startup &event){
 }
 
 
+void camera_system::on_resize(const event::resize &event){
+    state->cam.aspect = (bcg_scalar_t) event.width / (bcg_scalar_t) event.height;
+}
+
+
 void camera_system::on_update(const event::update &event) {
     state->cam.update_projection();
 }

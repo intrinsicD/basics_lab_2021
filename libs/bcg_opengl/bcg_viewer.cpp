@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <chrono>
+#include <iostream>
 
 #include "exts/glad/glad.h"
 #include "bcg_viewer_state.h"
@@ -78,8 +79,9 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     if (!glfwInit()) {
         throw std::runtime_error("cannot initialize windowing system");
     }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -117,6 +119,8 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                            auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                            if (state->callbacks.key_cb) {
                                state->callbacks.key_cb(state, key, (bool) action);
+                           } else {
+                               state->dispatcher.trigger<event::keyboard>(key, action);
                            }
                        });
     glfwSetCharCallback(state->window.win,
@@ -132,26 +136,31 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                    if (state->callbacks.click_cb) {
                                        state->callbacks.click_cb(state, button == GLFW_MOUSE_BUTTON_LEFT,
                                                                  (bool) action);
+                                   }else{
+                                       state->dispatcher.trigger<event::mouse::button>(button, action);
                                    }
                                });
     glfwSetCursorPosCallback(state->window.win,
-                             [](GLFWwindow *glfw, double xoffset, double yoffset) {
+                             [](GLFWwindow *glfw, double x, double y) {
                                  auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                 state->mouse.is_moving = true;
+                                 auto hdpi = state->window.high_dpi_scaling;
+                                 state->dispatcher.trigger<event::mouse::motion>(x * hdpi, y * hdpi);
                              });
     glfwSetScrollCallback(state->window.win,
                           [](GLFWwindow *glfw, double xoffset, double yoffset) {
                               auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                               if (state->callbacks.scroll_cb) {
                                   state->callbacks.scroll_cb(state, (float) yoffset);
+                              }else{
+                                  state->dispatcher.trigger<event::mouse::scroll>(yoffset);
                               }
-                              state->mouse.scroll_value = yoffset;
-                              state->mouse.is_scrolling = true;
                           });
     glfwSetWindowSizeCallback(state->window.win,
                               [](GLFWwindow *glfw, int width, int height) {
                                   auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                  glfwGetWindowSize(glfw, &state->window.width, &state->window.height);
+                                  state->dispatcher.trigger<event::resize>(width, height);
+                                  state->window.width = width;
+                                  state->window.height = height;
                                   glfwGetFramebufferSize(glfw, &state->window.framebuffer_viewport[2],
                                                          &state->window.framebuffer_viewport[3]);
                                   state->window.framebuffer_viewport[0] = 0;
@@ -170,6 +179,17 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     if (widgets || state->gui.left.show || state->gui.menu.show) {
         init_widgets(state, widgets_width);
     }
+
+    glfwGetWindowSize(state->window.win, &state->window.width, &state->window.height);
+    glfwGetFramebufferSize(state->window.win, &state->window.framebuffer_viewport[2], &state->window.framebuffer_viewport[3]);
+    state->window.high_dpi_scaling = (bcg_scalar_t) state->window.framebuffer_viewport[2] / (bcg_scalar_t) state->window.width;
+    if (state->window.high_dpi_scaling != 1){
+        std::cout << "highDPI scaling: " << state->window.high_dpi_scaling << "\n";
+    }
+
+    std::cout << "GL       " << ogl_version_string() << "\n";
+    std::cout << "GLSL     " << glsl_version_string() << "\n";
+    std::cout << "Renderer " << ogl_renderer_string() << "\n";
 }
 
 void set_close(viewer_state *state, bool close) {
@@ -189,42 +209,9 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
     auto win = state.window.win;
     while (!glfwWindowShouldClose(win)) {
         // update input
-        state.mouse.last_cursor_position = state.mouse.cursor_position;
-        auto mouse_posx = 0.0, mouse_posy = 0.0;
-        glfwGetCursorPos(win, &mouse_posx, &mouse_posy);
-        state.mouse.cursor_position[0] = mouse_posx;
-        state.mouse.cursor_position[1] = mouse_posy;
-        state.mouse.cursor_delta = state.mouse.cursor_position - state.mouse.last_cursor_position;
-        state.mouse.left = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-        if (state.mouse.left) {
-            state.mouse.last_left_click = state.mouse.cursor_position;
-        }
-        state.mouse.middle = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-        if (state.mouse.middle) {
-            state.mouse.last_middle_click = state.mouse.cursor_position;
-        }
-        state.mouse.right = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-        if (state.mouse.right) {
-            state.mouse.last_right_click = state.mouse.cursor_position;
-        }
-
-        state.mouse.is_dragging =
-                state.mouse.is_moving && (state.mouse.left || state.mouse.middle || state.mouse.right);
-
-        state.keyboard.alt_pressed = glfwGetKey(win, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
-                                     glfwGetKey(win, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
-        state.keyboard.shift_pressed = glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
-                                       glfwGetKey(win, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
-        state.keyboard.ctrl_pressed = glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
-                                      glfwGetKey(win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
-        state.keyboard.command_pressed = glfwGetKey(win, GLFW_KEY_LEFT_SUPER) == GLFW_PRESS ||
-                                         glfwGetKey(win, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS;
-
-        set_close(&state, state.keyboard.ctrl_pressed && glfwGetKey(win, GLFW_KEY_Q) == GLFW_PRESS);
-        state.keyboard.no_modifier = !(state.keyboard.alt_pressed ||
-                                       state.keyboard.shift_pressed ||
-                                       state.keyboard.ctrl_pressed ||
-                                       state.keyboard.command_pressed);
+        set_close(&state, (glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+                           glfwGetKey(win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) &&
+                          glfwGetKey(win, GLFW_KEY_Q) == GLFW_PRESS);
 
         glfwGetWindowSize(win, &state.window.width, &state.window.height);
         glfwGetFramebufferSize(win,

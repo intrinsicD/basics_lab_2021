@@ -99,6 +99,7 @@ struct viewer_callbacks {
 struct viewer_window {
     GLFWwindow *win = nullptr;
     std::string title = "";
+    bcg_scalar_t high_dpi_scaling = 1.0;
     int width, height;
     VectorI<4> framebuffer_viewport;
     int widgets_width = 0;

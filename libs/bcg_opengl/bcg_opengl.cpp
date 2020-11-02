@@ -110,7 +110,6 @@ std::string ogl_renderer_string() {
     return renderer_string;
 }
 
-
 GLenum ogl_types::GetGLType(const GLubyte *) { return GL_UNSIGNED_BYTE; }
 
 // Returns the OpenGL type identifier that corresponds to unsigned short.

@@ -16,6 +16,8 @@ struct camera_system : public system {
 
     void on_startup(const event::startup &event);
 
+    void on_resize(const event::resize &event);
+
     void on_update(const event::update &event);
 };
 

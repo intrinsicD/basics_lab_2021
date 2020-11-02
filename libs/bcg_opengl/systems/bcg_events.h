@@ -15,6 +15,20 @@ struct startup {
 struct shutdown {
 
 };
+namespace mouse{
+struct button{
+    int button, action;
+};
+struct motion{
+    double x, y;
+};
+struct scroll{
+    double value;
+};
+}
+struct keyboard{
+    int button, action;
+};
 struct file_drop {
     std::vector<std::string> filenames{};
 };
@@ -29,6 +43,9 @@ struct render {
 };
 struct end_frame {
 
+};
+struct resize{
+    int width, height;
 };
 namespace gpu {
 struct update_vertex_attributes {
