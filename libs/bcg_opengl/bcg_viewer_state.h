@@ -10,11 +10,12 @@
 #include "bcg_camera.h"
 #include "bcg_imgui.h"
 #include "bcg_opengl.h"
-#include "systems/bcg_events.h"
+#include "events/bcg_events.h"
 #include "color/bcg_colors.h"
 #include "bcg_opengl/systems/bcg_systems.h"
 #include "bcg_library/utils/bcg_dynamic_bitset.h"
 #include "bcg_library/utils/bcg_file_watcher.h"
+#include "bcg_library/geometry/bcg_mesh.h"
 #include "entt/entt.hpp"
 
 struct GLFWwindow;
@@ -121,7 +122,7 @@ struct viewer_systems {
 
     std::unique_ptr<system> &operator[](const std::string &name);
 
-    const  std::unique_ptr<system> &operator[](const std::string &name) const;
+    const std::unique_ptr<system> &operator[](const std::string &name) const;
 };
 
 struct viewer_shaders {
@@ -129,11 +130,11 @@ struct viewer_shaders {
     file_watcher watcher;
 
     glsl_program load(std::string name,
-              std::string vertex_shader_file,
-              std::string fragment_shader_file,
-              std::string *geometry_shader_file = nullptr,
-              std::string *tess_control_shader_file = nullptr,
-              std::string *tess_eval_shader_file = nullptr);
+                      std::string vertex_shader_file,
+                      std::string fragment_shader_file,
+                      std::string *geometry_shader_file = nullptr,
+                      std::string *tess_control_shader_file = nullptr,
+                      std::string *tess_eval_shader_file = nullptr);
 
     glsl_program &operator[](const std::string &name);
 
@@ -143,18 +144,20 @@ private:
     glsl_shader load_shader(std::string filename, unsigned int type) const;
 };
 
-struct viewer_picker{
+struct viewer_picker {
     size_t entity_id, vertex_id, edge_id, face_id;
     VectorS<3> model_space_point;
     VectorS<3> world_space_point;
     VectorS<3> view_space_point;
 };
 
-struct viewer_config{
+struct viewer_config {
     std::string renderers_path = "../../libs/bcg_opengl/renderers/";
 };
 
 struct viewer_state {
+    viewer_state();
+
     viewer_config config;
     viewer_colors colors;
     viewer_keyboard keyboard;
@@ -169,6 +172,14 @@ struct viewer_state {
     camera cam;
     entt::registry scene;
     entt::dispatcher dispatcher;
+
+    vertex_container *get_vertices(entt::entity id);
+
+    halfedge_container *get_halfedges(entt::entity id);
+
+    edge_container *get_edges(entt::entity id);
+
+    face_container *get_faces(entt::entity id);
 };
 
 

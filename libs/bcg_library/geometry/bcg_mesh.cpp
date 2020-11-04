@@ -5,6 +5,7 @@
 #include "bcg_mesh.h"
 #include "triangle/bcg_triangle.h"
 #include "triangle/bcg_triangle_distance.h"
+#include "bcg_vector_map_eigen.h"
 #include "utils/bcg_stl_utils.h"
 
 namespace bcg {
@@ -1363,41 +1364,42 @@ void halfedge_mesh::flip(edge_handle e) {
     assert(edges.is_dirty());
 }
 
-std::vector<int> halfedge_mesh::get_triangles() {
+property<VectorI<3>, 3> halfedge_mesh::get_triangles() {
     if (!is_triangle_mesh()) {
         triangulate();
     }
-    std::vector<int> triangles;
+    auto triangles = faces.get_or_add<VectorI<3>, 3>("triangles");
+
     triangles.reserve(faces.size());
     for (const auto f : faces) {
         auto v = get_vertices(f);
-        triangles.emplace_back((*v).idx);
-        triangles.emplace_back((*(++v)).idx);
-        triangles.emplace_back((*(++v)).idx);
+        triangles[f] = {(*v).idx, (*(++v)).idx, (*(++v)).idx};
     }
     return triangles;
 }
 
-std::vector<int> halfedge_mesh::get_triangles_adjacencies() {
+property<VectorI<6>, 6> halfedge_mesh::get_triangles_adjacencies() {
     if (!is_triangle_mesh()) {
         triangulate();
     }
-    std::vector<int> triangles;
-    triangles.reserve(faces.size() * 6);
+    auto triangle_adjacencies = faces.get_or_add<VectorI<6>, 6>("triangle_adjacencies");
+    std::vector<int> adjacency;
     for (const auto f : faces) {
         for (const auto h : get_halfedges(f)) {
-            triangles.push_back((int)halfedge_graph::get_from_vertex(h).idx);
+            adjacency.push_back((int)halfedge_graph::get_from_vertex(h).idx);
             if (!is_boundary(h)) {
                 auto o = halfedge_graph::get_opposite(h);
                 auto op = halfedge_graph::get_prev(o);
-                triangles.push_back((int)halfedge_graph::get_from_vertex(op).idx);
+                adjacency.push_back((int)halfedge_graph::get_from_vertex(op).idx);
             } else {
                 auto p = halfedge_graph::get_prev(h);
-                triangles.push_back((int)halfedge_graph::get_from_vertex(p).idx);
+                adjacency.push_back((int)halfedge_graph::get_from_vertex(p).idx);
             }
         }
+        triangle_adjacencies[f] = Map(adjacency);
+        adjacency.clear();
     }
-    return triangles;
+    return triangle_adjacencies;
 }
 
 face_handle halfedge_mesh::find_closest_face(const position_t &point) const {

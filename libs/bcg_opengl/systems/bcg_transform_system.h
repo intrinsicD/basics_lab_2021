@@ -11,6 +11,14 @@ namespace bcg {
 
 struct transform_system : public system {
     explicit transform_system(viewer_state *state);
+
+    void on_add(const event::transform::add &event);
+
+    void on_translate(const event::transform::translate &event);
+
+    void on_scale(const event::transform::scale &event);
+
+    void on_rotate(const event::transform::rotate &event);
 };
 
 }

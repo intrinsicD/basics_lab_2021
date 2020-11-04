@@ -7,7 +7,7 @@
 
 #include "renderers/bcg_renderer.h"
 #include "bcg_points_renderer_events.h"
-#include "systems/bcg_events.h"
+#include "events/bcg_events.h"
 
 namespace bcg {
 
@@ -15,15 +15,15 @@ struct points_renderer : public renderer {
     explicit points_renderer(viewer_state *state);
 
 private:
-    void on_startup(const event::startup &event);
+    void on_startup(const event::internal::startup &event);
 
     void on_enqueue(const event::points_renderer::enqueue &event);
 
-    void on_begin_frame(const event::begin_frame &event) override;
+    void on_begin_frame(const event::internal::begin_frame &event) override;
 
-    void on_render(const event::render &event) override;
+    void on_render(const event::internal::render &event) override;
 
-    void on_end_frame(const event::end_frame &event) override;
+    void on_end_frame(const event::internal::end_frame &event) override;
 };
 
 }

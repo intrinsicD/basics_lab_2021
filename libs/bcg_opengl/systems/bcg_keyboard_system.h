@@ -12,9 +12,9 @@ namespace bcg {
 struct keyboard_system : public system {
     explicit keyboard_system(viewer_state *state);
 
-    void on_keyboard(const event::keyboard &event);
+    void on_keyboard(const event::internal::keyboard &event);
 
-    void on_update(const event::update &event);
+    void on_update(const event::internal::update &event);
 };
 
 

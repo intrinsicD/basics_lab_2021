@@ -8,11 +8,11 @@
 namespace bcg {
 
 keyboard_system::keyboard_system(viewer_state *state) : system("keyboard_system", state) {
-    state->dispatcher.sink<event::update>().connect<&keyboard_system::on_update>(this);
-    state->dispatcher.sink<event::keyboard>().connect<&keyboard_system::on_keyboard>(this);
+    state->dispatcher.sink<event::internal::update>().connect<&keyboard_system::on_update>(this);
+    state->dispatcher.sink<event::internal::keyboard>().connect<&keyboard_system::on_keyboard>(this);
 }
 
-void keyboard_system::on_keyboard(const event::keyboard &event) {
+void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     /* Use this function to control single action per frame when triggered by glfw
      * like: enable, disable stuff
      * use on_update if you want to update continuously
@@ -91,7 +91,7 @@ void keyboard_system::on_keyboard(const event::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_F9]) {}
 }
 
-void keyboard_system::on_update(const event::update &event) {
+void keyboard_system::on_update(const event::internal::update &event) {
     /* Use this function to control continuous action per frame when updated by viewer
      * like: moving around with w,a,s,d.
      * use on_keyboard if you want to enable, disable stuff

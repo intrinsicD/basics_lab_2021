@@ -20,6 +20,8 @@ template<bcg_index_t N>
 struct aligned_box {
     VectorS<N> min, max;
 
+    aligned_box() : aligned_box(VectorS<N>::Constant(scalar_max), VectorS<N>::Constant(scalar_min)) {}
+
     aligned_box(const VectorS<N> &min, const VectorS<N> &max) : min(min), max(max) {}
 
     explicit aligned_box(const std::vector<VectorS<N>> &points) : aligned_box() {

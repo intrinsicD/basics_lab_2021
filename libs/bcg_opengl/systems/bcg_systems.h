@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-#include "bcg_events.h"
+#include "bcg_opengl/events/bcg_events.h"
 
 namespace bcg {
 
@@ -22,7 +22,7 @@ struct system {
     virtual ~system() = default;
 
     std::string name;
-    viewer_state *state;
+    viewer_state *state = nullptr;
 };
 
 }

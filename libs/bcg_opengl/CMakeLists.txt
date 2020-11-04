@@ -8,15 +8,19 @@ if (BCG_OPENGL)
             bcg_camera.h bcg_camera.cpp
             bcg_viewer.h bcg_viewer.cpp
             bcg_viewer_state.h bcg_viewer_state.cpp
+            events/bcg_events.h
+            systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp
-            systems/bcg_events.h
             systems/bcg_graph_system.h systems/bcg_graph_system.cpp
             systems/bcg_mesh_system.h systems/bcg_mesh_system.cpp
             systems/bcg_picker_system.h systems/bcg_picker_system.cpp
             systems/bcg_point_cloud_system.h systems/bcg_point_cloud_system.cpp
-            systems/bcg_systems.h
             systems/bcg_transform_system.h systems/bcg_transform_system.cpp
             systems/bcg_gpu_system.h systems/bcg_gpu_system.cpp
+            systems/bcg_mouse_system.h systems/bcg_mouse_system.cpp
+            systems/bcg_keyboard_system.h systems/bcg_keyboard_system.cpp
+            systems/bcg_aligned_box_system.h systems/bcg_aligned_box_system.cpp
+            systems/bcg_loading_system.h systems/bcg_loading_system.cpp
             renderers/bcg_renderer.h renderers/bcg_renderer.cpp
             renderers/bcg_render_system.h renderers/bcg_render_system.cpp
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_points_renderer_events.h

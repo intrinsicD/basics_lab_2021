@@ -9,12 +9,9 @@
 #include <vector>
 #include <string>
 
-#include "../systems/bcg_systems.h"
-#include "../systems/bcg_events.h"
-#include "../bcg_opengl.h"
+#include "bcg_opengl/systems/bcg_systems.h"
+#include "bcg_opengl/bcg_opengl.h"
 #include "entt/entt.hpp"
-
-
 
 namespace bcg {
 
@@ -28,11 +25,11 @@ struct renderer : public system {
     ~renderer() override = default;
 
 protected:
-    virtual void on_begin_frame(const event::begin_frame &event){}
+    virtual void on_begin_frame(const event::internal::begin_frame &event){}
 
-    virtual void on_render(const event::render &event){}
+    virtual void on_render(const event::internal::render &event){}
 
-    virtual void on_end_frame(const event::end_frame &event){}
+    virtual void on_end_frame(const event::internal::end_frame &event){}
 
     std::unordered_map<std::string, unsigned int> programs;
     std::vector<entt::entity> entities_to_draw;

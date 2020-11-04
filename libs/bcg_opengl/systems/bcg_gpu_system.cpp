@@ -14,21 +14,9 @@ gpu_system::gpu_system(viewer_state *state) : system("gpu_system", state) {
 }
 
 void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_attributes &event) {
-    property_container *vertices = nullptr;
-    auto *pc = state->scene.try_get<point_cloud>(event.id);
-    if (pc) {
-        vertices = &pc->vertices;
-    } else {
-        auto *graph = state->scene.try_get<halfedge_graph>(event.id);
-        if (graph) {
-            vertices = &graph->vertices;
-        } else {
-            auto *mesh = state->scene.try_get<halfedge_mesh>(event.id);
-            if (mesh) {
-                vertices = &mesh->vertices;
-            }
-        }
-    }
+    if(!state->scene.valid(event.id)) return;
+
+    property_container *vertices = state->get_vertices(event.id);
     if (vertices) {
         auto &vao = state->scene.get_or_emplace<ogl_vertex_array>(event.id);
         if (!vao) {
@@ -54,17 +42,9 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
 }
 
 void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attributes &event) {
-    property_container *edges = nullptr;
+    if(!state->scene.valid(event.id)) return;
 
-    auto *graph = state->scene.try_get<halfedge_graph>(event.id);
-    if (graph) {
-        edges = &graph->edges;
-    } else {
-        auto *mesh = state->scene.try_get<halfedge_mesh>(event.id);
-        if (mesh) {
-            edges = &mesh->edges;
-        }
-    }
+    property_container *edges = state->get_edges(event.id);
 
     if (edges) {
         auto &vao = state->scene.get_or_emplace<ogl_vertex_array>(event.id);
@@ -89,12 +69,10 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
 }
 
 void gpu_system::on_update_face_attributes(const event::gpu::update_face_attributes &event) {
-    property_container *faces = nullptr;
+    if(!state->scene.valid(event.id)) return;
 
-    auto *mesh = state->scene.try_get<halfedge_mesh>(event.id);
-    if (mesh) {
-        faces = &mesh->faces;
-    }
+    property_container *faces = state->get_faces(event.id);
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
 
     if (faces) {
         auto &vao = state->scene.get_or_emplace<ogl_vertex_array>(event.id);
@@ -109,7 +87,8 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
                     vao.set_element_buffer(vao.element_buffer);
                 }
                 if(vao.element_buffer.get_buffer_size_gpu() != faces->size() ){
-                    auto triangles = mesh->get_triangles();
+                    auto triangles = mesh.get_triangles();
+                    std::cout << triangles << "\n";
                     vao.element_buffer.upload(triangles.data(), faces->size(), 3, 0, true);
                 }
             }else if(name == "triangles_adjacency"){
@@ -118,7 +97,7 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
                     vao.set_element_buffer(vao.adjacency_buffer);
                 }
                 if(vao.adjacency_buffer.get_buffer_size_gpu() != faces->size() ){
-                    auto adjacencies = mesh->get_triangles_adjacencies();
+                    auto adjacencies = mesh.get_triangles_adjacencies();
                     vao.adjacency_buffer.upload(adjacencies.data(), faces->size(), 6, 0, true);
                 }
             }

@@ -5,9 +5,11 @@
 #include "bcg_library/utils/bcg_path.h"
 
 #include <GLFW/glfw3.h>
-
-
 #include "exts/imgui/imgui_internal.h"
+
+#include "bcg_entity_info.h"
+#include "aligned_box/bcg_aligned_box.h"
+#include "utils/bcg_path.h"
 
 namespace bcg {
 using namespace std::string_literals;
@@ -56,7 +58,65 @@ void left_panel::render(viewer_state *state) {
     ImGui::End();
 }
 
-void gui_settings(viewer_state *state) {
+void gui_info(viewer_state *state, property_container *container){
+    if(!container) return;
+}
+
+void gui_info(viewer_state *state, const aligned_box3 *aabb){
+    if(!aabb) return;
+    if(ImGui::CollapsingHeader("aligned_box")){
+        std::stringstream ss;
+        ss << aabb->min.transpose();
+        draw_label(&state->window, "min", ss.str());
+        ss.str("");
+        ss << aabb->max.transpose();
+        draw_label(&state->window, "max", ss.str());
+        ss.str("");
+        ss << aabb->center().transpose();
+        draw_label(&state->window, "center", ss.str());
+        ss.str("");
+        ss << aabb->halfextent().transpose();
+        draw_label(&state->window, "halfextent", ss.str());
+        ss.str("");
+    }
+}
+
+void gui_info(viewer_state *state, const Transform *model){
+    if(!model) return;
+    if(ImGui::CollapsingHeader("transform")){
+        std::stringstream ss;
+        ss << model->translation().transpose();
+        draw_label(&state->window, "position", ss.str());
+        ss.str("");
+        ss << model->linear();
+        draw_label(&state->window, "rotation\n\n\n", ss.str());
+        ss.str("");
+        ss << model->matrix();
+        draw_label(&state->window, "model_matrix\n\n\n\n", ss.str());
+    }
+}
+
+void gui_info(viewer_state *state) {
+    if(ImGui::CollapsingHeader("Scene")){
+        auto view = state->scene.view<entity_info>();
+        for(const auto id : view){
+            auto &info = state->scene.get<entity_info>(id);
+            std::stringstream ss;
+            ss << info.entity_name << " id: " << std::to_string((unsigned int)id);
+            if (ImGui::TreeNode(ss.str().c_str())){
+                ss.str("");
+                draw_label(&state->window, "entity_id", std::to_string((unsigned int)id));
+                draw_label(&state->window, "filename", path_filename(info.filename));
+                draw_textinput(&state->window, "entity_name", info.entity_name);
+                ss << info.loading_center.transpose();
+                draw_label(&state->window, "loading_center", ss.str());
+                draw_label(&state->window, "loading_scale", std::to_string(info.loading_scale));
+                gui_info(state, state->scene.try_get<aligned_box3>(id));
+                gui_info(state, state->scene.try_get<Transform>(id));
+                ImGui::TreePop();
+            }
+        }
+    }
     if (ImGui::CollapsingHeader("Colors")) {
         draw_coloredit(&state->window, "background", state->colors.background);
         draw_coloredit(&state->window, "overlay", state->colors.overlay);
@@ -89,6 +149,7 @@ void gui_settings(viewer_state *state) {
     if (ImGui::CollapsingHeader("Mouse")) {
         ImGui::Checkbox("moving", &state->mouse.is_moving);
         ImGui::Checkbox("scrolling", &state->mouse.is_scrolling);
+        ImGui::Checkbox("dragging", &state->mouse.is_dragging);
         ImGui::Checkbox("captured by gui", &state->mouse.is_captured_by_gui);
         ImGui::Checkbox("left pressed", &state->mouse.left);
         ImGui::Checkbox("middle pressed", &state->mouse.middle);
@@ -155,9 +216,9 @@ void gui_settings(viewer_state *state) {
         if(ImGui::InputFloat("aspect", &aspect)){
             state->cam.aspect = aspect;
         }
-        float fovy = state->cam.fovy;
-        if(ImGui::InputFloat("fovy degrees", &fovy)){
-            state->cam.fovy = fovy;
+        float fovy_degrees = state->cam.fovy_degrees;
+        if(ImGui::InputFloat("fovy degrees", &fovy_degrees)){
+            state->cam.fovy_degrees = fovy_degrees;
         }
         ImGui::Separator();
         float left = state->cam.left;
@@ -196,6 +257,10 @@ void gui_settings(viewer_state *state) {
 
 void gui_mesh_factory(viewer_state *state){
     ImGui::Button("Make Triangle");
+}
+
+void gui_aligned_box(viewer_state *state){
+
 }
 
 bool begin_header(viewer_window *win, const char *lbl) {

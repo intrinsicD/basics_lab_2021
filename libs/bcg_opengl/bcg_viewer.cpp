@@ -9,7 +9,7 @@
 #include "exts/glad/glad.h"
 #include "bcg_viewer_state.h"
 #include "bcg_viewer.h"
-#include "systems/bcg_events.h"
+#include "events/bcg_events.h"
 
 #ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
@@ -34,13 +34,13 @@ static void draw_window(viewer_state *state) {
                  state->colors.background[2],
                  state->colors.background[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    state->dispatcher.trigger<event::begin_frame>();
+    state->dispatcher.trigger<event::internal::begin_frame>();
     if (state->callbacks.draw_cb) {
         state->callbacks.draw_cb(state);
     } else {
-        state->dispatcher.trigger<event::render>();
+        state->dispatcher.trigger<event::internal::render>();
     }
-    state->dispatcher.trigger<event::end_frame>();
+    state->dispatcher.trigger<event::internal::end_frame>();
     if (!state->gui.hide_all) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -111,7 +111,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                             if (state->callbacks.drop_cb) {
                                 state->callbacks.drop_cb(state, pathv);
                             } else {
-                                state->dispatcher.trigger<event::file_drop>(pathv);
+                                state->dispatcher.trigger<event::internal::file_drop>(pathv);
                             }
                         });
     glfwSetKeyCallback(state->window.win,
@@ -120,7 +120,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                            if (state->callbacks.key_cb) {
                                state->callbacks.key_cb(state, key, (bool) action);
                            } else {
-                               state->dispatcher.trigger<event::keyboard>(key, action);
+                               state->dispatcher.trigger<event::internal::keyboard>(key, action);
                            }
                        });
     glfwSetCharCallback(state->window.win,
@@ -158,7 +158,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwSetWindowSizeCallback(state->window.win,
                               [](GLFWwindow *glfw, int width, int height) {
                                   auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                  state->dispatcher.trigger<event::resize>(width, height);
+                                  state->dispatcher.trigger<event::internal::resize>(width, height);
                                   state->window.width = width;
                                   state->window.height = height;
                                   glfwGetFramebufferSize(glfw, &state->window.framebuffer_viewport[2],
@@ -202,7 +202,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
     if (state.callbacks.startup_cb) {
         state.callbacks.startup_cb(&state);
     } else {
-        state.dispatcher.trigger<event::startup>();
+        state.dispatcher.trigger<event::internal::startup>();
     }
 
     // loop
@@ -242,7 +242,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         if (state.callbacks.update_cb) {
             state.callbacks.update_cb(&state);
         } else {
-            state.dispatcher.trigger<event::update>();
+            state.dispatcher.trigger<event::internal::update>();
         }
 
         // draw
@@ -260,7 +260,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
     if (state.callbacks.shutdown_cb) {
         state.callbacks.shutdown_cb(&state);
     } else {
-        state.dispatcher.trigger<event::shutdown>();
+        state.dispatcher.trigger<event::internal::shutdown>();
     }
 }
 

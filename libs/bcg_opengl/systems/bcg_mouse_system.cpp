@@ -7,8 +7,11 @@
 
 namespace bcg{
 
-mouse_system::mouse_system(viewer_state *state) : system("mouse_system", ){
-
+mouse_system::mouse_system(viewer_state *state) : system("mouse_system", state){
+    state->dispatcher.sink<event::mouse::button>().connect<&mouse_system::on_button>(this);
+    state->dispatcher.sink<event::mouse::motion>().connect<&mouse_system::on_motion>(this);
+    state->dispatcher.sink<event::mouse::scroll>().connect<&mouse_system::on_scroll>(this);
+    state->dispatcher.sink<event::internal::update>().connect<&mouse_system::on_update>(this);
 }
 
 void mouse_system::on_button(const event::mouse::button &event){
@@ -41,7 +44,7 @@ void mouse_system::on_scroll(const event::mouse::scroll &event){
     state->mouse.is_scrolling = true;
 }
 
-void mouse_system::on_update(const event::update &event){
+void mouse_system::on_update(const event::internal::update &event){
     state->mouse.is_dragging =
             state->mouse.is_moving && (state->mouse.left || state->mouse.middle || state->mouse.right);
 

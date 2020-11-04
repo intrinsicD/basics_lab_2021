@@ -12,11 +12,11 @@ namespace bcg {
 
 points_renderer::points_renderer(viewer_state *state) : renderer("points_renderer", state) {
     state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::startup>().connect<&points_renderer::on_startup>(this);
+    state->dispatcher.sink<event::internal::startup>().connect<&points_renderer::on_startup>(this);
 
 }
 
-void points_renderer::on_startup(const event::startup &event) {
+void points_renderer::on_startup(const event::internal::startup &event) {
     programs["point_renderer_program"] = state->shaders.load("point_renderer_program",
                                                              state->config.renderers_path +
                                                              "points_renderer/point_vertex_shader.glsl",
@@ -39,13 +39,13 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
     }
 }
 
-void points_renderer::on_begin_frame(const event::begin_frame &event) {
+void points_renderer::on_begin_frame(const event::internal::begin_frame &event) {
     state->scene.each([&](auto id) {
         state->dispatcher.trigger<event::points_renderer::enqueue>(id);
     });
 }
 
-void points_renderer::on_render(const event::render &event) {
+void points_renderer::on_render(const event::internal::render &event) {
     //if(entities_to_draw.empty()) return;
     gl_state.set_depth_test(true);
     gl_state.set_depth_mask(true);
@@ -85,7 +85,7 @@ void points_renderer::on_render(const event::render &event) {
     entities_to_draw.clear();
 }
 
-void points_renderer::on_end_frame(const event::end_frame &event) {
+void points_renderer::on_end_frame(const event::internal::end_frame &event) {
 
 }
 

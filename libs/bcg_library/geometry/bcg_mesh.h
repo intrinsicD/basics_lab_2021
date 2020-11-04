@@ -188,9 +188,9 @@ struct halfedge_mesh : public halfedge_graph {
 
     void flip(edge_handle e);
 
-    std::vector<int> get_triangles();
+    property<VectorI<3>, 3> get_triangles();
 
-    std::vector<int> get_triangles_adjacencies();
+    property<VectorI<6>, 6> get_triangles_adjacencies();
 
     face_handle find_closest_face(const position_t &point) const;
 
