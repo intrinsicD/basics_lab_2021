@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <functional>
 #include <algorithm>
+#include <string>
 #include "bcg_file.h"
 
 namespace bcg {

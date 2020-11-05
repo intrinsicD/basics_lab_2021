@@ -95,11 +95,11 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwSwapInterval(1);  // Enable vsync
     glfwSetWindowUserPointer(state->window.win, state);
 
-/*    glfwSetWindowRefreshCallback(state->window.win,
+    glfwSetWindowRefreshCallback(state->window.win,
                                  [](GLFWwindow *glfw) {
                                      auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                                      draw_window(state);
-                                 });*/
+                                 });
     glfwSetDropCallback(state->window.win,
                         [](GLFWwindow *glfw, int num, const char **paths) {
                             auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
@@ -114,7 +114,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                             }
                         });
     glfwSetKeyCallback(state->window.win,
-                       [](GLFWwindow *glfw, int key, int scancode, int action, int mods) {
+                       [](GLFWwindow *glfw, int key, int , int action, int ) {
                            auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                            if (state->callbacks.key_cb) {
                                state->callbacks.key_cb(state, key, (bool) action);
@@ -130,7 +130,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                             }
                         });
     glfwSetMouseButtonCallback(state->window.win,
-                               [](GLFWwindow *glfw, int button, int action, int mods) {
+                               [](GLFWwindow *glfw, int button, int action, int ) {
                                    auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                                    if (state->callbacks.click_cb) {
                                        state->callbacks.click_cb(state, button == GLFW_MOUSE_BUTTON_LEFT,
@@ -146,7 +146,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                  state->dispatcher.trigger<event::mouse::motion>(x * hdpi, y * hdpi);
                              });
     glfwSetScrollCallback(state->window.win,
-                          [](GLFWwindow *glfw, double xoffset, double yoffset) {
+                          [](GLFWwindow *glfw, double , double yoffset) {
                               auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                               if (state->callbacks.scroll_cb) {
                                   state->callbacks.scroll_cb(state, (float) yoffset);
@@ -164,10 +164,12 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                   state->dispatcher.trigger<event::internal::resize>(width, height);
                                   state->window.width = width;
                                   state->window.height = height;
-                                  glfwGetFramebufferSize(glfw, &state->window.framebuffer_viewport[2],
-                                                         &state->window.framebuffer_viewport[3]);
+                                  int vw, vh;
+                                  glfwGetFramebufferSize(glfw, &vw,&vh);
                                   state->window.framebuffer_viewport[0] = 0;
                                   state->window.framebuffer_viewport[1] = 0;
+                                  state->window.framebuffer_viewport[2] = vw;
+                                  state->window.framebuffer_viewport[3] = vh;
                                   glViewport(state->window.framebuffer_viewport[0],
                                              state->window.framebuffer_viewport[1],
                                              state->window.framebuffer_viewport[2],
@@ -185,8 +187,10 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     }
 
     glfwGetWindowSize(state->window.win, &state->window.width, &state->window.height);
-    glfwGetFramebufferSize(state->window.win, &state->window.framebuffer_viewport[2],
-                           &state->window.framebuffer_viewport[3]);
+    int vw, vh;
+    glfwGetFramebufferSize(state->window.win, &vw, &vh);
+    state->window.framebuffer_viewport[2] = vw;
+    state->window.framebuffer_viewport[3] = vh;
     state->window.high_dpi_scaling =
             (bcg_scalar_t) state->window.framebuffer_viewport[2] / (bcg_scalar_t) state->window.width;
     if (state->window.high_dpi_scaling != 1) {
@@ -211,6 +215,85 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         state.dispatcher.trigger<event::internal::startup>();
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    /*glsl_program program;
+    program.build_sources("#version 330 core\n"
+                          "layout (location = 0) in vec3 aPos;\n"
+                          "void main()\n"
+                          "{\n"
+                          "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                          "}\0",
+                          "#version 330 core\n"
+                          "out vec4 FragColor;\n"
+                          "void main()\n"
+                          "{\n"
+                          "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                          "}\n\0");
+
+    bcg_scalar_t vertices[] = {
+            0.5f,  0.5f, 0.0f,  // top right
+            0.5f, -0.5f, 0.0f,  // bottom right
+            -0.5f, -0.5f, 0.0f,  // bottom left
+            -0.5f,  0.5f, 0.0f   // top left
+    };
+    bcg_index_t indices[] = {  // note that we start from 0!
+            0, 1, 3,  // first Triangle
+            1, 2, 3   // second Triangle
+    };
+    ogl_vertex_array vao;
+    ogl_vertex_buffer vbo;
+    ogl_element_buffer ebo;
+    vao.create();
+    vbo.create();
+    ebo.create();
+
+    vao.bind();
+    vbo.bind();
+    vbo.upload(vertices, 4, 3, 0, false);
+    vao.capture_vertex_buffer(0, vbo);
+    vbo.release();
+    vao.release();
+
+    vao.bind();
+    ebo.bind();
+    ebo.upload(indices, 2, 3, 0, false);
+    vao.release();
+    ebo.release();*/
+/*
+    unsigned int VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, 4 * 3 * sizeof(bcg_scalar_t), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(bcg_index_t), indices, GL_STATIC_DRAW);
+
+    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+
+
+    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
+
+    //------------------------------------------------------------------------------------------------------------------
+
     // loop
     auto win = state.window.win;
     while (!glfwWindowShouldClose(win)) {
@@ -220,9 +303,10 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
                           glfwGetKey(win, GLFW_KEY_Q) == GLFW_PRESS);
 
         glfwGetWindowSize(win, &state.window.width, &state.window.height);
-        glfwGetFramebufferSize(win,
-                               &state.window.framebuffer_viewport[2],
-                               &state.window.framebuffer_viewport[3]);
+        int vw, vh;
+        glfwGetFramebufferSize(win, &vw, &vh);
+        state.window.framebuffer_viewport[2] = vw;
+        state.window.framebuffer_viewport[3] = vh;
         state.window.framebuffer_viewport[0] = 0;
         state.window.framebuffer_viewport[1] = 0;
 
@@ -257,6 +341,19 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         state.mouse.is_moving = false;
         state.mouse.is_scrolling = false;
         state.mouse.scroll_value = 0;
+
+
+        //------------------------------------------------------------------------------------------------------------------
+/*        program.bind();
+        vao.bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
+/*        program.bind();
+        vao.bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
+        //------------------------------------------------------------------------------------------------------------------
 
         // event hadling
         glfwSwapBuffers(win);

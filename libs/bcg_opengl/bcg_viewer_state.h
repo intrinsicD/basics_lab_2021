@@ -15,7 +15,7 @@
 #include "bcg_opengl/systems/bcg_systems.h"
 #include "bcg_library/utils/bcg_dynamic_bitset.h"
 #include "bcg_library/utils/bcg_file_watcher.h"
-#include "bcg_library/geometry/bcg_mesh.h"
+#include "bcg_library/geometry/mesh/bcg_mesh.h"
 #include "entt/entt.hpp"
 
 struct GLFWwindow;
@@ -160,6 +160,7 @@ struct viewer_picker {
 
 struct viewer_config {
     std::string renderers_path = "../../libs/bcg_opengl/renderers/";
+    size_t parallel_grain_size = 1024;
 };
 
 struct viewer_state {

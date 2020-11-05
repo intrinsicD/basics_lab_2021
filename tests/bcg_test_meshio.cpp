@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "bcg_library/geometry/bcg_meshio.h"
-#include "bcg_library/geometry/bcg_mesh_factory.h"
+#include "geometry/mesh/bcg_meshio.h"
+#include "geometry/mesh/bcg_mesh_factory.h"
 
 #ifdef _WIN32
 static std::string test_data_path = "..\\..\\tests\\data\\";

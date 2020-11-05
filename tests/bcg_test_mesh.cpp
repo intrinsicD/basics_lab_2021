@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include "bcg_library/geometry/bcg_mesh.h"
-#include "bcg_library/geometry/bcg_meshio.h"
-#include "bcg_library/geometry/bcg_mesh_factory.h"
+#include "geometry/mesh/bcg_mesh.h"
+#include "geometry/mesh/bcg_meshio.h"
+#include "geometry/mesh/bcg_mesh_factory.h"
 
 using namespace bcg;
 

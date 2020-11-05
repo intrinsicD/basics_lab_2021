@@ -24,7 +24,10 @@ halfedge_mesh mesh_factory::make_triangle(const triangle3 &triangle) {
 }
 
 halfedge_mesh mesh_factory::make_quad() {
-    return make_quad(quad3(zero3s, {0, 1, 0}, {1, 0, 0}, {1, 1, 0}));
+    return make_quad(quad3(VectorS<3>(0.5, 0.5, 0),
+                           VectorS<3>(0.5, -0.5, 0),
+                           VectorS<3>(-0.5, -0.5, 0),
+                                   VectorS<3>(-0.5, 0.5, 0)));
 }
 
 halfedge_mesh mesh_factory::make_quad(const quad3 &quad) {
@@ -34,9 +37,8 @@ halfedge_mesh mesh_factory::make_quad(const quad3 &quad) {
         mesh.add_vertex(point);
     }
 
-    auto fnormals = mesh.faces.add<VectorS<3>, 3>("normal");
-    auto f = mesh.add_quad(0, 1, 3, 2);
-    fnormals[f] = normal(quad);
+    auto f = mesh.add_quad(0, 1, 2, 3);
+    mesh.triangulate(f);
     return mesh;
 }
 

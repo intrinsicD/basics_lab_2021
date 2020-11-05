@@ -118,7 +118,10 @@ void gui_info(viewer_state *state, const ogl_buffer_object &buffer){
         draw_label(&state->window, "dims", std::to_string(buffer.dims));
         draw_label(&state->window, "dynamic", (buffer.dynamic ? "true" : "false"));
         draw_label(&state->window, "size_bytes_cpu", std::to_string(buffer.size_bytes));
+/*        glBindVertexArray(0);
+        buffer.bind();
         draw_label(&state->window, "size_bytes_gpu", std::to_string(buffer.get_buffer_size_gpu()));
+        buffer.release();*/
     }
 }
 
@@ -330,6 +333,11 @@ void gui_info(viewer_state *state) {
         if (ImGui::InputFloat("fovy degrees", &fovy_degrees)) {
             state->cam.fovy_degrees = fovy_degrees;
         }
+        float rot_speed = state->cam.rot_speed;
+        if(ImGui::InputFloat("rot_speed", &rot_speed)){
+            state->cam.rot_speed = rot_speed;
+        }
+        draw_checkbox(&state->window, "orthoraphic", state->cam.orthographic);
         ImGui::Separator();
         float left = state->cam.left;
         if (ImGui::InputFloat("left", &left)) {

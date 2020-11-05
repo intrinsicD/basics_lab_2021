@@ -20,7 +20,7 @@ points_renderer::points_renderer(viewer_state *state) : renderer("points_rendere
 
 }
 
-void points_renderer::on_startup(const event::internal::startup &event) {
+void points_renderer::on_startup(const event::internal::startup &) {
     programs["point_renderer_program"] = state->shaders.load("point_renderer_program",
                                                              state->config.renderers_path +
                                                              "points_renderer/point_vertex_shader.glsl",
@@ -43,14 +43,14 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
     }
 }
 
-void points_renderer::on_begin_frame(const event::internal::begin_frame &event) {
+void points_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
         state->dispatcher.trigger<event::points_renderer::enqueue>(id);
     });
 }
 
-void points_renderer::on_render(const event::internal::render &event) {
-    //if(entities_to_draw.empty()) return;
+void points_renderer::on_render(const event::internal::render &) {
+    if(entities_to_draw.empty()) return;
     gl_state.set_depth_test(true);
     gl_state.set_depth_mask(true);
     gl_state.set_depth_func(GL_LESS);
@@ -69,8 +69,6 @@ void points_renderer::on_render(const event::internal::render &event) {
 
         auto &model = state->scene.get<Transform>(id);
         auto &material = state->scene.get<material_points>(id);
-        auto &vao = state->scene.get<ogl_vertex_array>(id);
-        vao.bind();
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
@@ -81,8 +79,9 @@ void points_renderer::on_render(const event::internal::render &event) {
         program.set_uniform_i("use_uniform_color", material.use_uniform_color);
         Vector<float, 4> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_4f("uniform_color", 1, uniform_color.data());
+        auto &vao = state->scene.get<ogl_vertex_array>(id);
+        vao.bind();
         auto &pos = vao.vertex_buffers["position"];
-
         glDrawArrays(GL_POINTS, 0, pos.num_elements);
         assert_ogl_error();
     }
@@ -90,7 +89,7 @@ void points_renderer::on_render(const event::internal::render &event) {
     entities_to_draw.clear();
 }
 
-void points_renderer::on_end_frame(const event::internal::end_frame &event) {
+void points_renderer::on_end_frame(const event::internal::end_frame &) {
 
 }
 

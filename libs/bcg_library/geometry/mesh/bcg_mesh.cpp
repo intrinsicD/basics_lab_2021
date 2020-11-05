@@ -1382,17 +1382,17 @@ property<VectorI<6>, 6> halfedge_mesh::get_triangles_adjacencies() {
         triangulate();
     }
     auto triangle_adjacencies = faces.get_or_add<VectorI<6>, 6>("triangle_adjacencies");
-    std::vector<int> adjacency;
+    std::vector<bcg_index_t> adjacency;
     for (const auto f : faces) {
         for (const auto h : get_halfedges(f)) {
-            adjacency.push_back((int)halfedge_graph::get_from_vertex(h).idx);
+            adjacency.push_back((unsigned int)halfedge_graph::get_from_vertex(h).idx);
             if (!is_boundary(h)) {
                 auto o = halfedge_graph::get_opposite(h);
                 auto op = halfedge_graph::get_prev(o);
-                adjacency.push_back((int)halfedge_graph::get_from_vertex(op).idx);
+                adjacency.push_back((unsigned int)halfedge_graph::get_from_vertex(op).idx);
             } else {
                 auto p = halfedge_graph::get_prev(h);
-                adjacency.push_back((int)halfedge_graph::get_from_vertex(p).idx);
+                adjacency.push_back((unsigned int)halfedge_graph::get_from_vertex(p).idx);
             }
         }
         triangle_adjacencies[f] = Map(adjacency);

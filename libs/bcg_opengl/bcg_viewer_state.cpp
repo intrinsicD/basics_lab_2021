@@ -90,10 +90,10 @@ const glsl_program &viewer_shaders::operator[](const std::string &name) const {
 }
 
 viewer_shaders::viewer_shaders(viewer_state *state) : state(state) {
-    state->dispatcher.sink<event::internal::update>().connect<&viewer_shaders::on_update>(this);
+    this->state->dispatcher.sink<event::internal::update>().connect<&viewer_shaders::on_update>(this);
 }
 
-void viewer_shaders::on_update(const event::internal::update &event){
+void viewer_shaders::on_update(const event::internal::update &){
     watcher.trigger();
 }
 

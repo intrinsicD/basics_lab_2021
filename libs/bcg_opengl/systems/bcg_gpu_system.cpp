@@ -5,12 +5,16 @@
 #include "bcg_gpu_system.h"
 #include "bcg_viewer_state.h"
 #include "bcg_matrix_map_eigen.h"
-#include "bcg_library/geometry/bcg_mesh.h"
+#include "bcg_library/geometry/mesh/bcg_mesh.h"
 
 namespace bcg {
 
 gpu_system::gpu_system(viewer_state *state) : system("gpu_system", state) {
     state->dispatcher.sink<event::gpu::update_vertex_attributes>().connect<&gpu_system::on_update_vertex_attributes>(
+            this);
+    state->dispatcher.sink<event::gpu::update_edge_attributes>().connect<&gpu_system::on_update_edge_attributes>(
+            this);
+    state->dispatcher.sink<event::gpu::update_face_attributes>().connect<&gpu_system::on_update_face_attributes>(
             this);
     state->dispatcher.sink<event::internal::shutdown>().connect<&gpu_system::on_shutdown>(this);
 }
@@ -25,7 +29,7 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
             vao.create();
         }
         vao.bind();
-        const std::vector<std::string> &attribute_names = event.attributes_names;
+        const auto &attribute_names = event.attributes_names;
         for (size_t index = 0; index < attribute_names.size(); ++index) {
             auto attribute_name = attribute_names[index];
             if (vertices->has(attribute_name) && vertices->get_base_ptr(attribute_name)->is_dirty()) {
@@ -101,30 +105,36 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
         if (!vao) {
             vao.create();
         }
-
+        vao.bind();
         const auto &attribute_names = event.attributes_names;
         for (size_t index = 0; index < attribute_names.size(); ++index) {
             auto attribute_name = attribute_names[index];
-            if (attribute_name == "triangles") {
-                if (!vao.element_buffer) {
-                    vao.element_buffer.name = attribute_name;
-                    vao.set_element_buffer(vao.element_buffer);
-                }
-                if (vao.element_buffer.get_buffer_size_gpu() != faces->size()) {
+
+            if (faces->get<halfedge_mesh::face_connectivity, 1>("connectivity").is_dirty()) {
+                if (attribute_name == "triangles") {
+                    if (!vao.element_buffer) {
+                        vao.element_buffer.name = attribute_name;
+                        vao.element_buffer.create();
+                    }
+
                     auto triangles = mesh.get_triangles();
                     std::cout << triangles << "\n";
+                    vao.element_buffer.bind();
                     vao.element_buffer.upload(triangles.data(), faces->size(), 3, 0, true);
                 }
-            } else if (attribute_name == "triangles_adjacency") {
-                if (!vao.adjacency_buffer) {
-                    vao.adjacency_buffer.name = attribute_name;
-                    vao.set_element_buffer(vao.adjacency_buffer);
-                }
-                if (vao.adjacency_buffer.get_buffer_size_gpu() != faces->size()) {
-                    auto adjacencies = mesh.get_triangles_adjacencies();
-                    vao.adjacency_buffer.upload(adjacencies.data(), faces->size(), 6, 0, true);
+                if (attribute_name == "triangles_adjacency") {
+                    if (!vao.adjacency_buffer) {
+                        vao.adjacency_buffer.name = attribute_name;
+                        vao.adjacency_buffer.create();
+                    }
+
+                    auto triangle_adjacencies = mesh.get_triangles_adjacencies();
+                    std::cout << triangle_adjacencies << "\n";
+                    vao.adjacency_buffer.bind();
+                    vao.adjacency_buffer.upload(triangle_adjacencies.data(), faces->size(), 3, 0, true);
                 }
             } else if (faces->has(attribute_name) && faces->get_base_ptr(attribute_name)->is_dirty()) {
+                if (attribute_name == "triangles_adjacency" || attribute_name == "triangles") continue;
                 auto &buffer = vao.vertex_buffers[attribute_name];
                 bool first = false;
                 if (!buffer) {
@@ -134,14 +144,18 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
                 }
 
                 auto *base_ptr = faces->get_base_ptr(attribute_name);
+                buffer.bind();
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
 
                 if (first) {
                     vao.capture_vertex_buffer(index, buffer);
                 }
+                buffer.release();
                 faces->get_base_ptr(attribute_name)->set_clean();
             }
         }
+        faces->get<halfedge_mesh::face_connectivity, 1>("connectivity").set_clean();
+        vao.release();
     }
 }
 

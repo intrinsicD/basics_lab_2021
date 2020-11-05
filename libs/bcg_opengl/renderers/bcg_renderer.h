@@ -25,11 +25,11 @@ struct renderer : public system {
     ~renderer() override = default;
 
 protected:
-    virtual void on_begin_frame(const event::internal::begin_frame &event){}
+    virtual void on_begin_frame(const event::internal::begin_frame &){}
 
-    virtual void on_render(const event::internal::render &event){}
+    virtual void on_render(const event::internal::render &){}
 
-    virtual void on_end_frame(const event::internal::end_frame &event){}
+    virtual void on_end_frame(const event::internal::end_frame &){}
 
     std::unordered_map<std::string, glsl_program> programs;
     std::vector<entt::entity> entities_to_draw;

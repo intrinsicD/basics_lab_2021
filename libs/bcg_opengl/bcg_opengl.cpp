@@ -1378,11 +1378,11 @@ void ogl_vertex_buffer::download(bcg_scalar_t *data, size_t size_bytes, size_t o
     release();
 }
 
-ogl_element_buffer::ogl_element_buffer() : ogl_buffer_object(GL_ARRAY_BUFFER, "ebo") {
+ogl_element_buffer::ogl_element_buffer() : ogl_element_buffer(BCG_GL_INVALID_ID, "ebo") {
 
 }
 
-ogl_element_buffer::ogl_element_buffer(std::string name) : ogl_buffer_object(GL_ELEMENT_ARRAY_BUFFER, name) {
+ogl_element_buffer::ogl_element_buffer(std::string name) : ogl_element_buffer(BCG_GL_INVALID_ID, name) {
 
 }
 
@@ -1407,21 +1407,18 @@ void ogl_element_buffer::upload(const std::vector<VectorI<3>> &data, size_t offs
 void ogl_element_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
     if (size > capacity) {
         // reallocate buffer if needed
-        bind();
         capacity = size * dims;
         num_elements = capacity;
-        glBufferData(target, capacity * sizeof(bcg_index_t), nullptr, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+        size_bytes = capacity * sizeof(bcg_index_t);
+        glBufferData(target, size_bytes, data, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
         assert_ogl_error();
         this->dims = dims;
         this->dynamic = dynamic;
     } else {
         // we have enough space
-        bind();
+        glBufferSubData(target, offset * dims * sizeof(bcg_index_t), size * dims * sizeof(bcg_index_t), data);
+        assert_ogl_error();
     }
-
-    glBufferSubData(target, offset * dims * sizeof(bcg_index_t), size * dims * sizeof(bcg_index_t), data);
-    assert_ogl_error();
-    release();
 }
 
 void ogl_element_buffer::download(std::vector<bcg_index_t> &data, size_t offset) {
@@ -1499,16 +1496,6 @@ void ogl_vertex_array::disable_attribute(unsigned int index) const {
 
 void ogl_vertex_array::capture_vertex_buffer(unsigned int index, const ogl_vertex_buffer &buffer) {
     enable_attribute(index, buffer);
-}
-
-void ogl_vertex_array::set_element_buffer(const ogl_element_buffer &buffer) {
-    element_buffer = buffer;
-    if (!element_buffer) {
-        element_buffer.create();
-    }
-    bind();
-    element_buffer.bind();
-    release();
 }
 
 ogl_renderbuffer::ogl_renderbuffer() : ogl_renderbuffer(BCG_GL_INVALID_ID, "rbo") {

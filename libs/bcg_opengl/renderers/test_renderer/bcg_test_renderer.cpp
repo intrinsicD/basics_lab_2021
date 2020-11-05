@@ -1,4 +1,4 @@
-//
+//event
 // Created by alex on 05.11.20.
 //
 
@@ -18,7 +18,7 @@ test_renderer::test_renderer(viewer_state *state) : renderer("test_renderer", st
     state->dispatcher.sink<event::internal::startup>().connect<&test_renderer::on_startup>(this);
 }
 
-void test_renderer::on_startup(const event::internal::startup &event) {
+void test_renderer::on_startup(const event::internal::startup &) {
     programs["test_renderer_program"] = state->shaders.load("test_renderer_program",
                                                              state->config.renderers_path +
                                                              "test_renderer/test_vertex_shader.glsl",
@@ -38,14 +38,14 @@ void test_renderer::on_enqueue(const event::test_renderer::enqueue &event) {
     }
 }
 
-void test_renderer::on_begin_frame(const event::internal::begin_frame &event) {
+void test_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
         state->dispatcher.trigger<event::test_renderer::enqueue>(id);
     });
 }
 
-void test_renderer::on_render(const event::internal::render &event) {
-    //if(entities_to_draw.empty()) return;
+void test_renderer::on_render(const event::internal::render &) {
+    if(entities_to_draw.empty()) return;
     gl_state.set_depth_test(true);
     gl_state.set_depth_mask(true);
     gl_state.set_depth_func(GL_LESS);
@@ -74,7 +74,7 @@ void test_renderer::on_render(const event::internal::render &event) {
     entities_to_draw.clear();
 }
 
-void test_renderer::on_end_frame(const event::internal::end_frame &event) {
+void test_renderer::on_end_frame(const event::internal::end_frame &) {
 
 }
 

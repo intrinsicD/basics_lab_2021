@@ -611,6 +611,15 @@ struct property_container {
         return iter->second.get();
     }
 
+    bool any_dirty(const std::vector<std::string> &names) const {
+        for(const auto &name : names){
+            if(has(name) && get_base_ptr(name)->is_dirty()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     inline void remove(const std::string &name) {
         auto iter = container.find(name);
         if (iter != container.end()) {

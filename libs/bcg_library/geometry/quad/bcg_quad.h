@@ -14,10 +14,14 @@ struct quad {
     std::array<VectorS<N>, 4> points;
 
     quad() : points{zeros<N>, zeros<N>, zeros<N>, zeros<N>}{
-        points[1][0] = 1;
-        points[2][0] = 1;
-        points[2][1] = 1;
-        points[3][1] = 1;
+        points[0][0] = 0.5;
+        points[0][1] = 0.5;
+        points[1][0] = 0.5;
+        points[1][1] = -0.5;
+        points[2][0] = -0.5;
+        points[2][1] = -0.5;
+        points[3][0] = -0.5;
+        points[3][1] = 0.5;
     }
 
     quad(const VectorS<N> &p0, const VectorS<N> &p1, const VectorS<N> &p2, const VectorS<N> &p3) : points{p0, p1, p2, p3} {

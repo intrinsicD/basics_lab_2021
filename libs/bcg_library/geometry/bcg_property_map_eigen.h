@@ -57,7 +57,7 @@ inline Eigen::Map<const Eigen::Matrix<T, -1, -1>, 0, Eigen::Stride<-1, -1>> MapC
                                                                                 Eigen::Stride<-1, -1>(1, p->dims()));
 }
 
-template<typename T, bcg_index_t N>
+template<typename T, int N>
 inline std::enable_if_t<is_eigen_type<T>, Eigen::Map<Eigen::Matrix<typename T::Scalar, -1, N>, 0, Eigen::Stride<-1, N>>>
 Map(property<T, N> p) {
     return Eigen::Map<Eigen::Matrix<typename T::Scalar, -1, N>, 0, Eigen::Stride<-1, N>>(&p[0][0], p.size(),
@@ -66,7 +66,7 @@ Map(property<T, N> p) {
                                                                                                               p[0].size()));
 }
 
-template<typename T, bcg_index_t N>
+template<typename T, int N>
 inline std::enable_if_t<is_eigen_type<T>, Eigen::Map<const Eigen::Matrix<typename T::Scalar, -1, N>, 0, Eigen::Stride<-1, N>>>
 MapConst(const property<T, N> p) {
     return Eigen::Map<const Eigen::Matrix<typename T::Scalar, -1, N>, 0, Eigen::Stride<-1, N>>(&p[0][0], p.size(),
@@ -76,7 +76,7 @@ MapConst(const property<T, N> p) {
 }
 
 
-template<typename T, bcg_index_t N>
+template<typename T, int N>
 inline std::enable_if_t<is_glm_type<T>, Eigen::Map<Eigen::Matrix<typename T::value_type, -1, N>, 0, Eigen::Stride<-1, N>>>
 Map(property<T, N> p) {
     return Eigen::Map<Eigen::Matrix<typename T::value_type, -1, N>, 0, Eigen::Stride<-1, N>>(glm::value_ptr(p[0]),
@@ -85,7 +85,7 @@ Map(property<T, N> p) {
                                                                                                                   N));
 }
 
-template<typename T, bcg_index_t N>
+template<typename T, int N>
 inline std::enable_if_t<is_glm_type<T>, Eigen::Map<const Eigen::Matrix<typename T::value_type, -1, N>, 0, Eigen::Stride<-1, N>>>
 MapConst(const property<T, N> p) {
     return Eigen::Map<const Eigen::Matrix<typename T::value_type, -1, N>, 0, Eigen::Stride<-1, N>>(glm::value_ptr(p[0]),
@@ -96,13 +96,13 @@ MapConst(const property<T, N> p) {
                                                                                                            N));
 }
 
-template<typename T, bcg_index_t N>
+template<typename T, int N>
 inline std::enable_if_t<is_fundamental_type<T>, Eigen::Map<Eigen::Matrix<T, -1, N>, 0, Eigen::Stride<-1, N>>>
 Map(property<T, N> p) {
     return Eigen::Map<Eigen::Matrix<T, -1, N>, 0, Eigen::Stride<-1, N>>(&p[0], p.size(), N, Eigen::Stride<-1, N>(1, N));
 }
 
-template<typename T, bcg_index_t N>
+template<typename T, int N>
 inline std::enable_if_t<is_fundamental_type<T>, Eigen::Map<const Eigen::Matrix<T, -1, N>, 0, Eigen::Stride<-1, N>>>
 MapConst(property<T, N> p) {
     return Eigen::Map<const Eigen::Matrix<T, -1, N>, 0, Eigen::Stride<-1, N>>(&p[0], p.size(), N,

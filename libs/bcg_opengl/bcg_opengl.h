@@ -515,8 +515,6 @@ struct ogl_vertex_array : public ogl_handle {
     void disable_attribute(unsigned int index) const;
 
     void capture_vertex_buffer(unsigned int index, const ogl_vertex_buffer &buffer);
-
-    void set_element_buffer(const ogl_element_buffer &element_buffer);
 };
 
 struct ogl_renderbuffer : public ogl_handle {

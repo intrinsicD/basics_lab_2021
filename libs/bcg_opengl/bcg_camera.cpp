@@ -70,9 +70,10 @@ MatrixS<4, 4> camera::view_matrix() const {
     return model_matrix.inverse().matrix();
 }
 
-void camera::update_projection(bool orthographic) {
+void camera::update_projection() {
+    projection_matrix.setIdentity();
+
     if (orthographic) {
-        projection_matrix.setIdentity();
         projection_matrix(0, 0) = 2.0 / (right - left);
         projection_matrix(1, 1) = 2.0 / (top - bottom);
         projection_matrix(2, 2) = -2.0 / (far - near);
@@ -82,15 +83,6 @@ void camera::update_projection(bool orthographic) {
         projection_matrix(3, 3) = 0.0;
     } else {
         assert(std::abs(aspect - scalar_eps) > 0);
-
-/*        const auto tanHalfFovy = std::tan(fovy_radians() / 2.0);
-        projection_matrix.setIdentity();
-        projection_matrix(0, 0) = 1.0 / (aspect * tanHalfFovy);
-        projection_matrix(1, 1) = 1.0 / (tanHalfFovy);
-        projection_matrix(2, 2) = -(far + near) / (far - near);
-        projection_matrix(2, 3) = -1.0;
-        projection_matrix(3, 2) = -(2.0 * far * near) / (far - near);
-        projection_matrix(3, 0) = 0.0;*/
 
         top = near * std::tan(fovy_radians());
         bottom = -top;

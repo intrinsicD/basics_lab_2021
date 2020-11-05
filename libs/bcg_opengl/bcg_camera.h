@@ -10,6 +10,7 @@
 namespace bcg {
 
 struct camera {
+    //TODO Fix camera like in learnopengl
     MatrixS<4, 4> projection_matrix;
     Transform model_matrix;
     VectorS<3> target_point;
@@ -40,7 +41,7 @@ struct camera {
 
     MatrixS<4, 4> view_matrix() const;
 
-    void update_projection(bool orthographic = false);
+    void update_projection();
 
 };
 
