@@ -5,6 +5,7 @@
 
 int main() {
     using namespace bcg;
+
     viewer viewer;
     viewer.state.gui.menu.show = [](viewer_state *state, gui_menu *self) {
         if (ImGui::BeginMenu("Viewer")) {

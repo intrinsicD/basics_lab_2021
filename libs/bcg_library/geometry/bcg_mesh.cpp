@@ -14,8 +14,7 @@ halfedge_mesh::halfedge_mesh() : halfedge_graph(),
                                  fconn(faces.add<face_connectivity, 1>("connectivity")),
                                  faces_deleted(faces.add<bool, 1>("deleted", false)),
                                  size_faces_deleted(0) {
-    halfedges.remove("connectivity"); //unlink graph h_connectivity
-    hconn = halfedges.add<halfedge_connectivity, 1>("connectivity");
+
 }
 
 void halfedge_mesh::assign(const halfedge_mesh &other) {

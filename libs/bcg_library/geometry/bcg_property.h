@@ -139,7 +139,8 @@ struct base_property {
 };
 
 inline std::ostream &operator<<(std::ostream &stream, const base_property &property) {
-    stream << property.name() << " dims:" << property.dims() << " dirty:" << (property.is_dirty()?"true":"false") << "\n";
+    stream << property.name() << " dims:" << property.dims() << " dirty:" << (property.is_dirty() ? "true" : "false")
+           << "\n";
     return stream;
 }
 
@@ -427,7 +428,7 @@ private:
 
 template<typename T, int N>
 typename std::enable_if<N == 1, std::ostream>::type &
-operator<<(std::ostream &stream, const property<T, N> &property) {
+operator<<(std::ostream &stream, const property <T, N> &property) {
     if (property) {
         stream << property.name() << "\n";
         if (property.size() < 5) {
@@ -486,7 +487,12 @@ operator<<(std::ostream &stream, const property <T, N> &property) {
 }
 
 struct property_container {
+    std::string name;
     std::unordered_map<std::string, std::shared_ptr<base_property>> container;
+
+    property_container() : name("property_container") {}
+
+    explicit property_container(std::string name) : name(std::move(name)) {}
 
     struct Iterator {
         explicit Iterator(base_handle handle = base_handle(),
@@ -597,7 +603,7 @@ struct property_container {
         return d ? d : add<T, N>(name, t);
     }
 
-    base_property *get_base_ptr(const std::string &name) const{
+    base_property *get_base_ptr(const std::string &name) const {
         auto iter = container.find(name);
         if (iter == container.end()) {
             return nullptr;
@@ -786,7 +792,10 @@ private:
 };
 
 struct vertex_container : public property_container {
-    using property_container::property_container;
+    /*using property_container::property_container;
+
+    */
+    vertex_container() : property_container("vertices") {}
 
     struct vertex_iterator : public property_iterator<vertex_iterator, vertex_handle, vertex_container> {
         explicit vertex_iterator(vertex_handle v = vertex_handle(),
@@ -802,7 +811,10 @@ struct vertex_container : public property_container {
 };
 
 struct halfedge_container : public property_container {
-    using property_container::property_container;
+    /*using property_container::property_container;
+
+    */
+    halfedge_container() : property_container("halfedges") {}
 
     struct halfedge_iterator : public property_iterator<halfedge_iterator, halfedge_handle, halfedge_container> {
         explicit halfedge_iterator(halfedge_handle h = halfedge_handle(),
@@ -817,7 +829,10 @@ struct halfedge_container : public property_container {
 };
 
 struct edge_container : public property_container {
-    using property_container::property_container;
+    /*using property_container::property_container;
+
+    */
+    edge_container() : property_container("edges") {}
 
     struct edge_iterator : public property_iterator<edge_iterator, edge_handle, edge_container> {
         explicit edge_iterator(edge_handle e = edge_handle(),
@@ -832,7 +847,10 @@ struct edge_container : public property_container {
 };
 
 struct face_container : public property_container {
-    using property_container::property_container;
+    /*using property_container::property_container;
+
+    */
+    face_container() : property_container("faces") {}
 
     struct face_iterator : public property_iterator<face_iterator, face_handle, face_container> {
         explicit face_iterator(face_handle f = face_handle(),

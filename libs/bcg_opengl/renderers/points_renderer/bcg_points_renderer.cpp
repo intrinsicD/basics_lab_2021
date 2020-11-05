@@ -2,17 +2,21 @@
 // Created by alex on 29.10.20.
 //
 
+#include <vector>
+#include <string>
+
 #include "bcg_points_renderer.h"
 #include "bcg_viewer_state.h"
 #include "bcg_opengl.h"
 #include "bcg_material_points.h"
-#include "bcg_points_renderer_events.h"
+#include "bcg_events_points_renderer.h"
 
 namespace bcg {
 
 points_renderer::points_renderer(viewer_state *state) : renderer("points_renderer", state) {
     state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
     state->dispatcher.sink<event::internal::startup>().connect<&points_renderer::on_startup>(this);
+    state->dispatcher.sink<event::internal::point_size>().connect<&points_renderer::on_point_size>(this);
 
 }
 
@@ -34,8 +38,8 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
         state->scene.emplace<material_points>(event.id);
     }
     if (!state->scene.has<ogl_vertex_array>(event.id)) {
-        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(
-                {event.id, {"position", "color", "point_size"}});
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id,
+                                                                        std::vector<std::string>{"position", "color", "point_size"});
     }
 }
 
@@ -78,6 +82,7 @@ void points_renderer::on_render(const event::internal::render &event) {
         Vector<float, 4> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_4f("uniform_color", 1, uniform_color.data());
         auto &pos = vao.vertex_buffers["position"];
+
         glDrawArrays(GL_POINTS, 0, pos.num_elements);
         assert_ogl_error();
     }
@@ -87,6 +92,10 @@ void points_renderer::on_render(const event::internal::render &event) {
 
 void points_renderer::on_end_frame(const event::internal::end_frame &event) {
 
+}
+
+void points_renderer::on_point_size(const event::internal::point_size &event){
+    gl_state.set_point_size(std::min(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
 }
 
 }

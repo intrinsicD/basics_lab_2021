@@ -152,7 +152,11 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                               if (state->callbacks.scroll_cb) {
                                   state->callbacks.scroll_cb(state, (float) yoffset);
                               }else{
-                                  state->dispatcher.trigger<event::mouse::scroll>(yoffset);
+                                  if(state->keyboard.ctrl_pressed){
+                                      state->dispatcher.trigger<event::internal::point_size>(yoffset);
+                                  }else{
+                                      state->dispatcher.trigger<event::mouse::scroll>(yoffset);
+                                  }
                               }
                           });
     glfwSetWindowSizeCallback(state->window.win,

@@ -36,6 +36,9 @@ struct end_frame {
 struct resize {
     int width, height;
 };
+struct point_size{
+    double value;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_INTERNAL_H

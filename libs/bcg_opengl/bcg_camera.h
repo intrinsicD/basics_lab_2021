@@ -33,7 +33,7 @@ struct camera {
 
     VectorS<3> up_vec() const;
 
-    VectorS<3> left_vec() const;
+    VectorS<3> right_vec() const;
 
     VectorS<3> position() const;
 

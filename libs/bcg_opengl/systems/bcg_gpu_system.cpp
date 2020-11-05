@@ -4,6 +4,7 @@
 
 #include "bcg_gpu_system.h"
 #include "bcg_viewer_state.h"
+#include "bcg_matrix_map_eigen.h"
 #include "bcg_library/geometry/bcg_mesh.h"
 
 namespace bcg {
@@ -22,20 +23,27 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
         if (!vao) {
             vao.create();
         }
-
-        for (const auto &name : event.attributes_names) {
-            if (vertices->has(name) && vertices->get_base_ptr(name)->is_dirty()) {
-                auto &buffer = vao.vertex_buffers[name];
+        const std::vector<std::string> &attribute_names = event.attributes_names;
+        for (size_t index = 0; index < attribute_names.size(); ++index) {
+            auto attribute_name = attribute_names[index];
+            if (vertices->has(attribute_name) && vertices->get_base_ptr(attribute_name)->is_dirty()) {
+                auto &buffer = vao.vertex_buffers[attribute_name];
+                bool first = false;
                 if (!buffer) {
-                    buffer.name = name;
+                    buffer.name = attribute_name;
                     buffer.create();
-                    vao.capture_vertex_buffer(buffer);
+                    first = true;
                 }
-                auto *base_ptr = vertices->get_base_ptr(name);
+
+                auto *base_ptr = vertices->get_base_ptr(attribute_name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+
+                if(first){
+                    vao.capture_vertex_buffer(index, buffer);
+                }
                 auto sb = base_ptr->size_bytes();
-                assert(buffer.get_buffer_size_gpu() == sb);
-                vertices->get_base_ptr(name)->set_clean();
+                assert(buffer.get_buffer_size_gpu() == sb && buffer);
+                vertices->get_base_ptr(attribute_name)->set_clean();
             }
         }
     }
@@ -52,17 +60,25 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
             vao.create();
         }
 
-        for (const auto &name : event.attributes_names) {
-            if (edges->has(name) && edges->get_base_ptr(name)->is_dirty()) {
-                auto &buffer = vao.vertex_buffers[name];
+        const auto &attribute_names = event.attributes_names;
+        for (size_t index = 0; index < attribute_names.size(); ++index) {
+            auto attribute_name = attribute_names[index];
+            if (edges->has(attribute_name) && edges->get_base_ptr(attribute_name)->is_dirty()) {
+                auto &buffer = vao.vertex_buffers[attribute_name];
+                bool first = false;
                 if (!buffer) {
-                    buffer.name = name;
+                    buffer.name = attribute_name;
                     buffer.create();
-                    vao.capture_vertex_buffer(buffer);
+                    first = true;
                 }
-                auto *base_ptr = edges->get_base_ptr(name);
+
+                auto *base_ptr = edges->get_base_ptr(attribute_name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
-                edges->get_base_ptr(name)->set_clean();
+
+                if(first){
+                    vao.capture_vertex_buffer(index, buffer);
+                }
+                edges->get_base_ptr(attribute_name)->set_clean();
             }
         }
     }
@@ -80,10 +96,12 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
             vao.create();
         }
 
-        for (const auto &name : event.attributes_names) {
-            if(name == "triangles"){
+        const auto &attribute_names = event.attributes_names;
+        for (size_t index = 0; index < attribute_names.size(); ++index) {
+            auto attribute_name = attribute_names[index];
+            if(attribute_name == "triangles"){
                 if(!vao.element_buffer){
-                    vao.element_buffer.name = name;
+                    vao.element_buffer.name = attribute_name;
                     vao.set_element_buffer(vao.element_buffer);
                 }
                 if(vao.element_buffer.get_buffer_size_gpu() != faces->size() ){
@@ -91,26 +109,31 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
                     std::cout << triangles << "\n";
                     vao.element_buffer.upload(triangles.data(), faces->size(), 3, 0, true);
                 }
-            }else if(name == "triangles_adjacency"){
+            }else if(attribute_name == "triangles_adjacency"){
                 if(!vao.adjacency_buffer){
-                    vao.adjacency_buffer.name = name;
+                    vao.adjacency_buffer.name = attribute_name;
                     vao.set_element_buffer(vao.adjacency_buffer);
                 }
                 if(vao.adjacency_buffer.get_buffer_size_gpu() != faces->size() ){
                     auto adjacencies = mesh.get_triangles_adjacencies();
                     vao.adjacency_buffer.upload(adjacencies.data(), faces->size(), 6, 0, true);
                 }
-            }
-            if (faces->has(name) && faces->get_base_ptr(name)->is_dirty()) {
-                auto &buffer = vao.vertex_buffers[name];
+            }else if (faces->has(attribute_name) && faces->get_base_ptr(attribute_name)->is_dirty()) {
+                auto &buffer = vao.vertex_buffers[attribute_name];
+                bool first = false;
                 if (!buffer) {
-                    buffer.name = name;
+                    buffer.name = attribute_name;
                     buffer.create();
-                    vao.capture_vertex_buffer(buffer);
+                    first = true;
                 }
-                auto *base_ptr = faces->get_base_ptr(name);
+
+                auto *base_ptr = faces->get_base_ptr(attribute_name);
                 buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
-                faces->get_base_ptr(name)->set_clean();
+
+                if(first){
+                    vao.capture_vertex_buffer(index, buffer);
+                }
+                faces->get_base_ptr(attribute_name)->set_clean();
             }
         }
     }

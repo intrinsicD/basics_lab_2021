@@ -12,6 +12,11 @@ namespace bcg {
 struct halfedge_graph : public point_cloud {
     struct vertex_connectivity {
         halfedge_handle h;
+
+        friend std::ostream &operator<<(std::ostream &stream, const vertex_connectivity &value) {
+            stream << "h: " << value.h.idx;
+            return stream;
+        }
     };
 
     struct halfedge_connectivity {
@@ -19,6 +24,14 @@ struct halfedge_graph : public point_cloud {
         halfedge_handle nh;
         halfedge_handle ph;
         face_handle f;
+
+        friend std::ostream &operator<<(std::ostream &stream, const halfedge_connectivity &value) {
+            stream << "v: " << value.v.idx;
+            stream << " nh: " << value.nh.idx;
+            stream << " ph: " << value.ph.idx;
+            stream << " f: " << value.f.idx;
+            return stream;
+        }
     };
 
     halfedge_container halfedges;

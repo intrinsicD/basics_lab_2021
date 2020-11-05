@@ -23,11 +23,12 @@ void camera_system::on_resize(const event::internal::resize &event) {
 }
 
 void camera_system::on_mouse_scroll(const event::mouse::scroll &event) {
+    if(state->mouse.is_captured_by_gui) return;
     state->cam.fovy_degrees = std::min(std::max<bcg_scalar_t>(state->cam.fovy_degrees + event.value, 1.0), 90.0);
 }
 
 void camera_system::on_update(const event::internal::update &event) {
-    if (state->mouse.is_dragging) {
+    if (state->mouse.is_dragging && !state->mouse.is_captured_by_gui) {
         if (state->mouse.middle) {
             //translate camera in plane
             state->cam.model_matrix =

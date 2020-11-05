@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_POINTS_RENDERER_H
 
 #include "renderers/bcg_renderer.h"
-#include "bcg_points_renderer_events.h"
+#include "bcg_events_points_renderer.h"
 #include "events/bcg_events.h"
 
 namespace bcg {
@@ -24,6 +24,8 @@ private:
     void on_render(const event::internal::render &event) override;
 
     void on_end_frame(const event::internal::end_frame &event) override;
+
+    void on_point_size(const event::internal::point_size &event);
 };
 
 }

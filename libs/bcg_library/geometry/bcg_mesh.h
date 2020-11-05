@@ -12,6 +12,11 @@ namespace bcg {
 struct halfedge_mesh : public halfedge_graph {
     struct face_connectivity {
         halfedge_handle h;
+
+        friend std::ostream &operator<<(std::ostream &stream, const face_connectivity &value) {
+            stream << "h: " << value.h.idx;
+            return stream;
+        }
     };
 
     face_container faces;

@@ -34,7 +34,6 @@ std::string glsl_version_string();
 
 std::string ogl_renderer_string();
 
-
 struct ogl_types {
     enum Type {
         TYPE_UBYTE = 0,
@@ -416,6 +415,7 @@ struct ogl_buffer_object : public ogl_handle {
     unsigned int target;
     size_t capacity;
     size_t num_elements;
+    size_t size_bytes;
     int dims;
     bool dynamic;
 
@@ -439,6 +439,8 @@ struct ogl_buffer_object : public ogl_handle {
 };
 
 struct ogl_vertex_buffer : public ogl_buffer_object {
+    unsigned int normalized, type;
+
     ogl_vertex_buffer();
 
     explicit ogl_vertex_buffer(std::string name);
@@ -508,7 +510,11 @@ struct ogl_vertex_array : public ogl_handle {
 
     void release() const;
 
-    void capture_vertex_buffer(const ogl_vertex_buffer &vertex_buffer);
+    void enable_attribute(unsigned int index, const ogl_vertex_buffer &buffer) const;
+
+    void disable_attribute(unsigned int index) const;
+
+    void capture_vertex_buffer(unsigned int index, const ogl_vertex_buffer &buffer);
 
     void set_element_buffer(const ogl_element_buffer &element_buffer);
 };
@@ -743,6 +749,11 @@ struct ogl_state {
     friend std::ostream &operator<<(std::ostream &stream, const ogl_state &state);
 
 };
+
+GLenum string_to_ogl_enum(const std::string &name);
+
+std::string ogl_enum_to_string(size_t value);
+
 
 }
 

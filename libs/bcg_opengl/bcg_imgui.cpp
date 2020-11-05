@@ -58,13 +58,118 @@ void left_panel::render(viewer_state *state) {
     ImGui::End();
 }
 
-void gui_info(viewer_state *state, property_container *container){
-    if(!container) return;
+template<typename Real>
+bool draw_combo(viewer_state *state, const property<Real, 1> prop, size_t &current_entry) {
+    if (!prop) return false;
+    if (current_entry >= prop.size()) { current_entry = 0; }
+    std::stringstream ss;
+    ss << prop[current_entry];
+    if (ImGui::BeginCombo(prop.name().c_str(), ss.str().c_str())) {
+        for (size_t n = 0; n < prop.size(); ++n) {
+            ss.str("");
+            ss << prop[n];
+            const bool is_selected = (static_cast<size_t>(current_entry) == n);
+            ImGui::PushID((prop.name() + std::to_string(n)).c_str());
+            if (ImGui::Selectable(ss.str().c_str(), is_selected)) {
+                current_entry = n;
+            }
+            ImGui::PopID();
+
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return true;
 }
 
-void gui_info(viewer_state *state, const aligned_box3 *aabb){
-    if(!aabb) return;
-    if(ImGui::CollapsingHeader("aligned_box")){
+template<typename Real, int N>
+bool draw_combo(viewer_state *state, const property<Vector<Real, N>, N> prop, size_t &current_entry) {
+    if (!prop) return false;
+    if (current_entry >= prop.size()) { current_entry = 0; }
+    std::stringstream ss;
+    ss << prop[current_entry].transpose();
+    if (ImGui::BeginCombo(prop.name().c_str(), ss.str().c_str())) {
+        for (size_t n = 0; n < prop.size(); ++n) {
+            ss.str("");
+            ss << prop[n].transpose();
+            const bool is_selected = (static_cast<size_t>(current_entry) == n);
+            ImGui::PushID((prop.name() + std::to_string(n)).c_str());
+            if (ImGui::Selectable(ss.str().c_str(), is_selected)) {
+                current_entry = n;
+            }
+            ImGui::PopID();
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return true;
+}
+
+void gui_info(viewer_state *state, const ogl_buffer_object &buffer){
+    if (ImGui::CollapsingHeader(buffer.name.c_str())) {
+        draw_label(&state->window, "handle_id: ", std::to_string(buffer.handle));
+        draw_label(&state->window, "target", ogl_enum_to_string(buffer.target));
+        draw_label(&state->window, "capacity", std::to_string(buffer.capacity));
+        draw_label(&state->window, "num_elements", std::to_string(buffer.num_elements));
+        draw_label(&state->window, "dims", std::to_string(buffer.dims));
+        draw_label(&state->window, "dynamic", (buffer.dynamic ? "true" : "false"));
+        draw_label(&state->window, "size_bytes_cpu", std::to_string(buffer.size_bytes));
+        draw_label(&state->window, "size_bytes_gpu", std::to_string(buffer.get_buffer_size_gpu()));
+    }
+}
+
+void gui_info(viewer_state  *state, const ogl_vertex_array *array){
+    if(!array) return;
+    if (ImGui::CollapsingHeader(array->name.c_str())) {
+        draw_label(&state->window, "handle_id: ", std::to_string(array->handle));
+        ImGui::Separator();
+        for (auto &item : array->vertex_buffers) {
+            auto &buffer = item.second;
+            gui_info(state, buffer);
+        }
+        if(array->element_buffer){
+            gui_info(state, array->element_buffer);
+        }
+        if(array->adjacency_buffer){
+            gui_info(state, array->adjacency_buffer);
+        }
+    }
+}
+
+void gui_info(viewer_state *state, property_container *container, size_t &current_entry) {
+    if (!container) return;
+    if (ImGui::CollapsingHeader((container->name + " #" + std::to_string(container->size())).c_str())) {
+        for (const auto &name : container->properties_names()) {
+            ImGui::PushID((container->name + name).c_str());
+            auto any = draw_combo(state, container->get<bool, 1>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<bcg_scalar_t, 1>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<bcg_index_t, 1>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorS<2>, 2>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorS<3>, 3>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorS<4>, 4>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorI<2>, 2>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorI<3>, 3>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorI<4>, 4>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorI<5>, 5>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<VectorI<6>, 6>(name), current_entry);
+            ImGui::PopID();
+            if (!any) continue;
+        }
+        ImGui::PushID((container->name + "connectivity").c_str());
+        draw_combo(state, container->get<halfedge_graph::vertex_connectivity, 1>("connectivity"), current_entry);
+        draw_combo(state, container->get<halfedge_graph::halfedge_connectivity, 1>("connectivity"), current_entry);
+        draw_combo(state, container->get<halfedge_mesh::face_connectivity, 1>("connectivity"), current_entry);
+        ImGui::PopID();
+    }
+}
+
+void gui_info(viewer_state *state, const aligned_box3 *aabb) {
+    if (!aabb) return;
+    if (ImGui::CollapsingHeader("aligned_box")) {
         std::stringstream ss;
         ss << aabb->min.transpose();
         draw_label(&state->window, "min", ss.str());
@@ -81,9 +186,9 @@ void gui_info(viewer_state *state, const aligned_box3 *aabb){
     }
 }
 
-void gui_info(viewer_state *state, const Transform *model){
-    if(!model) return;
-    if(ImGui::CollapsingHeader("transform")){
+void gui_info(viewer_state *state, const Transform *model) {
+    if (!model) return;
+    if (ImGui::CollapsingHeader("transform")) {
         std::stringstream ss;
         ss << model->translation().transpose();
         draw_label(&state->window, "position", ss.str());
@@ -97,15 +202,15 @@ void gui_info(viewer_state *state, const Transform *model){
 }
 
 void gui_info(viewer_state *state) {
-    if(ImGui::CollapsingHeader("Scene")){
+    if (ImGui::CollapsingHeader("Scene")) {
         auto view = state->scene.view<entity_info>();
-        for(const auto id : view){
+        for (const auto id : view) {
             auto &info = state->scene.get<entity_info>(id);
             std::stringstream ss;
-            ss << info.entity_name << " id: " << std::to_string((unsigned int)id);
-            if (ImGui::TreeNode(ss.str().c_str())){
+            ss << info.entity_name << " id: " << std::to_string((unsigned int) id);
+            if (ImGui::TreeNode(ss.str().c_str())) {
                 ss.str("");
-                draw_label(&state->window, "entity_id", std::to_string((unsigned int)id));
+                draw_label(&state->window, "entity_id", std::to_string((unsigned int) id));
                 draw_label(&state->window, "filename", path_filename(info.filename));
                 draw_textinput(&state->window, "entity_name", info.entity_name);
                 ss << info.loading_center.transpose();
@@ -113,6 +218,11 @@ void gui_info(viewer_state *state) {
                 draw_label(&state->window, "loading_scale", std::to_string(info.loading_scale));
                 gui_info(state, state->scene.try_get<aligned_box3>(id));
                 gui_info(state, state->scene.try_get<Transform>(id));
+                gui_info(state, state->get_vertices(id), state->picker.vertex_id);
+                gui_info(state, state->get_halfedges(id), state->picker.halfedge_id);
+                gui_info(state, state->get_edges(id), state->picker.edge_id);
+                gui_info(state, state->get_faces(id), state->picker.face_id);
+                gui_info(state, state->scene.try_get<ogl_vertex_array>(id));
                 ImGui::TreePop();
             }
         }
@@ -205,36 +315,36 @@ void gui_info(viewer_state *state) {
     }
     if (ImGui::CollapsingHeader("Camera")) {
         float near = state->cam.near;
-        if(ImGui::InputFloat("near", &near)){
+        if (ImGui::InputFloat("near", &near)) {
             state->cam.near = near;
         }
         float far = state->cam.far;
-        if(ImGui::InputFloat("far", &far)){
+        if (ImGui::InputFloat("far", &far)) {
             state->cam.far = far;
         }
         float aspect = state->cam.aspect;
-        if(ImGui::InputFloat("aspect", &aspect)){
+        if (ImGui::InputFloat("aspect", &aspect)) {
             state->cam.aspect = aspect;
         }
         float fovy_degrees = state->cam.fovy_degrees;
-        if(ImGui::InputFloat("fovy degrees", &fovy_degrees)){
+        if (ImGui::InputFloat("fovy degrees", &fovy_degrees)) {
             state->cam.fovy_degrees = fovy_degrees;
         }
         ImGui::Separator();
         float left = state->cam.left;
-        if(ImGui::InputFloat("left", &left)){
+        if (ImGui::InputFloat("left", &left)) {
             state->cam.left = left;
         }
         float right = state->cam.right;
-        if(ImGui::InputFloat("right", &right)){
+        if (ImGui::InputFloat("right", &right)) {
             state->cam.right = right;
         }
         float top = state->cam.top;
-        if(ImGui::InputFloat("top", &top)){
+        if (ImGui::InputFloat("top", &top)) {
             state->cam.top = top;
         }
         float bottom = state->cam.bottom;
-        if(ImGui::InputFloat("bottom", &bottom)){
+        if (ImGui::InputFloat("bottom", &bottom)) {
             state->cam.bottom = bottom;
         }
         ImGui::Separator();
@@ -244,7 +354,7 @@ void gui_info(viewer_state *state) {
         ss.str("");
         ss << state->cam.model_matrix.matrix();
 
-        draw_label(&state->window, "model\n\n\n\n",  ss.str());
+        draw_label(&state->window, "model\n\n\n\n", ss.str());
         ss.str("");
         ss << state->cam.view_matrix();
         draw_label(&state->window, "view\n\n\n\n", ss.str());
@@ -255,11 +365,11 @@ void gui_info(viewer_state *state) {
     }
 }
 
-void gui_mesh_factory(viewer_state *state){
+void gui_mesh_factory(viewer_state *state) {
     ImGui::Button("Make Triangle");
 }
 
-void gui_aligned_box(viewer_state *state){
+void gui_aligned_box(viewer_state *state) {
 
 }
 

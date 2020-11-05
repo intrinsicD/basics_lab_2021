@@ -9,7 +9,7 @@ namespace bcg {
 
 camera::camera() : projection_matrix(MatrixS<4, 4>::Identity()),
                    model_matrix(Transform::Identity()),
-                   target_point({0, 0, -5}),
+                   target_point({0, 0, 5}),
                    near(0.01),
                    far(10.0),
                    aspect(1.0),
@@ -26,7 +26,6 @@ camera::camera() : projection_matrix(MatrixS<4, 4>::Identity()),
 }
 
 void camera::init() {
-    target_point = {0, 0, -5};
     near = 0.01;
     far = 10.0;
     aspect = 1.0;
@@ -35,6 +34,7 @@ void camera::init() {
     right = 1;
     top = 1;
     bottom = -1;
+    set_target({0, 0, 5});
     update_projection();
 }
 
@@ -50,14 +50,14 @@ bcg_scalar_t camera::fovy_radians() const {
 }
 
 VectorS<3> camera::front_vec() const {
-    return model_matrix.matrix().col(2).head<3>();
+    return -model_matrix.matrix().col(2).head<3>();
 }
 
 VectorS<3> camera::up_vec() const {
     return model_matrix.matrix().col(1).head<3>();
 }
 
-VectorS<3> camera::left_vec() const {
+VectorS<3> camera::right_vec() const {
     return model_matrix.matrix().col(0).head<3>();
 }
 
