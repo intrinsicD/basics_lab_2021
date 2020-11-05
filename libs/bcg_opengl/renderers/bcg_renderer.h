@@ -31,7 +31,7 @@ protected:
 
     virtual void on_end_frame(const event::internal::end_frame &event){}
 
-    std::unordered_map<std::string, unsigned int> programs;
+    std::unordered_map<std::string, glsl_program> programs;
     std::vector<entt::entity> entities_to_draw;
     ogl_state gl_state;
 };

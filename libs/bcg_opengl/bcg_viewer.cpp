@@ -56,7 +56,6 @@ static void draw_window(viewer_state *state) {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
-    glfwSwapBuffers(state->window.win);
 }
 
 void init_widgets(viewer_state *state, int width) {
@@ -96,11 +95,11 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwSwapInterval(1);  // Enable vsync
     glfwSetWindowUserPointer(state->window.win, state);
 
-    glfwSetWindowRefreshCallback(state->window.win,
+/*    glfwSetWindowRefreshCallback(state->window.win,
                                  [](GLFWwindow *glfw) {
                                      auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                                      draw_window(state);
-                                 });
+                                 });*/
     glfwSetDropCallback(state->window.win,
                         [](GLFWwindow *glfw, int num, const char **paths) {
                             auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
@@ -136,7 +135,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                    if (state->callbacks.click_cb) {
                                        state->callbacks.click_cb(state, button == GLFW_MOUSE_BUTTON_LEFT,
                                                                  (bool) action);
-                                   }else{
+                                   } else {
                                        state->dispatcher.trigger<event::mouse::button>(button, action);
                                    }
                                });
@@ -151,10 +150,10 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                               auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                               if (state->callbacks.scroll_cb) {
                                   state->callbacks.scroll_cb(state, (float) yoffset);
-                              }else{
-                                  if(state->keyboard.ctrl_pressed){
+                              } else {
+                                  if (state->keyboard.ctrl_pressed) {
                                       state->dispatcher.trigger<event::internal::point_size>(yoffset);
-                                  }else{
+                                  } else {
                                       state->dispatcher.trigger<event::mouse::scroll>(yoffset);
                                   }
                               }
@@ -174,9 +173,10 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                              state->window.framebuffer_viewport[2],
                                              state->window.framebuffer_viewport[3]);
                               });
-
+    glfwSwapInterval(1);
     // init gl extensions
-    if (!gladLoadGL()) {
+    //if (!gladLoadGL()) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error{"cannot initialize OpenGL extensions"};
     }
 
@@ -185,9 +185,11 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     }
 
     glfwGetWindowSize(state->window.win, &state->window.width, &state->window.height);
-    glfwGetFramebufferSize(state->window.win, &state->window.framebuffer_viewport[2], &state->window.framebuffer_viewport[3]);
-    state->window.high_dpi_scaling = (bcg_scalar_t) state->window.framebuffer_viewport[2] / (bcg_scalar_t) state->window.width;
-    if (state->window.high_dpi_scaling != 1){
+    glfwGetFramebufferSize(state->window.win, &state->window.framebuffer_viewport[2],
+                           &state->window.framebuffer_viewport[3]);
+    state->window.high_dpi_scaling =
+            (bcg_scalar_t) state->window.framebuffer_viewport[2] / (bcg_scalar_t) state->window.width;
+    if (state->window.high_dpi_scaling != 1) {
         std::cout << "highDPI scaling: " << state->window.high_dpi_scaling << "\n";
     }
 
@@ -257,6 +259,7 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         state.mouse.scroll_value = 0;
 
         // event hadling
+        glfwSwapBuffers(win);
         glfwPollEvents();
     }
 

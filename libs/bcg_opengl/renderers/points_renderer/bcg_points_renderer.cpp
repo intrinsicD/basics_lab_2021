@@ -76,7 +76,7 @@ void points_renderer::on_render(const event::internal::render &event) {
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         program.set_uniform_i("use_uniform_point_size", material.use_uniform_point_size);
-        program.set_uniform_f("uniform_point_size", material.uniform_point_size);
+        program.set_uniform_f("uniform_point_size", gl_state.point_size_value);
 
         program.set_uniform_i("use_uniform_color", material.use_uniform_color);
         Vector<float, 4> uniform_color = material.uniform_color.cast<float>();
@@ -95,7 +95,7 @@ void points_renderer::on_end_frame(const event::internal::end_frame &event) {
 }
 
 void points_renderer::on_point_size(const event::internal::point_size &event){
-    gl_state.set_point_size(std::min(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
+    gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
 }
 
 }

@@ -12,6 +12,8 @@ namespace bcg{
 struct mesh_system : public system{
     explicit mesh_system(viewer_state *state);
 
+    void on_make_triangle(const event::mesh::make_triangle &event);
+
     void on_setup_mesh(const event::mesh::setup &event);
 };
 

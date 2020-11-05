@@ -1270,11 +1270,9 @@ ogl_buffer_object::ogl_buffer_object(unsigned int handle, unsigned int target, s
 }
 
 size_t ogl_buffer_object::get_buffer_size_gpu() const {
-    bind();
     GLint bytes = 0;
     glGetBufferParameteriv(target, GL_BUFFER_SIZE, &bytes);
     assert_ogl_error();
-    release();
     return static_cast<size_t>(bytes);
 }
 
@@ -1333,12 +1331,11 @@ void ogl_vertex_buffer::upload(const std::vector<VectorS<4>> &data, size_t offse
 }
 
 void ogl_vertex_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
-    bind();
     if (size > capacity || !(*this)) {
         // reallocate buffer if needed
         num_elements = size;
         capacity = num_elements;
-        size_bytes = capacity * dims * sizeof(bcg_scalar_t);
+        size_bytes = capacity * dims * sizeof(float);
         glBufferData(target, size_bytes, data, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
         assert_ogl_error();
         this->dims = dims;
@@ -1348,8 +1345,6 @@ void ogl_vertex_buffer::upload(const void *data, size_t size, int dims, size_t o
         glBufferSubData(target, offset * dims * sizeof(bcg_scalar_t), size * dims * sizeof(bcg_scalar_t), data);
         assert_ogl_error();
     }
-
-    release();
 }
 
 void ogl_vertex_buffer::download(std::vector<bcg_scalar_t> &data, size_t offset) {
@@ -1491,9 +1486,9 @@ void ogl_vertex_array::release() const {
 }
 
 void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buffer &buffer) const {
-    glEnableVertexAttribArray(index);
+    glVertexAttribPointer(index, buffer.dims, buffer.type, buffer.normalized, buffer.dims * sizeof(float), (void *) 0);
     assert_ogl_error();
-    glVertexAttribPointer(index, buffer.dims, buffer.type, buffer.normalized, 0, (const void *) 0);
+    glEnableVertexAttribArray(index);
     assert_ogl_error();
 }
 
@@ -1503,11 +1498,7 @@ void ogl_vertex_array::disable_attribute(unsigned int index) const {
 }
 
 void ogl_vertex_array::capture_vertex_buffer(unsigned int index, const ogl_vertex_buffer &buffer) {
-    bind();
-    buffer.bind();
     enable_attribute(index, buffer);
-    release();
-    buffer.release();
 }
 
 void ogl_vertex_array::set_element_buffer(const ogl_element_buffer &buffer) {

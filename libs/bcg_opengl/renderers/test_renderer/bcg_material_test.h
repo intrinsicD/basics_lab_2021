@@ -9,10 +9,8 @@
 
 namespace bcg{
 
-struct material_points{
-    bool use_uniform_point_size = true;
-    bool use_uniform_color = true;
-    VectorS<4> uniform_color = color::random().homogeneous();
+struct material_test{
+    VectorS<4> uniform_color = color::red.homogeneous();
 };
 
 

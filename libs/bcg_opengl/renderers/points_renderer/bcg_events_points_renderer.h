@@ -11,5 +11,6 @@ namespace bcg::event::points_renderer{
 struct enqueue{
     entt::entity id;
 };
+
 }
 #endif //BCG_GRAPHICS_BCG_EVENTS_POINTS_RENDERER_H

@@ -17,6 +17,8 @@ struct gpu_system : public system {
     void on_update_edge_attributes(const event::gpu::update_edge_attributes &event);
 
     void on_update_face_attributes(const event::gpu::update_face_attributes &event);
+
+    void on_shutdown(const event::internal::shutdown &event);
 };
 
 }

@@ -12,6 +12,10 @@ struct setup{
     entt::entity id;
     std::string filename;
 };
+
+struct make_triangle{
+
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MESH_H

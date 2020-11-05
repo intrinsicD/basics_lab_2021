@@ -24,6 +24,7 @@ if (BCG_OPENGL)
             renderers/bcg_renderer.h renderers/bcg_renderer.cpp
             renderers/bcg_render_system.h renderers/bcg_render_system.cpp
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_events_points_renderer.h
+            renderers/test_renderer/bcg_material_test.h renderers/test_renderer/bcg_test_renderer.h renderers/test_renderer/bcg_test_renderer.cpp renderers/test_renderer/bcg_events_test_renderer.h
             exts/imgui/imgui.cpp
             exts/imgui/imgui_draw.cpp
             exts/imgui/imgui_widgets.cpp

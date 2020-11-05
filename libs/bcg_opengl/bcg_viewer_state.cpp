@@ -8,6 +8,7 @@
 #include <iostream>
 #include "exts/glad/glad.h"
 
+#include "events/bcg_events_internal.h"
 #include "bcg_opengl/systems/bcg_camera_system.h"
 #include "bcg_opengl/systems/bcg_gpu_system.h"
 #include "bcg_opengl/systems/bcg_picker_system.h"
@@ -64,13 +65,14 @@ glsl_program viewer_shaders::load(std::string name,
             glsl_shader new_shader = shader;
             program.detach(shader);
             new_shader.compile_file(shader.filename.c_str(), shader.type);
+            std::cout << "reload program: " << shader.filename << "\n";
             if (!program.is_valid()) return;
             program.attach(new_shader);
             if (program.link()) return;
         });
     }
     programs[name] = program;
-    return program;
+    return programs[name];
 }
 
 glsl_shader viewer_shaders::load_shader(std::string filename, unsigned int type) const {
@@ -87,7 +89,15 @@ const glsl_program &viewer_shaders::operator[](const std::string &name) const {
     return programs.at(name);
 }
 
-viewer_state::viewer_state(){
+viewer_shaders::viewer_shaders(viewer_state *state) : state(state) {
+    state->dispatcher.sink<event::internal::update>().connect<&viewer_shaders::on_update>(this);
+}
+
+void viewer_shaders::on_update(const event::internal::update &event){
+    watcher.trigger();
+}
+
+viewer_state::viewer_state() : shaders(this){
     systems["camera_system"] = std::make_unique<camera_system>(this);
     systems["loading_system"] = std::make_unique<loading_system>(this);
     systems["point_cloud_system"] = std::make_unique<point_cloud_system>(this);

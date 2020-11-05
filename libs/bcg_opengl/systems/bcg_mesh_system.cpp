@@ -7,11 +7,13 @@
 #include "bcg_entity_info.h"
 #include "bcg_property_map_eigen.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
+#include "geometry/bcg_mesh_factory.h"
 
 namespace bcg{
 
 mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state){
     state->dispatcher.sink<event::mesh::setup>().connect<&mesh_system::on_setup_mesh>(this);
+    state->dispatcher.sink<event::mesh::make_triangle>().connect<&mesh_system::on_make_triangle>(this);
 }
 
 void mesh_system::on_setup_mesh(const event::mesh::setup &event) {
@@ -24,6 +26,17 @@ void mesh_system::on_setup_mesh(const event::mesh::setup &event) {
 
     Map(mesh.positions) = (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
+    state->picker.entity_id = event.id;
+    std::cout << mesh << "\n";
+}
+
+void mesh_system::on_make_triangle(const event::mesh::make_triangle &event){
+    mesh_factory factory;
+
+    auto mesh = factory.make_triangle();
+    auto id = state->scene.create();
+    state->scene.emplace<halfedge_mesh>(id, mesh);
+    state->dispatcher.trigger<event::mesh::setup>(id);
 }
 
 }

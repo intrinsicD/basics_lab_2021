@@ -298,7 +298,7 @@ void gui_info(viewer_state *state) {
         draw_label(&state->window, "menu_height", std::to_string(state->gui.menu_height));
     }
     if (ImGui::CollapsingHeader("Picker")) {
-        draw_label(&state->window, "entity_id", std::to_string(state->picker.entity_id));
+        draw_label(&state->window, "entity_id", std::to_string((unsigned int)state->picker.entity_id));
         draw_label(&state->window, "vertex_id", std::to_string(state->picker.vertex_id));
         draw_label(&state->window, "edge_id", std::to_string(state->picker.edge_id));
         draw_label(&state->window, "face_id", std::to_string(state->picker.face_id));

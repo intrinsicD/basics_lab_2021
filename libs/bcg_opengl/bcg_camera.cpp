@@ -8,8 +8,8 @@
 namespace bcg {
 
 camera::camera() : projection_matrix(MatrixS<4, 4>::Identity()),
-                   model_matrix(Transform::Identity()),
-                   target_point({0, 0, 5}),
+                   model_matrix(Translation(0.0, 0.0, 8.0)),
+                   target_point(zero3s),
                    near(0.01),
                    far(10.0),
                    aspect(1.0),
@@ -25,16 +25,17 @@ camera::camera() : projection_matrix(MatrixS<4, 4>::Identity()),
 
 }
 
-void camera::init() {
-    near = 0.01;
-    far = 10.0;
-    aspect = 1.0;
+void camera::init(int width, int height) {
+    near = 0.001;
+    far = 100.0;
+    aspect = (bcg_scalar_t) width / (bcg_scalar_t) height;
     fovy_degrees = 45.0;
     left = -1;
     right = 1;
     top = 1;
     bottom = -1;
-    set_target({0, 0, 5});
+    model_matrix = Translation(0.0, 0.0, 8.0);
+    set_target({0, 0, 0});
     update_projection();
 }
 
@@ -50,14 +51,14 @@ bcg_scalar_t camera::fovy_radians() const {
 }
 
 VectorS<3> camera::front_vec() const {
-    return -model_matrix.matrix().col(2).head<3>();
+    return model_matrix.matrix().col(2).head<3>();
 }
 
 VectorS<3> camera::up_vec() const {
     return model_matrix.matrix().col(1).head<3>();
 }
 
-VectorS<3> camera::right_vec() const {
+VectorS<3> camera::left_vec() const {
     return model_matrix.matrix().col(0).head<3>();
 }
 
@@ -78,31 +79,33 @@ void camera::update_projection(bool orthographic) {
         projection_matrix(3, 0) = -(right + left) / (right - left);
         projection_matrix(3, 1) = -(top + bottom) / (top - bottom);
         projection_matrix(3, 2) = -(far + near) / (far - near);
+        projection_matrix(3, 3) = 0.0;
     } else {
         assert(std::abs(aspect - scalar_eps) > 0);
 
-        const auto tanHalfFovy = std::tan(fovy_radians() / 2.0);
+/*        const auto tanHalfFovy = std::tan(fovy_radians() / 2.0);
         projection_matrix.setIdentity();
         projection_matrix(0, 0) = 1.0 / (aspect * tanHalfFovy);
         projection_matrix(1, 1) = 1.0 / (tanHalfFovy);
         projection_matrix(2, 2) = -(far + near) / (far - near);
         projection_matrix(2, 3) = -1.0;
         projection_matrix(3, 2) = -(2.0 * far * near) / (far - near);
+        projection_matrix(3, 0) = 0.0;*/
+
+        top = near * std::tan(fovy_radians());
+        bottom = -top;
+        left = bottom * aspect;
+        right = top * aspect;
+
+        projection_matrix(0, 0) = (near + near) / (right - left);
+        projection_matrix(0, 2) = (right + left) / (right - left);
+        projection_matrix(1, 1) = (near + near) / (top - bottom);
+        projection_matrix(1, 2) = (top + bottom) / (top - bottom);
+        projection_matrix(2, 2) = -(far + near) / (far - near);
+        projection_matrix(2, 3) = -2.0 * far * near / (far - near);
+        projection_matrix(3, 2) = -1.0;
+        projection_matrix(3, 3) = 0.0;
     }
-}
-
-Translation world_translation(const VectorS<2> &delta_pos, int width, int height, camera &cam) {
-    //transform target to view coords
-    VectorS<4> ec = cam.view_matrix() * cam.target_point.homogeneous();
-    auto z = (ec[2] / ec[3]);
-
-    auto up = std::tan(cam.fovy_radians()) * cam.near;
-    auto right = cam.aspect * up;
-
-    return Translation(-cam.model_matrix.linear() *
-                       VectorS<3>(2.0 * delta_pos[0] / (bcg_scalar_t) width * right / cam.near * z,
-                                  -2.0 * delta_pos[1] / (bcg_scalar_t) height * up / cam.near * z,
-                                  0.0));
 }
 
 bool map_to_sphere(const VectorS<2> &point, int width, int height, VectorS<3> &result) {
@@ -117,6 +120,20 @@ bool map_to_sphere(const VectorS<2> &point, int width, int height, VectorS<3> &r
     return false;
 }
 
+Translation world_translation(const VectorS<2> &delta_pos, int width, int height, camera &cam) {
+    //transform target to view coords
+    VectorS<4> ec = cam.view_matrix() * cam.target_point.homogeneous();
+    auto z = (ec[2] / ec[3]);
+
+    auto up = std::tan(cam.fovy_radians()) * cam.near;
+    auto right = cam.aspect * up;
+
+    return Translation(cam.model_matrix.linear() *
+                       VectorS<3>(2.0 * delta_pos[0] / (bcg_scalar_t) width * right / cam.near * z,
+                                  -2.0 * delta_pos[1] / (bcg_scalar_t) height * up / cam.near * z,
+                                  0.0));
+}
+
 Rotation world_rotation(const VectorS<2> &position, int width, int height, camera &cam) {
     VectorS<3> axis(one3s);
     axis.normalize();
@@ -126,13 +143,10 @@ Rotation world_rotation(const VectorS<2> &position, int width, int height, camer
         VectorS<3> new_point_3d;
         if (map_to_sphere(position, width, height, new_point_3d)) {
             //transform axis to world coords
-            axis = (cam.model_matrix.linear() *
-                                      (cam.last_point_3d.cross(new_point_3d)).normalized()).normalized();
-            angle = -safe_acos(std::min(1.0, cam.last_point_3d.dot(new_point_3d))) * cam.rot_speed;
+            axis = (cam.model_matrix.linear() * (cam.last_point_3d.cross(new_point_3d)).normalized()).normalized();
+            angle = safe_acos(std::min<bcg_scalar_t>(1.0, cam.last_point_3d.dot(new_point_3d))) * cam.rot_speed;
         }
     }
-    cam.last_point_ok  = map_to_sphere(position, width, height, cam.last_point_3d);
-
     return {angle, axis};
 }
 

@@ -193,8 +193,8 @@ struct glsl_program : public ogl_handle {
                      int prepend_count, const char **prepend_sources);
 
     bool build_sources(const char *vertex_shader_source, const char *fragment_shader_source,
-                       const char *geometry_shader_source, const char *tess_control_shader_source,
-                       const char *tess_eval_shader_source);
+                       const char *geometry_shader_source=nullptr, const char *tess_control_shader_source=nullptr,
+                       const char *tess_eval_shader_source=nullptr);
 
     bool build_sources(const char *vertex_shader_source, const char *fragment_shader_source,
                        const char *geometry_shader_source, const char *tess_control_shader_source,

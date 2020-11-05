@@ -37,7 +37,7 @@ void loading_system::on_file_drop(const event::internal::file_drop &event){
         }else{
             auto id = state->scene.create();
             state->scene.emplace<halfedge_mesh>(id, mesh);
-            std::cout << mesh << "\n";
+
             state->dispatcher.trigger<event::mesh::setup>(id, filename);
         }
 

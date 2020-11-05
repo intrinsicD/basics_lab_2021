@@ -17,13 +17,14 @@ struct camera {
     bcg_scalar_t left, right, top, bottom;
     bool orthographic;
 
+    VectorS<2> last_point_2d;
     VectorS<3> last_point_3d;
     bool last_point_ok;
     bcg_scalar_t rot_speed;
 
     camera();
 
-    virtual void init();
+    virtual void init(int width, int height);
 
     void set_target(const VectorS<3> &target);
 
@@ -33,7 +34,7 @@ struct camera {
 
     VectorS<3> up_vec() const;
 
-    VectorS<3> right_vec() const;
+    VectorS<3> left_vec() const;
 
     VectorS<3> position() const;
 
@@ -42,6 +43,8 @@ struct camera {
     void update_projection(bool orthographic = false);
 
 };
+
+bool map_to_sphere(const VectorS<2> &point, int width, int height, VectorS<3> &result);
 
 Translation world_translation(const VectorS<2> &delta_pos, int width, int height, camera &cam);
 

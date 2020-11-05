@@ -35,7 +35,7 @@ struct viewer_colors {
 
 struct viewer_mouse {
     dynamic_bitset buttons;
-    bool is_moving, is_scrolling, is_dragging, is_captured_by_gui, left, middle, right;
+    bool is_moving = false, is_scrolling = false, is_dragging = false, is_captured_by_gui = false, left = false, middle = false, right = false;
     VectorS<2> last_left_click = zero2s;
     VectorS<2> last_middle_click = zero2s;
     VectorS<2> last_right_click = zero2s;
@@ -47,7 +47,7 @@ struct viewer_mouse {
 
 struct viewer_keyboard {
     dynamic_bitset keys;
-    bool shift_pressed, alt_pressed, ctrl_pressed, command_pressed, no_modifier, is_captured_by_gui;
+    bool shift_pressed = false, alt_pressed = false, ctrl_pressed = false, command_pressed = false, no_modifier = false, is_captured_by_gui = false;
 };
 
 struct viewer_time {
@@ -126,6 +126,8 @@ struct viewer_systems {
 };
 
 struct viewer_shaders {
+    viewer_shaders(viewer_state *state);
+
     std::unordered_map<std::string, glsl_program> programs;
     file_watcher watcher;
 
@@ -142,10 +144,15 @@ struct viewer_shaders {
 
 private:
     glsl_shader load_shader(std::string filename, unsigned int type) const;
+
+    void on_update(const event::internal::update &event);
+
+    viewer_state *state;
 };
 
 struct viewer_picker {
-    size_t entity_id, vertex_id, halfedge_id, edge_id, face_id;
+    entt::entity entity_id;
+    size_t vertex_id, halfedge_id, edge_id, face_id;
     VectorS<3> model_space_point;
     VectorS<3> world_space_point;
     VectorS<3> view_space_point;
@@ -157,6 +164,9 @@ struct viewer_config {
 
 struct viewer_state {
     viewer_state();
+
+    entt::registry scene;
+    entt::dispatcher dispatcher;
 
     viewer_config config;
     viewer_colors colors;
@@ -170,8 +180,6 @@ struct viewer_state {
     viewer_systems systems;
     viewer_shaders shaders;
     camera cam;
-    entt::registry scene;
-    entt::dispatcher dispatcher;
 
     vertex_container *get_vertices(entt::entity id);
 
