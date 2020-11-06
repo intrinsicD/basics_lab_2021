@@ -23,12 +23,12 @@ add_library(bcg_graphics
         exts/json/include/nlohmann/json.hpp
         exts/tinyexr/tinyexr.h
         exts/rply/rply.h exts/rply/rply.c
-
-        )
+        exts/tbb/include/tbb/tbb.h )
 
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(bcg_graphics PUBLIC ${CMAKE_SOURCE_DIR}/exts/entt/single_include)
 target_include_directories(bcg_graphics PUBLIC ./exts/glm)
+target_include_directories(bcg_graphics PUBLIC ./exts/tbb/include)
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
 target_include_directories(bcg_graphics PUBLIC . ./math)
 
