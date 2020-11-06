@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-EXTS_DIR="`dirname "$0"`/../libs/bcg_library/exts"
+EXTS_DIR="`dirname "$0"`/../external"
 
 if [[ ! (-e "$EXTS_DIR"/glm) ]];
 then
