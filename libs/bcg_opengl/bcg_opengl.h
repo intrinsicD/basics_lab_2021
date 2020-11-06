@@ -9,7 +9,7 @@
 #include <array>
 #include <vector>
 #include <unordered_map>
-#include "exts/glad/glad.h"
+#include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "bcg_library/math/bcg_linalg.h"
 
@@ -416,7 +416,7 @@ struct ogl_buffer_object : public ogl_handle {
     size_t capacity;
     size_t num_elements;
     size_t size_bytes;
-    int dims;
+    size_t dims;
     bool dynamic;
 
     ogl_buffer_object();
@@ -455,7 +455,7 @@ struct ogl_vertex_buffer : public ogl_buffer_object {
 
     void upload(const std::vector<VectorS<4>> &data, size_t offset = 0, bool dynamic = false);
 
-    void upload(const void *data, size_t size, int dims, size_t offset = 0, bool dynamic = false);
+    void upload(const void *data, size_t size, size_t dims, size_t offset = 0, bool dynamic = false);
 
     void download(std::vector<bcg_scalar_t> &data, size_t offset = 0);
 

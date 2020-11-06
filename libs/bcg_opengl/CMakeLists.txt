@@ -1,6 +1,10 @@
 if (BCG_OPENGL)
     add_definitions(-DBCG_OPENGL)
     find_package(OpenGL REQUIRED)
+    find_package(glad REQUIRED)
+    find_package(entt REQUIRED)
+    find_package(imgui REQUIRED)
+    find_package(rply REQUIRED)
 
     add_library(bcg_opengl
             bcg_imgui.h bcg_imgui.cpp
@@ -26,22 +30,19 @@ if (BCG_OPENGL)
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_events_points_renderer.h
             renderers/mesh_renderer/bcg_material_mesh.h renderers/mesh_renderer/bcg_mesh_renderer.h renderers/mesh_renderer/bcg_mesh_renderer.cpp renderers/mesh_renderer/bcg_events_mesh_renderer.h
             renderers/test_renderer/bcg_material_test.h renderers/test_renderer/bcg_test_renderer.h renderers/test_renderer/bcg_test_renderer.cpp renderers/test_renderer/bcg_events_test_renderer.h
-            exts/imgui/imgui.cpp
-            exts/imgui/imgui_draw.cpp
-            exts/imgui/imgui_widgets.cpp
-            exts/imgui/examples/imgui_impl_glfw.cpp
-            exts/imgui/examples/imgui_impl_opengl3.cpp
-            exts/glad/glad.c)
+            ${GLAD_SOURCE_DIRS}/glad.c
+            ${IMGUI_SOURCES}
+            )
 
     target_include_directories(bcg_opengl PRIVATE .)
     target_include_directories(bcg_opengl PUBLIC ${CMAKE_SOURCE_DIR}/libs)
+    target_include_directories(bcg_opengl PUBLIC ${IMGUI_INCLUDE_DIRS})
+    target_include_directories(bcg_opengl PUBLIC ${GLAD_INCLUDE_DIRS})
+    target_include_directories(bcg_opengl PUBLIC ${ENTT_INCLUDE_DIRS})
+    target_include_directories(bcg_opengl PUBLIC ${GLFW_INCLUDE_DIRS})
     target_compile_definitions(bcg_opengl PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
     set_target_properties(bcg_opengl PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 
-    target_include_directories(bcg_opengl PUBLIC ${CMAKE_SOURCE_DIR}/exts/glfw/include)
-    target_include_directories(bcg_opengl PUBLIC ./exts/imgui)
-    target_include_directories(bcg_opengl PUBLIC ./exts)
-    target_include_directories(bcg_opengl PUBLIC ${CMAKE_SOURCE_DIR}/exts/entt/single_include)
     target_link_libraries(bcg_opengl glfw ${OPENGL_gl_LIBRARY} bcg_graphics tbb)
 
     if (UNIX AND NOT APPLE)

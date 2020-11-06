@@ -3,9 +3,7 @@ project(bcg_graphics VERSION 1.0)
 
 option(BCG_APPS "Build Apps" ON)
 option(BCG_OPENGL "Build OpenGL" ON)
-option(BCG_TESTS "Build tests" ON)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wno-missing-field-initializers -g -ggdb")
+option(BCG_TESTS "Build Tests" ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -13,6 +11,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif ()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 
 if (NOT GENERATOR_IS_MULTI_CONFIG AND CMAKE_BUILD_TYPE MATCHES Debug)
@@ -29,7 +28,7 @@ if (GENERATOR_IS_MULTI_CONFIG)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
 endif (GENERATOR_IS_MULTI_CONFIG)
 
-add_subdirectory(exts)
+add_subdirectory(external)
 add_subdirectory(libs)
 add_subdirectory(apps)
 

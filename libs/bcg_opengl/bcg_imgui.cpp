@@ -5,7 +5,7 @@
 #include "bcg_library/utils/bcg_path.h"
 
 #include <GLFW/glfw3.h>
-#include "exts/imgui/imgui_internal.h"
+#include "imgui/imgui_internal.h"
 
 #include "bcg_entity_info.h"
 #include "aligned_box/bcg_aligned_box.h"

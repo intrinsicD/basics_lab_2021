@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "exts/imgui/imgui.h"
+#include "imgui/imgui.h"
 #include "bcg_library/math/bcg_linalg.h"
 
 namespace bcg {

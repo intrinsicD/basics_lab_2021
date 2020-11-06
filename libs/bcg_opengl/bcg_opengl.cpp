@@ -1114,8 +1114,8 @@ void ogl_texture::release() const {
     assert_ogl_error();
 }
 
-void ogl_texture::activate(GLint unit) {
-    unit = unit;
+void ogl_texture::activate(GLint unit_) {
+    unit = unit_;
     activate();
 }
 
@@ -1307,9 +1307,10 @@ ogl_vertex_buffer::ogl_vertex_buffer(std::string name) : ogl_vertex_buffer(BCG_G
 
 }
 
-ogl_vertex_buffer::ogl_vertex_buffer(unsigned int handle, std::string name) : ogl_buffer_object(handle, GL_ARRAY_BUFFER,
+ogl_vertex_buffer::ogl_vertex_buffer(unsigned int handle, std::string name) : ogl_buffer_object(handle,
+                                                                                                GL_ARRAY_BUFFER,
                                                                                                 name),
-                                                                              normalized(GL_FALSE),
+                                                                              normalized(false),
                                                                               type(GL_FLOAT) {
 
 }
@@ -1330,7 +1331,7 @@ void ogl_vertex_buffer::upload(const std::vector<VectorS<4>> &data, size_t offse
     upload(data.data(), data.size(), 4, offset, dynamic);
 }
 
-void ogl_vertex_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
+void ogl_vertex_buffer::upload(const void *data, size_t size, size_t dims, size_t offset, bool dynamic) {
     if (size > capacity || !(*this)) {
         // reallocate buffer if needed
         num_elements = size;
@@ -1483,7 +1484,8 @@ void ogl_vertex_array::release() const {
 }
 
 void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buffer &buffer) const {
-    glVertexAttribPointer(index, buffer.dims, buffer.type, buffer.normalized, buffer.dims * sizeof(float), (void *) 0);
+    glVertexAttribPointer(index, buffer.dims, buffer.type, (bool) buffer.normalized, buffer.dims * sizeof(float),
+                          (void *) 0);
     assert_ogl_error();
     glEnableVertexAttribArray(index);
     assert_ogl_error();
@@ -1581,7 +1583,7 @@ void ogl_framebuffer::attach_texture(const ogl_texture &texture, unsigned int at
 }
 
 void ogl_framebuffer::attach_renderbuffer(const ogl_renderbuffer &renderbuffer, unsigned int attachment) {
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer.handle);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer.handle);
     assert_ogl_error();
     has_depth_buffer = true;
 }
@@ -1597,10 +1599,11 @@ bool ogl_framebuffer::check() const {
 
 void ogl_framebuffer::oepngl_draw_buffers() {
     std::vector<unsigned int> attachments;
+    attachments.reserve(textures.size());
     for (size_t i = 0; i < textures.size(); ++i) {
-        attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+        attachments.push_back(GL_COLOR_ATTACHMENT0 + (int) i);
     }
-    glDrawBuffers(attachments.size(), attachments.data());
+    glDrawBuffers((int) attachments.size(), attachments.data());
     assert_ogl_error();
 }
 

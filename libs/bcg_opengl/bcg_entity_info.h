@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_ENTITY_INFO_H
 
 #include <string>
-#include "bcg_linalg.h"
+#include "math/bcg_linalg.h"
 
 namespace bcg{
 

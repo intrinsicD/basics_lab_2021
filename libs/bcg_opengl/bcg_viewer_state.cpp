@@ -6,7 +6,7 @@
 
 #include <utility>
 #include <iostream>
-#include "exts/glad/glad.h"
+#include "glad/glad.h"
 
 #include "events/bcg_events_internal.h"
 #include "bcg_opengl/systems/bcg_camera_system.h"

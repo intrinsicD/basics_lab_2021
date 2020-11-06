@@ -7,7 +7,7 @@
 #include "utils/bcg_file.h"
 #include "utils/bcg_string_utils.h"
 #include "color/bcg_colors.h"
-#include "exts/rply/rply.h"
+#include "rply/rply.h"
 
 namespace bcg {
 

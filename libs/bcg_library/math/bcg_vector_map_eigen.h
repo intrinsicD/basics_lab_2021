@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_VECTOR_MAP_EIGEN_H
 #define BCG_GRAPHICS_BCG_VECTOR_MAP_EIGEN_H
 
-#include "exts/eigen/Eigen/Core"
+#include "Eigen/Core"
 
 namespace bcg {
 

@@ -5,8 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_MATH_VECTOR_COS_H
 #define BCG_GRAPHICS_BCG_MATH_VECTOR_COS_H
 
-#include "bcg_linalg.h"
-#include "bcg_math_common.h"
+#include "math/bcg_linalg.h"
+#include "math/bcg_math_common.h"
 
 namespace bcg{
 

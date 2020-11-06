@@ -1,11 +1,16 @@
 if (BCG_APPS)
-
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL " " FORCE)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)
     set(GLFW_INSTALL OFF CACHE BOOL " " FORCE)
     add_subdirectory(glfw)
+    add_subdirectory(tbb)
+    add_subdirectory(glm)
+    #add_subdirectory(spectra)
+    include_directories(cgltf)
     include_directories(entt/single_include)
+    include_directories(imgui)
+    include_directories(eigen)
 endif (BCG_APPS)
 
 if(BCG_TESTS)

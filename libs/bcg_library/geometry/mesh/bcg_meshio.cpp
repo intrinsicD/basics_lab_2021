@@ -5,7 +5,7 @@
 #include <map>
 #include <fstream>
 #include <utility>
-#include "exts/rply/rply.h"
+#include "rply/rply.h"
 #include "bcg_meshio.h"
 #include "utils/bcg_path.h"
 

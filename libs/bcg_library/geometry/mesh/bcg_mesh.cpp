@@ -5,7 +5,7 @@
 #include "bcg_mesh.h"
 #include "triangle/bcg_triangle.h"
 #include "triangle/bcg_triangle_distance.h"
-#include "bcg_vector_map_eigen.h"
+#include "math/bcg_vector_map_eigen.h"
 #include "utils/bcg_stl_utils.h"
 
 namespace bcg {

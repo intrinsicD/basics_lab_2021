@@ -2,8 +2,9 @@
 // Created by alex on 27.10.20.
 //
 
+#include <iostream>
 #include "bcg_camera.h"
-#include "bcg_math_common.h"
+#include "math/bcg_math_common.h"
 
 namespace bcg {
 

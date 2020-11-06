@@ -3,7 +3,7 @@
 //
 
 #include "bcg_colors.h"
-#include "../exts/eigen/Eigen/Core"
+#include "Eigen/Core"
 
 namespace bcg{
 

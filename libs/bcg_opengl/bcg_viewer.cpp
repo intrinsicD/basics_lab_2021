@@ -6,7 +6,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "exts/glad/glad.h"
+#include "glad/glad.h"
 #include "bcg_viewer_state.h"
 #include "bcg_viewer.h"
 #include "events/bcg_events.h"
@@ -18,8 +18,8 @@
 #include <GLFW/glfw3.h>
 
 #include "bcg_imgui.h"
-#include "exts/imgui/examples/imgui_impl_glfw.h"
-#include "exts/imgui/examples/imgui_impl_opengl3.h"
+#include "imgui/examples/imgui_impl_glfw.h"
+#include "imgui/examples/imgui_impl_opengl3.h"
 
 #ifdef _WIN32
 #undef near
@@ -143,7 +143,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                              [](GLFWwindow *glfw, double x, double y) {
                                  auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                                  auto hdpi = state->window.high_dpi_scaling;
-                                 state->dispatcher.trigger<event::mouse::motion>(x * hdpi, y * hdpi);
+                                 state->dispatcher.trigger<event::mouse::motion>(x, y);
                              });
     glfwSetScrollCallback(state->window.win,
                           [](GLFWwindow *glfw, double , double yoffset) {

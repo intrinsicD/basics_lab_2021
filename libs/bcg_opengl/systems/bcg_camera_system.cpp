@@ -15,14 +15,17 @@ camera_system::camera_system(viewer_state *state) : system("camera_system", stat
     state->dispatcher.sink<event::internal::end_frame>().connect<&camera_system::on_end_frame>(this);
 }
 
-void camera_system::on_startup(const event::internal::startup &event) {
+void camera_system::on_startup(const event::internal::startup &) {
     state->cam.init(state->window.width, state->window.height);
     state->dispatcher.trigger<event::internal::resize>(state->window.width, state->window.height);
 }
 
 void camera_system::on_resize(const event::internal::resize &event) {
     state->cam.aspect = (bcg_scalar_t) event.width / (bcg_scalar_t) event.height;
-    glViewport(0, 0, event.width, event.height);
+    glViewport(state->window.framebuffer_viewport[0],
+               state->window.framebuffer_viewport[1],
+               state->window.framebuffer_viewport[2],
+               state->window.framebuffer_viewport[3]);
 }
 
 void camera_system::on_mouse_scroll(const event::mouse::scroll &event) {
@@ -31,7 +34,7 @@ void camera_system::on_mouse_scroll(const event::mouse::scroll &event) {
                                                      90.0);
 }
 
-void camera_system::on_update(const event::internal::update &event) {
+void camera_system::on_update(const event::internal::update &) {
     if (state->mouse.is_dragging && !state->mouse.is_captured_by_gui) {
         if (state->mouse.middle) {
             //translate camera in plane
@@ -57,9 +60,11 @@ void camera_system::on_update(const event::internal::update &event) {
     state->cam.update_projection();
 }
 
-void camera_system::on_end_frame(const event::internal::end_frame &event) {
+void camera_system::on_end_frame(const event::internal::end_frame &) {
     state->cam.last_point_2d = state->mouse.cursor_position;
-    state->cam.last_point_ok = map_to_sphere(state->cam.last_point_2d, state->window.width, state->window.height,
+    state->cam.last_point_ok = map_to_sphere(state->cam.last_point_2d,
+                                             state->window.width,
+                                             state->window.height,
                                              state->cam.last_point_3d);
 
 }

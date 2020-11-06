@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_EVENTS_TRANSFORM_H
 #define BCG_GRAPHICS_BCG_EVENTS_TRANSFORM_H
 
-#include "bcg_linalg.h"
+#include "math/bcg_linalg.h"
 #include "entt/entt.hpp"
 
 namespace bcg::event::transform{

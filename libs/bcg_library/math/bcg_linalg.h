@@ -5,8 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_LINALG_H
 #define BCG_GRAPHICS_BCG_LINALG_H
 
-#include "exts/eigen/Eigen/Core"
-#include "exts/eigen/Eigen/Geometry"
+#include "Eigen/Core"
+#include "Eigen/Geometry"
 #include "bcg_math_common.h"
 
 namespace bcg {
