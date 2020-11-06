@@ -761,10 +761,10 @@ void halfedge_mesh::delete_vertex(vertex_handle v) {
     if (vertices_deleted[v]) return;
     std::vector<face_handle> incident_faces;
     incident_faces.reserve(6);
-    for (const auto f : get_faces(v)) {
+    for (const auto &f : get_faces(v)) {
         incident_faces.push_back(f);
     }
-    for (const auto f : incident_faces) {
+    for (const auto &f : incident_faces) {
         delete_face(f);
     }
     mark_vertex_deleted(v);
