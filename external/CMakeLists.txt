@@ -1,7 +1,7 @@
 add_compile_options(-w)
 if (BCG_APPS)
     find_package(eigen3 REQUIRED)
-    find_package(CLANG_FORMAT)
+
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL " " FORCE)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)

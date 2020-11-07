@@ -583,7 +583,7 @@ halfedge_graph::find_closest_edges_radius(const halfedge_graph::position_t &poin
     std::vector<DistIndex> closest;
     for (const auto e : edges) {
         bcg_scalar_t sqr_dist = (positions[get_vertex(e, 0)] - point).dot(
-                             positions[get_vertex(e, 1)] - point);
+                positions[get_vertex(e, 1)] - point);
         if (sqr_dist <= radius) {
             closest.emplace_back(sqr_dist, e);
         }
@@ -601,8 +601,7 @@ edge_handle halfedge_graph::find_closest_edge_in_neighborhood(vertex_handle v,
     edge_handle closest_yet;
     bcg_scalar_t min_dist_yet = scalar_max;
     for (const auto h : get_halfedges(v)) {
-        bcg_scalar_t sqr_dist = (positions[get_from_vertex(h)] - point).dot(
-                positions[get_to_vertex(h)] - point);
+        bcg_scalar_t sqr_dist = (positions[get_from_vertex(h)] - point).dot(positions[get_to_vertex(h)] - point);
         if (sqr_dist < min_dist_yet) {
             min_dist_yet = sqr_dist;
             closest_yet = get_edge(h);
