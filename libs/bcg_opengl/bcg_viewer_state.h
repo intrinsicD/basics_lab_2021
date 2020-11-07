@@ -151,6 +151,7 @@ private:
 };
 
 struct viewer_picker {
+    bool valid = false;
     entt::entity entity_id;
     size_t vertex_id, halfedge_id, edge_id, face_id;
     VectorS<3> model_space_point;

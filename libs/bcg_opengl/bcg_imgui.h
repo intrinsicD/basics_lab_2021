@@ -43,10 +43,6 @@ struct left_panel : public gui_element {
 
 void gui_info(viewer_state *state);
 
-void gui_mesh_factory(viewer_state *state);
-
-void gui_aligned_box(viewer_state *state);
-
 bool begin_header(viewer_window *win, const char *title);
 
 void end_header(viewer_window *win);

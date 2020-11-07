@@ -1,0 +1,23 @@
+//
+// Created by alex on 06.11.20.
+//
+
+#ifndef BCG_GRAPHICS_BCG_MATERIAL_PICKING_H
+#define BCG_GRAPHICS_BCG_MATERIAL_PICKING_H
+
+#include "color/bcg_colors.h"
+#include "entt/entt.hpp"
+
+namespace bcg{
+
+struct material_picking{
+    material_picking() = default;
+
+    explicit material_picking(entt::entity id) : picking_color(color::packed_int((unsigned int)id)){}
+
+    VectorS<3> picking_color;
+};
+
+}
+
+#endif //BCG_GRAPHICS_BCG_MATERIAL_PICKING_H

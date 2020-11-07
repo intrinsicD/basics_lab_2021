@@ -413,10 +413,10 @@ struct ogl_texture : public ogl_handle {
 
 struct ogl_buffer_object : public ogl_handle {
     unsigned int target;
-    size_t capacity;
-    size_t num_elements;
+    int capacity;
+    int num_elements;
     size_t size_bytes;
-    size_t dims;
+    int dims;
     bool dynamic;
 
     ogl_buffer_object();

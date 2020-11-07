@@ -24,10 +24,11 @@ halfedge_mesh mesh_factory::make_triangle(const triangle3 &triangle) {
 }
 
 halfedge_mesh mesh_factory::make_quad() {
-    return make_quad(quad3(VectorS<3>(0.5, 0.5, 0),
-                           VectorS<3>(0.5, -0.5, 0),
-                           VectorS<3>(-0.5, -0.5, 0),
-                                   VectorS<3>(-0.5, 0.5, 0)));
+    return make_quad(quad3(
+            VectorS<3>(-0.5, 0.5, 0),
+            VectorS<3>(-0.5, -0.5, 0),
+            VectorS<3>(0.5, -0.5, 0),
+            VectorS<3>(0.5, 0.5, 0)));
 }
 
 halfedge_mesh mesh_factory::make_quad(const quad3 &quad) {

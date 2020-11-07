@@ -5,13 +5,11 @@
 #ifndef BCG_GRAPHICS_BCG_MESH_FACE_NORMALS_H
 #define BCG_GRAPHICS_BCG_MESH_FACE_NORMALS_H
 
-#include "bcg_mesh_face_area_vector.h"
+#include "bcg_mesh.h"
 
 namespace bcg{
 
-inline VectorS<3> face_normal(const halfedge_mesh &mesh, face_handle f) {
-    return face_area_vector(mesh, f).normalized();
-}
+VectorS<3> face_normal(const halfedge_mesh &mesh, face_handle f);
 
 }
 

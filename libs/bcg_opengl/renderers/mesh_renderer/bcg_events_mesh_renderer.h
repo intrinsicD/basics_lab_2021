@@ -11,7 +11,6 @@ namespace bcg::event::mesh_renderer {
 struct enqueue {
     entt::entity id;
 };
-
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MESH_RENDERER_H

@@ -13,6 +13,7 @@ struct material_points{
     bool use_uniform_point_size = true;
     bool use_uniform_color = true;
     VectorS<4> uniform_color = color::random().homogeneous();
+    bcg_scalar_t alpha = 1.0;
 };
 
 

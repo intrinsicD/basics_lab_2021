@@ -39,6 +39,9 @@ struct resize {
 struct point_size{
     double value;
 };
+struct set_point_size{
+    double value;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_INTERNAL_H

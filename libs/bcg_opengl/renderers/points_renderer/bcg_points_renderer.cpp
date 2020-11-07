@@ -17,7 +17,7 @@ points_renderer::points_renderer(viewer_state *state) : renderer("points_rendere
     state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
     state->dispatcher.sink<event::internal::startup>().connect<&points_renderer::on_startup>(this);
     state->dispatcher.sink<event::internal::point_size>().connect<&points_renderer::on_point_size>(this);
-
+    state->dispatcher.sink<event::internal::set_point_size>().connect<&points_renderer::on_set_point_size>(this);
 }
 
 void points_renderer::on_startup(const event::internal::startup &) {
@@ -45,7 +45,9 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
 
 void points_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        state->dispatcher.trigger<event::points_renderer::enqueue>(id);
+        if(state->scene.has<event::points_renderer::enqueue>(id)){
+            state->dispatcher.trigger<event::points_renderer::enqueue>(id);
+        }
     });
 }
 
@@ -73,12 +75,15 @@ void points_renderer::on_render(const event::internal::render &) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
-        program.set_uniform_i("use_uniform_point_size", material.use_uniform_point_size);
-        program.set_uniform_f("uniform_point_size", gl_state.point_size_value);
+        program.set_uniform_i("material.use_uniform_point_size", material.use_uniform_point_size);
+        program.set_uniform_f("material.uniform_point_size", gl_state.point_size_value);
 
-        program.set_uniform_i("use_uniform_color", material.use_uniform_color);
+        program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
         Vector<float, 4> uniform_color = material.uniform_color.cast<float>();
-        program.set_uniform_4f("uniform_color", 1, uniform_color.data());
+        program.set_uniform_4f("material.uniform_color", 1, uniform_color.data());
+        float alpha = material.alpha;
+        program.set_uniform_f("material.alpha", alpha);
+
         auto &vao = state->scene.get<ogl_vertex_array>(id);
         vao.bind();
         auto &pos = vao.vertex_buffers["position"];
@@ -95,6 +100,10 @@ void points_renderer::on_end_frame(const event::internal::end_frame &) {
 
 void points_renderer::on_point_size(const event::internal::point_size &event){
     gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
+}
+
+void points_renderer::on_set_point_size(const event::internal::set_point_size &event){
+    gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(event.value, 1.0), 20.0));
 }
 
 }

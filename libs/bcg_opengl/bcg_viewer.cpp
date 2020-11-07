@@ -142,7 +142,6 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwSetCursorPosCallback(state->window.win,
                              [](GLFWwindow *glfw, double x, double y) {
                                  auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                 auto hdpi = state->window.high_dpi_scaling;
                                  state->dispatcher.trigger<event::mouse::motion>(x, y);
                              });
     glfwSetScrollCallback(state->window.win,

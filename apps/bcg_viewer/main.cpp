@@ -16,7 +16,7 @@ int main() {
         }
         if (ImGui::BeginMenu("Examples")) {
             if(ImGui::MenuItem("Mesh")){
-                state->gui.left = gui_mesh_factory;
+                /*state->gui.left = gui_mesh_factory;*/
             }
             ImGui::MenuItem("Console", NULL, &self->show_app_console);
             ImGui::EndMenu();

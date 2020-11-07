@@ -26,6 +26,8 @@ private:
     void on_end_frame(const event::internal::end_frame &event) override;
 
     void on_point_size(const event::internal::point_size &event);
+
+    void on_set_point_size(const event::internal::set_point_size &event);
 };
 
 }

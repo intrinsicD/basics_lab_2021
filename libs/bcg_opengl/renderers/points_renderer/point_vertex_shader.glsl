@@ -7,25 +7,30 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
-uniform bool use_uniform_color;
-uniform vec4 uniform_color;
+struct Material{
+    bool use_uniform_color;
+    vec4 uniform_color;
 
-uniform bool use_uniform_point_size;
-uniform float uniform_point_size;
+    bool use_uniform_point_size;
+    float uniform_point_size;
+    float alpha;
+};
+
+uniform Material material;
 
 out vec4 f_color;
 
 void main() {
-    if(use_uniform_color){
-        f_color = uniform_color;
+    if(material.use_uniform_color){
+        f_color = material.uniform_color;
     }else{
-        f_color = vec4(color, 1.0f);
+        f_color = vec4(color, material.alpha);
     }
 
-    if(use_uniform_point_size){
-        gl_PointSize = uniform_point_size;
+    if(material.use_uniform_point_size){
+        gl_PointSize = material.uniform_point_size;
     }else{
-        gl_PointSize = point_size * uniform_point_size;
+        gl_PointSize = point_size * material.uniform_point_size;
     }
 
     gl_Position = proj * view * model * vec4(position, 1.0f);

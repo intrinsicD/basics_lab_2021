@@ -9,6 +9,8 @@
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "geometry/mesh/bcg_mesh_factory.h"
 #include "geometry/mesh/bcg_mesh_vertex_normals.h"
+#include "renderers/picking_renderer/bcg_events_picking_renderer.h"
+#include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
@@ -38,6 +40,8 @@ void mesh_system::on_setup_mesh(const event::mesh::setup &event) {
 
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
+    state->scene.emplace_or_replace<event::picking_renderer::enqueue>(event.id);
+    state->scene.emplace_or_replace<event::mesh_renderer::enqueue>(event.id);
     state->picker.entity_id = event.id;
     std::cout << mesh << "\n";
 }
@@ -69,17 +73,7 @@ void mesh_system::on_vertex_normal_uniform(const event::mesh::vertex_normals::un
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), state->config.parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    normals[i] = vertex_normal_uniform(mesh, i);
-                }
-            }
-    );
-    normals.set_dirty();
+    vertex_normals(mesh, vertex_normal_uniform, state->config.parallel_grain_size);
 }
 
 void mesh_system::on_vertex_normal_area(const event::mesh::vertex_normals::area &event) {
@@ -87,17 +81,7 @@ void mesh_system::on_vertex_normal_area(const event::mesh::vertex_normals::area 
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), state->config.parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    normals[i] = vertex_normal_area(mesh, i);
-                }
-            }
-    );
-    normals.set_dirty();
+    vertex_normals(mesh, vertex_normal_area, state->config.parallel_grain_size);
 }
 
 void mesh_system::on_vertex_normal_angle(const event::mesh::vertex_normals::angle &event) {
@@ -105,17 +89,7 @@ void mesh_system::on_vertex_normal_angle(const event::mesh::vertex_normals::angl
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), state->config.parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    normals[i] = vertex_normal_angle(mesh, i);
-                }
-            }
-    );
-    normals.set_dirty();
+    vertex_normals(mesh, vertex_normal_angle, state->config.parallel_grain_size);
 }
 
 void mesh_system::on_vertex_normal_area_angle(const event::mesh::vertex_normals::area_angle &event) {
@@ -123,17 +97,7 @@ void mesh_system::on_vertex_normal_area_angle(const event::mesh::vertex_normals:
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), state->config.parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    normals[i] = vertex_normal_area_angle(mesh, i);
-                }
-            }
-    );
-    normals.set_dirty();
+    vertex_normals(mesh, vertex_normal_area_angle, state->config.parallel_grain_size);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

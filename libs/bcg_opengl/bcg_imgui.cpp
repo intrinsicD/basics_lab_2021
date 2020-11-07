@@ -9,6 +9,9 @@
 
 #include "bcg_entity_info.h"
 #include "aligned_box/bcg_aligned_box.h"
+#include "renderers/mesh_renderer/bcg_material_mesh.h"
+#include "renderers/points_renderer/bcg_material_points.h"
+#include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "utils/bcg_path.h"
 
 namespace bcg {
@@ -109,7 +112,7 @@ bool draw_combo(viewer_state *state, const property<Vector<Real, N>, N> prop, si
     return true;
 }
 
-void gui_info(viewer_state *state, const ogl_buffer_object &buffer){
+void gui_info(viewer_state *state, const ogl_buffer_object &buffer) {
     if (ImGui::CollapsingHeader(buffer.name.c_str())) {
         draw_label(&state->window, "handle_id: ", std::to_string(buffer.handle));
         draw_label(&state->window, "target", ogl_enum_to_string(buffer.target));
@@ -125,8 +128,8 @@ void gui_info(viewer_state *state, const ogl_buffer_object &buffer){
     }
 }
 
-void gui_info(viewer_state  *state, const ogl_vertex_array *array){
-    if(!array) return;
+void gui_info(viewer_state *state, const ogl_vertex_array *array) {
+    if (!array) return;
     if (ImGui::CollapsingHeader(array->name.c_str())) {
         draw_label(&state->window, "handle_id: ", std::to_string(array->handle));
         ImGui::Separator();
@@ -134,10 +137,10 @@ void gui_info(viewer_state  *state, const ogl_vertex_array *array){
             auto &buffer = item.second;
             gui_info(state, buffer);
         }
-        if(array->element_buffer){
+        if (array->element_buffer) {
             gui_info(state, array->element_buffer);
         }
-        if(array->adjacency_buffer){
+        if (array->adjacency_buffer) {
             gui_info(state, array->adjacency_buffer);
         }
     }
@@ -204,6 +207,48 @@ void gui_info(viewer_state *state, const Transform *model) {
     }
 }
 
+void gui_info(viewer_state *state, material_mesh *material) {
+    if (!material) return;
+    ImGui::PushID("mesh_material");
+    ImGui::Checkbox("use_uniform_color", &material->use_uniform_color);
+    draw_coloredit(&state->window, "ambient", material->ambient);
+    draw_coloredit(&state->window, "diffuse", material->diffuse);
+    draw_coloredit(&state->window, "specular", material->specular);
+    ImGui::InputFloat("shininess", &material->shininess);
+    ImGui::InputFloat("alpha", &material->alpha);
+    ImGui::PopID();
+
+}
+
+void gui_info(viewer_state *state, material_points *material) {
+    if (!material) return;
+
+    ImGui::Checkbox("use_uniform_color", &material->use_uniform_color);
+    ImGui::Checkbox("use_uniform_point_size", &material->use_uniform_point_size);
+    draw_coloredit(&state->window, "uniform_color", material->uniform_color);
+    ImGui::InputFloat("alpha", &material->alpha);
+}
+
+void gui_rendering(viewer_state *state, entt::entity id) {
+    static bool show_points = false;
+    if (ImGui::CollapsingHeader("rendering")) {
+        if (ImGui::Checkbox("show points", &show_points)) {
+            if (show_points) {
+                state->scene.emplace_or_replace<event::points_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::points_renderer::enqueue>(id);
+            }
+        }
+    }
+    if (ImGui::CollapsingHeader("materials")) {
+        gui_info(state, state->scene.try_get<material_mesh>(id));
+        if (show_points) {
+            ImGui::Separator();
+            gui_info(state, state->scene.try_get<material_points>(id));
+        }
+    }
+}
+
 void gui_info(viewer_state *state) {
     if (ImGui::CollapsingHeader("Scene")) {
         auto view = state->scene.view<entity_info>();
@@ -221,6 +266,7 @@ void gui_info(viewer_state *state) {
                 draw_label(&state->window, "loading_scale", std::to_string(info.loading_scale));
                 gui_info(state, state->scene.try_get<aligned_box3>(id));
                 gui_info(state, state->scene.try_get<Transform>(id));
+                gui_rendering(state, id);
                 gui_info(state, state->get_vertices(id), state->picker.vertex_id);
                 gui_info(state, state->get_halfedges(id), state->picker.halfedge_id);
                 gui_info(state, state->get_edges(id), state->picker.edge_id);
@@ -301,7 +347,7 @@ void gui_info(viewer_state *state) {
         draw_label(&state->window, "menu_height", std::to_string(state->gui.menu_height));
     }
     if (ImGui::CollapsingHeader("Picker")) {
-        draw_label(&state->window, "entity_id", std::to_string((unsigned int)state->picker.entity_id));
+        draw_label(&state->window, "entity_id", std::to_string((unsigned int) state->picker.entity_id));
         draw_label(&state->window, "vertex_id", std::to_string(state->picker.vertex_id));
         draw_label(&state->window, "edge_id", std::to_string(state->picker.edge_id));
         draw_label(&state->window, "face_id", std::to_string(state->picker.face_id));
@@ -334,7 +380,7 @@ void gui_info(viewer_state *state) {
             state->cam.fovy_degrees = fovy_degrees;
         }
         float rot_speed = state->cam.rot_speed;
-        if(ImGui::InputFloat("rot_speed", &rot_speed)){
+        if (ImGui::InputFloat("rot_speed", &rot_speed)) {
             state->cam.rot_speed = rot_speed;
         }
         draw_checkbox(&state->window, "orthoraphic", state->cam.orthographic);
@@ -371,14 +417,6 @@ void gui_info(viewer_state *state) {
         draw_label(&state->window, "projection\n\n\n\n", ss.str());
         ss.str("");
     }
-}
-
-void gui_mesh_factory(viewer_state *state) {
-    ImGui::Button("Make Triangle");
-}
-
-void gui_aligned_box(viewer_state *state) {
-
 }
 
 bool begin_header(viewer_window *win, const char *lbl) {
