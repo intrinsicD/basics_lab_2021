@@ -30,24 +30,15 @@ struct kdtree_property {
 
     };
 
-    ~kdtree_property() = default;
-
     explicit kdtree_property(property <VectorS<D>, D> positions, const int leaf_max_size = 10) : positions(positions) {
         index = std::make_shared<index_t>(static_cast<int>(D), *this , nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
         index->buildIndex();
     }
 
-    kdtree_property(const kdtree_property &other) : index(other.index), positions(other.positions){
-
-    }
-
-    kdtree_property(const kdtree_property &&other) : index(std::move(other.index)), positions(std::move(other.positions)){
-
-    }
-
-    kdtree_property &operator=(const kdtree_property &&other){
-        index = std::move(other.index);
-        positions = std::move(other.positions);
+    void build(property <VectorS<D>, D> positions, const int leaf_max_size = 10){
+        this->positions = positions;
+        index = std::make_shared<index_t>(static_cast<int>(D), *this , nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
+        index->buildIndex();
     }
 
     inline size_t kdtree_get_point_count() const {

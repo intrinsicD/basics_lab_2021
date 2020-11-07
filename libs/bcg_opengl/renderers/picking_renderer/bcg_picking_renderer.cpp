@@ -52,8 +52,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     if (!state->mouse.left) return;
 
     const auto &vp = state->window.framebuffer_viewport;
-    int x = (int) state->mouse.cursor_position[0];
-    int y = (int) vp[3] - (int) state->mouse.cursor_position[1];
+    int x = (int) state->mouse.cursor_position[0] * 2;
+    int y = (int) vp[3] - (int) state->mouse.cursor_position[1] * 2;
     gl_state.set_scissor_test(true);
     gl_state.set_scissor_values(x, y, 1, 1);
     gl_state.set_depth_test(true);
@@ -134,14 +134,15 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     if (!state->scene.has<kdtree_property<bcg_scalar_t>>(id)) {
         auto *vertices = state->get_vertices(id);
         auto positions = vertices->get<VectorS<3>, 3>("position");
-        kdtree_property<bcg_scalar_t> kd_tree(positions);
-        state->scene.emplace<kdtree_property<bcg_scalar_t>>(id, kd_tree);
+        auto &kd_tree = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(id);
+        kd_tree.build(positions);
     }
 
     auto &kd_tree = state->scene.get<kdtree_property<bcg_scalar_t>>(id);
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);
     state->picker.vertex_id = result.indices[0];
 
+    //TODO fix the following
     if (state->scene.has<halfedge_graph>(id)) {
         auto &graph = state->scene.get<halfedge_graph>(id);
         state->picker.edge_id = graph.find_closest_edge_in_neighborhood(state->picker.vertex_id,

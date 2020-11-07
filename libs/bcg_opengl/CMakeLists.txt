@@ -5,6 +5,7 @@ if (BCG_OPENGL)
     find_package(entt REQUIRED)
     find_package(imgui REQUIRED)
     find_package(rply REQUIRED)
+    find_package(nanoflann REQUIRED)
 
     add_library(bcg_opengl
             bcg_imgui.h bcg_imgui.cpp
@@ -41,6 +42,7 @@ if (BCG_OPENGL)
     target_include_directories(bcg_opengl PUBLIC ${GLAD_INCLUDE_DIRS})
     target_include_directories(bcg_opengl PUBLIC ${ENTT_INCLUDE_DIRS})
     target_include_directories(bcg_opengl PUBLIC ${GLFW_INCLUDE_DIRS})
+    target_include_directories(bcg_opengl PUBLIC ${NANOFLANN_INCLUDE_DIRS})
     target_compile_definitions(bcg_opengl PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
     set_target_properties(bcg_opengl PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 
@@ -54,7 +56,7 @@ endif (BCG_OPENGL)
 
 # warning flags
 if (APPLE)
-    target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
 endif (APPLE)
 if (MSVC)
     target_compile_options(bcg_opengl PUBLIC /D_CRT_SECURE_NO_WARNINGS /wd4018 /wd4244 /wd4305 /wd4800 /wd4267)
