@@ -52,8 +52,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     if (!state->mouse.left) return;
 
     const auto &vp = state->window.framebuffer_viewport;
-    int x = (int) state->mouse.cursor_position[0] * 2;
-    int y = (int) vp[3] - (int) state->mouse.cursor_position[1] * 2;
+    int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
+    int y = static_cast<int>( vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling);
     gl_state.set_scissor_test(true);
     gl_state.set_scissor_values(x, y, 1, 1);
     gl_state.set_depth_test(true);

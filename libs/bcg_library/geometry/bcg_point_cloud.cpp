@@ -89,7 +89,7 @@ vertex_handle point_cloud::new_vertex() {
 
 vertex_handle point_cloud::add_vertex(const position_t &point) {
     auto v = new_vertex();
-    if (v) positions[v] = point;
+    if (v.is_valid()) positions[v] = point;
     return v;
 }
 

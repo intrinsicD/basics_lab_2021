@@ -5,13 +5,12 @@
 #ifndef BCG_GRAPHICS_BCG_DISTANCE_ALIGNED_BOX_POINT_H
 #define BCG_GRAPHICS_BCG_DISTANCE_ALIGNED_BOX_POINT_H
 
-#include "bcg_distance_query.h"
 #include "aligned_box/bcg_aligned_box.h"
 
 namespace bcg {
 
 template<bcg_index_t N>
-struct distance_query<VectorS<N>, aligned_box<N>> {
+struct distance_point_aligned_box {
     struct result {
         bcg_scalar_t distance, sqr_distance;
         VectorS<N> closest;
@@ -44,6 +43,10 @@ protected:
         return res;
     }
 };
+
+using distance_point2_aligned_box2 = distance_point_aligned_box<2>;
+
+using distance_point3_aligned_box3 = distance_point_aligned_box<3>;
 }
 
 #endif //BCG_GRAPHICS_BCG_DISTANCE_ALIGNED_BOX_POINT_H

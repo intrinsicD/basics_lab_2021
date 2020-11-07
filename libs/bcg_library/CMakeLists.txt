@@ -30,6 +30,9 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_factory.h geometry/mesh/bcg_mesh_factory.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
         geometry/sphere/bcg_sphere.h geometry/sphere/bcg_sphere_fit.h geometry/sphere/bcg_sphere_sampling_fibunacci.h
+        geometry/distance_query/bcg_distance_segment_point.h
+        geometry/distance_query/bcg_distance_aligned_box_point.h
+        geometry/distance_query/bcg_distance_triangle_point.h
         ${RPLY_SOURCE_DIRS}/rply.c
         )
 

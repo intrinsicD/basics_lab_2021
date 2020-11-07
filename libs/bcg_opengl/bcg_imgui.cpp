@@ -267,10 +267,10 @@ void gui_info(viewer_state *state) {
                 gui_info(state, state->scene.try_get<aligned_box3>(id));
                 gui_info(state, state->scene.try_get<Transform>(id));
                 gui_rendering(state, id);
-                gui_info(state, state->get_vertices(id), state->picker.vertex_id);
-                gui_info(state, state->get_halfedges(id), state->picker.halfedge_id);
-                gui_info(state, state->get_edges(id), state->picker.edge_id);
-                gui_info(state, state->get_faces(id), state->picker.face_id);
+                gui_info(state, state->get_vertices(id), state->picker.vertex_id.idx);
+                gui_info(state, state->get_halfedges(id), state->picker.halfedge_id.idx);
+                gui_info(state, state->get_edges(id), state->picker.edge_id.idx);
+                gui_info(state, state->get_faces(id), state->picker.face_id.idx);
                 gui_info(state, state->scene.try_get<ogl_vertex_array>(id));
                 ImGui::TreePop();
             }
@@ -348,9 +348,9 @@ void gui_info(viewer_state *state) {
     }
     if (ImGui::CollapsingHeader("Picker")) {
         draw_label(&state->window, "entity_id", std::to_string((unsigned int) state->picker.entity_id));
-        draw_label(&state->window, "vertex_id", std::to_string(state->picker.vertex_id));
-        draw_label(&state->window, "edge_id", std::to_string(state->picker.edge_id));
-        draw_label(&state->window, "face_id", std::to_string(state->picker.face_id));
+        draw_label(&state->window, "vertex_id", std::to_string(state->picker.vertex_id.idx));
+        draw_label(&state->window, "edge_id", std::to_string(state->picker.edge_id.idx));
+        draw_label(&state->window, "face_id", std::to_string(state->picker.face_id.idx));
         ImGui::Separator();
         std::stringstream ss;
         ss << state->picker.model_space_point.transpose();

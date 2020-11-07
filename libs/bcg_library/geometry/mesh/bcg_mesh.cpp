@@ -5,6 +5,7 @@
 #include "bcg_mesh.h"
 #include "triangle/bcg_triangle.h"
 #include "triangle/bcg_triangle_distance.h"
+#include "distance_query/bcg_distance_triangle_point.h"
 #include "math/bcg_vector_map_eigen.h"
 #include "utils/bcg_stl_utils.h"
 
@@ -239,7 +240,7 @@ bool halfedge_mesh::is_boundary(vertex_handle v) const {
 }
 
 bool halfedge_mesh::is_boundary(halfedge_handle h) const {
-    return !(h && get_face(h));
+    return !(h.is_valid() && get_face(h).is_valid());
 }
 
 bool halfedge_mesh::is_boundary(edge_handle e) const {
@@ -296,7 +297,7 @@ bool halfedge_mesh::is_removal_ok(edge_handle e) const {
     auto f1 = get_face(h1);
 
     // boundary?
-    if (!f0 || !f1) {
+    if (!f0.is_valid() || !f1.is_valid()) {
         return false;
     }
 
@@ -359,7 +360,7 @@ bool halfedge_mesh::is_collapse_ok(halfedge_handle h) const {
     // test intersection of the one-rings of v0 and v1
     for (const auto vv : halfedge_graph::get_vertices(v0)) {
         if (vv != v1 && vv != vl && vv != vr) {
-            if (halfedge_graph::find_halfedge(vv, v1)) {
+            if (halfedge_graph::find_halfedge(vv, v1).is_valid()) {
                 return false;
             }
         }
@@ -392,7 +393,7 @@ bool halfedge_mesh::is_flip_ok(edge_handle e) const {
         return false;
     }
 
-    return !find_halfedge(v0, v1);
+    return !find_halfedge(v0, v1).is_valid();
 }
 
 face_handle halfedge_mesh::get_face(edge_handle e, bool i) const {
@@ -444,7 +445,7 @@ face_handle halfedge_mesh::add_face(const std::vector<vertex_handle> &f_vertices
         }
 
         f_halfedges[i] = halfedge_graph::find_halfedge(f_vertices[i], f_vertices[ii]);
-        h_is_new[i] = !f_halfedges[i];
+        h_is_new[i] = !f_halfedges[i].is_valid();
 
         if (!h_is_new[i] && !is_boundary(f_halfedges[i])) {
             std::cerr << "add_face: complex edge!\n";
@@ -543,7 +544,7 @@ face_handle halfedge_mesh::add_face(const std::vector<vertex_handle> &f_vertices
                     break;
 
                 case 3: // both are new
-                    if (!halfedge_graph::get_halfedge(v)) {
+                    if (!halfedge_graph::get_halfedge(v).is_valid()) {
                         halfedge_graph::set_halfedge(v, outer_next);
                         next_cache.emplace_back(outer_prev, outer_next);
                     } else {
@@ -597,7 +598,7 @@ void halfedge_mesh::adjust_outgoing_halfedge(vertex_handle v) {
     auto h = halfedge_graph::get_halfedge(v);
     const auto hh = h;
 
-    if (h) {
+    if (h.is_valid()) {
         do {
             if (is_boundary(h)) {
                 halfedge_graph::set_halfedge(v, h);
@@ -774,7 +775,7 @@ halfedge_mesh::face_around_vertex_circulator::face_around_vertex_circulator(cons
         ds(ds), active(false) {
     if (ds) {
         halfedge = ds->halfedge_graph::get_halfedge(v);
-        if (halfedge && ds->is_boundary(halfedge)) {
+        if (halfedge.is_valid() && ds->is_boundary(halfedge)) {
             operator++();
         }
     }
@@ -791,7 +792,7 @@ bool halfedge_mesh::face_around_vertex_circulator::operator!=(const face_around_
 }
 
 halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::operator++() {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     do {
         halfedge = ds->rotate_ccw(halfedge);
     } while (ds->is_boundary(halfedge));
@@ -800,7 +801,7 @@ halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_
 }
 
 halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::operator--() {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     do {
         halfedge = ds->rotate_cw(halfedge);
     } while (ds->is_boundary(halfedge));
@@ -808,16 +809,16 @@ halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_
 }
 
 face_handle halfedge_mesh::face_around_vertex_circulator::operator*() const {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     return ds->get_face(halfedge);
 }
 
 halfedge_mesh::face_around_vertex_circulator::operator bool() const {
-    return halfedge;
+    return halfedge.is_valid();
 }
 
 halfedge_mesh::face_around_vertex_circulator &halfedge_mesh::face_around_vertex_circulator::begin() {
-    active = !halfedge;
+    active = !halfedge.is_valid();
     return *this;
 }
 
@@ -849,25 +850,25 @@ bool halfedge_mesh::vertex_around_face_circulator::operator!=(const vertex_aroun
 }
 
 halfedge_mesh::vertex_around_face_circulator &halfedge_mesh::vertex_around_face_circulator::operator++() {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     halfedge = ds->halfedge_graph::get_next(halfedge);
     active = true;
     return *this;
 }
 
 halfedge_mesh::vertex_around_face_circulator &halfedge_mesh::vertex_around_face_circulator::operator--() {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     halfedge = ds->halfedge_graph::get_prev(halfedge);
     return *this;
 }
 
 vertex_handle halfedge_mesh::vertex_around_face_circulator::operator*() const {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     return ds->get_to_vertex(halfedge);
 }
 
 halfedge_mesh::vertex_around_face_circulator &halfedge_mesh::vertex_around_face_circulator::begin() {
-    active = !halfedge;
+    active = !halfedge.is_valid();
     return *this;
 }
 
@@ -899,14 +900,14 @@ bool halfedge_mesh::halfedge_around_face_circulator::operator!=(const halfedge_a
 }
 
 halfedge_mesh::halfedge_around_face_circulator &halfedge_mesh::halfedge_around_face_circulator::operator++() {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     halfedge = ds->halfedge_graph::get_next(halfedge);
     active = true;
     return *this;
 }
 
 halfedge_mesh::halfedge_around_face_circulator &halfedge_mesh::halfedge_around_face_circulator::operator--() {
-    assert(ds && halfedge);
+    assert(ds && halfedge.is_valid());
     halfedge = ds->halfedge_graph::get_prev(halfedge);
     return *this;
 }
@@ -916,7 +917,7 @@ halfedge_handle halfedge_mesh::halfedge_around_face_circulator::operator*() cons
 }
 
 halfedge_mesh::halfedge_around_face_circulator &halfedge_mesh::halfedge_around_face_circulator::begin() {
-    active = !halfedge;
+    active = !halfedge.is_valid();
     return *this;
 }
 
@@ -1015,10 +1016,10 @@ void halfedge_mesh::remove_edge_helper(halfedge_handle h) {
     halfedge_graph::set_next(op, on);
 
     // face -> halfedge
-    if (fh) {
+    if (fh.is_valid()) {
         set_halfedge(fh, hn);
     }
-    if (fo) {
+    if (fo.is_valid()) {
         set_halfedge(fo, on);
     }
 
@@ -1065,12 +1066,12 @@ void halfedge_mesh::remove_loop_helper(halfedge_handle h) {
     adjust_outgoing_halfedge(v1);
 
     // face -> halfedge
-    if (fo && get_halfedge(fo) == o0) {
+    if (fo.is_valid() && get_halfedge(fo) == o0) {
         set_halfedge(fo, h1);
     }
 
     // delete stuff
-    if (fh) {
+    if (fh.is_valid()) {
         mark_face_deleted(fh);
     }
 
@@ -1272,10 +1273,10 @@ halfedge_handle halfedge_mesh::insert_vertex(halfedge_handle h0, vertex_handle v
     adjust_outgoing_halfedge(v);
 
     // adjust face connectivity
-    if (fh) {
+    if (fh.is_valid()) {
         set_halfedge(fh, h0);
     }
-    if (fo) {
+    if (fo.is_valid()) {
         set_halfedge(fo, o1);
     }
 
@@ -1289,7 +1290,7 @@ halfedge_handle halfedge_mesh::insert_vertex(halfedge_handle h0, vertex_handle v
 
 halfedge_handle halfedge_mesh::insert_edge(halfedge_handle h0, halfedge_handle h1) {
     assert(get_face(h0) == get_face(h1));
-    assert(get_face(h0));
+    assert(get_face(h0).is_valid());
 
     auto v0 = halfedge_graph::get_to_vertex(h0);
     auto v1 = halfedge_graph::get_to_vertex(h1);
@@ -1402,6 +1403,7 @@ property<VectorI<6>, 6> halfedge_mesh::get_triangles_adjacencies() {
 }
 
 face_handle halfedge_mesh::find_closest_face(const position_t &point) const {
+    distance_point3_triangle3 distance;
     face_handle closest_yet;
     auto min_distance = scalar_max;
     for (const auto f : faces) {
@@ -1411,7 +1413,7 @@ face_handle halfedge_mesh::find_closest_face(const position_t &point) const {
                            positions[halfedge_graph::get_to_vertex(h)],
                            positions[halfedge_graph::get_from_vertex(h)]);
 
-        auto dist = distance(triangle, point);
+        auto dist = distance(point, triangle).distance;
         if (dist < min_distance) {
             min_distance = dist;
             closest_yet = f;
@@ -1422,6 +1424,7 @@ face_handle halfedge_mesh::find_closest_face(const position_t &point) const {
 }
 
 std::vector<face_handle> halfedge_mesh::find_closest_k_face(const position_t &point, size_t k) const {
+    distance_point3_triangle3 distance;
     using DistIndex = std::pair<bcg_scalar_t, face_handle>;
     std::vector<DistIndex> closest_k;
 
@@ -1432,7 +1435,7 @@ std::vector<face_handle> halfedge_mesh::find_closest_k_face(const position_t &po
                            positions[halfedge_graph::get_to_vertex(h)],
                            positions[halfedge_graph::get_from_vertex(h)]);
 
-        auto dist = distance(triangle, point);
+        auto dist = distance(point, triangle).distance;
         if (closest_k.size() < k + 1) {
             closest_k.emplace_back(dist, f);
             if (closest_k.size() == k) {
@@ -1458,6 +1461,7 @@ std::vector<face_handle> halfedge_mesh::find_closest_k_face(const position_t &po
 }
 
 std::vector<face_handle> halfedge_mesh::find_closest_faces(const position_t &point, bcg_scalar_t radius) const {
+    distance_point3_triangle3 distance;
     using DistIndex = std::pair<bcg_scalar_t, face_handle>;
     std::vector<DistIndex> closest;
     for (const auto v : this->vertices) {
@@ -1466,7 +1470,7 @@ std::vector<face_handle> halfedge_mesh::find_closest_faces(const position_t &poi
                                positions[halfedge_graph::get_to_vertex(h)],
                                positions[halfedge_graph::get_from_vertex(h)]);
 
-            auto dist = distance(triangle, point);
+            auto dist = distance(point, triangle).distance;
             if (dist <= radius) {
                 closest.emplace_back(dist, get_face(h));
             }
@@ -1482,6 +1486,7 @@ std::vector<face_handle> halfedge_mesh::find_closest_faces(const position_t &poi
 }
 
 face_handle halfedge_mesh::find_closest_face_in_neighborhood(vertex_handle v, const position_t &point) const {
+    distance_point3_triangle3 distance;
     face_handle closest_yet;
     bcg_scalar_t min_dist_yet = scalar_max;
 
@@ -1491,18 +1496,18 @@ face_handle halfedge_mesh::find_closest_face_in_neighborhood(vertex_handle v, co
         auto h = get_halfedge(f);
         triangle3 triangle(positions[halfedge_graph::get_to_vertex(halfedge_graph::get_next(h))],
                            positions[halfedge_graph::get_to_vertex(h)],
-                           positions[halfedge_graph::get_from_vertex(h)]);
+                           positions[v]);
 
-        auto dist = distance(triangle, point);
-        if (dist < min_dist_yet) {
-            min_dist_yet = dist;
+        auto sqr_dist = distance(point, triangle).sqr_distance;
+        if (sqr_dist < min_dist_yet) {
+            min_dist_yet = sqr_dist;
             closest_yet = f;
         }
         ++count;
         if (count > valence) {
             std::cerr << "infinite loop?\n";
         }
-        if (dist == 0) break;
+        if (sqr_dist == 0) break;
     }
     return closest_yet;
 }
