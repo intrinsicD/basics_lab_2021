@@ -79,8 +79,8 @@ void points_renderer::on_render(const event::internal::render &) {
         program.set_uniform_f("material.uniform_point_size", gl_state.point_size_value);
 
         program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
-        Vector<float, 4> uniform_color = material.uniform_color.cast<float>();
-        program.set_uniform_4f("material.uniform_color", 1, uniform_color.data());
+        Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
+        program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
         float alpha = material.alpha;
         program.set_uniform_f("material.alpha", alpha);
 

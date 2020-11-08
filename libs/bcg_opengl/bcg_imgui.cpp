@@ -249,6 +249,45 @@ void gui_rendering(viewer_state *state, entt::entity id) {
     }
 }
 
+void gui_info(viewer_state *state, entity_info *info, entt::entity id){
+    if(!info) return;
+    if (ImGui::CollapsingHeader("info")) {
+        draw_label(&state->window, "entity_id", std::to_string((unsigned int) id));
+        draw_label(&state->window, "filename", path_filename(info->filename));
+        draw_textinput(&state->window, "entity_name", info->entity_name);
+        std::stringstream ss;
+        ss << info->loading_center.transpose();
+        draw_label(&state->window, "loading_center", ss.str());
+        draw_label(&state->window, "loading_scale", std::to_string(info->loading_scale));
+    }
+}
+
+void gui_info(viewer_state *state, halfedge_mesh *mesh){
+    if(!mesh) return;
+    if (ImGui::CollapsingHeader("mesh")) {
+        gui_info(state, &mesh->vertices, state->picker.vertex_id.idx);
+        gui_info(state, &mesh->halfedges, state->picker.halfedge_id.idx);
+        gui_info(state, &mesh->edges, state->picker.edge_id.idx);
+        gui_info(state, &mesh->faces, state->picker.face_id.idx);
+    }
+}
+
+void gui_info(viewer_state *state, halfedge_graph *graph){
+    if(!graph) return;
+    if (ImGui::CollapsingHeader("graph")) {
+        gui_info(state, &graph->vertices, state->picker.vertex_id.idx);
+        gui_info(state, &graph->halfedges, state->picker.halfedge_id.idx);
+        gui_info(state, &graph->edges, state->picker.edge_id.idx);
+    }
+}
+
+void gui_info(viewer_state *state, point_cloud *pc){
+    if(!pc) return;
+    if (ImGui::CollapsingHeader("point_cloud")) {
+        gui_info(state, &pc->vertices, state->picker.vertex_id.idx);
+    }
+}
+
 void gui_info(viewer_state *state) {
     if (ImGui::CollapsingHeader("Scene")) {
         auto view = state->scene.view<entity_info>();
@@ -257,20 +296,16 @@ void gui_info(viewer_state *state) {
             std::stringstream ss;
             ss << info.entity_name << " id: " << std::to_string((unsigned int) id);
             if (ImGui::TreeNode(ss.str().c_str())) {
-                ss.str("");
-                draw_label(&state->window, "entity_id", std::to_string((unsigned int) id));
-                draw_label(&state->window, "filename", path_filename(info.filename));
-                draw_textinput(&state->window, "entity_name", info.entity_name);
-                ss << info.loading_center.transpose();
-                draw_label(&state->window, "loading_center", ss.str());
-                draw_label(&state->window, "loading_scale", std::to_string(info.loading_scale));
+                gui_info(state, state->scene.try_get<entity_info>(id), id);
                 gui_info(state, state->scene.try_get<aligned_box3>(id));
                 gui_info(state, state->scene.try_get<Transform>(id));
                 gui_rendering(state, id);
-                gui_info(state, state->get_vertices(id), state->picker.vertex_id.idx);
-                gui_info(state, state->get_halfedges(id), state->picker.halfedge_id.idx);
-                gui_info(state, state->get_edges(id), state->picker.edge_id.idx);
-                gui_info(state, state->get_faces(id), state->picker.face_id.idx);
+                auto *mesh =  state->scene.try_get<halfedge_mesh>(id);
+                if(mesh) gui_info(state, mesh);
+                auto *graph =  state->scene.try_get<halfedge_graph>(id);
+                if(graph) gui_info(state, graph);
+                auto *pc =  state->scene.try_get<point_cloud>(id);
+                if(pc) gui_info(state, pc);
                 gui_info(state, state->scene.try_get<ogl_vertex_array>(id));
                 ImGui::TreePop();
             }

@@ -9,7 +9,7 @@ uniform mat4 proj;
 
 struct Material{
     bool use_uniform_color;
-    vec4 uniform_color;
+    vec3 uniform_color;
 
     bool use_uniform_point_size;
     float uniform_point_size;
@@ -22,7 +22,7 @@ out vec4 f_color;
 
 void main() {
     if(material.use_uniform_color){
-        f_color = material.uniform_color;
+        f_color = vec4(material.uniform_color, material.alpha);
     }else{
         f_color = vec4(color, material.alpha);
     }
