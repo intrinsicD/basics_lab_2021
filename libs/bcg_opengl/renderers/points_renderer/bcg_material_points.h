@@ -6,17 +6,25 @@
 #define BCG_GRAPHICS_BCG_MATERIAL_POINTS_H
 
 #include "bcg_library/color/bcg_colors.h"
+#include "renderers/bcg_attribute.h"
 
 namespace bcg{
 
 struct material_points{
-    bool use_uniform_point_size = true;
+    std::vector<attribute> attributes = {
+            {"position", "position", 0, true},
+            {"points_color", "", 1, false},
+            {"point_size", "", 2, false}
+    };
+
+    ogl_vertex_array vao;
+
     bool use_uniform_color = true;
+    bool use_uniform_size = true;
+
     VectorS<3> uniform_color = color::random();
-    bcg_scalar_t alpha = 1.0;
-    std::string position_buffer;
-    std::string color_buffer;
-    std::string size_buffer;
+    bcg_scalar_t uniform_size = 1.0;
+    bcg_scalar_t uniform_alpha = 1.0;
 };
 
 

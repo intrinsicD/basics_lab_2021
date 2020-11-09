@@ -1,6 +1,6 @@
 #version 330
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 color;
+layout (location = 1) in vec3 points_color;
 layout (location = 2) in float point_size;
 
 uniform mat4 model;
@@ -24,7 +24,7 @@ void main() {
     if(material.use_uniform_color){
         f_color = vec4(material.uniform_color, material.alpha);
     }else{
-        f_color = vec4(color, material.alpha);
+        f_color = vec4(points_color, material.alpha);
     }
 
     if(material.use_uniform_point_size){

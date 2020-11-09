@@ -9,15 +9,26 @@
 #include "bcg_viewer_state.h"
 #include "bcg_opengl.h"
 #include "bcg_material_points.h"
+#include "renderers/bcg_attribute.h"
 #include "bcg_events_points_renderer.h"
 
 namespace bcg {
 
 points_renderer::points_renderer(viewer_state *state) : renderer("points_renderer", state) {
-    state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
     state->dispatcher.sink<event::internal::startup>().connect<&points_renderer::on_startup>(this);
-    state->dispatcher.sink<event::internal::point_size>().connect<&points_renderer::on_point_size>(this);
-    state->dispatcher.sink<event::internal::set_point_size>().connect<&points_renderer::on_set_point_size>(this);
+    state->dispatcher.sink<event::internal::shutdown>().connect<&points_renderer::on_shutdown>(this);
+    state->dispatcher.sink<event::internal::uniform_point_size>().connect<&points_renderer::on_uniform_point_size>(
+            this);
+    state->dispatcher.sink<event::internal::set_uniform_point_size>().connect<&points_renderer::on_set_uniform_point_size>(
+            this);
+    state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
+    state->dispatcher.sink<event::points_renderer::set_material>().connect<&points_renderer::on_set_material>(this);
+    state->dispatcher.sink<event::points_renderer::set_position_attribute>().connect<&points_renderer::on_set_position_attribute>(
+            this);
+    state->dispatcher.sink<event::points_renderer::set_color_attribute>().connect<&points_renderer::on_set_color_attribute>(
+            this);
+    state->dispatcher.sink<event::points_renderer::set_point_size_attribute>().connect<&points_renderer::on_set_point_size_attribute>(
+            this);
 }
 
 void points_renderer::on_startup(const event::internal::startup &) {
@@ -28,31 +39,64 @@ void points_renderer::on_startup(const event::internal::startup &) {
                                                              "points_renderer/point_fragment_shader.glsl");
 }
 
+void points_renderer::on_shutdown(const event::internal::shutdown &event) {
+    auto view = state->scene.view<material_points>();
+    for (const auto id : view) {
+        auto &material = view.get<material_points>(id);
+        material.vao.destroy();
+    }
+    programs["point_renderer_program"].destroy();
+}
+
 void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
+
+    auto &material = state->scene.get_or_emplace<material_points>(event.id);
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+    state->dispatcher.trigger<event::points_renderer::set_material>(event.id);
+}
+
+void points_renderer::on_set_material(const event::points_renderer::set_material &event) {
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<material_points>(event.id)) {
         state->scene.emplace<material_points>(event.id);
     }
-    if (!state->scene.has<ogl_vertex_array>(event.id)) {
-        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id,
-                                                                        std::vector<std::string>{"position", "color", "point_size"});
+    auto &material = state->scene.get<material_points>(event.id);
+    auto &shape = state->scene.get<ogl_shape>(event.id);
+    if (!material.vao) {
+        material.vao.name = "points";
+        material.vao.create();
     }
+    material.vao.bind();
+    for (const auto &attribute: material.attributes) {
+        auto iter = shape.vertex_buffers.find(attribute.buffer_name);
+        if (iter != shape.vertex_buffers.end()) {
+            iter->second.bind();
+            if (attribute.enable) {
+                material.vao.capture_vertex_buffer(attribute.index, iter->second);
+            } else {
+                material.vao.disable_attribute(attribute.index);
+            }
+            iter->second.release();
+        }
+    }
+    material.vao.release();
 }
 
 void points_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        if(state->scene.has<event::points_renderer::enqueue>(id)){
+        if (state->scene.has<event::points_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::points_renderer::enqueue>(id);
         }
     });
 }
 
 void points_renderer::on_render(const event::internal::render &) {
-    if(entities_to_draw.empty()) return;
+    if (entities_to_draw.empty()) return;
     gl_state.set_depth_test(true);
     gl_state.set_depth_mask(true);
     gl_state.set_depth_func(GL_LESS);
@@ -75,18 +119,18 @@ void points_renderer::on_render(const event::internal::render &) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
-        program.set_uniform_i("material.use_uniform_point_size", material.use_uniform_point_size);
+        program.set_uniform_i("material.use_uniform_point_size", material.use_uniform_size);
         program.set_uniform_f("material.uniform_point_size", gl_state.point_size_value);
 
         program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
         Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
-        float alpha = material.alpha;
+        float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
 
-        auto &vao = state->scene.get<ogl_vertex_array>(id);
-        vao.bind();
-        auto &pos = vao.vertex_buffers["position"];
+        auto &shape = state->scene.get<ogl_shape>(id);
+        material.vao.bind();
+        auto &pos = shape.vertex_buffers["position"];
         glDrawArrays(GL_POINTS, 0, pos.num_elements);
         assert_ogl_error();
     }
@@ -98,12 +142,55 @@ void points_renderer::on_end_frame(const event::internal::end_frame &) {
 
 }
 
-void points_renderer::on_point_size(const event::internal::point_size &event){
-    gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
+void points_renderer::on_uniform_point_size(const event::internal::uniform_point_size &event) {
+    gl_state.set_point_size(
+            std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
 }
 
-void points_renderer::on_set_point_size(const event::internal::set_point_size &event){
+void points_renderer::on_set_uniform_point_size(const event::internal::set_uniform_point_size &event) {
     gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(event.value, 1.0), 20.0));
+}
+
+void points_renderer::on_set_position_attribute(const event::points_renderer::set_position_attribute &event) {
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_points>(event.id);
+    auto *vertices = state->get_vertices(event.id);
+    if (vertices->get_base_ptr(event.position.property_name)->dims() != 3) return;
+    auto &position = material.attributes[0];
+    position.property_name = event.position.property_name;
+    position.enable = true;
+    position.update = true;
+    std::vector<attribute> vertex_attributes = {position};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+}
+
+void points_renderer::on_set_color_attribute(const event::points_renderer::set_color_attribute &event) {
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_points>(event.id);
+    //TODO convert to colormap if 1 dimensional.
+    auto &color = material.attributes[1];
+    color.property_name = event.color.property_name;
+    color.enable = true;
+    color.update = true;
+    material.use_uniform_color = false;
+    std::vector<attribute> vertex_attributes = {color};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+}
+
+void points_renderer::on_set_point_size_attribute(const event::points_renderer::set_point_size_attribute &event) {
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_points>(event.id);
+    auto *vertices = state->get_vertices(event.id);
+    auto *ptr = vertices->get_base_ptr(event.point_size.property_name);
+    if (!ptr) return;
+    if (ptr->dims() != 1) return;
+    auto &point_size = material.attributes[2];
+    point_size.property_name = event.point_size.property_name;
+    point_size.enable = true;
+    point_size.update = true;
+    material.use_uniform_size = false;
+    std::vector<attribute> vertex_attributes = {point_size};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
 }
 
 }

@@ -7,6 +7,7 @@
 
 #include "color/bcg_colors.h"
 #include "entt/entt.hpp"
+#include "renderers/bcg_attribute.h"
 
 namespace bcg{
 
@@ -14,6 +15,12 @@ struct material_picking{
     material_picking() = default;
 
     explicit material_picking(entt::entity id) : picking_color(color::packed_int((unsigned int)id)){}
+
+    std::vector<attribute> attributes = {
+            {"position", "position", 0, true}
+    };
+
+    ogl_vertex_array vao;
 
     VectorS<3> picking_color;
 };

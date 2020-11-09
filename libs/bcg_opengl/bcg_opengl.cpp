@@ -1489,6 +1489,7 @@ void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buf
     assert_ogl_error();
     glEnableVertexAttribArray(index);
     assert_ogl_error();
+    captured_attributes[index] = buffer.name;
 }
 
 void ogl_vertex_array::disable_attribute(unsigned int index) const {

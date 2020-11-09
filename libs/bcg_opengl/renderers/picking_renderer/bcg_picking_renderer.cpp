@@ -17,8 +17,10 @@ namespace bcg {
 
 picking_renderer::picking_renderer(viewer_state *state) : renderer("picking_renderer", state) {
     state->dispatcher.sink<event::picking_renderer::enqueue>().connect<&picking_renderer::on_enqueue>(this);
+    state->dispatcher.sink<event::picking_renderer::set_material>().connect<&picking_renderer::on_set_material>(this);
     state->dispatcher.sink<event::mouse::button>().connect<&picking_renderer::on_mouse_button>(this);
     state->dispatcher.sink<event::internal::startup>().connect<&picking_renderer::on_startup>(this);
+    state->dispatcher.sink<event::internal::shutdown>().connect<&picking_renderer::on_shutdown>(this);
 }
 
 void picking_renderer::on_startup(const event::internal::startup &) {
@@ -29,15 +31,47 @@ void picking_renderer::on_startup(const event::internal::startup &) {
                                                                "picking_renderer/picking_fragment_shader.glsl");
 }
 
+void picking_renderer::on_shutdown(const event::internal::shutdown &event) {
+    programs["picking_renderer_program"].destroy();
+}
+
 void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
+    state->dispatcher.trigger<event::picking_renderer::set_material>(event.id);
+}
+
+void picking_renderer::on_set_material(const event::picking_renderer::set_material &event){
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<material_picking>(event.id)) {
         state->scene.emplace<material_picking>(event.id, event.id);
     }
+    auto &material = state->scene.get<material_picking>(event.id);
+    auto &shape = state->scene.get<ogl_shape>(event.id);
+    if (!material.vao) {
+        material.vao.name = "picking";
+        material.vao.create();
+    }
+    material.vao.bind();
+    for(const auto &attribute: material.attributes){
+        auto iter = shape.vertex_buffers.find(attribute.buffer_name);
+        if(iter != shape.vertex_buffers.end()){
+            iter->second.bind();
+            if(attribute.enable){
+                material.vao.capture_vertex_buffer(attribute.index, iter->second);
+            }else{
+                material.vao.disable_attribute(attribute.index);
+            }
+            iter->second.release();
+        }
+    }
+    if(shape.element_buffer){
+        shape.element_buffer.bind();
+    }
+    material.vao.release();
 }
 
 void picking_renderer::on_begin_frame(const event::internal::begin_frame &) {
@@ -80,17 +114,17 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         Vector<float, 3> picking_color = material.picking_color.cast<float>();
         program.set_uniform_3f("material.picking_color", 1, picking_color.data());
 
-        auto &vao = state->scene.get<ogl_vertex_array>(id);
-        vao.bind();
+        auto &shape = state->scene.get<ogl_shape>(id);
+        material.vao.bind();
 
-        if (vao.element_buffer) {
-            if (vao.element_buffer.dims == 2) {
-                glDrawElements(GL_LINES, vao.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
-            } else if (vao.element_buffer.dims == 3) {
-                glDrawElements(GL_TRIANGLES, vao.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
+        if (shape.element_buffer) {
+            if (shape.element_buffer.dims == 2) {
+                glDrawElements(GL_LINES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
+            } else if (shape.element_buffer.dims == 3) {
+                glDrawElements(GL_TRIANGLES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
             }
         } else {
-            auto &pos = vao.vertex_buffers["position"];
+            auto &pos = shape.vertex_buffers["position"];
             glDrawArrays(GL_POINTS, 0, pos.num_elements);
         }
         assert_ogl_error();

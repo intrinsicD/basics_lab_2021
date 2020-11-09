@@ -11,7 +11,9 @@ namespace bcg::event::picking_renderer {
 struct enqueue {
     entt::entity id;
 };
-
+struct set_material{
+    entt::entity id;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_PICKING_RENDERER_H

@@ -17,7 +17,11 @@ struct picking_renderer : public renderer {
 private:
     void on_startup(const event::internal::startup &event);
 
+    void on_shutdown(const event::internal::shutdown &event);
+
     void on_enqueue(const event::picking_renderer::enqueue &event);
+
+    void on_set_material(const event::picking_renderer::set_material &event);
 
     void on_begin_frame(const event::internal::begin_frame &event) override;
 

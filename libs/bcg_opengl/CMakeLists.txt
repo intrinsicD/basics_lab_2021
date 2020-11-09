@@ -30,7 +30,6 @@ if (BCG_OPENGL)
             renderers/bcg_render_system.h renderers/bcg_render_system.cpp
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_events_points_renderer.h
             renderers/mesh_renderer/bcg_material_mesh.h renderers/mesh_renderer/bcg_mesh_renderer.h renderers/mesh_renderer/bcg_mesh_renderer.cpp renderers/mesh_renderer/bcg_events_mesh_renderer.h
-            renderers/test_renderer/bcg_material_test.h renderers/test_renderer/bcg_test_renderer.h renderers/test_renderer/bcg_test_renderer.cpp renderers/test_renderer/bcg_events_test_renderer.h
             renderers/picking_renderer/bcg_material_picking.h renderers/picking_renderer/bcg_picking_renderer.h renderers/picking_renderer/bcg_picking_renderer.cpp renderers/picking_renderer/bcg_events_picking_renderer.h
             ${GLAD_SOURCE_DIRS}/glad.c
             ${IMGUI_SOURCES}

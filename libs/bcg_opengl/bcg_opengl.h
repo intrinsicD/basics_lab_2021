@@ -492,9 +492,9 @@ struct ogl_element_buffer : public ogl_buffer_object {
     void download(bcg_index_t *data, size_t size_bytes, size_t offset_bytes = 0);
 };
 
+
 struct ogl_vertex_array : public ogl_handle {
-    std::unordered_map<std::string, ogl_vertex_buffer> vertex_buffers;
-    ogl_element_buffer element_buffer, adjacency_buffer;
+    mutable std::unordered_map<unsigned int, std::string> captured_attributes;
 
     ogl_vertex_array();
 
@@ -515,6 +515,11 @@ struct ogl_vertex_array : public ogl_handle {
     void disable_attribute(unsigned int index) const;
 
     void capture_vertex_buffer(unsigned int index, const ogl_vertex_buffer &buffer);
+};
+
+struct ogl_shape{
+    std::unordered_map<std::string, ogl_vertex_buffer> vertex_buffers;
+    ogl_element_buffer element_buffer, adjacency_buffer;
 };
 
 struct ogl_renderbuffer : public ogl_handle {

@@ -10,13 +10,19 @@
 #include "bcg_viewer_state.h"
 #include "bcg_opengl.h"
 #include "bcg_material_mesh.h"
+#include "renderers/bcg_attribute.h"
 #include "bcg_events_mesh_renderer.h"
 
 namespace bcg {
 
 mesh_renderer::mesh_renderer(viewer_state *state) : renderer("mesh_renderer", state) {
-    state->dispatcher.sink<event::mesh_renderer::enqueue>().connect<&mesh_renderer::on_enqueue>(this);
     state->dispatcher.sink<event::internal::startup>().connect<&mesh_renderer::on_startup>(this);
+    state->dispatcher.sink<event::internal::shutdown>().connect<&mesh_renderer::on_shutdown>(this);
+    state->dispatcher.sink<event::mesh_renderer::enqueue>().connect<&mesh_renderer::on_enqueue>(this);
+    state->dispatcher.sink<event::mesh_renderer::set_material>().connect<&mesh_renderer::on_set_material>(this);
+    state->dispatcher.sink<event::mesh_renderer::set_position_attribute>().connect<&mesh_renderer::on_set_position_attribute>(this);
+    state->dispatcher.sink<event::mesh_renderer::set_normal_attribute>().connect<&mesh_renderer::on_set_normal_attribute>(this);
+    state->dispatcher.sink<event::mesh_renderer::set_color_attribute>().connect<&mesh_renderer::on_set_color_attribute>(this);
 }
 
 void mesh_renderer::on_startup(const event::internal::startup &) {
@@ -27,6 +33,15 @@ void mesh_renderer::on_startup(const event::internal::startup &) {
                                                             "mesh_renderer/mesh_fragment_shader.glsl");
 }
 
+void mesh_renderer::on_shutdown(const event::internal::shutdown &event){
+    auto view = state->scene.view<material_mesh>();
+    for(const auto id : view){
+        auto &material = view.get<material_mesh>(id);
+        material.vao.destroy();
+    }
+    programs["mesh_renderer_program"].destroy();
+}
+
 void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
@@ -34,19 +49,45 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
-    if (!state->scene.has<material_mesh>(event.id)) {
+
+    auto &material = state->scene.get_or_emplace<material_mesh>(event.id);
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+    auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
+    state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+    state->dispatcher.trigger<event::mesh_renderer::set_material>(event.id);
+}
+
+void mesh_renderer::on_set_material(const event::mesh_renderer::set_material &event){
+    if (!state->scene.valid(event.id)) return;
+    if(!state->scene.has<material_mesh>(event.id)){
         state->scene.emplace<material_mesh>(event.id);
     }
-    auto vertices = state->get_vertices(event.id);
-    auto faces = state->get_faces(event.id);
-    auto vertex_attributes = std::vector<std::string>{"position", "normal", "color"};
-    if (vertices->any_dirty(vertex_attributes)) {
-        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    auto &material = state->scene.get<material_mesh>(event.id);
+    auto &shape = state->scene.get<ogl_shape>(event.id);
+    if (!material.vao) {
+        material.vao.name = "mesh";
+        material.vao.create();
     }
-    auto face_attributes = std::vector<std::string>{"triangles"};
-    if (!faces->has("triangles") || faces->any_dirty(face_attributes)) {
-        state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+    material.vao.bind();
+    for(const auto &attribute: material.attributes){
+        auto iter = shape.vertex_buffers.find(attribute.buffer_name);
+        if(iter != shape.vertex_buffers.end()){
+            iter->second.bind();
+            if(attribute.enable){
+                material.vao.capture_vertex_buffer(attribute.index, iter->second);
+            }else{
+                material.vao.disable_attribute(attribute.index);
+            }
+            iter->second.release();
+        }
     }
+    if(shape.element_buffer.is_valid()){
+        shape.element_buffer.bind();
+    }
+    if(shape.adjacency_buffer.is_valid()){
+        shape.adjacency_buffer.bind();
+    }
+    material.vao.release();
 }
 
 void mesh_renderer::on_begin_frame(const event::internal::begin_frame &) {
@@ -86,13 +127,13 @@ void mesh_renderer::on_render(const event::internal::render &) {
         program.set_uniform_3f("material.specular", 1, specular.data());
         float shininess = material.shininess;
         program.set_uniform_f("material.shininess", shininess);
-        float alpha = material.alpha;
+        float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
 
-        auto &vao = state->scene.get<ogl_vertex_array>(id);
-        vao.bind();
+        auto &shape = state->scene.get<ogl_shape>(id);
+        material.vao.bind();
 
-        glDrawElements(GL_TRIANGLES, vao.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
         assert_ogl_error();
     }
 
@@ -101,6 +142,45 @@ void mesh_renderer::on_render(const event::internal::render &) {
 
 void mesh_renderer::on_end_frame(const event::internal::end_frame &) {
 
+}
+
+void mesh_renderer::on_set_position_attribute(const event::mesh_renderer::set_position_attribute &event){
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_mesh>(event.id);
+    auto *vertices = state->get_vertices(event.id);
+    if (vertices->get_base_ptr(event.position.property_name)->dims() != 3) return;
+    auto &position = material.attributes[0];
+    position.property_name = event.position.property_name;
+    position.enable = true;
+    position.update = true;
+    std::vector<attribute> vertex_attributes = {position};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+}
+
+void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_normal_attribute &event){
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_mesh>(event.id);
+    auto *vertices = state->get_vertices(event.id);
+    if (vertices->get_base_ptr(event.normal.property_name)->dims() != 3) return;
+    auto &position = material.attributes[1];
+    position.property_name = event.normal.property_name;
+    position.enable = true;
+    position.update = true;
+    std::vector<attribute> vertex_attributes = {position};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+}
+
+void mesh_renderer::on_set_color_attribute(const event::mesh_renderer::set_color_attribute &event){
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_mesh>(event.id);
+    //TODO convert to colormap if 1 dimensional.
+    auto &color = material.attributes[2];
+    color.property_name = event.color.property_name;
+    color.enable = true;
+    color.update = true;
+    material.use_uniform_color = false;
+    std::vector<attribute> vertex_attributes = {color};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
 }
 
 }

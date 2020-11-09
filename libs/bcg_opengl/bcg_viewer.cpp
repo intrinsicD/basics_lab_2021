@@ -151,7 +151,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                   state->callbacks.scroll_cb(state, (float) yoffset);
                               } else {
                                   if (state->keyboard.ctrl_pressed) {
-                                      state->dispatcher.trigger<event::internal::point_size>(yoffset);
+                                      state->dispatcher.trigger<event::internal::uniform_point_size>(yoffset);
                                   } else {
                                       state->dispatcher.trigger<event::mouse::scroll>(yoffset);
                                   }

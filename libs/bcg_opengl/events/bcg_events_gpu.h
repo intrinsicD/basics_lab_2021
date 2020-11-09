@@ -8,19 +8,20 @@
 #include <vector>
 #include <string>
 #include "entt/entt.hpp"
+#include "bcg_opengl/renderers/bcg_attribute.h"
 
 namespace bcg::event::gpu{
 struct update_vertex_attributes {
     entt::entity id;
-    std::vector<std::string> attributes_names;
+    std::vector<attribute> attributes;
 };
 struct update_edge_attributes {
     entt::entity id;
-    std::vector<std::string> attributes_names;
+    std::vector<attribute> attributes;
 };
 struct update_face_attributes {
     entt::entity id;
-    std::vector<std::string> attributes_names;
+    std::vector<attribute> attributes;
 };
 }
 

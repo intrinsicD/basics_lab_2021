@@ -12,6 +12,7 @@
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
+#include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "utils/bcg_path.h"
 
 namespace bcg {
@@ -128,20 +129,18 @@ void gui_info(viewer_state *state, const ogl_buffer_object &buffer) {
     }
 }
 
-void gui_info(viewer_state *state, const ogl_vertex_array *array) {
-    if (!array) return;
-    if (ImGui::CollapsingHeader(array->name.c_str())) {
-        draw_label(&state->window, "handle_id: ", std::to_string(array->handle));
-        ImGui::Separator();
-        for (auto &item : array->vertex_buffers) {
+void gui_info(viewer_state *state, const ogl_shape *shape) {
+    if (!shape) return;
+    if (ImGui::CollapsingHeader("buffers")) {
+        for (auto &item : shape->vertex_buffers) {
             auto &buffer = item.second;
             gui_info(state, buffer);
         }
-        if (array->element_buffer) {
-            gui_info(state, array->element_buffer);
+        if (shape->element_buffer) {
+            gui_info(state, shape->element_buffer);
         }
-        if (array->adjacency_buffer) {
-            gui_info(state, array->adjacency_buffer);
+        if (shape->adjacency_buffer) {
+            gui_info(state, shape->adjacency_buffer);
         }
     }
 }
@@ -207,26 +206,114 @@ void gui_info(viewer_state *state, const Transform *model) {
     }
 }
 
-void gui_info(viewer_state *state, material_mesh *material) {
+
+bool gui_info_property_selector(viewer_state *state, property_container *container, const std::vector<int> &filter_dims,
+                                std::string label,
+                                std::string &current_property_name) {
+    if (!container) return false;
+    auto property_names = container->properties_names(filter_dims);
+    if (property_names.empty()) return false;
+    property_names.push_back("");
+    int current_entry = property_names.size() - 1;
+    for (size_t i = 0; i < property_names.size(); ++i) {
+        if (property_names[i] == current_property_name) {
+            current_entry = i;
+            break;
+        }
+    }
+
+    auto change = draw_combobox(&state->window, label.c_str(), current_entry, property_names);
+    current_property_name = property_names[current_entry];
+    return change;
+}
+
+
+void gui_info(viewer_state *state, material_mesh *material, entt::entity id) {
     if (!material) return;
     ImGui::PushID("mesh_material");
-    ImGui::Checkbox("use_uniform_color", &material->use_uniform_color);
+    auto &position = material->attributes[0];
+    auto *vertices = state->get_vertices(id);
+    draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
+    if(ImGui::CollapsingHeader("Captured Attributes")){
+        for(const auto &item : material->vao.captured_attributes){
+            draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
+        }
+    }
+    if (gui_info_property_selector(state, vertices, {3}, position.buffer_name.c_str(),position.property_name)) {
+        if(position.property_name.empty()){
+            position.property_name = "position";
+        }
+        state->dispatcher.trigger<event::mesh_renderer::set_position_attribute>(id, position);
+    }
+    auto &normal = material->attributes[1];
+    if (gui_info_property_selector(state, vertices, {3}, normal.buffer_name, normal.property_name)) {
+        if(normal.property_name.empty()){
+            normal.property_name = "normal";
+        }
+        state->dispatcher.trigger<event::mesh_renderer::set_normal_attribute>(id, normal);
+    }
+    auto &color = material->attributes[2];
+    if (gui_info_property_selector(state, vertices, {1, 3}, color.buffer_name, color.property_name)) {
+        state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+        if(color.property_name.empty()){
+            material->use_uniform_color = true;
+        }
+    }
+    if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
+        color.property_name = "";
+    }
     draw_coloredit(&state->window, "ambient", material->ambient);
     draw_coloredit(&state->window, "diffuse", material->diffuse);
     draw_coloredit(&state->window, "specular", material->specular);
     ImGui::InputFloat("shininess", &material->shininess);
-    ImGui::InputFloat("alpha", &material->alpha);
+    ImGui::InputFloat("alpha", &material->uniform_alpha);
     ImGui::PopID();
-
 }
 
-void gui_info(viewer_state *state, material_points *material) {
+void gui_info(viewer_state *state, material_points *material, entt::entity id) {
     if (!material) return;
-
-    ImGui::Checkbox("use_uniform_color", &material->use_uniform_color);
-    ImGui::Checkbox("use_uniform_point_size", &material->use_uniform_point_size);
+    ImGui::PushID("point_material");
+    auto *vertices = state->get_vertices(id);
+    auto &position = material->attributes[0];
+    draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
+    if(ImGui::CollapsingHeader("Captured Attributes")){
+        for(const auto &item : material->vao.captured_attributes){
+            draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
+        }
+    }
+    if (gui_info_property_selector(state, vertices, {3}, position.buffer_name.c_str(),position.property_name)) {
+        if(position.property_name.empty()){
+            position.property_name = "position";
+        }
+        state->dispatcher.trigger<event::points_renderer::set_position_attribute>(id, position);
+    }
+    auto &color = material->attributes[1];
+    if (gui_info_property_selector(state, vertices, {1, 3}, color.buffer_name, color.property_name)) {
+        if(color.property_name.empty()){
+            material->use_uniform_color = true;
+        }
+        state->dispatcher.trigger<event::points_renderer::set_color_attribute>(id, color);
+    }
+    auto &point_size = material->attributes[2];
+    if (gui_info_property_selector(state, vertices, {1}, point_size.buffer_name, point_size.property_name)) {
+        state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(id, point_size);
+        if(point_size.property_name.empty()){
+            material->use_uniform_size = true;
+        }
+    }
+    if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
+        if(material->use_uniform_color){
+            color.property_name = "";
+        }
+    }
+    if(ImGui::Checkbox("use_uniform_point_size", &material->use_uniform_size)){
+        if(material->use_uniform_size){
+            point_size.property_name = "";
+        }
+    }
     draw_coloredit(&state->window, "uniform_color", material->uniform_color);
-    ImGui::InputFloat("alpha", &material->alpha);
+    ImGui::InputFloat("alpha", &material->uniform_alpha);
+    ImGui::PopID();
 }
 
 void gui_rendering(viewer_state *state, entt::entity id) {
@@ -241,16 +328,16 @@ void gui_rendering(viewer_state *state, entt::entity id) {
         }
     }
     if (ImGui::CollapsingHeader("materials")) {
-        gui_info(state, state->scene.try_get<material_mesh>(id));
+        gui_info(state, state->scene.try_get<material_mesh>(id), id);
         if (show_points) {
             ImGui::Separator();
-            gui_info(state, state->scene.try_get<material_points>(id));
+            gui_info(state, state->scene.try_get<material_points>(id), id);
         }
     }
 }
 
-void gui_info(viewer_state *state, entity_info *info, entt::entity id){
-    if(!info) return;
+void gui_info(viewer_state *state, entity_info *info, entt::entity id) {
+    if (!info) return;
     if (ImGui::CollapsingHeader("info")) {
         draw_label(&state->window, "entity_id", std::to_string((unsigned int) id));
         draw_label(&state->window, "filename", path_filename(info->filename));
@@ -262,8 +349,8 @@ void gui_info(viewer_state *state, entity_info *info, entt::entity id){
     }
 }
 
-void gui_info(viewer_state *state, halfedge_mesh *mesh){
-    if(!mesh) return;
+void gui_info(viewer_state *state, halfedge_mesh *mesh) {
+    if (!mesh) return;
     if (ImGui::CollapsingHeader("mesh")) {
         gui_info(state, &mesh->vertices, state->picker.vertex_id.idx);
         gui_info(state, &mesh->halfedges, state->picker.halfedge_id.idx);
@@ -272,8 +359,8 @@ void gui_info(viewer_state *state, halfedge_mesh *mesh){
     }
 }
 
-void gui_info(viewer_state *state, halfedge_graph *graph){
-    if(!graph) return;
+void gui_info(viewer_state *state, halfedge_graph *graph) {
+    if (!graph) return;
     if (ImGui::CollapsingHeader("graph")) {
         gui_info(state, &graph->vertices, state->picker.vertex_id.idx);
         gui_info(state, &graph->halfedges, state->picker.halfedge_id.idx);
@@ -281,8 +368,8 @@ void gui_info(viewer_state *state, halfedge_graph *graph){
     }
 }
 
-void gui_info(viewer_state *state, point_cloud *pc){
-    if(!pc) return;
+void gui_info(viewer_state *state, point_cloud *pc) {
+    if (!pc) return;
     if (ImGui::CollapsingHeader("point_cloud")) {
         gui_info(state, &pc->vertices, state->picker.vertex_id.idx);
     }
@@ -300,13 +387,13 @@ void gui_info(viewer_state *state) {
                 gui_info(state, state->scene.try_get<aligned_box3>(id));
                 gui_info(state, state->scene.try_get<Transform>(id));
                 gui_rendering(state, id);
-                auto *mesh =  state->scene.try_get<halfedge_mesh>(id);
-                if(mesh) gui_info(state, mesh);
-                auto *graph =  state->scene.try_get<halfedge_graph>(id);
-                if(graph) gui_info(state, graph);
-                auto *pc =  state->scene.try_get<point_cloud>(id);
-                if(pc) gui_info(state, pc);
-                gui_info(state, state->scene.try_get<ogl_vertex_array>(id));
+                auto *mesh = state->scene.try_get<halfedge_mesh>(id);
+                if (mesh) gui_info(state, mesh);
+                auto *graph = state->scene.try_get<halfedge_graph>(id);
+                if (graph) gui_info(state, graph);
+                auto *pc = state->scene.try_get<point_cloud>(id);
+                if (pc) gui_info(state, pc);
+                gui_info(state, state->scene.try_get<ogl_shape>(id));
                 ImGui::TreePop();
             }
         }

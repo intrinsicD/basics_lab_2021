@@ -166,7 +166,9 @@ struct property_vector : public base_property {
     }
 
     inline void swap(size_t i0, size_t i1) override {
-        std::swap(container[i0], container[i1]);
+        T tmp = container[i0];
+        container[i0] = container[i1];
+        container[i1] = tmp;
         set_dirty();
     }
 
@@ -716,13 +718,29 @@ struct property_container {
         return container;
     }
 
-    [[nodiscard]] inline std::vector<std::string> properties_names() const {
+    [[nodiscard]] inline std::vector<std::string> properties_names(std::vector<int> filter_dims = {}, bool only_dirty = false) const {
         std::vector<std::string> names;
-        std::transform(container.begin(), container.end(), std::back_inserter(names),
-                       [](const auto &p) {
-                           return p.second->name();
-                       }
-        );
+        std::for_each(container.begin(), container.end(), [&names, &filter_dims, &only_dirty](auto &p) {
+            bool add = false;
+            if(!filter_dims.empty()){
+                for(const auto filter_dim : filter_dims){
+                    if(p.second->dims() == filter_dim){
+                        add = true;
+                    }
+                }
+            }else{
+                add = true;
+            }
+            if(only_dirty){
+                add = false;
+                if(p.second->is_dirty()){
+                    add = true;
+                }
+            }
+            if (add) {
+                names.push_back(p.second->name());
+            }
+        });
         return names;
     }
 

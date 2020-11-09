@@ -36,10 +36,10 @@ struct end_frame {
 struct resize {
     int width, height;
 };
-struct point_size{
+struct uniform_point_size{
     double value;
 };
-struct set_point_size{
+struct set_uniform_point_size{
     double value;
 };
 }

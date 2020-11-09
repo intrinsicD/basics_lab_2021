@@ -1,34 +1,53 @@
-poiint_cloud
-    - vertices
-        -position
-        -uniform color
-        -uniform size
-        -varying color
-        -varying size
-        -vectorfield
-        -splat
-            -x_direction
-            -y_direction
+Rendering programs:
+
+points
+- vertices
+  - varying position
+  - varying color
+  - varying size
+  - use_uniform_color
+  - use_uniform_size
+  - uniform color
+  - uniform size
+  - uniform alpha
+
+splats
+- vertices
+  - varying position
+  - varying color
+  - varying size
+  - varying x_direction
+  - varying y_direction
+  - use_uniform_color
+  - use_uniform_size
+  - uniform color
+  - uniform size
+  - uniform alpha
 
 vectorfield
-    -vertices
-        -position
-        -direction
-        -uniform color
-        -uniform size
-        -varying color
-        -varying size
+- vertices
+  - varying position
+  - varying color
+  - varying size
+  - varying direction
+  - use_uniform_color
+  - use_uniform_size
+  - uniform color
+  - uniform size
+  - uniform alpha
 
 graph : point_cloud
-    -edges
-        -position
-        -uniform color
-        -varying color
-        -vectorfield
+- edges
+  - varying position
+  - varying color
+  - use_uniform_color
+  - uniform color
+  - uniform alpha
 
 mesh : graph
-    -faces
-        -position
-        -uniform color
-        -varying color
-        -vectorfield
+- faces
+  - varying position
+  - varying color
+  - use_uniform_color
+  - uniform color
+  - uniform alpha
