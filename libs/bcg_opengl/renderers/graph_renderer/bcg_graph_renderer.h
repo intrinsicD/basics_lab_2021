@@ -21,7 +21,7 @@ private:
 
     void on_enqueue(const event::graph_renderer::enqueue &event);
 
-    void on_set_material(const event::graph_renderer::set_material &event);
+    void on_setup_for_rendering(const event::graph_renderer::setup_for_rendering &event);
 
     void on_begin_frame(const event::internal::begin_frame &event) override;
 

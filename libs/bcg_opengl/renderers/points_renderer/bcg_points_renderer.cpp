@@ -22,7 +22,7 @@ points_renderer::points_renderer(viewer_state *state) : renderer("points_rendere
     state->dispatcher.sink<event::internal::set_uniform_point_size>().connect<&points_renderer::on_set_uniform_point_size>(
             this);
     state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::points_renderer::set_material>().connect<&points_renderer::on_set_material>(this);
+    state->dispatcher.sink<event::points_renderer::setup_for_rendering>().connect<&points_renderer::on_setup_for_rendering>(this);
     state->dispatcher.sink<event::points_renderer::set_position_attribute>().connect<&points_renderer::on_set_position_attribute>(
             this);
     state->dispatcher.sink<event::points_renderer::set_color_attribute>().connect<&points_renderer::on_set_color_attribute>(
@@ -51,21 +51,19 @@ void points_renderer::on_shutdown(const event::internal::shutdown &event) {
 void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
+    if (!state->scene.has<material_points>(event.id)) {
+        auto &material = state->scene.emplace<material_points>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
+    }
+}
+
+void points_renderer::on_setup_for_rendering(const event::points_renderer::setup_for_rendering &event) {
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
-
     auto &material = state->scene.get_or_emplace<material_points>(event.id);
-    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-    state->dispatcher.trigger<event::points_renderer::set_material>(event.id);
-}
-
-void points_renderer::on_set_material(const event::points_renderer::set_material &event) {
-    if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<material_points>(event.id)) {
-        state->scene.emplace<material_points>(event.id);
-    }
-    auto &material = state->scene.get<material_points>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "points";
@@ -160,6 +158,7 @@ void points_renderer::on_set_position_attribute(const event::points_renderer::se
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
 }
 
 void points_renderer::on_set_color_attribute(const event::points_renderer::set_color_attribute &event) {
@@ -173,6 +172,7 @@ void points_renderer::on_set_color_attribute(const event::points_renderer::set_c
     material.use_uniform_color = false;
     std::vector<attribute> vertex_attributes = {color};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
 }
 
 void points_renderer::on_set_point_size_attribute(const event::points_renderer::set_point_size_attribute &event) {
@@ -189,6 +189,7 @@ void points_renderer::on_set_point_size_attribute(const event::points_renderer::
     material.use_uniform_size = false;
     std::vector<attribute> vertex_attributes = {point_size};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
 }
 
 }

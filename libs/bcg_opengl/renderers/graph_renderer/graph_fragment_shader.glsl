@@ -23,6 +23,6 @@ void main(){
     if(material.use_uniform_color){
         final_color = vec4(material.uniform_color, material.alpha);
     }else{
-        final_color = vec4(texelFetch(e_color, get_tex_coords(gl_PrimitiveID), 0).xyz, material.alpha);
+        final_color = vec4(texelFetch(edge_color, get_tex_coords(gl_PrimitiveID), 0).xyz, material.alpha);
     }
 }

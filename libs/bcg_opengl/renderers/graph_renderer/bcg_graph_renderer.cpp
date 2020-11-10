@@ -11,6 +11,8 @@
 #include "bcg_material_graph.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_graph_renderer.h"
+#include "bcg_property_map_eigen.h"
+#include "math/bcg_matrix_map_eigen.h"
 
 namespace bcg {
 
@@ -18,7 +20,7 @@ graph_renderer::graph_renderer(viewer_state *state) : renderer("mesh_renderer", 
     state->dispatcher.sink<event::internal::startup>().connect<&graph_renderer::on_startup>(this);
     state->dispatcher.sink<event::internal::shutdown>().connect<&graph_renderer::on_shutdown>(this);
     state->dispatcher.sink<event::graph_renderer::enqueue>().connect<&graph_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::graph_renderer::set_material>().connect<&graph_renderer::on_set_material>(this);
+    state->dispatcher.sink<event::graph_renderer::setup_for_rendering>().connect<&graph_renderer::on_setup_for_rendering>(this);
     state->dispatcher.sink<event::graph_renderer::set_position_attribute>().connect<&graph_renderer::on_set_position_attribute>(this);
     state->dispatcher.sink<event::graph_renderer::set_color_attribute>().connect<&graph_renderer::on_set_color_attribute>(this);
 }
@@ -32,9 +34,9 @@ void graph_renderer::on_startup(const event::internal::startup &) {
 }
 
 void graph_renderer::on_shutdown(const event::internal::shutdown &event){
-    auto view = state->scene.view<material_mesh>();
+    auto view = state->scene.view<material_graph>();
     for(const auto id : view){
-        auto &material = view.get<material_mesh>(id);
+        auto &material = view.get<material_graph>(id);
         material.vao.destroy();
     }
     programs["graph_renderer_program"].destroy();
@@ -44,23 +46,22 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
     entities_to_draw.emplace_back(event.id);
+
+    if(!state->scene.has<material_graph>(event.id)){
+        auto &material = state->scene.emplace<material_graph>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
+        state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+        state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
+    }
+}
+
+void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_for_rendering &event){
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
-
-    auto &material = state->scene.get_or_emplace<material_mesh>(event.id);
-    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-    auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
-    state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
-    state->dispatcher.trigger<event::graph_renderer::set_material>(event.id);
-}
-
-void graph_renderer::on_set_material(const event::graph_renderer::set_material &event){
-    if (!state->scene.valid(event.id)) return;
-    if(!state->scene.has<material_mesh>(event.id)){
-        state->scene.emplace<material_mesh>(event.id);
-    }
-    auto &material = state->scene.get<material_mesh>(event.id);
+    auto &material = state->scene.get_or_emplace<material_graph>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "mesh";
@@ -111,7 +112,7 @@ void graph_renderer::on_render(const event::internal::render &) {
         if (!state->scene.valid(id)) continue;
 
         auto &model = state->scene.get<Transform>(id);
-        auto &material = state->scene.get<material_mesh>(id);
+        auto &material = state->scene.get<material_graph>(id);
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
@@ -124,7 +125,7 @@ void graph_renderer::on_render(const event::internal::render &) {
         program.set_uniform_i("width", material.width);
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-
+        //TODO upload edges separately?
         glDrawElements(GL_LINES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
         assert_ogl_error();
     }
@@ -138,7 +139,7 @@ void graph_renderer::on_end_frame(const event::internal::end_frame &) {
 
 void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_position_attribute &event){
     if (!state->scene.valid(event.id)) return;
-    auto &material = state->scene.get<material_mesh>(event.id);
+    auto &material = state->scene.get<material_graph>(event.id);
     auto *vertices = state->get_vertices(event.id);
     if (vertices->get_base_ptr(event.position.property_name)->dims() != 3) return;
     auto &position = material.attributes[0];
@@ -147,19 +148,78 @@ void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
 }
 
 void graph_renderer::on_set_color_attribute(const event::graph_renderer::set_color_attribute &event){
     if (!state->scene.valid(event.id)) return;
-    auto &material = state->scene.get<material_mesh>(event.id);
-    //TODO convert to colormap if 1 dimensional.
-    auto &color = material.attributes[2];
-    color.property_name = event.color.property_name;
-    color.enable = true;
-    color.update = true;
+    auto &material = state->scene.get<material_graph>(event.id);
+
+    material.color_map = colormap::jet();
+
+    auto *edges = state->get_edges(event.id);
+    if(!edges) return;
+
+    auto *base_ptr = edges->get_base_ptr(event.color.property_name);
+    std::vector<VectorS<3>> colors;
+    if(base_ptr->dims() == 1){
+        if(base_ptr->void_ptr() == nullptr){
+            VectorS<-1> values = MapConst(edges->get<bool, 1>(base_ptr->name())).cast<float>();
+            colors = material.color_map(values, values.minCoeff(), values.maxCoeff());
+        }else{
+            VectorS<-1> values = MapConst(edges->get<bcg_scalar_t , 1>(base_ptr->name()));
+            colors = material.color_map(values, values.minCoeff(), values.maxCoeff());
+        }
+    }else if(base_ptr->dims() == 3){
+        auto values = edges->get<VectorS<3>, 3>(base_ptr->name());
+        auto min = MapConst(values).minCoeff();
+        auto max = MapConst(values).maxCoeff();
+        colors.resize(values.size());
+        Map(colors) = (MapConst(values).array() - min) /  (max - min);
+    }
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
+    material.width = std::min((int)colors.size(), material.width);
+    int height = colors.size() % material.width;
+    colors.resize(material.width * (height + 1));
+
+    if(material.edge_colors){
+        material.edge_colors.update_data(colors[0].data(),  material.width, height + 1);
+    }else{
+        auto &texture = material.edge_colors;
+        texture = ogl_texture(GL_TEXTURE_2D, "edge_color");
+        int unit = 0;
+        if (!texture.is_valid()) {
+            texture.create();
+            texture.activate(unit);
+        }
+        texture.bind();
+        texture.set_wrap_clamp_to_border();
+        texture.set_filter_linear();
+        auto *data = colors[0].data();
+        int channels = 3;
+        if (data) {
+            auto internal_format = TextureFormat(ogl_types::GetType(data), channels);
+            auto format = TextureDataFormat(ogl_types::GetType(data), channels);
+
+            texture.set_image_data(GL_TEXTURE_2D, 0, internal_format, material.width, height + 1, format,
+                                   ogl_types::GetGLType(data), data);
+
+            auto program = programs["graph_renderer_program"];
+            program.bind();
+            if (program.get_uniform_location(name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
+                program.set_uniform_i(name.c_str(), unit);
+            }
+        }
+        texture.release();
+
+        std::vector<VectorS<3>> test_data(material.width * (height + 1));
+        material.edge_colors.download_data(test_data.data());
+    }
+
     material.use_uniform_color = false;
-    std::vector<attribute> vertex_attributes = {color};
-    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+    state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
 }
 
 }

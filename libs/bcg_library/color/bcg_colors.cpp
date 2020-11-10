@@ -79,6 +79,51 @@ size_t base_colormap::interval(bcg_scalar_t t) const {
     return (i == n && i > 0) ? i - 1 : i;
 }
 
+std::vector<std::string> colormap_selector::get_names() {
+    std::vector<std::string> names(colormap_type::__LAST__);
+    names[GREY] = "GREY";
+    names[HOT] = "HOT";
+    names[TEMPERATURE] = "TEMPERATURE";
+    names[RAINBOW] = "RAINBOW";
+    names[JET] = "JET";
+    names[VIDRIS] = "VIDRIS";
+    names[HSV] = "HSV";
+    names[COOLWARM] = "COOLWARM";
+    return names;
+}
+
+base_colormap colormap_selector::get_colormap(colormap_type type) {
+    switch (type) {
+        case GREY : {
+            return grey();
+        }
+        case HOT : {
+            return hot();
+        }
+        case TEMPERATURE : {
+            return temperature();
+        }
+        case RAINBOW : {
+            return rainbow();
+        }
+        case JET : {
+            return jet();
+        }
+        case VIDRIS : {
+            return vidris();
+        }
+        case HSV : {
+            return hsv();
+        }
+        case COOLWARM : {
+            return coolwarm();
+        }
+        case __LAST__ : {
+            return base_colormap();
+        }
+    }
+}
+
 }
 
 }

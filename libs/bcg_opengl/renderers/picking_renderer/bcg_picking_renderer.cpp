@@ -17,7 +17,7 @@ namespace bcg {
 
 picking_renderer::picking_renderer(viewer_state *state) : renderer("picking_renderer", state) {
     state->dispatcher.sink<event::picking_renderer::enqueue>().connect<&picking_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::picking_renderer::set_material>().connect<&picking_renderer::on_set_material>(this);
+    state->dispatcher.sink<event::picking_renderer::setup_for_rendering>().connect<&picking_renderer::on_setup_for_rendering>(this);
     state->dispatcher.sink<event::mouse::button>().connect<&picking_renderer::on_mouse_button>(this);
     state->dispatcher.sink<event::internal::startup>().connect<&picking_renderer::on_startup>(this);
     state->dispatcher.sink<event::internal::shutdown>().connect<&picking_renderer::on_shutdown>(this);
@@ -38,18 +38,21 @@ void picking_renderer::on_shutdown(const event::internal::shutdown &event) {
 void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
+
+    if (!state->scene.has<material_picking>(event.id)) {
+        auto &material = state->scene.emplace<material_picking>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        state->dispatcher.trigger<event::picking_renderer::setup_for_rendering>(event.id);
+    }
+}
+
+void picking_renderer::on_setup_for_rendering(const event::picking_renderer::setup_for_rendering &event){
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
-    state->dispatcher.trigger<event::picking_renderer::set_material>(event.id);
-}
 
-void picking_renderer::on_set_material(const event::picking_renderer::set_material &event){
-    if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<material_picking>(event.id)) {
-        state->scene.emplace<material_picking>(event.id, event.id);
-    }
-    auto &material = state->scene.get<material_picking>(event.id);
+    auto &material = state->scene.get_or_emplace<material_picking>(event.id, event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "picking";
@@ -176,7 +179,6 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);
     state->picker.vertex_id = result.indices[0];
 
-    //TODO fix the following
     if (state->scene.has<halfedge_graph>(id)) {
         auto &graph = state->scene.get<halfedge_graph>(id);
         state->picker.edge_id = graph.find_closest_edge_in_neighborhood(state->picker.vertex_id,

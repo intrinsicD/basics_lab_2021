@@ -35,6 +35,8 @@ struct color {
 namespace colormap {
 
 struct base_colormap {
+    base_colormap() = default;
+
     base_colormap(std::vector<VectorS < 3>>
 
     colorpath) :
@@ -54,7 +56,6 @@ struct base_colormap {
     minClamp,
     bcg_scalar_t maxClamp
     ) const;
-
 
     VectorS<3> interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) const;
 
@@ -143,6 +144,24 @@ struct coolwarm : public base_colormap {
                                 color::red}) {
 
     }
+};
+
+struct colormap_selector {
+    enum colormap_type {
+        GREY,
+        HOT,
+        TEMPERATURE,
+        RAINBOW,
+        JET,
+        VIDRIS,
+        HSV,
+        COOLWARM,
+        __LAST__
+    };
+
+    static std::vector<std::string> get_names();
+
+    static base_colormap get_colormap(colormap_type type);
 };
 
 }

@@ -5,15 +5,15 @@
 #ifndef BCG_GRAPHICS_BCG_MATERIAL_GRAPH_H
 #define BCG_GRAPHICS_BCG_MATERIAL_GRAPH_H
 
+#include "bcg_opengl.h"
 #include "color/bcg_colors.h"
 #include "renderers/bcg_attribute.h"
 
 namespace bcg{
 
-struct material_mesh{
+struct material_graph{
     std::vector<attribute> attributes = {
-            {"position", "position", 0, true},
-            {"graph_color", "", 2, false}
+            {"position", "position", 0, true}
     };
 
     ogl_vertex_array vao;
@@ -23,6 +23,8 @@ struct material_mesh{
 
     VectorS<3> uniform_color = color::random();
     bcg_scalar_t uniform_alpha = 1;
+    ogl_texture edge_colors = ogl_texture("edge_color");
+    colormap::base_colormap color_map;
 };
 
 }

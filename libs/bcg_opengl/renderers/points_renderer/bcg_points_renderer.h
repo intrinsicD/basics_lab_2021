@@ -21,7 +21,7 @@ private:
 
     void on_enqueue(const event::points_renderer::enqueue &event);
 
-    void on_set_material(const event::points_renderer::set_material &event);
+    void on_setup_for_rendering(const event::points_renderer::setup_for_rendering &event);
 
     void on_begin_frame(const event::internal::begin_frame &event) override;
 

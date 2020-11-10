@@ -19,7 +19,7 @@ mesh_renderer::mesh_renderer(viewer_state *state) : renderer("mesh_renderer", st
     state->dispatcher.sink<event::internal::startup>().connect<&mesh_renderer::on_startup>(this);
     state->dispatcher.sink<event::internal::shutdown>().connect<&mesh_renderer::on_shutdown>(this);
     state->dispatcher.sink<event::mesh_renderer::enqueue>().connect<&mesh_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::mesh_renderer::set_material>().connect<&mesh_renderer::on_set_material>(this);
+    state->dispatcher.sink<event::mesh_renderer::setup_for_rendering>().connect<&mesh_renderer::on_setup_for_rendering>(this);
     state->dispatcher.sink<event::mesh_renderer::set_position_attribute>().connect<&mesh_renderer::on_set_position_attribute>(this);
     state->dispatcher.sink<event::mesh_renderer::set_normal_attribute>().connect<&mesh_renderer::on_set_normal_attribute>(this);
     state->dispatcher.sink<event::mesh_renderer::set_color_attribute>().connect<&mesh_renderer::on_set_color_attribute>(this);
@@ -46,23 +46,22 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
     entities_to_draw.emplace_back(event.id);
+
+    if(!state->scene.has<material_mesh>(event.id)){
+        auto &material = state->scene.emplace<material_mesh>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
+        state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+        state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
+    }
+}
+
+void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for_rendering &event){
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
-
     auto &material = state->scene.get_or_emplace<material_mesh>(event.id);
-    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-    auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
-    state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
-    state->dispatcher.trigger<event::mesh_renderer::set_material>(event.id);
-}
-
-void mesh_renderer::on_set_material(const event::mesh_renderer::set_material &event){
-    if (!state->scene.valid(event.id)) return;
-    if(!state->scene.has<material_mesh>(event.id)){
-        state->scene.emplace<material_mesh>(event.id);
-    }
-    auto &material = state->scene.get<material_mesh>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "mesh";
@@ -155,6 +154,7 @@ void mesh_renderer::on_set_position_attribute(const event::mesh_renderer::set_po
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 
 void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_normal_attribute &event){
@@ -168,6 +168,7 @@ void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_norm
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 
 void mesh_renderer::on_set_color_attribute(const event::mesh_renderer::set_color_attribute &event){
@@ -181,6 +182,7 @@ void mesh_renderer::on_set_color_attribute(const event::mesh_renderer::set_color
     material.use_uniform_color = false;
     std::vector<attribute> vertex_attributes = {color};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 
 }
