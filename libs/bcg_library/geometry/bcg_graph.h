@@ -37,7 +37,7 @@ struct halfedge_graph : public point_cloud {
     halfedge_container halfedges;
     edge_container edges;
     property<vertex_connectivity, 1> vconn;
-    property<halfedge_connectivity, 1> hconn;
+    property<halfedge_connectivity, 4> hconn;
     property<bool, 1> halfedges_deleted;
     property<bool, 1> edges_deleted;
     size_t size_halfedges_deleted;

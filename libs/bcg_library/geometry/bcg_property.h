@@ -488,6 +488,57 @@ operator<<(std::ostream &stream, const property <T, N> &property) {
     return stream;
 }
 
+template<typename Derived, typename Handle, typename Container>
+struct property_iterator {
+    explicit property_iterator(Handle handle = Handle(),
+                               const Container *container = nullptr,
+                               property<bool, 1> deleted = {}) : handle(handle),
+                                                                 deleted(deleted),
+                                                                 container(container) {
+        if (container) {
+            if (deleted) {
+                while (container->is_valid(handle) && deleted[handle]) {
+                    ++handle;
+                }
+            }
+        }
+    }
+
+    inline Handle operator*() const {
+        return handle;
+    }
+
+    inline bool operator==(const Derived &rhs) const {
+        return handle == rhs.handle;
+    }
+
+    inline bool operator!=(const Derived &rhs) const {
+        return handle != rhs.handle;
+    }
+
+    inline property_iterator &operator++() {
+        ++handle;
+        while (deleted && container->is_valid(handle) && deleted[handle]) {
+            ++handle;
+        }
+        return *this;
+    }
+
+    inline property_iterator &operator--() {
+        --handle;
+        while (deleted && handle.idx > 0 && container->is_valid(handle) &&
+               deleted[handle]) {
+            --handle;
+        }
+        return *this;
+    }
+
+private:
+    Handle handle;
+    property<bool, 1> deleted;
+    const Container *container;
+};
+
 struct property_container {
     std::string name;
     std::unordered_map<std::string, std::shared_ptr<base_property>> container;
@@ -496,61 +547,18 @@ struct property_container {
 
     explicit property_container(std::string name) : name(std::move(name)) {}
 
-    struct Iterator {
-        explicit Iterator(base_handle handle = base_handle(),
-                          const property_container *container = nullptr) : m_handle(handle),
-                                                                           m_container(container) {
-            if (m_container && deleted) {
-                deleted = m_container->get<bool, 1>("deleted");
-                if (deleted) {
-                    while (m_container->is_valid(m_handle) && deleted[m_handle]) {
-                        ++m_handle;
-                    }
-                }
-            }
-        }
-
-        inline base_handle operator*() const {
-            return m_handle;
-        }
-
-        inline bool operator==(const Iterator &rhs) const {
-            return m_handle == rhs.m_handle;
-        }
-
-        inline bool operator!=(const Iterator &rhs) const {
-            return m_handle != rhs.m_handle;
-        }
-
-        inline Iterator &operator++() {
-            ++m_handle;
-            while (deleted && m_container->is_valid(m_handle) && deleted[m_handle]) {
-                ++m_handle;
-            }
-            return *this;
-        }
-
-        inline Iterator &operator--() {
-            --m_handle;
-            while (deleted && m_handle.idx > 0 && m_container->is_valid(m_handle) &&
-                   deleted[m_handle]) {
-                --m_handle;
-            }
-            return *this;
-        }
-
-    private:
-        base_handle m_handle;
-        property<bool, 1> deleted;
-        const property_container *m_container;
+    struct Iterator : public property_iterator<Iterator, base_handle, property_container> {
+        explicit Iterator(base_handle v = base_handle(), property<bool, 1> deleted = {},
+                          const property_container *container = nullptr) : property_iterator(v, container,
+                                                                                             std::move(deleted)) {}
     };
 
     [[nodiscard]] inline Iterator begin() const {
-        return Iterator(base_handle(0), this);
+        return Iterator(base_handle(0), get<bool, 1>("deleted"), this);
     }
 
     [[nodiscard]] inline Iterator end() const {
-        return Iterator(base_handle(size()), this);
+        return Iterator(base_handle(size()), get<bool, 1>("deleted"), this);
     }
 
     template<typename T, int N>
@@ -614,8 +622,8 @@ struct property_container {
     }
 
     bool any_dirty(const std::vector<std::string> &names) const {
-        for(const auto &name : names){
-            if(has(name) && get_base_ptr(name)->is_dirty()){
+        for (const auto &name : names) {
+            if (has(name) && get_base_ptr(name)->is_dirty()) {
                 return true;
             }
         }
@@ -718,22 +726,23 @@ struct property_container {
         return container;
     }
 
-    [[nodiscard]] inline std::vector<std::string> properties_names(std::vector<int> filter_dims = {}, bool only_dirty = false) const {
+    [[nodiscard]] inline std::vector<std::string>
+    properties_names(std::vector<int> filter_dims = {}, bool only_dirty = false) const {
         std::vector<std::string> names;
         std::for_each(container.begin(), container.end(), [&names, &filter_dims, &only_dirty](auto &p) {
             bool add = false;
-            if(!filter_dims.empty()){
-                for(const auto filter_dim : filter_dims){
-                    if(p.second->dims() == filter_dim){
+            if (!filter_dims.empty()) {
+                for (const auto filter_dim : filter_dims) {
+                    if (p.second->dims() == filter_dim) {
                         add = true;
                     }
                 }
-            }else{
+            } else {
                 add = true;
             }
-            if(only_dirty){
+            if (only_dirty) {
                 add = false;
-                if(p.second->is_dirty()){
+                if (p.second->is_dirty()) {
                     add = true;
                 }
             }
@@ -766,57 +775,6 @@ inline std::ostream &operator<<(std::ostream &stream, const property_container &
     }
     return stream;
 }
-
-template<typename Derived, typename Handle, typename Container>
-struct property_iterator {
-    explicit property_iterator(Handle handle = Handle(),
-                               const Container *container = nullptr,
-                               property<bool, 1> deleted = {}) : handle(handle),
-                                                                 deleted(deleted),
-                                                                 container(container) {
-        if (container) {
-            if (deleted) {
-                while (container->is_valid(handle) && deleted[handle]) {
-                    ++handle;
-                }
-            }
-        }
-    }
-
-    inline Handle operator*() const {
-        return handle;
-    }
-
-    inline bool operator==(const Derived &rhs) const {
-        return handle == rhs.handle;
-    }
-
-    inline bool operator!=(const Derived &rhs) const {
-        return handle != rhs.handle;
-    }
-
-    inline property_iterator &operator++() {
-        ++handle;
-        while (deleted && container->is_valid(handle) && deleted[handle]) {
-            ++handle;
-        }
-        return *this;
-    }
-
-    inline property_iterator &operator--() {
-        --handle;
-        while (deleted && handle.idx > 0 && container->is_valid(handle) &&
-               deleted[handle]) {
-            --handle;
-        }
-        return *this;
-    }
-
-private:
-    Handle handle;
-    property<bool, 1> deleted;
-    const Container *container;
-};
 
 struct vertex_container : public property_container {
     /*using property_container::property_container;

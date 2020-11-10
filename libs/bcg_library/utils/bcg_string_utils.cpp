@@ -24,6 +24,13 @@ void trim(std::string &s, char c) {
     rtrim(s, c);
 }
 
+bool contains(const std::string &s, const std::string &substring){
+    if(s.find(substring) != std::string::npos){
+        return true;
+    }
+    return false;
+}
+
 std::string join(const std::string &str1, const std::string &str2) {
     return std::string(str1 + str2);
 }

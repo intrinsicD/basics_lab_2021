@@ -19,6 +19,8 @@ void rtrim(std::string &s, char c = ' ');
 
 void trim(std::string &s, char c = ' ');
 
+bool contains(const std::string &s, const std::string &substring);
+
 std::string join(const std::string &str1, const std::string &str2);
 
 std::vector<std::string> split(const std::string &str, const std::vector<char> &delims);

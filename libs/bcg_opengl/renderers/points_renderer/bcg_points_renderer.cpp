@@ -130,11 +130,9 @@ void points_renderer::on_render(const event::internal::render &) {
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-        auto &pos = shape.vertex_buffers["position"];
-        glDrawArrays(GL_POINTS, 0, pos.num_elements);
+        glDrawArrays(GL_POINTS, 0, shape.num_vertices);
         assert_ogl_error();
     }
-
     entities_to_draw.clear();
 }
 

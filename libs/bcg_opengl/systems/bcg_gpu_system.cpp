@@ -7,6 +7,7 @@
 #include "math/bcg_matrix_map_eigen.h"
 #include "geometry/bcg_property_map_eigen.h"
 #include "bcg_library/geometry/mesh/bcg_mesh.h"
+#include "utils/bcg_string_utils.h"
 
 namespace bcg {
 
@@ -26,7 +27,11 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
     property_container *vertices = state->get_vertices(event.id);
     if (vertices) {
         auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
+        shape.num_vertices = vertices->size();
         const auto &attributes = event.attributes;
+
+        colormap::jet color_map;
+
         for (const auto &attribute : attributes) {
             if (vertices->has(attribute.property_name)) {
                 auto &buffer = shape.vertex_buffers[attribute.buffer_name];
@@ -41,15 +46,36 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
 
                 if(base_ptr->is_dirty() || first || attribute.update){
                     buffer.bind();
-                    if(base_ptr->void_ptr() == nullptr){
-                        Matrix<float, -1, 1> p = MapConst(vertices->get<bool, 1>(attribute.property_name)).cast<float>();
-                        buffer.upload(p.data(), base_ptr->size(), base_ptr->dims(), 0, true);
+                    if(contains(attribute.buffer_name, "color")){
+                        if(base_ptr->void_ptr() == nullptr){
+                            Vector<float, -1> values = MapConst(vertices->get<bool, 1>(attribute.property_name)).cast<float>();
+                            auto colors = color_map(values, values.minCoeff(), values.maxCoeff());
+
+                            buffer.upload(colors[0].data(), base_ptr->size(), 3, 0, true);
+                        }else{
+                            if(base_ptr->dims() == 1){
+                                auto property = vertices->get<bcg_scalar_t , 1>(attribute.property_name);
+                                if(!property){
+                                    buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+                                }else{
+                                    auto colors = color_map(property.vector(), MapConst(property).minCoeff(), MapConst(property).maxCoeff());
+
+                                    buffer.upload(colors[0].data(), base_ptr->size(), 3, 0, true);
+                                }
+                            }else{
+                                buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+                            }
+                        }
                     }else{
-                        buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+                        if(base_ptr->void_ptr() == nullptr){
+                            Matrix<float, -1, 1> p = MapConst(vertices->get<bool, 1>(attribute.property_name)).cast<float>();
+                            buffer.upload(p.data(), base_ptr->size(), base_ptr->dims(), 0, true);
+                        }else{
+                            buffer.upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+                        }
                     }
+
                     base_ptr->set_clean();
-/*                    auto sb = base_ptr->size_bytes();
-                    assert(buffer.get_buffer_size_gpu() == sb && buffer);*/
                     buffer.release();
                 }
             }

@@ -33,5 +33,5 @@ void main() {
         gl_PointSize = point_size * material.uniform_point_size;
     }
 
-    gl_Position = proj * view * model * vec4(position, 1.0f);
+    gl_Position =  proj * view * model * vec4(position, 1.0f);
 }

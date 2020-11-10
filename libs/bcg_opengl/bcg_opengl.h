@@ -520,6 +520,7 @@ struct ogl_vertex_array : public ogl_handle {
 struct ogl_shape{
     std::unordered_map<std::string, ogl_vertex_buffer> vertex_buffers;
     ogl_element_buffer element_buffer, adjacency_buffer;
+    int num_vertices;
 };
 
 struct ogl_renderbuffer : public ogl_handle {
@@ -641,7 +642,7 @@ struct ogl_state {
     unsigned int stencil_sfail;
     unsigned int stencil_dpfail;
     unsigned int stencil_dppass;
-    unsigned int point_size_value;
+    float point_size_value;
     unsigned int polygon_mode_face;
     unsigned int polygon_mode;
 
@@ -721,7 +722,7 @@ struct ogl_state {
 
     void set_program_point_size(bool enabled);
 
-    void set_point_size(unsigned int size);
+    void set_point_size(float size);
 
 #ifdef GL_VERSION_3_1
 

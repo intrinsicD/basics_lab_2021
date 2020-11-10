@@ -1945,7 +1945,7 @@ void ogl_state::set_program_point_size(bool enabled) {
     assert_ogl_error();
 }
 
-void ogl_state::set_point_size(GLuint size) {
+void ogl_state::set_point_size(GLfloat size) {
     point_size_value = size;
     set_program_point_size(true);
     glPointSize(point_size_value);
