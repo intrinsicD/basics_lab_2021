@@ -15,6 +15,7 @@
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
+#include "geometry/mesh/bcg_mesh.h"
 #include "utils/bcg_path.h"
 
 namespace bcg {
@@ -363,9 +364,9 @@ void gui_info(viewer_state *state, material_points *material, entt::entity id) {
 }
 
 void gui_rendering(viewer_state *state, entt::entity id) {
-    static bool show_points = false;
-    static bool show_edges = false;
-    static bool show_mesh = false;
+    static bool show_points = state->scene.has<point_cloud>(id);
+    static bool show_edges = state->scene.has<halfedge_graph>(id);
+    static bool show_mesh = state->scene.has<halfedge_mesh>(id);
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {
