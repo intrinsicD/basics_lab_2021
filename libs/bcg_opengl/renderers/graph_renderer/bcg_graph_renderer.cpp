@@ -50,8 +50,8 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
     if(!state->scene.has<material_graph>(event.id)){
         auto &material = state->scene.emplace<material_graph>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-        auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
-        state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+        auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
+        state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
         state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
     }
 }
@@ -80,18 +80,17 @@ void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_f
             iter->second.release();
         }
     }
-    if(shape.element_buffer.is_valid()){
-        shape.element_buffer.bind();
-    }
-    if(shape.adjacency_buffer.is_valid()){
-        shape.adjacency_buffer.bind();
+    if(shape.edge_buffer.is_valid()){
+        shape.edge_buffer.bind();
     }
     material.vao.release();
 }
 
 void graph_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        state->dispatcher.trigger<event::graph_renderer::enqueue>(id);
+        if (state->scene.has<event::graph_renderer::enqueue>(id)) {
+            state->dispatcher.trigger<event::graph_renderer::enqueue>(id);
+        }
     });
 }
 
@@ -125,8 +124,8 @@ void graph_renderer::on_render(const event::internal::render &) {
         program.set_uniform_i("width", material.width);
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-        //TODO upload edges separately?
-        glDrawElements(GL_LINES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
+        shape.edge_buffer.bind();
+        glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
         assert_ogl_error();
     }
 
@@ -219,6 +218,8 @@ void graph_renderer::on_set_color_attribute(const event::graph_renderer::set_col
 
     material.use_uniform_color = false;
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+    auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
+    state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
     state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
 }
 

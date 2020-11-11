@@ -17,7 +17,7 @@ halfedge_mesh mesh_factory::make_triangle(const triangle3 &triangle) {
         mesh.add_vertex(point);
     }
 
-    auto fnormals = mesh.faces.add<VectorS<3>, 3>("normal");
+    auto fnormals = mesh.faces.add<VectorS<3>, 3>("f_normal");
     auto f = mesh.add_triangle(0, 1, 2);
     fnormals[f] = normal(triangle);
     return mesh;

@@ -83,13 +83,13 @@ bool read_off_ascii(halfedge_mesh &mesh, FILE *in, const bool has_normals,
     property<VectorS<2>, 2> texcoords;
     property<VectorS<3>, 3> colors;
     if (has_normals) {
-        normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
+        normals = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
     }
     if (has_texcoords) {
-        texcoords = mesh.vertices.get_or_add<VectorS<2>, 2>("tex");
+        texcoords = mesh.vertices.get_or_add<VectorS<2>, 2>("v_tex");
     }
     if (has_colors) {
-        colors = mesh.vertices.get_or_add<VectorS<3>, 3>("color");
+        colors = mesh.vertices.get_or_add<VectorS<3>, 3>("v_color");
     }
 
     // #Vertice, #Faces, #Edges
@@ -215,10 +215,10 @@ bool read_off_binary(halfedge_mesh &mesh, FILE *in, const bool has_normals,
     property<VectorS<3>, 3> normals;
     property<VectorS<2>, 2> texcoords;
     if (has_normals) {
-        normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
+        normals = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
     }
     if (has_texcoords) {
-        texcoords = mesh.vertices.get_or_add<VectorS<2>, 2>("tex");
+        texcoords = mesh.vertices.get_or_add<VectorS<2>, 2>("v_tex");
     }
 
     // #Vertice, #Faces, #Edges
@@ -341,7 +341,7 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
     std::vector<vertex_handle> vertices;
     std::vector<VectorS<2>> all_tex_coords; //individual texture coordinates
     std::vector<int> halfedge_tex_idx; //texture coordinates sorted for halfedges
-    property<VectorS<2>, 2> tex_coords = mesh.halfedges.get_or_add<VectorS<2>, 2>("tex");
+    property<VectorS<2>, 2> tex_coords = mesh.halfedges.get_or_add<VectorS<2>, 2>("v_tex");
     bool with_tex_coord = false;
 
     // open file (in ASCII mode)
@@ -625,7 +625,7 @@ static int vertexCallback(p_ply_argument argument) {
     ply_get_argument_user_data(argument, &pdata, &idx);
 
     auto *mesh = (halfedge_mesh *) pdata;
-    auto point = mesh->object_properties.get<VectorS<3>, 3>("position");
+    auto point = mesh->object_properties.get<VectorS<3>, 3>("v_position");
 
     point[0][idx] = (bcg_scalar_t) ply_get_argument_value(argument);
 
@@ -668,7 +668,7 @@ static int faceCallback(p_ply_argument argument) {
 
 bool meshio::read_ply(halfedge_mesh &mesh) {
     // add object properties to hold temporary data
-    auto point = mesh.object_properties.add<VectorS<3>, 3>("position");
+    auto point = mesh.object_properties.add<VectorS<3>, 3>("v_position");
     point.resize(1);
     auto vertices = mesh.object_properties.add<std::vector<vertex_handle>, 1>("vertices");
 
@@ -729,10 +729,10 @@ bool meshio::read_pmp(halfedge_mesh &mesh) {
     mesh.faces.resize(nf);
 
     // get properties
-    auto vconn = mesh.vertices.get_or_add<halfedge_mesh::vertex_connectivity, 1>("connectivity");
-    auto hconn = mesh.halfedges.get_or_add<halfedge_mesh::halfedge_connectivity, 1>("connectivity");
-    auto fconn = mesh.faces.get_or_add<halfedge_mesh::face_connectivity, 1>("connectivity");
-    auto point = mesh.vertices.get_or_add<VectorS<3>, 3>("position");
+    auto vconn = mesh.vertices.get_or_add<halfedge_mesh::vertex_connectivity, 1>("v_connectivity");
+    auto hconn = mesh.halfedges.get_or_add<halfedge_mesh::halfedge_connectivity, 1>("h_connectivity");
+    auto fconn = mesh.faces.get_or_add<halfedge_mesh::face_connectivity, 1>("f_connectivity");
+    auto point = mesh.vertices.get_or_add<VectorS<3>, 3>("v_position");
 
     // read properties from file
     size_t nvc = fread((char *) vconn.data(), sizeof(halfedge_mesh::vertex_connectivity), nv, in);
@@ -762,7 +762,7 @@ bool meshio::read_pmp(halfedge_mesh &mesh) {
 
     // read texture coordiantes
     if (has_htex) {
-        auto htex = mesh.halfedges.get_or_add<VectorS<2>, 2>("tex");
+        auto htex = mesh.halfedges.get_or_add<VectorS<2>, 2>("v_tex");
         size_t nhtc = fread((char *) htex.data(), sizeof(VectorS<2>), nh, in);
         if (nhtc != nh) {
             std::cerr << "nhtc != nh";
@@ -784,7 +784,7 @@ bool meshio::read_xyz(halfedge_mesh &mesh) {
 
     // add normal property
     // \todo this adds property even if no normals present. change it.
-    auto vnormal = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
+    auto vnormal = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
 
     char line[200];
     bcg_scalar_t x, y, z;
@@ -817,8 +817,8 @@ bool meshio::read_agi(halfedge_mesh &mesh) {
     }
 
     // add normal property
-    auto normal = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
-    auto color = mesh.vertices.get_or_add<VectorS<3>, 3>("color");
+    auto normal = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
+    auto color = mesh.vertices.get_or_add<VectorS<3>, 3>("v_color");
 
     char line[200];
     bcg_scalar_t x, y, z;
@@ -862,9 +862,9 @@ bool meshio::write_off(const halfedge_mesh &mesh) {
     bool has_texcoords = false;
     bool has_colors = false;
 
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("normal");
-    auto texcoords = mesh.vertices.get<VectorS<3>, 2>("tex");
-    auto colors = mesh.vertices.get<VectorS<3>, 3>("color");
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    auto texcoords = mesh.vertices.get<VectorS<3>, 2>("v_tex");
+    auto colors = mesh.vertices.get<VectorS<3>, 3>("v_color");
 
     if (normals && flags.use_vertex_normals) {
         has_normals = true;
@@ -889,7 +889,7 @@ bool meshio::write_off(const halfedge_mesh &mesh) {
     fprintf(out, "OFF\n%zu %zu 0\n", mesh.num_vertices(), mesh.num_faces());
 
     // vertices, and optionally normals and texture coordinates
-    auto position = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto position = mesh.vertices.get<VectorS<3>, 3>("v_position");
     for (const auto v : mesh.vertices) {
         fprintf(out, "%.10f %.10f %.10f", position[v][0], position[v][1], position[v][2]);
 
@@ -939,7 +939,7 @@ bool meshio::write_off_binary(const halfedge_mesh &mesh) {
     tfwrite(out, nv);
     tfwrite(out, nf);
     tfwrite(out, ne);
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     for (const auto v : mesh.vertices) {
         tfwrite(out, positions[v]);
     }
@@ -964,13 +964,13 @@ bool meshio::write_obj(const halfedge_mesh &mesh) {
     fprintf(out, "# OBJ export from SurfaceMesh\n");
 
     //vertices
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     for (const auto v : mesh.vertices) {
         fprintf(out, "v %.10f %.10f %.10f\n", positions[v][0], positions[v][1], positions[v][2]);
     }
 
     //normals
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("normal");
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
     if (normals) {
         for (const auto v : mesh.vertices) {
             fprintf(out, "vn %.10f %.10f %.10f\n", normals[v][0], normals[v][1], normals[v][2]);
@@ -984,7 +984,7 @@ bool meshio::write_obj(const halfedge_mesh &mesh) {
     auto hpropEnd = hprops.end();
     auto hpropStart = hprops.begin();
     while (hpropStart != hpropEnd) {
-        if (0 == (*hpropStart).compare("tex")) {
+        if (0 == (*hpropStart).compare("v_tex")) {
             with_tex_coord = true;
         }
         ++hpropStart;
@@ -992,7 +992,7 @@ bool meshio::write_obj(const halfedge_mesh &mesh) {
 
     //if so then add
     if (with_tex_coord) {
-        auto texCoord = mesh.halfedges.get<VectorS<2>, 2>("tex");
+        auto texCoord = mesh.halfedges.get<VectorS<2>, 2>("v_tex");
         for (const auto h: mesh.halfedges) {
             fprintf(out, "vt %.10f %.10f \n", texCoord[h][0], texCoord[h][1]);
         }
@@ -1028,14 +1028,14 @@ bool meshio::write_stl(const halfedge_mesh &mesh) {
         return false;
     }
 
-    auto fnormals = mesh.faces.get<VectorS<3>, 3>("normal");
+    auto fnormals = mesh.faces.get<VectorS<3>, 3>("f_normal");
     if (!fnormals) {
         std::cerr << "write_stl: no face normals present!\n";
         return false;
     }
 
     std::ofstream ofs(filename.c_str());
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
 
     ofs << "solid stl" << std::endl;
     ofs.precision(10);
@@ -1073,7 +1073,7 @@ bool meshio::write_ply(const halfedge_mesh &mesh) {
     ply_write_header(ply);
 
     // write vertices
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     for (const auto v : mesh.vertices) {
         ply_write(ply, positions[v][0]);
         ply_write(ply, positions[v][1]);
@@ -1100,11 +1100,11 @@ bool meshio::write_pmp(const halfedge_mesh &mesh) {
     }
 
     // get properties
-    auto vconn = mesh.vertices.get<halfedge_mesh::vertex_connectivity, 1>("connectivity");
-    auto hconn = mesh.halfedges.get<halfedge_mesh::halfedge_connectivity, 1>("connectivity");
-    auto fconn = mesh.faces.get<halfedge_mesh::face_connectivity, 1>("connectivity");
-    auto point = mesh.vertices.get<VectorS<3>, 3>("position");
-    auto htex = mesh.halfedges.get<VectorS<2>, 2>("tex");
+    auto vconn = mesh.vertices.get<halfedge_mesh::vertex_connectivity, 1>("v_connectivity");
+    auto hconn = mesh.halfedges.get<halfedge_mesh::halfedge_connectivity, 1>("h_connectivity");
+    auto fconn = mesh.faces.get<halfedge_mesh::face_connectivity, 1>("f_connectivity");
+    auto point = mesh.vertices.get<VectorS<3>, 3>("v_position");
+    auto htex = mesh.halfedges.get<VectorS<2>, 2>("v_tex");
 
     // how many elements?
     unsigned int nv = (unsigned int) mesh.num_vertices();
@@ -1139,8 +1139,8 @@ bool meshio::write_xyz(const halfedge_mesh &mesh) {
         return false;
     }
 
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("position");
-    auto vnormal = mesh.vertices.get<VectorS<3>, 3>("normal");
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
+    auto vnormal = mesh.vertices.get<VectorS<3>, 3>("v_normal");
 
     for (const auto v : mesh.vertices) {
         ofs << positions[v].transpose();

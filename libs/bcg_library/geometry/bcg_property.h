@@ -790,9 +790,9 @@ struct vertex_container : public property_container {
                                                                                                   std::move(deleted)) {}
     };
 
-    inline vertex_iterator begin() const { return vertex_iterator(0, get<bool, 1>("deleted"), this); }
+    inline vertex_iterator begin() const { return vertex_iterator(0, get<bool, 1>("v_deleted"), this); }
 
-    inline vertex_iterator end() const { return vertex_iterator(size(), get<bool, 1>("deleted"), this); }
+    inline vertex_iterator end() const { return vertex_iterator(size(), get<bool, 1>("v_deleted"), this); }
 };
 
 struct halfedge_container : public property_container {
@@ -808,9 +808,9 @@ struct halfedge_container : public property_container {
                                                                                                       deleted) {}
     };
 
-    inline halfedge_iterator begin() const { return halfedge_iterator(0, get<bool, 1>("deleted"), this); }
+    inline halfedge_iterator begin() const { return halfedge_iterator(0, get<bool, 1>("h_deleted"), this); }
 
-    inline halfedge_iterator end() const { return halfedge_iterator(size(), get<bool, 1>("deleted"), this); }
+    inline halfedge_iterator end() const { return halfedge_iterator(size(), get<bool, 1>("h_deleted"), this); }
 };
 
 struct edge_container : public property_container {
@@ -826,9 +826,9 @@ struct edge_container : public property_container {
                                                                                               std::move(deleted)) {}
     };
 
-    inline edge_iterator begin() const { return edge_iterator(0, get<bool, 1>("deleted"), this); }
+    inline edge_iterator begin() const { return edge_iterator(0, get<bool, 1>("e_deleted"), this); }
 
-    inline edge_iterator end() const { return edge_iterator(size(), get<bool, 1>("deleted"), this); }
+    inline edge_iterator end() const { return edge_iterator(size(), get<bool, 1>("e_deleted"), this); }
 };
 
 struct face_container : public property_container {
@@ -844,9 +844,9 @@ struct face_container : public property_container {
                                                                                               std::move(deleted)) {}
     };
 
-    inline face_iterator begin() const { return face_iterator(0, get<bool, 1>("deleted"), this); }
+    inline face_iterator begin() const { return face_iterator(0, get<bool, 1>("f_deleted"), this); }
 
-    inline face_iterator end() const { return face_iterator(size(), get<bool, 1>("deleted"), this); }
+    inline face_iterator end() const { return face_iterator(size(), get<bool, 1>("f_deleted"), this); }
 };
 
 

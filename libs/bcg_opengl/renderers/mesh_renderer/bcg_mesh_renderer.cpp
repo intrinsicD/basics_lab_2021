@@ -50,7 +50,7 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if(!state->scene.has<material_mesh>(event.id)){
         auto &material = state->scene.emplace<material_mesh>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-        auto face_attributes = {attribute{"triangles", "triangles", 0, true}};
+        auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
         state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
     }
@@ -80,18 +80,17 @@ void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for
             iter->second.release();
         }
     }
-    if(shape.element_buffer.is_valid()){
-        shape.element_buffer.bind();
-    }
-    if(shape.adjacency_buffer.is_valid()){
-        shape.adjacency_buffer.bind();
+    if(shape.triangle_buffer.is_valid()){
+        shape.triangle_buffer.bind();
     }
     material.vao.release();
 }
 
 void mesh_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        state->dispatcher.trigger<event::mesh_renderer::enqueue>(id);
+        if (state->scene.has<event::mesh_renderer::enqueue>(id)) {
+            state->dispatcher.trigger<event::mesh_renderer::enqueue>(id);
+        }
     });
 }
 
@@ -131,8 +130,8 @@ void mesh_renderer::on_render(const event::internal::render &) {
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-
-        glDrawElements(GL_TRIANGLES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
+        shape.triangle_buffer.bind();
+        glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
         assert_ogl_error();
     }
 

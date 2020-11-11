@@ -17,7 +17,7 @@ struct material_picking{
     explicit material_picking(entt::entity id) : picking_color(color::packed_int((unsigned int)id)){}
 
     std::vector<attribute> attributes = {
-            {"position", "position", 0, true}
+            {"position", "v_position", "v_position", 0, true}
     };
 
     ogl_vertex_array vao;

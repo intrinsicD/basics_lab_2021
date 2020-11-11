@@ -10,8 +10,10 @@
 #include "bcg_entity_info.h"
 #include "aligned_box/bcg_aligned_box.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
+#include "renderers/graph_renderer/bcg_material_graph.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
+#include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "utils/bcg_path.h"
 
@@ -62,8 +64,8 @@ void left_panel::render(viewer_state *state) {
     ImGui::End();
 }
 
-template<typename Real>
-bool draw_combo(viewer_state *state, const property<Real, 1> prop, size_t &current_entry) {
+template<typename Real, int N>
+bool draw_combo(viewer_state *state, const property<Real, N> prop, size_t &current_entry) {
     if (!prop) return false;
     if (current_entry >= prop.size()) { current_entry = 0; }
     std::stringstream ss;
@@ -136,8 +138,11 @@ void gui_info(viewer_state *state, const ogl_shape *shape) {
             auto &buffer = item.second;
             gui_info(state, buffer);
         }
-        if (shape->element_buffer) {
-            gui_info(state, shape->element_buffer);
+        if (shape->edge_buffer) {
+            gui_info(state, shape->edge_buffer);
+        }
+        if (shape->triangle_buffer) {
+            gui_info(state, shape->triangle_buffer);
         }
         if (shape->adjacency_buffer) {
             gui_info(state, shape->adjacency_buffer);
@@ -165,9 +170,9 @@ void gui_info(viewer_state *state, property_container *container, size_t &curren
             if (!any) continue;
         }
         ImGui::PushID((container->name + "connectivity").c_str());
-        draw_combo(state, container->get<halfedge_graph::vertex_connectivity, 1>("connectivity"), current_entry);
-        draw_combo(state, container->get<halfedge_graph::halfedge_connectivity, 1>("connectivity"), current_entry);
-        draw_combo(state, container->get<halfedge_mesh::face_connectivity, 1>("connectivity"), current_entry);
+        draw_combo(state, container->get<halfedge_graph::vertex_connectivity, 1>("v_connectivity"), current_entry);
+        draw_combo(state, container->get<halfedge_graph::halfedge_connectivity, 4>("h_connectivity"), current_entry);
+        draw_combo(state, container->get<halfedge_mesh::face_connectivity, 1>("f_connectivity"), current_entry);
         ImGui::PopID();
     }
 }
@@ -239,24 +244,25 @@ void gui_info(viewer_state *state, material_mesh *material, entt::entity id) {
             draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
         }
     }
-    if (gui_info_property_selector(state, vertices, {3}, position.buffer_name.c_str(),position.property_name)) {
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),position.property_name)) {
         if(position.property_name.empty()){
-            position.property_name = "position";
+            position.property_name = "v_position";
         }
         state->dispatcher.trigger<event::mesh_renderer::set_position_attribute>(id, position);
     }
     auto &normal = material->attributes[1];
-    if (gui_info_property_selector(state, vertices, {3}, normal.buffer_name, normal.property_name)) {
+    if (gui_info_property_selector(state, vertices, {3}, normal.shader_attribute_name, normal.property_name)) {
         if(normal.property_name.empty()){
-            normal.property_name = "normal";
+            normal.property_name = "v_normal";
         }
         state->dispatcher.trigger<event::mesh_renderer::set_normal_attribute>(id, normal);
     }
     auto &color = material->attributes[2];
-    if (gui_info_property_selector(state, vertices, {1, 3}, color.buffer_name, color.property_name)) {
-        state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+    if (gui_info_property_selector(state, vertices, {1, 3}, color.shader_attribute_name, color.property_name)) {
         if(color.property_name.empty()){
             material->use_uniform_color = true;
+        }else{
+            state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
         }
     }
     if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
@@ -266,6 +272,44 @@ void gui_info(viewer_state *state, material_mesh *material, entt::entity id) {
     draw_coloredit(&state->window, "diffuse", material->diffuse);
     draw_coloredit(&state->window, "specular", material->specular);
     ImGui::InputFloat("shininess", &material->shininess);
+    ImGui::InputFloat("alpha", &material->uniform_alpha);
+    ImGui::PopID();
+}
+
+void gui_info(viewer_state *state, material_graph *material, entt::entity id) {
+    if (!material) return;
+    ImGui::PushID("graph_material");
+    auto *vertices = state->get_vertices(id);
+    auto *edges = state->get_edges(id);
+    auto &position = material->attributes[0];
+    draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
+    if(ImGui::CollapsingHeader("Captured Attributes")){
+        for(const auto &item : material->vao.captured_attributes){
+            draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
+        }
+    }
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),position.property_name)) {
+        if(position.property_name.empty()){
+            position.property_name = "v_position";
+        }
+        state->dispatcher.trigger<event::graph_renderer::set_position_attribute>(id, position);
+    }
+    auto &color = material->attributes[1];
+    if (gui_info_property_selector(state, edges, {1, 3}, color.shader_attribute_name, color.property_name)) {
+        if(color.property_name.empty()){
+            material->use_uniform_color = true;
+        }else{
+            state->dispatcher.trigger<event::graph_renderer::set_color_attribute>(id, color);
+        }
+    }
+
+    if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
+        if(material->use_uniform_color){
+            color.property_name = "";
+        }
+    }
+
+    draw_coloredit(&state->window, "uniform_color", material->uniform_color);
     ImGui::InputFloat("alpha", &material->uniform_alpha);
     ImGui::PopID();
 }
@@ -281,24 +325,26 @@ void gui_info(viewer_state *state, material_points *material, entt::entity id) {
             draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
         }
     }
-    if (gui_info_property_selector(state, vertices, {3}, position.buffer_name.c_str(),position.property_name)) {
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),position.property_name)) {
         if(position.property_name.empty()){
-            position.property_name = "position";
+            position.property_name = "v_position";
         }
         state->dispatcher.trigger<event::points_renderer::set_position_attribute>(id, position);
     }
     auto &color = material->attributes[1];
-    if (gui_info_property_selector(state, vertices, {1, 3}, color.buffer_name, color.property_name)) {
+    if (gui_info_property_selector(state, vertices, {1, 3}, color.shader_attribute_name, color.property_name)) {
         if(color.property_name.empty()){
             material->use_uniform_color = true;
+        }else{
+            state->dispatcher.trigger<event::points_renderer::set_color_attribute>(id, color);
         }
-        state->dispatcher.trigger<event::points_renderer::set_color_attribute>(id, color);
     }
     auto &point_size = material->attributes[2];
-    if (gui_info_property_selector(state, vertices, {1}, point_size.buffer_name, point_size.property_name)) {
-        state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(id, point_size);
+    if (gui_info_property_selector(state, vertices, {1}, point_size.shader_attribute_name, point_size.property_name)) {
         if(point_size.property_name.empty()){
             material->use_uniform_size = true;
+        }else{
+            state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(id, point_size);
         }
     }
     if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
@@ -318,6 +364,8 @@ void gui_info(viewer_state *state, material_points *material, entt::entity id) {
 
 void gui_rendering(viewer_state *state, entt::entity id) {
     static bool show_points = false;
+    static bool show_edges = false;
+    static bool show_mesh = false;
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {
@@ -326,12 +374,30 @@ void gui_rendering(viewer_state *state, entt::entity id) {
                 state->scene.remove_if_exists<event::points_renderer::enqueue>(id);
             }
         }
+        if (ImGui::Checkbox("show edges", &show_edges)) {
+            if (show_edges && state->get_edges(id) != nullptr) {
+                state->scene.emplace_or_replace<event::graph_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::graph_renderer::enqueue>(id);
+            }
+        }
+        if (ImGui::Checkbox("show mesh", &show_mesh)) {
+            if (show_mesh && state->get_faces(id) != nullptr) {
+                state->scene.emplace_or_replace<event::mesh_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::mesh_renderer::enqueue>(id);
+            }
+        }
     }
     if (ImGui::CollapsingHeader("materials")) {
         gui_info(state, state->scene.try_get<material_mesh>(id), id);
         if (show_points) {
             ImGui::Separator();
             gui_info(state, state->scene.try_get<material_points>(id), id);
+        }
+        if (show_edges) {
+            ImGui::Separator();
+            gui_info(state, state->scene.try_get<material_graph>(id), id);
         }
     }
 }

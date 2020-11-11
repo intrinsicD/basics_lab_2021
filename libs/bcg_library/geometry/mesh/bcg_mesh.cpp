@@ -12,8 +12,8 @@
 namespace bcg {
 
 halfedge_mesh::halfedge_mesh() : halfedge_graph(),
-                                 fconn(faces.add<face_connectivity, 1>("connectivity")),
-                                 faces_deleted(faces.add<bool, 1>("deleted", false)),
+                                 fconn(faces.add<face_connectivity, 1>("f_connectivity")),
+                                 faces_deleted(faces.add<bool, 1>("f_deleted", false)),
                                  size_faces_deleted(0) {
 
 }
@@ -26,7 +26,7 @@ void halfedge_mesh::assign(const halfedge_mesh &other) {
         faces.remove_all();
 
         // allocate standard properties
-        fconn = faces.get_or_add<face_connectivity, 1>("connectivity");
+        fconn = faces.get_or_add<face_connectivity, 1>("f_connectivity");
 
         // copy properties from other mesh
         fconn.vector() = other.fconn.vector();
@@ -50,14 +50,14 @@ halfedge_mesh &halfedge_mesh::operator=(const halfedge_mesh &other) {
         faces = other.faces;
 
         // property handles contain pointers, have to be reassigned
-        positions = vertices.get<position_t, 3>("position");
-        vertices_deleted = vertices.get<bool, 1>("deleted");
-        edges_deleted = edges.get<bool, 1>("deleted");
-        halfedges_deleted = halfedges.get<bool, 1>("deleted");
-        faces_deleted = faces.get<bool, 1>("deleted");
-        vconn = vertices.get<vertex_connectivity, 1>("connectivity");
-        hconn = halfedges.get<halfedge_connectivity, 4>("connectivity");
-        fconn = faces.get<face_connectivity, 1>("connectivity");
+        positions = vertices.get<position_t, 3>("v_position");
+        vertices_deleted = vertices.get<bool, 1>("v_deleted");
+        halfedges_deleted = halfedges.get<bool, 1>("h_deleted");
+        edges_deleted = edges.get<bool, 1>("e_deleted");
+        faces_deleted = faces.get<bool, 1>("f_deleted");
+        vconn = vertices.get<vertex_connectivity, 1>("v_connectivity");
+        hconn = halfedges.get<halfedge_connectivity, 4>("h_connectivity");
+        fconn = faces.get<face_connectivity, 1>("f_connectivity");
 
         // how many elements are deleted?
         size_vertices_deleted = other.size_vertices_deleted;
@@ -101,9 +101,9 @@ void halfedge_mesh::garbage_collection() {
     size_t nH = halfedges.size();
     size_t nF = faces.size();
 
-    auto vmap = vertices.add<vertex_handle, 1>("garbage_collection");
-    auto hmap = halfedges.add<halfedge_handle, 1>("garbage_collection");
-    auto fmap = faces.add<face_handle, 1>("garbage_collection");
+    auto vmap = vertices.add<vertex_handle, 1>("v_garbage_collection");
+    auto hmap = halfedges.add<halfedge_handle, 1>("h_garbage_collection");
+    auto fmap = faces.add<face_handle, 1>("f_garbage_collection");
 
     for (size_t i = 0; i < nV; ++i) {
         vmap[i] = i;

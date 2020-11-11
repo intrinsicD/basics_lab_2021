@@ -1299,6 +1299,33 @@ void ogl_buffer_object::release() const {
     assert_ogl_error();
 }
 
+void ogl_buffer_object::upload(const void *data, size_t size, size_t dims, size_t offset, bool dynamic){
+    if (size  * dims > capacity || !(*this)) {
+        // reallocate buffer if needed
+        if(target == GL_ELEMENT_ARRAY_BUFFER){
+            num_elements = size  * dims;
+            capacity = num_elements;
+        }else{
+            num_elements = size;
+            capacity = num_elements  * dims;
+        }
+        size_bytes = capacity * sizeof(float);
+        glBufferData(target, size_bytes, data, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+        assert_ogl_error();
+        this->dims = dims;
+        this->dynamic = dynamic;
+    } else {
+        // we have enough space
+        glBufferSubData(target, offset * dims * sizeof(bcg_scalar_t), size * dims * sizeof(bcg_scalar_t), data);
+        assert_ogl_error();
+    }
+}
+
+void ogl_buffer_object::download(bcg_scalar_t *data, size_t size_bytes, size_t offset_bytes){
+    glGetBufferSubData(target, offset_bytes, size_bytes, data);
+    assert_ogl_error();
+}
+
 ogl_vertex_buffer::ogl_vertex_buffer() : ogl_vertex_buffer(BCG_GL_INVALID_ID, "vbo") {
 
 }

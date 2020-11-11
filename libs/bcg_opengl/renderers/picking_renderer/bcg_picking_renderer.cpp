@@ -71,8 +71,8 @@ void picking_renderer::on_setup_for_rendering(const event::picking_renderer::set
             iter->second.release();
         }
     }
-    if(shape.element_buffer){
-        shape.element_buffer.bind();
+    if(shape.triangle_buffer){
+        shape.triangle_buffer.bind();
     }
     material.vao.release();
 }
@@ -120,15 +120,12 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
 
-        if (shape.element_buffer) {
-            if (shape.element_buffer.dims == 2) {
-                glDrawElements(GL_LINES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
-            } else if (shape.element_buffer.dims == 3) {
-                glDrawElements(GL_TRIANGLES, shape.element_buffer.num_elements, GL_UNSIGNED_INT, 0);
-            }
-        } else {
-            auto &pos = shape.vertex_buffers["position"];
-            glDrawArrays(GL_POINTS, 0, pos.num_elements);
+        if (shape.edge_buffer) {
+            glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
+        } else if(shape.triangle_buffer){
+            glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
+        }else{
+            glDrawArrays(GL_POINTS, 0, shape.num_vertices);
         }
         assert_ogl_error();
     }
@@ -170,7 +167,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     if (!state->scene.has<kdtree_property<bcg_scalar_t>>(id)) {
         auto *vertices = state->get_vertices(id);
-        auto positions = vertices->get<VectorS<3>, 3>("position");
+        auto positions = vertices->get<VectorS<3>, 3>("v_position");
         auto &kd_tree = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(id);
         kd_tree.build(positions);
     }

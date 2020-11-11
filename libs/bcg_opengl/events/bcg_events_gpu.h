@@ -9,8 +9,17 @@
 #include <string>
 #include "entt/entt.hpp"
 #include "bcg_opengl/renderers/bcg_attribute.h"
+#include "bcg_property.h"
+#include "color/bcg_colors.h"
 
 namespace bcg::event::gpu{
+
+struct update_property{
+    entt::entity id;
+    property_container *container;
+    attribute attrib;
+    colormap::base_colormap color_map;
+};
 struct update_vertex_attributes {
     entt::entity id;
     std::vector<attribute> attributes;

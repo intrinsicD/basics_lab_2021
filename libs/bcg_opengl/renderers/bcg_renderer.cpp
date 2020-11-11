@@ -17,4 +17,12 @@ renderer::renderer(std::string name, viewer_state *state) : system(name, state){
     state->dispatcher.sink<event::internal::end_frame>().connect<&renderer::on_end_frame>(this);
 }
 
+void renderer::on_begin_frame(const event::internal::begin_frame &){}
+
+void renderer::on_render(const event::internal::render &){}
+
+void renderer::on_end_frame(const event::internal::end_frame &){
+
+}
+
 }

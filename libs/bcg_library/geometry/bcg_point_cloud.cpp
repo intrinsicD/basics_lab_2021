@@ -8,8 +8,8 @@
 
 namespace bcg {
 
-point_cloud::point_cloud() : positions(vertices.add<position_t, 3>("position")),
-                             vertices_deleted(vertices.add<bool, 1>("deleted")),
+point_cloud::point_cloud() : positions(vertices.add<position_t, 3>("v_position")),
+                             vertices_deleted(vertices.add<bool, 1>("v_deleted")),
                              size_vertices_deleted(0) {
 
 }
@@ -17,8 +17,8 @@ point_cloud::point_cloud() : positions(vertices.add<position_t, 3>("position")),
 void point_cloud::assign(const point_cloud &other) {
     if (this != &other) {
         vertices.remove_all();
-        positions = vertices.get_or_add<position_t, 3>("position");
-        vertices_deleted = vertices.get_or_add<bool, 1>("deleted");
+        positions = vertices.get_or_add<position_t, 3>("v_position");
+        vertices_deleted = vertices.get_or_add<bool, 1>("v_deleted");
         positions.vector() = other.positions.vector();
         vertices_deleted.vector() = other.vertices_deleted.vector();
 
@@ -31,8 +31,8 @@ void point_cloud::assign(const point_cloud &other) {
 point_cloud &point_cloud::operator=(const point_cloud &other) {
     if (this != &other) {
         vertices = other.vertices;
-        positions = vertices.get_or_add<position_t, 3>("position");
-        vertices_deleted = vertices.get_or_add<bool, 1>("deleted");
+        positions = vertices.get_or_add<position_t, 3>("v_position");
+        vertices_deleted = vertices.get_or_add<bool, 1>("v_deleted");
         size_vertices_deleted = other.size_vertices_deleted;
     }
     return *this;

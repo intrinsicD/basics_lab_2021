@@ -436,6 +436,10 @@ struct ogl_buffer_object : public ogl_handle {
     void bind() const;
 
     void release() const;
+
+    void upload(const void *data, size_t size, size_t dims, size_t offset = 0, bool dynamic = false);
+
+    void download(bcg_scalar_t *data, size_t size_bytes, size_t offset_bytes = 0);
 };
 
 struct ogl_vertex_buffer : public ogl_buffer_object {
@@ -519,8 +523,10 @@ struct ogl_vertex_array : public ogl_handle {
 
 struct ogl_shape{
     std::unordered_map<std::string, ogl_vertex_buffer> vertex_buffers;
-    ogl_element_buffer element_buffer, adjacency_buffer;
+    ogl_element_buffer edge_buffer, triangle_buffer, adjacency_buffer;
     int num_vertices;
+    int num_edges;
+    int num_faces;
 };
 
 struct ogl_renderbuffer : public ogl_handle {

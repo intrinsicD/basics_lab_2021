@@ -77,8 +77,8 @@ bool point_cloudio::read_pts(point_cloud &pc) {
 
     };
 
-    auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("color", color::white);
-    auto intensities = pc.vertices.get_or_add<bcg_scalar_t, 1>("intensity", 1.0);
+    auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("v_color", color::white);
+    auto intensities = pc.vertices.get_or_add<bcg_scalar_t, 1>("v_intensity", 1.0);
     vertex_handle v;
     auto insertLambda = [&v, &pc, &colors, &intensities](bcg_scalar_t result, size_t lineCount, size_t ScalarTypePerLineCount) {
         if (lineCount == 0) {
@@ -162,7 +162,7 @@ bool point_cloudio::read_pwn(point_cloud &pc) {
         v = pc.add_vertex(p);
     }
 
-    auto normals = pc.vertices.get_or_add<VectorS<3>, 3>("normal");
+    auto normals = pc.vertices.get_or_add<VectorS<3>, 3>("v_normal");
     for (unsigned int i = 0; i < size; ++i) {
         res = fscanf(in, "%lf %lf %lf", reinterpret_cast<double*>(&normals[0]), reinterpret_cast<double*>(&normals[1]), reinterpret_cast<double*>(&normals[2]));
         normals[i] = normals[i].normalized();
@@ -197,7 +197,7 @@ bool point_cloudio::read_pb(point_cloud &pc) {
     }
 
     if (i.fail()) {
-        auto normals = pc.vertices.get_or_add<VectorS<3>, 3>("normal");
+        auto normals = pc.vertices.get_or_add<VectorS<3>, 3>("v_normal");
         for (size_t k = 0; k < size; ++k) {
             for (unsigned int j = 0; j < 3; ++j) {
                 i.read((char *) &s, sizeof(bcg_scalar_t));
@@ -208,7 +208,7 @@ bool point_cloudio::read_pb(point_cloud &pc) {
     }
 
     if (i.fail()) {
-        auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("color");
+        auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("v_color");
         for (size_t k = 0; k < size; ++k) {
             for (unsigned int j = 0; j < 3; ++j) {
                 i.read((char *) &s, sizeof(bcg_scalar_t));
@@ -248,7 +248,7 @@ bool point_cloudio::read_3d(point_cloud &pc) {
     };
 
     std::vector<bcg_scalar_t> position, intensity;
-    auto intensities = pc.vertices.get_or_add<bcg_scalar_t, 1>("intensity");
+    auto intensities = pc.vertices.get_or_add<bcg_scalar_t, 1>("v_intensity");
     vertex_handle v;
     auto insertLambda = [&v, &pc, &intensities](bcg_scalar_t result, size_t, size_t ScalarTypePerLineCount) {
         if (ScalarTypePerLineCount == 0) {
@@ -274,8 +274,8 @@ bool point_cloudio::read_txt(point_cloud &pc) {
 
     };
 
-    auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("color");
-    auto reflectances = pc.vertices.get_or_add<bcg_scalar_t, 1>("reflectance");
+    auto colors = pc.vertices.get_or_add<VectorS<3>, 3>("v_color");
+    auto reflectances = pc.vertices.get_or_add<bcg_scalar_t, 1>("v_reflectance");
     vertex_handle v;
     auto insertLambda = [&v, &pc, &colors, &reflectances](bcg_scalar_t result, size_t lineCount,
                                                           size_t ScalarTypePerLineCount) {

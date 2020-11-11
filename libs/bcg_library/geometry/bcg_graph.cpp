@@ -10,10 +10,10 @@
 namespace bcg {
 
 halfedge_graph::halfedge_graph() : point_cloud(),
-                                   vconn(vertices.add<vertex_connectivity, 1>("connectivity")),
-                                   hconn(halfedges.add<halfedge_connectivity, 4>("connectivity")),
-                                   halfedges_deleted(halfedges.add<bool, 1>("deleted")),
-                                   edges_deleted(edges.add<bool, 1>("deleted")),
+                                   vconn(vertices.add<vertex_connectivity, 1>("v_connectivity")),
+                                   hconn(halfedges.add<halfedge_connectivity, 4>("h_connectivity")),
+                                   halfedges_deleted(halfedges.add<bool, 1>("h_deleted")),
+                                   edges_deleted(edges.add<bool, 1>("e_deleted")),
                                    size_halfedges_deleted(0),
                                    size_edges_deleted(0) {
 
@@ -25,11 +25,11 @@ void halfedge_graph::assign(const halfedge_graph &other) {
         halfedges.remove_all();
         edges.remove_all();
 
-        vconn = vertices.get_or_add<vertex_connectivity, 1>("connectivity");
-        hconn = halfedges.get_or_add<halfedge_connectivity, 4>("connectivity");
+        vconn = vertices.get_or_add<vertex_connectivity, 1>("v_connectivity");
+        hconn = halfedges.get_or_add<halfedge_connectivity, 4>("h_connectivity");
 
-        halfedges_deleted = halfedges.get_or_add<bool, 1>("deleted");
-        edges_deleted = edges.get_or_add<bool, 1>("deleted");
+        halfedges_deleted = halfedges.get_or_add<bool, 1>("h_deleted");
+        edges_deleted = edges.get_or_add<bool, 1>("e_deleted");
 
         vconn.vector() = other.vconn.vector();
         hconn.vector() = other.hconn.vector();
@@ -50,14 +50,14 @@ halfedge_graph &halfedge_graph::operator=(const halfedge_graph &other) {
         vertices = other.vertices;
         halfedges = other.halfedges;
         edges = other.edges;
-        positions = vertices.get_or_add<position_t, 3>("position");
+        positions = vertices.get_or_add<position_t, 3>("v_position");
 
-        vconn = vertices.get_or_add<vertex_connectivity, 1>("connectivity");
-        hconn = halfedges.get_or_add<halfedge_connectivity, 4>("connectivity");
+        vconn = vertices.get_or_add<vertex_connectivity, 1>("v_connectivity");
+        hconn = halfedges.get_or_add<halfedge_connectivity, 4>("h_connectivity");
 
-        vertices_deleted = vertices.get_or_add<bool, 1>("deleted");
-        halfedges_deleted = halfedges.get_or_add<bool, 1>("deleted");
-        edges_deleted = edges.get_or_add<bool, 1>("deleted");
+        vertices_deleted = vertices.get_or_add<bool, 1>("v_deleted");
+        halfedges_deleted = halfedges.get_or_add<bool, 1>("h_deleted");
+        edges_deleted = edges.get_or_add<bool, 1>("e_deleted");
 
         size_vertices_deleted = other.size_vertices_deleted;
         size_halfedges_deleted = other.size_halfedges_deleted;
@@ -85,8 +85,8 @@ void halfedge_graph::garbage_collection() {
     size_t nE = edges.size();
     size_t nH = halfedges.size();
 
-    auto vmap = vertices.add<vertex_handle, 1>("garbage_collection");
-    auto hmap = halfedges.add<halfedge_handle, 1>("garbage_collection");
+    auto vmap = vertices.add<vertex_handle, 1>("v_garbage_collection");
+    auto hmap = halfedges.add<halfedge_handle, 1>("h_garbage_collection");
 
     for (size_t i = 0; i < nV; ++i) {
         vmap[i] = vertex_handle(i);

@@ -52,7 +52,7 @@ VectorS<3> vertex_normal_area_angle(halfedge_mesh &mesh, vertex_handle v) {
 
 void vertex_normals(halfedge_mesh &mesh, std::function<VectorS<3>(halfedge_mesh &, vertex_handle)> method,
                     size_t parallel_grain_size) {
-    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("normal");
+    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
 
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),

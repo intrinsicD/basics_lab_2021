@@ -12,9 +12,9 @@ namespace bcg{
 
 struct material_points{
     std::vector<attribute> attributes = {
-            {"position", "position", 0, true},
-            {"points_color", "", 1, false},
-            {"point_size", "", 2, false}
+            {"position", "v_position","v_position", 0, true},
+            {"color", "", "", 1, false},
+            {"point_size","", "", 2, false}
     };
 
     ogl_vertex_array vao;

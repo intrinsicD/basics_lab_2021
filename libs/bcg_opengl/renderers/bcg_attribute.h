@@ -10,7 +10,7 @@
 namespace bcg{
 
 struct attribute{
-    std::string buffer_name, property_name;
+    std::string shader_attribute_name, buffer_name, property_name;
     int index = 0;
     bool enable = false;
     bool update = false;
