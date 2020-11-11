@@ -11,10 +11,13 @@
 #include "aligned_box/bcg_aligned_box.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 #include "renderers/graph_renderer/bcg_material_graph.h"
+#include "renderers/vectorfield_renderer/bcg_material_vectorfield.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
+#include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
+#include "renderers/bcg_vectorfields.h"
 #include "geometry/mesh/bcg_mesh.h"
 #include "utils/bcg_path.h"
 
@@ -240,33 +243,34 @@ void gui_info(viewer_state *state, material_mesh *material, entt::entity id) {
     auto &position = material->attributes[0];
     auto *vertices = state->get_vertices(id);
     draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
-    if(ImGui::CollapsingHeader("Captured Attributes")){
-        for(const auto &item : material->vao.captured_attributes){
+    if (ImGui::CollapsingHeader("Captured Attributes")) {
+        for (const auto &item : material->vao.captured_attributes) {
             draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
         }
     }
-    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),position.property_name)) {
-        if(position.property_name.empty()){
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),
+                                   position.property_name)) {
+        if (position.property_name.empty()) {
             position.property_name = "v_position";
         }
         state->dispatcher.trigger<event::mesh_renderer::set_position_attribute>(id, position);
     }
     auto &normal = material->attributes[1];
     if (gui_info_property_selector(state, vertices, {3}, normal.shader_attribute_name, normal.property_name)) {
-        if(normal.property_name.empty()){
+        if (normal.property_name.empty()) {
             normal.property_name = "v_normal";
         }
         state->dispatcher.trigger<event::mesh_renderer::set_normal_attribute>(id, normal);
     }
     auto &color = material->attributes[2];
     if (gui_info_property_selector(state, vertices, {1, 3}, color.shader_attribute_name, color.property_name)) {
-        if(color.property_name.empty()){
+        if (color.property_name.empty()) {
             material->use_uniform_color = true;
-        }else{
+        } else {
             state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
         }
     }
-    if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
+    if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
         color.property_name = "";
     }
     draw_coloredit(&state->window, "ambient", material->ambient);
@@ -284,32 +288,76 @@ void gui_info(viewer_state *state, material_graph *material, entt::entity id) {
     auto *edges = state->get_edges(id);
     auto &position = material->attributes[0];
     draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
-    if(ImGui::CollapsingHeader("Captured Attributes")){
-        for(const auto &item : material->vao.captured_attributes){
+    if (ImGui::CollapsingHeader("Captured Attributes")) {
+        for (const auto &item : material->vao.captured_attributes) {
             draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
         }
     }
-    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),position.property_name)) {
-        if(position.property_name.empty()){
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),
+                                   position.property_name)) {
+        if (position.property_name.empty()) {
             position.property_name = "v_position";
         }
         state->dispatcher.trigger<event::graph_renderer::set_position_attribute>(id, position);
     }
     auto &color = material->attributes[1];
     if (gui_info_property_selector(state, edges, {1, 3}, color.shader_attribute_name, color.property_name)) {
-        if(color.property_name.empty()){
+        if (color.property_name.empty()) {
             material->use_uniform_color = true;
-        }else{
+        } else {
             state->dispatcher.trigger<event::graph_renderer::set_color_attribute>(id, color);
         }
     }
 
-    if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
-        if(material->use_uniform_color){
+    if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
+        if (material->use_uniform_color) {
             color.property_name = "";
         }
     }
 
+    draw_coloredit(&state->window, "uniform_color", material->uniform_color);
+    ImGui::InputFloat("alpha", &material->uniform_alpha);
+    ImGui::PopID();
+}
+
+void gui_info(viewer_state *state, material_vectorfield *material, property_container *container, entt::entity id,
+              std::string vectorfield_name) {
+    if (!material) return;
+    ImGui::PushID(("vectorfield_material" + vectorfield_name).c_str());
+
+    auto &position = material->attributes[0];
+    draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
+    if (ImGui::CollapsingHeader("Captured Attributes")) {
+        for (const auto &item : material->vao.captured_attributes) {
+            draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
+        }
+    }
+    std::string property_name = position.property_name;
+    if (gui_info_property_selector(state, container, {3}, position.shader_attribute_name.c_str(),
+                                   position.property_name)) {
+        if (position.property_name.empty()) {
+            position.property_name = property_name;
+        }
+        state->dispatcher.trigger<event::vectorfield_renderer::set_position_attribute>(id, vectorfield_name, position);
+    }
+    auto &vector = material->attributes[1];
+    if (gui_info_property_selector(state, container, {3}, vector.shader_attribute_name, vector.property_name)) {
+        state->dispatcher.trigger<event::vectorfield_renderer::set_color_attribute>(id, vectorfield_name, vector);
+    }
+    auto &color = material->attributes[2];
+    if (gui_info_property_selector(state, container, {1, 3}, color.shader_attribute_name, color.property_name)) {
+        if (color.property_name.empty()) {
+            material->use_uniform_color = true;
+        } else {
+            state->dispatcher.trigger<event::vectorfield_renderer::set_color_attribute>(id, vectorfield_name, color);
+        }
+    }
+    if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
+        if (material->use_uniform_color) {
+            color.property_name = "";
+        }
+    }
+    ImGui::Checkbox("use_uniform_vector_length", &material->use_uniform_size);
     draw_coloredit(&state->window, "uniform_color", material->uniform_color);
     ImGui::InputFloat("alpha", &material->uniform_alpha);
     ImGui::PopID();
@@ -321,40 +369,41 @@ void gui_info(viewer_state *state, material_points *material, entt::entity id) {
     auto *vertices = state->get_vertices(id);
     auto &position = material->attributes[0];
     draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
-    if(ImGui::CollapsingHeader("Captured Attributes")){
-        for(const auto &item : material->vao.captured_attributes){
+    if (ImGui::CollapsingHeader("Captured Attributes")) {
+        for (const auto &item : material->vao.captured_attributes) {
             draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
         }
     }
-    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),position.property_name)) {
-        if(position.property_name.empty()){
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),
+                                   position.property_name)) {
+        if (position.property_name.empty()) {
             position.property_name = "v_position";
         }
         state->dispatcher.trigger<event::points_renderer::set_position_attribute>(id, position);
     }
     auto &color = material->attributes[1];
     if (gui_info_property_selector(state, vertices, {1, 3}, color.shader_attribute_name, color.property_name)) {
-        if(color.property_name.empty()){
+        if (color.property_name.empty()) {
             material->use_uniform_color = true;
-        }else{
+        } else {
             state->dispatcher.trigger<event::points_renderer::set_color_attribute>(id, color);
         }
     }
     auto &point_size = material->attributes[2];
     if (gui_info_property_selector(state, vertices, {1}, point_size.shader_attribute_name, point_size.property_name)) {
-        if(point_size.property_name.empty()){
+        if (point_size.property_name.empty()) {
             material->use_uniform_size = true;
-        }else{
+        } else {
             state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(id, point_size);
         }
     }
-    if(ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)){
-        if(material->use_uniform_color){
+    if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
+        if (material->use_uniform_color) {
             color.property_name = "";
         }
     }
-    if(ImGui::Checkbox("use_uniform_point_size", &material->use_uniform_size)){
-        if(material->use_uniform_size){
+    if (ImGui::Checkbox("use_uniform_point_size", &material->use_uniform_size)) {
+        if (material->use_uniform_size) {
             point_size.property_name = "";
         }
     }
@@ -363,10 +412,37 @@ void gui_info(viewer_state *state, material_points *material, entt::entity id) {
     ImGui::PopID();
 }
 
+void gui_info(viewer_state *state, vectorfields *vectors, entt::entity id) {
+    if(!vectors) return;
+    static std::string current_vertex_vectorfield_name = "";
+    static std::string current_edge_vectorfield_name = "";
+    static std::string current_face_vectorfield_name = "";
+    gui_info_property_selector(state, state->get_vertices(id), {3}, "vertex vectorfield",
+                                   current_vertex_vectorfield_name);
+
+    if(current_vertex_vectorfield_name != ""){
+        gui_info(state, &vectors->vertex_vectorfields[current_vertex_vectorfield_name], state->get_vertices(id), id,
+                 current_vertex_vectorfield_name);
+    }
+    gui_info_property_selector(state, state->get_edges(id), {3}, "edge vectorfield",
+                                   current_vertex_vectorfield_name);
+    if(current_edge_vectorfield_name != ""){
+        gui_info(state, &vectors->edge_vectorfields[current_edge_vectorfield_name], state->get_edges(id), id,
+                 current_edge_vectorfield_name);
+    }
+    gui_info_property_selector(state, state->get_faces(id), {3}, "face vectorfield",
+                                   current_vertex_vectorfield_name);
+    if(current_face_vectorfield_name != ""){
+        gui_info(state, &vectors->face_vectorfields[current_face_vectorfield_name], state->get_faces(id), id,
+                 current_face_vectorfield_name);
+    }
+}
+
 void gui_rendering(viewer_state *state, entt::entity id) {
     static bool show_points = state->scene.has<point_cloud>(id);
     static bool show_edges = state->scene.has<halfedge_graph>(id);
     static bool show_mesh = state->scene.has<halfedge_mesh>(id);
+    static bool show_vectors = false;
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {
@@ -389,9 +465,15 @@ void gui_rendering(viewer_state *state, entt::entity id) {
                 state->scene.remove_if_exists<event::mesh_renderer::enqueue>(id);
             }
         }
+        if (ImGui::Checkbox("show vectors", &show_vectors)) {
+            if (show_mesh && state->get_faces(id) != nullptr) {
+                state->scene.emplace_or_replace<event::vectorfield_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::vectorfield_renderer::enqueue>(id);
+            }
+        }
     }
     if (ImGui::CollapsingHeader("materials")) {
-        gui_info(state, state->scene.try_get<material_mesh>(id), id);
         if (show_points) {
             ImGui::Separator();
             gui_info(state, state->scene.try_get<material_points>(id), id);
@@ -399,6 +481,14 @@ void gui_rendering(viewer_state *state, entt::entity id) {
         if (show_edges) {
             ImGui::Separator();
             gui_info(state, state->scene.try_get<material_graph>(id), id);
+        }
+        if (show_mesh) {
+            ImGui::Separator();
+            gui_info(state, state->scene.try_get<material_mesh>(id), id);
+        }
+        if (show_vectors) {
+            ImGui::Separator();
+            gui_info(state, state->scene.try_get<vectorfields>(id), id);
         }
     }
 }

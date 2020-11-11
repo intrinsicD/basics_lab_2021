@@ -2,6 +2,7 @@
 // Created by alex on 06.11.20.
 //
 
+#include "geometry/bcg_property.h"
 #include "bcg_mesh_vertex_normals.h"
 #include "bcg_mesh_face_normals.h"
 #include "bcg_mesh_face_area_vector.h"

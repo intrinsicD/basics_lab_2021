@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bcg_library/geometry/bcg_graph.h"
+#include "geometry/graph/bcg_graph.h"
 
 using namespace bcg;
 

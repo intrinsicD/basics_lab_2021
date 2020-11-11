@@ -27,7 +27,6 @@ struct material_points{
     bcg_scalar_t uniform_alpha = 1.0;
 };
 
-
 }
 
 #endif //BCG_GRAPHICS_BCG_MATERIAL_POINTS_H

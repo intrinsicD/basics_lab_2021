@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bcg_library/geometry/bcg_point_cloud.h"
+#include "geometry/point_cloud/bcg_point_cloud.h"
 
 using namespace bcg;
 

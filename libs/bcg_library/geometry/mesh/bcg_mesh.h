@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_MESH_H
 #define BCG_GRAPHICS_BCG_MESH_H
 
-#include "bcg_graph.h"
+#include "geometry/graph/bcg_graph.h"
 
 namespace bcg {
 

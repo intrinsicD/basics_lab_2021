@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "bcg_library/geometry/bcg_point_cloudio.h"
+#include "geometry/point_cloud/bcg_point_cloudio.h"
 
 #ifdef _WIN32
 static std::string test_data_path = "..\\..\\tests\\data\\";

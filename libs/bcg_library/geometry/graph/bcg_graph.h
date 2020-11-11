@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_GRAPH_H
 #define BCG_GRAPHICS_BCG_GRAPH_H
 
-#include "bcg_point_cloud.h"
+#include "geometry/point_cloud/bcg_point_cloud.h"
 
 namespace bcg {
 

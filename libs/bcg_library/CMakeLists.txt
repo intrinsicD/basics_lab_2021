@@ -20,8 +20,8 @@ add_library(bcg_graphics
         geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
         geometry/bcg_property.h
         geometry/bcg_property_map_eigen.h
-        geometry/bcg_point_cloud.h geometry/bcg_point_cloud.cpp geometry/bcg_point_cloudio.h geometry/bcg_point_cloudio.cpp
-        geometry/bcg_graph.h geometry/bcg_graph.cpp
+        geometry/point_cloud/bcg_point_cloud.h geometry/point_cloud/bcg_point_cloud.cpp geometry/point_cloud/bcg_point_cloudio.h geometry/point_cloud/bcg_point_cloudio.cpp
+        geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/mesh/bcg_mesh.h geometry/mesh/bcg_mesh.cpp
         geometry/mesh/bcg_meshio.h geometry/mesh/bcg_meshio.cpp
         geometry/mesh/bcg_mesh_face_area_vector.h geometry/mesh/bcg_mesh_face_area_vector.cpp
