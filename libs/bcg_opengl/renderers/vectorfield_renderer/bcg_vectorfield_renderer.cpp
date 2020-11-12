@@ -129,15 +129,14 @@ void render_vectorfield(material_vectorfield &material, Transform &model, glsl_p
     Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
     program.set_uniform_matrix_4f("model", model_matrix.data());
 
-    program.set_uniform_i("material.use_uniform_vectors_length", material.use_uniform_size);
-    program.set_uniform_f("material.uniform_vectors_length", material.uniform_size);
+    program.set_uniform_i("material.use_uniform_vector_length", material.use_uniform_size);
+    program.set_uniform_f("material.uniform_vector_length", material.uniform_size);
 
     program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
     Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
     program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
     float alpha = material.uniform_alpha;
     program.set_uniform_f("material.alpha", alpha);
-
     material.vao.bind();
     glDrawArrays(GL_POINTS, 0, shape.num_vertices);
     assert_ogl_error();
@@ -165,12 +164,18 @@ void vectorfield_renderer::on_render(const event::internal::render &) {
         auto &vectors = state->scene.get<vectorfields>(id);
         auto &shape = state->scene.get<ogl_shape>(id);
         for(auto &item : vectors.vertex_vectorfields){
+            if(!item.second.vao.is_valid()) continue;
+            if(!item.second.enabled) continue;
             render_vectorfield(item.second, model, program, shape);
         }
         for(auto &item : vectors.edge_vectorfields){
+            if(!item.second.vao.is_valid()) continue;
+            if(!item.second.enabled) continue;
             render_vectorfield(item.second, model, program, shape);
         }
         for(auto &item : vectors.face_vectorfields){
+            if(!item.second.vao.is_valid()) continue;
+            if(!item.second.enabled) continue;
             render_vectorfield(item.second, model, program, shape);
         }
     }

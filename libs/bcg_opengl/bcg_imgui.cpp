@@ -222,9 +222,9 @@ bool gui_info_property_selector(viewer_state *state, property_container *contain
     if (!container) return false;
     auto property_names = container->properties_names(filter_dims);
     if (property_names.empty()) return false;
-    property_names.push_back("");
-    int current_entry = property_names.size() - 1;
-    for (size_t i = 0; i < property_names.size(); ++i) {
+    property_names.emplace_back("");
+    int current_entry = static_cast<int>(property_names.size() - 1);
+    for (int i = 0; i < property_names.size(); ++i) {
         if (property_names[i] == current_property_name) {
             current_entry = i;
             break;
@@ -324,7 +324,7 @@ void gui_info(viewer_state *state, material_vectorfield *material, property_cont
               std::string vectorfield_name) {
     if (!material) return;
     ImGui::PushID(("vectorfield_material" + vectorfield_name).c_str());
-
+    ImGui::Checkbox("enabled", &material->enabled);
     auto &position = material->attributes[0];
     draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
     if (ImGui::CollapsingHeader("Captured Attributes")) {
@@ -340,10 +340,12 @@ void gui_info(viewer_state *state, material_vectorfield *material, property_cont
         }
         state->dispatcher.trigger<event::vectorfield_renderer::set_position_attribute>(id, vectorfield_name, position);
     }
-    auto &vector = material->attributes[1];
+/*    auto &vector = material->attributes[1];
+    vector.property_name = vectorfield_name;
+    vector.buffer_name = vectorfield_name;
     if (gui_info_property_selector(state, container, {3}, vector.shader_attribute_name, vector.property_name)) {
-        state->dispatcher.trigger<event::vectorfield_renderer::set_color_attribute>(id, vectorfield_name, vector);
-    }
+        state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, vectorfield_name, vector);
+    }*/
     auto &color = material->attributes[2];
     if (gui_info_property_selector(state, container, {1, 3}, color.shader_attribute_name, color.property_name)) {
         if (color.property_name.empty()) {
@@ -358,6 +360,7 @@ void gui_info(viewer_state *state, material_vectorfield *material, property_cont
         }
     }
     ImGui::Checkbox("use_uniform_vector_length", &material->use_uniform_size);
+    draw_dragger(&state->window, "uniform_size", material->uniform_size, 0.01, 0.001, 2.0);
     draw_coloredit(&state->window, "uniform_color", material->uniform_color);
     ImGui::InputFloat("alpha", &material->uniform_alpha);
     ImGui::PopID();
@@ -417,24 +420,51 @@ void gui_info(viewer_state *state, vectorfields *vectors, entt::entity id) {
     static std::string current_vertex_vectorfield_name = "";
     static std::string current_edge_vectorfield_name = "";
     static std::string current_face_vectorfield_name = "";
-    gui_info_property_selector(state, state->get_vertices(id), {3}, "vertex vectorfield",
-                                   current_vertex_vectorfield_name);
+    if(gui_info_property_selector(state, state->get_vertices(id), {3}, "vertex vectorfield",
+                                   current_vertex_vectorfield_name)){
+        if(!current_vertex_vectorfield_name.empty()){
+            auto &material = vectors->vertex_vectorfields[current_vertex_vectorfield_name];
+            auto &vector = material.attributes[1];
+            vector.property_name = current_vertex_vectorfield_name;
+            vector.buffer_name = current_vertex_vectorfield_name;
+            state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, current_vertex_vectorfield_name, vector);
+        }
+    }
 
-    if(current_vertex_vectorfield_name != ""){
+    if(!current_vertex_vectorfield_name.empty()){
         gui_info(state, &vectors->vertex_vectorfields[current_vertex_vectorfield_name], state->get_vertices(id), id,
                  current_vertex_vectorfield_name);
+        ImGui::Separator();
     }
-    gui_info_property_selector(state, state->get_edges(id), {3}, "edge vectorfield",
-                                   current_vertex_vectorfield_name);
-    if(current_edge_vectorfield_name != ""){
+    if(gui_info_property_selector(state, state->get_edges(id), {3}, "edge vectorfield",
+                                   current_edge_vectorfield_name)){
+        if(!current_edge_vectorfield_name.empty()){
+            auto &material = vectors->edge_vectorfields[current_edge_vectorfield_name];
+            auto &vector = material.attributes[1];
+            vector.property_name = current_edge_vectorfield_name;
+            vector.buffer_name = current_edge_vectorfield_name;
+            state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, current_edge_vectorfield_name, vector);
+        }
+    }
+    if(!current_edge_vectorfield_name.empty()){
         gui_info(state, &vectors->edge_vectorfields[current_edge_vectorfield_name], state->get_edges(id), id,
                  current_edge_vectorfield_name);
+        ImGui::Separator();
     }
-    gui_info_property_selector(state, state->get_faces(id), {3}, "face vectorfield",
-                                   current_vertex_vectorfield_name);
-    if(current_face_vectorfield_name != ""){
+    if(gui_info_property_selector(state, state->get_faces(id), {3}, "face vectorfield",
+                                   current_face_vectorfield_name)){
+        if(!current_face_vectorfield_name.empty()){
+            auto &material = vectors->face_vectorfields[current_face_vectorfield_name];
+            auto &vector = material.attributes[1];
+            vector.property_name = current_face_vectorfield_name;
+            vector.buffer_name = current_face_vectorfield_name;
+            state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, current_face_vectorfield_name, vector);
+        }
+    }
+    if(!current_face_vectorfield_name.empty()){
         gui_info(state, &vectors->face_vectorfields[current_face_vectorfield_name], state->get_faces(id), id,
                  current_face_vectorfield_name);
+        ImGui::Separator();
     }
 }
 
