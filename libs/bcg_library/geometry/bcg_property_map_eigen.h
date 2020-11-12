@@ -10,14 +10,14 @@
 
 namespace bcg {
 namespace glm {
-template<bcg_index_t L, typename T, /*qualifier*/bcg_index_t Q>
+template<int L, typename T, /*qualifier*/int Q>
 struct vec;
 
 template<typename T>
 T *value_ptr(const T &obj);
 }
 
-template<bcg_index_t L, typename T, /*qualifier*/bcg_index_t Q>
+template<int L, typename T, /*qualifier*/int Q>
 constexpr bool is_glm_type_f(const typename glm::vec<L, T, Q> *) {
     return true;
 }

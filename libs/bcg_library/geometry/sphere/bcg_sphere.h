@@ -10,7 +10,7 @@
 
 namespace bcg {
 
-template<bcg_index_t N>
+template<int N>
 struct sphere {
     VectorS<N> center;
     bcg_scalar_t radius;
@@ -64,7 +64,7 @@ struct sphere {
     }
 };
 
-template<bcg_index_t N>
+template<int N>
 inline std::ostream &operator<<(std::ostream &stream, const sphere<N> &sphere) {
     stream << "center: " << sphere.center.transpose() << "\n";
     stream << "radius: " << sphere.radius << "\n";

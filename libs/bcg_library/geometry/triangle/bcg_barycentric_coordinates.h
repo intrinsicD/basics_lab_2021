@@ -10,10 +10,10 @@
 
 namespace bcg {
 
-template<bcg_index_t N>
+template<int N>
 struct triangle;
 
-template<bcg_index_t N>
+template<int N>
 inline VectorS<3> to_barycentric_coordinates(const triangle<N> &t, const VectorS<N> &point) {
     VectorS<N> v0 = t.edge0();
     VectorS<N> v1 = -t.edge2();
@@ -39,13 +39,13 @@ inline VectorS<3> to_barycentric_coordinates(const triangle<N> &t, const VectorS
     return result;
 }
 
-template<bcg_index_t N>
+template<int N>
 inline VectorS<N>
 from_barycentric_coords(const triangle<N> &t, const VectorS<3> &bc) {
     return VectorS<N>(t.points[0] * bc[0] + t.points[1] * bc[1] + t.points[2] * bc[2]);
 }
 
-template<bcg_index_t N>
+template<int N>
 VectorS<N>
 from_barycentric_coords(const triangle<N> &t, bcg_scalar_t b0, bcg_scalar_t b1, bcg_scalar_t b2) {
     return from_barycentric_coords(t, {b0, b1, b2});

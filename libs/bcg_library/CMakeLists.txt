@@ -16,6 +16,11 @@ add_library(bcg_graphics
         utils/bcg_stl_utils.h
         utils/bcg_string_utils.h utils/bcg_string_utils.cpp
         math/bcg_math_common.h math/bcg_linalg.h
+        math/bcg_polynomial.h math/bcg_polynomial.cpp
+        math/bcg_monomial_basis.h math/bcg_monomial_basis.cpp
+        math/bcg_factorial.h math/bcg_factorial.cpp
+        math/bcg_binomial_coefficient.h math/bcg_binomial_coefficient.cpp
+        math/bcg_bernstein_basis.h math/bcg_bernstein_basis.cpp
         math/vector/bcg_math_vector_angle.h math/vector/bcg_math_vector_cos.h math/vector/bcg_math_vector_sin.h
         geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
         geometry/bcg_property.h

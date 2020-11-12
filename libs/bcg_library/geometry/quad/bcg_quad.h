@@ -9,7 +9,7 @@
 
 namespace bcg {
 
-template<bcg_index_t N>
+template<int N>
 struct quad {
     std::array<VectorS<N>, 4> points;
 
@@ -88,7 +88,7 @@ struct quad {
     }
 };
 
-template<bcg_index_t N>
+template<int N>
 std::ostream &operator<<(std::ostream &stream, const quad<N> &quad) {
     stream << quad.to_string();
     return stream;

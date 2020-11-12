@@ -13,7 +13,7 @@
 
 namespace bcg {
 
-template<bcg_index_t N>
+template<int N>
 struct triangle {
     std::array<VectorS<N>, 3> points;
 
@@ -72,7 +72,7 @@ struct triangle {
     }
 };
 
-template<bcg_index_t N>
+template<int N>
 std::ostream &operator<<(std::ostream &stream, const triangle<N> &triangle) {
     stream << triangle.to_string();
     return stream;

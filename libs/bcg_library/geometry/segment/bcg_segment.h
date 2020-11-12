@@ -10,7 +10,7 @@
 
 namespace bcg{
 
-template<bcg_index_t N>
+template<int N>
 struct segment{
     std::array<VectorS<N>, 2> points;
 

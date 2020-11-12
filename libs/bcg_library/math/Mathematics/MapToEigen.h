@@ -8,7 +8,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include <vector>
-#include "exts/eigen/Eigen/Core"
+#include "Eigen/Core"
 
 namespace bcg {
 

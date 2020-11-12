@@ -16,7 +16,7 @@
 
 namespace bcg {
 
-template<bcg_index_t N>
+template<int N>
 struct aligned_box {
     VectorS<N> min, max;
 
@@ -113,7 +113,7 @@ struct aligned_box {
     }
 };
 
-template<bcg_index_t N>
+template<int N>
 inline std::ostream &operator<<(std::ostream &stream, const aligned_box<N> &alignedBox) {
     stream << "min: " << alignedBox.min << "\n";
     stream << "max: " << alignedBox.max << "\n";
@@ -124,7 +124,7 @@ inline std::ostream &operator<<(std::ostream &stream, const aligned_box<N> &alig
     return stream;
 }
 
-template<bcg_index_t N>
+template<int N>
 std::vector<VectorS<N>> get_vetices(const aligned_box<N> &alignedBox) {
     VectorS<N> center, halfextent;
     alignedBox.get_centered_form(center, halfextent);
@@ -141,7 +141,7 @@ std::vector<VectorS<N>> get_vetices(const aligned_box<N> &alignedBox) {
     return vertices;
 }
 
-template<bcg_index_t N>
+template<int N>
 std::vector<VectorI<2>> fet_edges(const aligned_box<N> &alignedBox, size_t offset = 0) {
     std::vector<VectorI<2>> edges;
     size_t n = alignedBox.NumVertices();
@@ -156,7 +156,7 @@ std::vector<VectorI<2>> fet_edges(const aligned_box<N> &alignedBox, size_t offse
     return edges;
 }
 
-template<bcg_index_t N>
+template<int N>
 std::vector<VectorI<3>> get_triangles(const aligned_box<N> &, size_t offset = 0) {
     std::vector<VectorI<3>> tris;
     VectorI<3> o = VectorI<3>::Constant(bcg_index_t(offset));
@@ -177,7 +177,7 @@ std::vector<VectorI<3>> get_triangles(const aligned_box<N> &, size_t offset = 0)
     return tris;
 }
 
-template<bcg_index_t N>
+template<int N>
 std::vector<VectorI<4>> get_faces(const aligned_box<N> &, size_t offset = 0) {
     std::vector<VectorI<4>> faces;
     VectorI<4> o = VectorI<4>::Constant(bcg_index_t(offset));

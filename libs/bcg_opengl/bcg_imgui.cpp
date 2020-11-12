@@ -161,7 +161,9 @@ void gui_info(viewer_state *state, property_container *container, size_t &curren
             ImGui::PushID((container->name + name).c_str());
             auto any = draw_combo(state, container->get<bool, 1>(name), current_entry);
             if (!any) any = draw_combo(state, container->get<bcg_scalar_t, 1>(name), current_entry);
-            if (!any) any = draw_combo(state, container->get<bcg_index_t, 1>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<int, 1>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<unsigned int, 1>(name), current_entry);
+            if (!any) any = draw_combo(state, container->get<size_t, 1>(name), current_entry);
             if (!any) any = draw_combo(state, container->get<VectorS<2>, 2>(name), current_entry);
             if (!any) any = draw_combo(state, container->get<VectorS<3>, 3>(name), current_entry);
             if (!any) any = draw_combo(state, container->get<VectorS<4>, 4>(name), current_entry);

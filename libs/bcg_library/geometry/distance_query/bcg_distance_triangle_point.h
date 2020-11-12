@@ -9,7 +9,7 @@
 
 namespace bcg {
 
-template<bcg_index_t N>
+template<int N>
 struct distance_point_triangle {
     struct result {
         bcg_scalar_t distance, sqr_distance;
