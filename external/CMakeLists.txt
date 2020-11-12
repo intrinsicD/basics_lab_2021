@@ -14,6 +14,7 @@ if (BCG_APPS)
     include_directories(entt/single_include)
     include_directories(imgui)
     include_directories(eigen)
+
 endif (BCG_APPS)
 
 if(BCG_TESTS)

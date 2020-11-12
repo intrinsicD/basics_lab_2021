@@ -24,8 +24,8 @@ TEST_F(TestPointCloudIoFixture, pts) {
     point_cloudio io(test_data_path + "test.pts", point_cloudio_flags());
     io.read(pc);
     EXPECT_EQ(pc.vertices.size(), 7);
-    auto colors = pc.vertices.get<VectorS<3>, 3>("color");
-    auto intensities = pc.vertices.get<bcg_scalar_t, 1>("intensity");
+    auto colors = pc.vertices.get<VectorS<3>, 3>("v_color");
+    auto intensities = pc.vertices.get<bcg_scalar_t, 1>("v_intensity");
     EXPECT_TRUE(colors);
     EXPECT_TRUE(intensities);
     EXPECT_LE((pc.positions[0]- VectorS<3>(1.185287, -1.583054, -1.004562)).squaredNorm(), scalar_eps);
@@ -72,7 +72,7 @@ TEST_F(TestPointCloudIoFixture, csv) {
 TEST_F(TestPointCloudIoFixture, tree_d) {
     point_cloudio io(test_data_path + "test.3d", point_cloudio_flags());
     io.read(pc);
-    auto intensities = pc.vertices.get<bcg_scalar_t, 1>("intensity");
+    auto intensities = pc.vertices.get<bcg_scalar_t, 1>("v_intensity");
     EXPECT_EQ(pc.vertices.size(), 5);
     EXPECT_TRUE(intensities);
 
@@ -92,8 +92,8 @@ TEST_F(TestPointCloudIoFixture, tree_d) {
 TEST_F(TestPointCloudIoFixture, txt) {
     point_cloudio io(test_data_path + "test.txt", point_cloudio_flags());
     io.read(pc);
-    auto colors = pc.vertices.get<VectorS<3>, 3>("color");
-    auto reflectances = pc.vertices.get<bcg_scalar_t, 1>("reflectance");
+    auto colors = pc.vertices.get<VectorS<3>, 3>("v_color");
+    auto reflectances = pc.vertices.get<bcg_scalar_t, 1>("v_reflectance");
     EXPECT_EQ(pc.vertices.size(), 5);
     EXPECT_TRUE(colors);
     EXPECT_TRUE(reflectances);

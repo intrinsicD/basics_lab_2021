@@ -8,7 +8,7 @@
 #include "bcg_library/geometry/bcg_property.h"
 #include "bcg_library/geometry/bcg_property_map_eigen.h"
 #include "bcg_library/math/bcg_linalg.h"
-#include "bcg_library/exts/eigen/Eigen/Core"
+#include "Eigen/Core"
 
 using namespace bcg;
 

@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include "bcg_library/geometry/triangle/bcg_triangle.h"
-#include "bcg_library/geometry/triangle/bcg_triangle_centers.h"
-#include "bcg_library/geometry/triangle/bcg_barycentric_coordinates.h"
+#include "geometry/triangle/bcg_triangle.h"
+#include "geometry/triangle/bcg_triangle_centers.h"
+#include "geometry/triangle/bcg_barycentric_coordinates.h"
 
 using namespace bcg;
 
