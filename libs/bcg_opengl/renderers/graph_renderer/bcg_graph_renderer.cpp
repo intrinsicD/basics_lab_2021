@@ -16,7 +16,7 @@
 
 namespace bcg {
 
-graph_renderer::graph_renderer(viewer_state *state) : renderer("mesh_renderer", state) {
+graph_renderer::graph_renderer(viewer_state *state) : renderer("graph_renderer", state) {
     state->dispatcher.sink<event::internal::startup>().connect<&graph_renderer::on_startup>(this);
     state->dispatcher.sink<event::internal::shutdown>().connect<&graph_renderer::on_shutdown>(this);
     state->dispatcher.sink<event::graph_renderer::enqueue>().connect<&graph_renderer::on_enqueue>(this);

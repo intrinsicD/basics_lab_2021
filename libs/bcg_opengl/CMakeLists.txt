@@ -33,6 +33,7 @@ if (BCG_OPENGL)
             renderers/picking_renderer/bcg_material_picking.h renderers/picking_renderer/bcg_picking_renderer.h renderers/picking_renderer/bcg_picking_renderer.cpp renderers/picking_renderer/bcg_events_picking_renderer.h
             renderers/graph_renderer/bcg_material_graph.h renderers/graph_renderer/bcg_graph_renderer.h renderers/graph_renderer/bcg_graph_renderer.cpp renderers/graph_renderer/bcg_events_graph_renderer.h
             renderers/vectorfield_renderer/bcg_material_vectorfield.h renderers/vectorfield_renderer/bcg_vectorfield_renderer.h renderers/vectorfield_renderer/bcg_vectorfield_renderer.cpp renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h
+            renderers/curve_renderer/bcg_material_curve.h renderers/curve_renderer/bcg_curve_renderer.h renderers/curve_renderer/bcg_curve_renderer.cpp renderers/curve_renderer/bcg_events_curve_renderer.h
             ${GLAD_SOURCE_DIRS}/glad.c
             ${IMGUI_SOURCES}
             )
