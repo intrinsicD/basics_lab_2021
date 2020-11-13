@@ -2,32 +2,23 @@
 // Created by alex on 13.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_CURVE_H
-#define BCG_GRAPHICS_BCG_CURVE_H
+#ifndef BCG_GRAPHICS_BCG_COMPOSITE_CURVE_H
+#define BCG_GRAPHICS_BCG_COMPOSITE_CURVE_H
 
-#include <functional>
-#include "math/bcg_linalg.h"
-#include "geometry/graph/bcg_graph.h"
+#include "bcg_curve_segment.h"
 
-namespace bcg {
+namespace bcg{
 
-struct curve : public halfedge_graph{
-    static enum Type{
-        CubicHermite,
-        CubicBezier
-    };
+struct composite_curve{
+    std::vector<curve_segment> segments;
 
-    Type type;
-
-    curve() = default;
+    composite_curve() = default;
 
     VectorS<3> operator()(bcg_scalar_t t) const;
 
     virtual VectorS<3> evaluate(bcg_scalar_t t) const;
 
     virtual VectorS<3> derivative_vector(bcg_scalar_t t, int order) const;
-
-    const std::vector<VectorS<3>> &control_points() const;
 
     VectorS<3> first_derivative(bcg_scalar_t t) const;
 
@@ -56,8 +47,13 @@ struct curve : public halfedge_graph{
     std::vector<VectorI<2>> connectivity(size_t num_points) const;
 
     int degree() const;
+
+private:
+    int segment_index(bcg_scalar_t t);
+
+    bcg_scalar_t segment_parameter(bcg_scalar_t t);
 };
 
 }
 
-#endif //BCG_GRAPHICS_BCG_CURVE_H
+#endif //BCG_GRAPHICS_BCG_COMPOSITE_CURVE_H

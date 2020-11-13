@@ -5,6 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_EVENTS_CURVE_H
 #define BCG_GRAPHICS_BCG_EVENTS_CURVE_H
 
+#include <string>
+
 namespace bcg{
     enum curve_mode{
         DISABLED,
@@ -20,6 +22,16 @@ struct enable_plane_curve_mode{
 
 };
 struct enable_surface_curve_mode{
+
+};
+struct setup_curve{
+    entt::entity id;
+    std::string filename;
+};
+struct new_curve{
+
+};
+struct delete_curve{
 
 };
 }

@@ -130,18 +130,21 @@ void curve_renderer::on_render(const event::internal::render &) {
         program.set_uniform_i("tesselation_level", material.tesselation_level);
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-        if(material.show_hermite){
-            program.set_uniform_i("show_hermite", material.show_hermite);
-            program.set_uniform_i("show_bezier", !material.show_hermite);
-            glPatchParameteri(GL_PATCH_VERTICES, shape.num_vertices);
-            glDrawArrays(GL_PATCHES, 0, shape.num_vertices);
+        for(size_t offset = 0; offset < shape.num_vertices - 3; offset += 3){
+            if(material.show_hermite){
+                program.set_uniform_i("show_hermite", material.show_hermite);
+                program.set_uniform_i("show_bezier", !material.show_hermite);
+                glPatchParameteri(GL_PATCH_VERTICES, 4);
+                glDrawArrays(GL_PATCHES, offset, 4);
+            }
+            if(material.show_bezier){
+                program.set_uniform_i("show_bezier", material.show_bezier);
+                program.set_uniform_i("show_hermite", !material.show_bezier);
+                glPatchParameteri(GL_PATCH_VERTICES, 4);
+                glDrawArrays(GL_PATCHES, offset, 4);
+            }
         }
-        if(material.show_bezier){
-            program.set_uniform_i("show_bezier", material.show_bezier);
-            program.set_uniform_i("show_hermite", !material.show_bezier);
-            glPatchParameteri(GL_PATCH_VERTICES, shape.num_vertices);
-            glDrawArrays(GL_PATCHES, 0, shape.num_vertices);
-        }
+
         assert_ogl_error();
     }
 
