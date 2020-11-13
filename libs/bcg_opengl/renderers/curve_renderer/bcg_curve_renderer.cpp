@@ -11,7 +11,6 @@
 #include "bcg_material_curve.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_curve_renderer.h"
-#include "bcg_property_map_eigen.h"
 #include "math/bcg_matrix_map_eigen.h"
 
 namespace bcg {
@@ -27,14 +26,17 @@ curve_renderer::curve_renderer(viewer_state *state) : renderer("curve_renderer",
 }
 
 void curve_renderer::on_startup(const event::internal::startup &) {
-    std::string tess_eval = state->config.renderers_path + "curve_renderer/bezier_curve_tess_eval_shader.glsl";
-    std::string tess_control = state->config.renderers_path + "curve_renderer/bezier_curve_tess_control_shader.glsl";
+    std::string tess_control = state->config.renderers_path + "curve_renderer/curve_tess_control_shader.glsl";
+    std::string tess_eval = state->config.renderers_path + "curve_renderer/curve_tess_eval_shader.glsl";
 
-    programs["bezier_curve_renderer_program"] = state->shaders.load("bezier_curve_renderer_program",
+    programs["curve_renderer_program"] = state->shaders.load("curve_renderer_program",
                                                                     state->config.renderers_path +
-                                                                    "curve_renderer/bezier_curve_vertex_shader.glsl",
+                                                                    "curve_renderer/curve_vertex_shader.glsl",
                                                                     state->config.renderers_path +
-                                                                    "curve_renderer/bezier_curve_fragment_shader.glsl");
+                                                                    "curve_renderer/curve_fragment_shader.glsl",
+                                                                    nullptr,
+                                                                    &tess_control,
+                                                                    &tess_eval);
 }
 
 void curve_renderer::on_shutdown(const event::internal::shutdown &event) {
@@ -43,7 +45,7 @@ void curve_renderer::on_shutdown(const event::internal::shutdown &event) {
         auto &material = view.get<material_curve>(id);
         material.vao.destroy();
     }
-    programs["bezier_curve_renderer_program"].destroy();
+    programs["curve_renderer_program"].destroy();
 }
 
 void curve_renderer::on_enqueue(const event::curve_renderer::enqueue &event) {
@@ -105,7 +107,7 @@ void curve_renderer::on_render(const event::internal::render &) {
     gl_state.set_blend(true);
     gl_state.set_blend_func_factors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto program = programs["bezier_curve_renderer_program"];
+    auto program = programs["curve_renderer_program"];
     program.bind();
     Matrix<float, 4, 4> proj = state->cam.projection_matrix.cast<float>();
     program.set_uniform_matrix_4f("proj", proj.data());
@@ -125,12 +127,21 @@ void curve_renderer::on_render(const event::internal::render &) {
         program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
         float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
-
+        program.set_uniform_i("tesselation_level", material.tesselation_level);
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-
-        glPatchParameteri(GL_PATCH_VERTICES, shape.num_vertices);
-        glDrawArrays(GL_PATCHES, 0, shape.num_vertices);
+        if(material.show_hermite){
+            program.set_uniform_i("show_hermite", material.show_hermite);
+            program.set_uniform_i("show_bezier", !material.show_hermite);
+            glPatchParameteri(GL_PATCH_VERTICES, shape.num_vertices);
+            glDrawArrays(GL_PATCHES, 0, shape.num_vertices);
+        }
+        if(material.show_bezier){
+            program.set_uniform_i("show_bezier", material.show_bezier);
+            program.set_uniform_i("show_hermite", !material.show_bezier);
+            glPatchParameteri(GL_PATCH_VERTICES, shape.num_vertices);
+            glDrawArrays(GL_PATCHES, 0, shape.num_vertices);
+        }
         assert_ogl_error();
     }
 

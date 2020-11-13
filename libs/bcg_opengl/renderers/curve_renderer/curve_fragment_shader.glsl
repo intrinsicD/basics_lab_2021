@@ -1,4 +1,4 @@
-#version 440
+#version 410 core
 
 struct Material {
     vec3 uniform_color;

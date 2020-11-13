@@ -13,10 +13,12 @@
 #include "renderers/graph_renderer/bcg_material_graph.h"
 #include "renderers/vectorfield_renderer/bcg_material_vectorfield.h"
 #include "renderers/points_renderer/bcg_material_points.h"
+#include "renderers/curve_renderer/bcg_material_curve.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
+#include "renderers/curve_renderer/bcg_events_curve_renderer.h"
 #include "renderers/bcg_vectorfields.h"
 #include "geometry/mesh/bcg_mesh.h"
 #include "utils/bcg_path.h"
@@ -342,12 +344,6 @@ void gui_info(viewer_state *state, material_vectorfield *material, property_cont
         }
         state->dispatcher.trigger<event::vectorfield_renderer::set_position_attribute>(id, vectorfield_name, position);
     }
-/*    auto &vector = material->attributes[1];
-    vector.property_name = vectorfield_name;
-    vector.buffer_name = vectorfield_name;
-    if (gui_info_property_selector(state, container, {3}, vector.shader_attribute_name, vector.property_name)) {
-        state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, vectorfield_name, vector);
-    }*/
     auto &color = material->attributes[2];
     if (gui_info_property_selector(state, container, {1, 3}, color.shader_attribute_name, color.property_name)) {
         if (color.property_name.empty()) {
@@ -417,6 +413,33 @@ void gui_info(viewer_state *state, material_points *material, entt::entity id) {
     ImGui::PopID();
 }
 
+void gui_info(viewer_state *state, material_curve *material, entt::entity id) {
+    if (!material) return;
+    ImGui::PushID("curve_material");
+    auto *vertices = state->get_vertices(id);
+    auto &position = material->attributes[0];
+    draw_label(&state->window, (material->vao.name + " vao id").c_str(), std::to_string(material->vao.handle));
+    if (ImGui::CollapsingHeader("Captured Attributes")) {
+        for (const auto &item : material->vao.captured_attributes) {
+            draw_label(&state->window, std::to_string(item.first).c_str(), item.second);
+        }
+    }
+    if (gui_info_property_selector(state, vertices, {3}, position.shader_attribute_name.c_str(),
+                                   position.property_name)) {
+        if (position.property_name.empty()) {
+            position.property_name = "v_position";
+        }
+        state->dispatcher.trigger<event::curve_renderer::set_position_attribute>(id, position);
+    }
+
+    draw_coloredit(&state->window, "uniform_color", material->uniform_color);
+    ImGui::InputFloat("alpha", &material->uniform_alpha);
+    ImGui::Checkbox("show_bezier", &material->show_bezier);
+    ImGui::Checkbox("show_hermite", &material->show_hermite);
+    draw_dragger(&state->window, "tesselation_level", material->tesselation_level, 1, 1, 256);
+    ImGui::PopID();
+}
+
 void gui_info(viewer_state *state, vectorfields *vectors, entt::entity id) {
     if(!vectors) return;
     static std::string current_vertex_vectorfield_name = "";
@@ -475,6 +498,7 @@ void gui_rendering(viewer_state *state, entt::entity id) {
     static bool show_edges = state->scene.has<halfedge_graph>(id);
     static bool show_mesh = state->scene.has<halfedge_mesh>(id);
     static bool show_vectors = false;
+    static bool show_curves = false;
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {
@@ -498,10 +522,17 @@ void gui_rendering(viewer_state *state, entt::entity id) {
             }
         }
         if (ImGui::Checkbox("show vectors", &show_vectors)) {
-            if (show_mesh && state->get_faces(id) != nullptr) {
+            if (show_vectors) {
                 state->scene.emplace_or_replace<event::vectorfield_renderer::enqueue>(id);
             } else {
                 state->scene.remove_if_exists<event::vectorfield_renderer::enqueue>(id);
+            }
+        }
+        if (ImGui::Checkbox("show curves", &show_curves)) {
+            if (show_curves) {
+                state->scene.emplace_or_replace<event::curve_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::curve_renderer::enqueue>(id);
             }
         }
     }
@@ -521,6 +552,10 @@ void gui_rendering(viewer_state *state, entt::entity id) {
         if (show_vectors) {
             ImGui::Separator();
             gui_info(state, state->scene.try_get<vectorfields>(id), id);
+        }
+        if (show_curves) {
+            ImGui::Separator();
+            gui_info(state, state->scene.try_get<material_curve>(id), id);
         }
     }
 }

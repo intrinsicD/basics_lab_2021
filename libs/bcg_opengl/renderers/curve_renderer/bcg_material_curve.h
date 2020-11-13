@@ -18,8 +18,11 @@ struct material_curve{
 
     ogl_vertex_array vao;
 
+    bool show_bezier = true, show_hermite = false;
+
     VectorS<3> uniform_color = color::random();
     bcg_scalar_t uniform_alpha = 1;
+    int tesselation_level = 16;
 };
 
 }
