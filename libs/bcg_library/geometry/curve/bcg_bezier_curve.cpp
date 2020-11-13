@@ -44,7 +44,7 @@ bezier_curve bezier_curve::derivative(int order) {
     return d;
 }
 
-VectorS<3> bezier_curve::derivative_vector(bcg_scalar_t t, int order) {
+VectorS<3> bezier_curve::derivative(bcg_scalar_t t, int order) {
     return derivative(order).evaluate(t);
 }
 

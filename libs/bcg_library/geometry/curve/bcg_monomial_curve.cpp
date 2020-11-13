@@ -32,7 +32,7 @@ monomial_curve monomial_curve::derivative(int order) {
     return result;
 }
 
-VectorS<3> monomial_curve::derivative_vector(bcg_scalar_t t, int order) {
+VectorS<3> monomial_curve::derivative(bcg_scalar_t t, int order) {
     if(order >= positions.size()) return VectorS<3>::Zero();
     if(order == 0) return evaluate(t);
     VectorS<3> result = VectorS<3>::Zero();

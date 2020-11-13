@@ -16,7 +16,7 @@ struct monomial_curve : public parametric_curve<monomial_curve> {
 
     monomial_curve derivative(int order) override;
 
-    VectorS<3> derivative_vector(bcg_scalar_t t, int order) override;
+    VectorS<3> derivative(bcg_scalar_t t, int order) override;
 };
 
 }

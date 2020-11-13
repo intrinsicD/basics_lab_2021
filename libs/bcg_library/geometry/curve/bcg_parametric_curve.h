@@ -22,16 +22,14 @@ struct parametric_curve : public halfedge_graph {
 
     virtual DerivedCurve derivative(int order) {};
 
-    virtual VectorS<3> derivative_vector(bcg_scalar_t t, int order) {};
-
+    virtual VectorS<3> derivative(bcg_scalar_t t, int order) {};
 
     bcg_scalar_t speed(bcg_scalar_t t) {
-        return derivative_vector(t, 1).norm();
+        return derivative(t, 1).norm();
     }
 
     bcg_scalar_t length() {
-        auto d = derivative(1);
-        return d.evaluate(1).norm() - d.evaluate(0).norm();
+        return derivative(1, 1).norm() - derivative(0, 1).norm();
     }
 
     bcg_scalar_t curvature(bcg_scalar_t t) {
@@ -39,11 +37,11 @@ struct parametric_curve : public halfedge_graph {
     }
 
     VectorS<3> tangent_vector(bcg_scalar_t t) {
-        return derivative(1).evaluate(t);
+        return derivative(t, 1);
     }
 
     VectorS<3> curvature_vector(bcg_scalar_t t) {
-        return derivative(2).evaluate(t);
+        return derivative(t, 2);
     }
 
     VectorS<3> normal_vector(bcg_scalar_t t) {

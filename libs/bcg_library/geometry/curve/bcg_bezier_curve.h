@@ -16,7 +16,7 @@ struct bezier_curve : public parametric_curve<bezier_curve>{
 
     bezier_curve derivative(int order) override;
 
-    VectorS<3> derivative_vector(bcg_scalar_t t, int order) override;
+    VectorS<3> derivative(bcg_scalar_t t, int order) override;
 };
 
 }
