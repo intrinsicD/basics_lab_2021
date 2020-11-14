@@ -765,6 +765,12 @@ void gui_info(viewer_state *state) {
     }
 }
 
+void gui_dihedral_angle(viewer_state *state){
+    if(ImGui::Button("Compute Dihedral Angles")){
+        state->dispatcher.trigger<event::mesh::edge::dihedral_angle>(state->picker.entity_id);
+    }
+}
+
 bool begin_header(viewer_window *win, const char *lbl) {
     if (!ImGui::CollapsingHeader(lbl)) return false;
     ImGui::PushID(lbl);

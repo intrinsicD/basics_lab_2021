@@ -9,6 +9,7 @@
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "geometry/mesh/bcg_mesh_factory.h"
 #include "geometry/mesh/bcg_mesh_vertex_normals.h"
+#include "geometry/mesh/bcg_mesh_edge_dihedral_angle.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "tbb/tbb.h"
@@ -25,6 +26,7 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::vertex_normals::angle>().connect<&mesh_system::on_vertex_normal_angle>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::area_angle>().connect<&mesh_system::on_vertex_normal_area_angle>(
             this);
+    state->dispatcher.sink<event::mesh::edge::dihedral_angle>().connect<&mesh_system::on_dihedral_angle>(this);
 }
 
 void mesh_system::on_setup_mesh(const event::mesh::setup &event) {
@@ -57,7 +59,7 @@ void mesh_system::on_make_triangle(const event::mesh::make_triangle &) {
     state->dispatcher.trigger<event::mesh::setup>(id);
 }
 
-void mesh_system::on_make_quad(const event::mesh::make_quad &){
+void mesh_system::on_make_quad(const event::mesh::make_quad &) {
     mesh_factory factory;
 
     auto mesh = factory.make_quad();
@@ -102,6 +104,13 @@ void mesh_system::on_vertex_normal_area_angle(const event::mesh::vertex_normals:
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void mesh_system::on_dihedral_angle(const event::mesh::edge::dihedral_angle &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    edge_dihedral_angles(mesh, state->config.parallel_grain_size);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 

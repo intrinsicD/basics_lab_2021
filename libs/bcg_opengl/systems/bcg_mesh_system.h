@@ -32,6 +32,7 @@ struct mesh_system : public system {
 
     //------------------------------------------------------------------------------------------------------------------
 
+    void on_dihedral_angle(const event::mesh::edge::dihedral_angle &event);
 };
 
 }

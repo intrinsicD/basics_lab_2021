@@ -18,9 +18,11 @@ struct make_triangle{
 struct make_quad{
 
 };
-struct boundary{
+namespace edge{
+struct dihedral_angle{
     entt::entity id;
 };
+}
 
 
 namespace vertex_normals{

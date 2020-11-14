@@ -122,6 +122,10 @@ void graph_renderer::on_render(const event::internal::render &) {
         float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
         program.set_uniform_i("width", material.width);
+
+        if(material.edge_colors.is_valid()){
+            material.edge_colors.activate();
+        }
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
         shape.edge_buffer.bind();
@@ -206,14 +210,15 @@ void graph_renderer::on_set_color_attribute(const event::graph_renderer::set_col
 
             auto program = programs["graph_renderer_program"];
             program.bind();
-            if (program.get_uniform_location(name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
-                program.set_uniform_i(name.c_str(), unit);
+            if (program.get_uniform_location(material.edge_colors.name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
+                program.set_uniform_i(material.edge_colors.name.c_str(), unit);
             }
         }
         texture.release();
 
         std::vector<VectorS<3>> test_data(material.width * (height + 1));
         material.edge_colors.download_data(test_data.data());
+        std::cout << MapConst(test_data) << "\n";
     }
 
     material.use_uniform_color = false;

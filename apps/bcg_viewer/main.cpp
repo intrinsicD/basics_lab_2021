@@ -14,6 +14,12 @@ int main() {
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Mesh")) {
+            if(ImGui::MenuItem("Dihedeal Angle")){
+                state->gui.left = gui_dihedral_angle;
+            }
+            ImGui::EndMenu();
+        }
         if (ImGui::BeginMenu("Examples")) {
             if(ImGui::MenuItem("Mesh")){
                 /*state->gui.left = gui_mesh_factory;*/
