@@ -53,7 +53,7 @@ bcg_scalar_t curve::torsion(bcg_scalar_t t) const {
     return tmp.dot(third_derivative(t)) / tmp.squaredNorm();
 }
 
-bcg_scalar_t curve::length(bcg_scalar_t a, bcg_scalar_t b, size_t n = 100) const {
+bcg_scalar_t curve::length(bcg_scalar_t a, bcg_scalar_t b, size_t n) const {
     bcg_scalar_t result = 0;
     bcg_scalar_t dt = (b - a) / bcg_scalar_t(n);
     bcg_scalar_t t = a;

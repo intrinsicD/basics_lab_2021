@@ -160,6 +160,7 @@ struct viewer_picker {
     VectorS<3> model_space_point;
     VectorS<3> world_space_point;
     VectorS<3> view_space_point;
+    std::vector<entt::entity> selected_entities;
 };
 
 struct viewer_config {

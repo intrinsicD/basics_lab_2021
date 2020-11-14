@@ -11,6 +11,8 @@ namespace bcg {
 
 struct picker_system : public system {
     explicit picker_system(viewer_state *state);
+
+
 };
 
 }

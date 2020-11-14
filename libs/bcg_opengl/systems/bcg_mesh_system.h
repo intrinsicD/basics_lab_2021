@@ -31,6 +31,7 @@ struct mesh_system : public system {
     void on_vertex_normal_area_angle(const event::mesh::vertex_normals::area_angle &event);
 
     //------------------------------------------------------------------------------------------------------------------
+
 };
 
 }

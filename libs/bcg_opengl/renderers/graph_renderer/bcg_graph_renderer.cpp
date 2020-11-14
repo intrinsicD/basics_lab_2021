@@ -218,7 +218,8 @@ void graph_renderer::on_set_color_attribute(const event::graph_renderer::set_col
 
     material.use_uniform_color = false;
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-    auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
+    auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true},
+                            attribute{"boundary", "boundary", "boundary", 0, true}};
     state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
     state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
 }

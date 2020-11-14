@@ -22,7 +22,7 @@ struct material_graph{
     bool use_uniform_color = true;
     int width;
 
-    VectorS<3> uniform_color = color::random();
+    VectorS<3> uniform_color = color::red;
     bcg_scalar_t uniform_alpha = 1;
     ogl_texture edge_colors = ogl_texture("edge_color");
     colormap::base_colormap color_map;

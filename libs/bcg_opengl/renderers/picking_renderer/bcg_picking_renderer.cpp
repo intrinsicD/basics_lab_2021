@@ -160,6 +160,13 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         return;
     }
     state->picker.entity_id = id;
+
+    if(state->mouse.left && state->keyboard.ctrl_pressed && !state->keyboard.shift_pressed){
+        state->picker.selected_entities.clear();
+    }
+    if(state->mouse.left && state->keyboard.ctrl_pressed && state->keyboard.shift_pressed){
+        state->picker.selected_entities.push_back(id);
+    }
     auto &model = state->scene.get<Transform>(id);
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
     state->picker.view_space_point = (state->cam.view_matrix() *

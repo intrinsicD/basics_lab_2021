@@ -34,7 +34,7 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_vertex_normals.h geometry/mesh/bcg_mesh_vertex_normals.cpp
         geometry/mesh/bcg_mesh_factory.h geometry/mesh/bcg_mesh_factory.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
-        geometry/curve/bcg_bezier_curve.h geometry/curve/bcg_bezier_curve.cpp
+        geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
         geometry/sphere/bcg_sphere.h geometry/sphere/bcg_sphere_fit.h geometry/sphere/bcg_sphere_sampling_fibunacci.h
         geometry/distance_query/bcg_distance_segment_point.h

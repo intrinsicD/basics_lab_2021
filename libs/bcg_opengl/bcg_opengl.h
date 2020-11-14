@@ -523,7 +523,7 @@ struct ogl_vertex_array : public ogl_handle {
 
 struct ogl_shape{
     std::unordered_map<std::string, ogl_vertex_buffer> vertex_buffers;
-    ogl_element_buffer edge_buffer, triangle_buffer, adjacency_buffer;
+    ogl_element_buffer edge_buffer, triangle_buffer, adjacency_buffer, boundary_buffer;
     int num_vertices;
     int num_edges;
     int num_faces;

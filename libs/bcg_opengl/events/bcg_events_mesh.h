@@ -18,6 +18,11 @@ struct make_triangle{
 struct make_quad{
 
 };
+struct boundary{
+    entt::entity id;
+};
+
+
 namespace vertex_normals{
 struct uniform{
     entt::entity id;
