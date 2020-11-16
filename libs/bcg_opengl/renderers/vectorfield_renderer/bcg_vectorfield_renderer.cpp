@@ -66,10 +66,10 @@ void vectorfield_renderer::on_enqueue(const event::vectorfield_renderer::enqueue
             state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, item.second.attributes);
         }
         for(auto &item : vectors.edge_vectorfields){
-            state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, item.second.attributes);
+            state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, item.second.attributes);
         }
         for(auto &item : vectors.face_vectorfields){
-            state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, item.second.attributes);
+            state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, item.second.attributes);
         }
         state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
     }

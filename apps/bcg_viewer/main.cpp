@@ -2,6 +2,7 @@
 
 #include "bcg_opengl/bcg_viewer.h"
 #include "bcg_opengl/bcg_imgui.h"
+#include "bcg_opengl/guis/bcg_gui_viewer_state.h"
 
 int main() {
     using namespace bcg;
@@ -10,7 +11,7 @@ int main() {
     viewer.state.gui.menu.show = [](viewer_state *state, gui_menu *self) {
         if (ImGui::BeginMenu("Viewer")) {
             if (ImGui::MenuItem("Info")) {
-                state->gui.left = gui_info;
+                state->gui.left = gui_viewer_state;
             }
             ImGui::EndMenu();
         }

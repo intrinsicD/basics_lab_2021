@@ -7,6 +7,7 @@
 
 #include "bcg_library/color/bcg_colors.h"
 #include "renderers/bcg_attribute.h"
+#include "bcg_opengl.h"
 
 namespace bcg{
 

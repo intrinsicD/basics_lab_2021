@@ -7,9 +7,11 @@
 
 #include "bcg_mesh.h"
 
-namespace bcg{
+namespace bcg {
 
 VectorS<3> face_normal(const halfedge_mesh &mesh, face_handle f);
+
+void face_normals(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
 
 }
 

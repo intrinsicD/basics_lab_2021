@@ -13,6 +13,26 @@ if (BCG_OPENGL)
             bcg_camera.h bcg_camera.cpp
             bcg_viewer.h bcg_viewer.cpp
             bcg_viewer_state.h bcg_viewer_state.cpp
+            guis/bcg_gui_viewer_state.h guis/bcg_gui_viewer_state.cpp
+            guis/bcg_gui_vectorfields.h guis/bcg_gui_vectorfields.cpp
+            guis/bcg_gui_transform.h guis/bcg_gui_transform.cpp
+            guis/bcg_gui_rendering_options.h guis/bcg_gui_rendering_options.cpp
+            guis/bcg_gui_property_selector.h guis/bcg_gui_property_selector.cpp
+            guis/bcg_gui_property_container_selector.h guis/bcg_gui_property_container_selector.cpp
+            guis/bcg_gui_point_cloud.h guis/bcg_gui_point_cloud.cpp
+            guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
+            guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp
+            guis/bcg_gui_mesh.h guis/bcg_gui_mesh.cpp
+            guis/bcg_gui_materials.h guis/bcg_gui_materials.cpp
+            guis/bcg_gui_material_vectorfield.h guis/bcg_gui_material_vectorfield.cpp
+            guis/bcg_gui_material_points.h guis/bcg_gui_material_points.cpp
+            guis/bcg_gui_material_mesh.h guis/bcg_gui_material_mesh.cpp
+            guis/bcg_gui_material_graph.h guis/bcg_gui_material_graph.cpp
+            guis/bcg_gui_material_curve.h guis/bcg_gui_material_curve.cpp
+            guis/bcg_gui_graph.h guis/bcg_gui_graph.cpp
+            guis/bcg_gui_entity_info.h guis/bcg_gui_entity_info.cpp
+            guis/bcg_gui_aligned_box3.h guis/bcg_gui_aligned_box3.cpp
+            guis/bcg_gui_dihedral_angle.h guis/bcg_gui_dihedral_angle.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

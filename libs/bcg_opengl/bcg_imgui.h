@@ -8,6 +8,7 @@
 
 #include "imgui/imgui.h"
 #include "bcg_library/math/bcg_linalg.h"
+#include "guis/bcg_gui_dihedral_angle.h"
 
 namespace bcg {
 
@@ -40,10 +41,6 @@ struct left_panel : public gui_element {
 
     void render(viewer_state *state) override;
 };
-
-void gui_info(viewer_state *state);
-
-void gui_dihedral_angle(viewer_state *state);
 
 bool begin_header(viewer_window *win, const char *title);
 
