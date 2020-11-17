@@ -20,6 +20,7 @@ void gui_entity_info(viewer_state *state, entity_info *info, entt::entity id){
         ss << info->loading_center.transpose();
         draw_label(&state->window, "loading_center", ss.str());
         draw_label(&state->window, "loading_scale", std::to_string(info->loading_scale));
+        ImGui::Separator();
     }
 }
 

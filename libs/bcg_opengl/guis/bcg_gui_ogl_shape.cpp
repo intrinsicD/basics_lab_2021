@@ -24,6 +24,7 @@ void gui_ogl_shape(viewer_state *state, ogl_shape *shape){
         if (shape->adjacency_buffer) {
             gui_ogl_buffer(state, shape->adjacency_buffer);
         }
+        ImGui::Separator();
     }
 }
 

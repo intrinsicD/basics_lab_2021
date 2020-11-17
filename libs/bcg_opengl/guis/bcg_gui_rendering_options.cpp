@@ -55,6 +55,7 @@ void gui_rendering_options(viewer_state *state, entt::entity id){
                 state->scene.remove_if_exists<event::curve_renderer::enqueue>(id);
             }
         }
+        ImGui::Separator();
     }
 
     gui_materials(state, id, show_points, show_edges, show_mesh, show_vectors, show_curves);

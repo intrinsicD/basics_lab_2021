@@ -35,6 +35,7 @@ void gui_materials(viewer_state *state, entt::entity id,
             ImGui::Separator();
             gui_material_curve(state, state->scene.try_get<material_curve>(id), id);
         }
+        ImGui::Separator();
     }
 }
 

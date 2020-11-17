@@ -24,6 +24,7 @@ void gui_aligned_box3(viewer_state *state, aligned_box3 *aabb){
         ss << aabb->halfextent().transpose();
         draw_label(&state->window, "halfextent", ss.str());
         ss.str("");
+        ImGui::Separator();
     }
 }
 

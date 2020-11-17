@@ -20,6 +20,7 @@ void gui_ogl_buffer(viewer_state* state, const ogl_buffer_object &buffer){
         buffer.bind();
         draw_label(&state->window, "size_bytes_gpu", std::to_string(buffer.get_buffer_size_gpu()));
         buffer.release();*/
+        ImGui::Separator();
     }
 }
 

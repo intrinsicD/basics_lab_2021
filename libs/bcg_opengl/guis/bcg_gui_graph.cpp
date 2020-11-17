@@ -14,6 +14,7 @@ void gui_graph(viewer_state *state, halfedge_graph *graph){
         gui_property_container_selector(state, &graph->vertices, state->picker.vertex_id.idx);
         gui_property_container_selector(state, &graph->halfedges, state->picker.halfedge_id.idx);
         gui_property_container_selector(state, &graph->edges, state->picker.edge_id.idx);
+        ImGui::Separator();
     }
 }
 
