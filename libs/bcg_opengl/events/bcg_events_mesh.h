@@ -23,6 +23,14 @@ struct dihedral_angle{
     entt::entity id;
 };
 }
+namespace face{
+struct centers{
+    entt::entity id;
+};
+struct normals{
+    entt::entity id;
+};
+}
 
 
 namespace vertex_normals{

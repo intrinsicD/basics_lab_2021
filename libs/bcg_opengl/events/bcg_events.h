@@ -12,6 +12,7 @@
 #include "bcg_events_aligned_box.h"
 #include "bcg_events_point_cloud.h"
 #include "bcg_events_mesh.h"
+#include "bcg_events_graph.h"
 #include "bcg_events_curve.h"
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_H
