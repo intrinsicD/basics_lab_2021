@@ -21,12 +21,17 @@ struct material_mesh{
     ogl_vertex_array vao;
 
     bool use_uniform_color = true;
+    bool use_face_color = false;
 
     VectorS<3> ambient = color::random();
     VectorS<3> diffuse = color::white;
     VectorS<3> specular = color::grey;
     bcg_scalar_t shininess = 32;
     bcg_scalar_t uniform_alpha = 1;
+
+    colormap::base_colormap color_map = colormap::jet();
+    int width;
+    ogl_texture face_colors = ogl_texture("face_color");
 };
 
 }

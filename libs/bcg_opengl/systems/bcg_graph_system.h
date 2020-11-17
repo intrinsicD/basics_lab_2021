@@ -11,6 +11,8 @@ namespace bcg {
 
 struct graph_system : public system {
     explicit graph_system(viewer_state *state);
+
+    void on_edge_centers(const event::graph::edge::centers &event);
 };
 
 

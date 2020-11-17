@@ -17,6 +17,10 @@ struct halfedge_graph : public point_cloud {
             stream << "h: " << value.h.idx;
             return stream;
         }
+
+        operator size_t() const {
+            return h.idx;
+        }
     };
 
     struct halfedge_connectivity {

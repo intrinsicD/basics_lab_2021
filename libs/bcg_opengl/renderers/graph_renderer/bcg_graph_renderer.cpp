@@ -163,23 +163,7 @@ void graph_renderer::on_set_color_attribute(const event::graph_renderer::set_col
     auto *edges = state->get_edges(event.id);
     if(!edges) return;
 
-    auto *base_ptr = edges->get_base_ptr(event.color.property_name);
-    std::vector<VectorS<3>> colors;
-    if(base_ptr->dims() == 1){
-        if(base_ptr->void_ptr() == nullptr){
-            VectorS<-1> values = MapConst(edges->get<bool, 1>(base_ptr->name())).cast<float>();
-            colors = material.color_map(values, values.minCoeff(), values.maxCoeff());
-        }else{
-            VectorS<-1> values = MapConst(edges->get<bcg_scalar_t , 1>(base_ptr->name()));
-            colors = material.color_map(values, values.minCoeff(), values.maxCoeff());
-        }
-    }else if(base_ptr->dims() == 3){
-        auto values = edges->get<VectorS<3>, 3>(base_ptr->name());
-        auto min = MapConst(values).minCoeff();
-        auto max = MapConst(values).maxCoeff();
-        colors.resize(values.size());
-        Map(colors) = (MapConst(values).array() - min) /  (max - min);
-    }
+    std::vector<VectorS<3>> colors = map_to_colors(edges, event.color.property_name, material.color_map);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
     material.width = std::min((int)colors.size(), material.width);

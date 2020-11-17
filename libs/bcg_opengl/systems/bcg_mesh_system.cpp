@@ -9,10 +9,12 @@
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "geometry/mesh/bcg_mesh_factory.h"
 #include "geometry/mesh/bcg_mesh_vertex_normals.h"
+#include "geometry/mesh/bcg_mesh_face_normals.h"
+#include "geometry/mesh/bcg_mesh_face_centers.h"
 #include "geometry/mesh/bcg_mesh_edge_dihedral_angle.h"
+#include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
-#include "tbb/tbb.h"
 
 namespace bcg {
 
@@ -26,6 +28,9 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::vertex_normals::angle>().connect<&mesh_system::on_vertex_normal_angle>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::area_angle>().connect<&mesh_system::on_vertex_normal_area_angle>(
             this);
+    state->dispatcher.sink<event::mesh::face::centers>().connect<&mesh_system::on_face_centers>(this);
+    state->dispatcher.sink<event::mesh::face::normals>().connect<&mesh_system::on_face_normals>(this);
+    state->dispatcher.sink<event::graph::edge::centers>().connect<&mesh_system::on_edge_centers>(this);
     state->dispatcher.sink<event::mesh::edge::dihedral_angle>().connect<&mesh_system::on_dihedral_angle>(this);
 }
 
@@ -41,6 +46,8 @@ void mesh_system::on_setup_mesh(const event::mesh::setup &event) {
             (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
 
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::mesh::face::centers>(event.id);
+    state->dispatcher.trigger<event::graph::edge::centers>(event.id);
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
     state->scene.emplace_or_replace<event::picking_renderer::enqueue>(event.id);
     state->scene.emplace_or_replace<event::mesh_renderer::enqueue>(event.id);
@@ -112,7 +119,33 @@ void mesh_system::on_dihedral_angle(const event::mesh::edge::dihedral_angle &eve
     edge_dihedral_angles(mesh, state->config.parallel_grain_size);
 }
 
+
+void mesh_system::on_edge_centers(const event::graph::edge::centers &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    edge_centers(mesh, state->config.parallel_grain_size);
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
+void mesh_system::on_face_centers(const event::mesh::face::centers &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    face_centers(mesh, state->config.parallel_grain_size);
+}
+
+void mesh_system::on_face_normals(const event::mesh::face::normals &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    face_normals(mesh, state->config.parallel_grain_size);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 
 }

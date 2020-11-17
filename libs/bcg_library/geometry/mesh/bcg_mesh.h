@@ -17,6 +17,10 @@ struct halfedge_mesh : public halfedge_graph {
             stream << "h: " << value.h.idx;
             return stream;
         }
+
+        operator size_t() const {
+            return h.idx;
+        }
     };
 
     face_container faces;

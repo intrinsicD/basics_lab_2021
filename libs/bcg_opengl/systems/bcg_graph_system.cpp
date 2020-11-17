@@ -10,4 +10,8 @@ graph_system::graph_system(viewer_state *state) : system("graph_system", state){
 
 }
 
+void graph_system::on_edge_centers(const event::graph::edge::centers &event){
+
+}
+
 }

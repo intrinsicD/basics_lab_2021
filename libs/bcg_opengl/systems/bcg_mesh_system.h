@@ -33,6 +33,16 @@ struct mesh_system : public system {
     //------------------------------------------------------------------------------------------------------------------
 
     void on_dihedral_angle(const event::mesh::edge::dihedral_angle &event);
+
+    void on_edge_centers(const event::graph::edge::centers &event);
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    void on_face_centers(const event::mesh::face::centers &event);
+
+    void on_face_normals(const event::mesh::face::normals &event);
+
+    //------------------------------------------------------------------------------------------------------------------
 };
 
 }

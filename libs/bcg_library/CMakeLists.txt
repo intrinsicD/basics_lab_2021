@@ -27,10 +27,12 @@ add_library(bcg_graphics
         geometry/bcg_property_map_eigen.h
         geometry/point_cloud/bcg_point_cloud.h geometry/point_cloud/bcg_point_cloud.cpp geometry/point_cloud/bcg_point_cloudio.h geometry/point_cloud/bcg_point_cloudio.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
+        geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
         geometry/mesh/bcg_mesh.h geometry/mesh/bcg_mesh.cpp
         geometry/mesh/bcg_meshio.h geometry/mesh/bcg_meshio.cpp
         geometry/mesh/bcg_mesh_face_area_vector.h geometry/mesh/bcg_mesh_face_area_vector.cpp
         geometry/mesh/bcg_mesh_face_normals.h geometry/mesh/bcg_mesh_face_normals.cpp
+        geometry/mesh/bcg_mesh_face_centers.h geometry/mesh/bcg_mesh_face_centers.cpp
         geometry/mesh/bcg_mesh_vertex_normals.h geometry/mesh/bcg_mesh_vertex_normals.cpp
         geometry/mesh/bcg_mesh_factory.h geometry/mesh/bcg_mesh_factory.cpp
         geometry/mesh/bcg_mesh_edge_dihedral_angle.h geometry/mesh/bcg_mesh_edge_dihedral_angle.cpp

@@ -19,9 +19,13 @@ void gui_vectorfields(viewer_state *state, vectorfields *vectors, entt::entity i
                                   current_vertex_vectorfield_name)){
         if(!current_vertex_vectorfield_name.empty()){
             auto &material = vectors->vertex_vectorfields[current_vertex_vectorfield_name];
+            auto &position = material.attributes[0];
+            position.buffer_name = "v_position";
+            position.property_name = "v_position";
             auto &vector = material.attributes[1];
             vector.property_name = current_vertex_vectorfield_name;
             vector.buffer_name = current_vertex_vectorfield_name;
+            state->dispatcher.trigger<event::vectorfield_renderer::set_position_attribute>(id, current_face_vectorfield_name, position);
             state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, current_vertex_vectorfield_name, vector);
         }
     }
@@ -33,11 +37,16 @@ void gui_vectorfields(viewer_state *state, vectorfields *vectors, entt::entity i
     }
     if(gui_property_selector(state, state->get_edges(id), {3}, "edge vectorfield",
                                   current_edge_vectorfield_name)){
+
         if(!current_edge_vectorfield_name.empty()){
             auto &material = vectors->edge_vectorfields[current_edge_vectorfield_name];
+            auto &position = material.attributes[0];
+            position.property_name = "e_position";
+            position.buffer_name = "e_position";
             auto &vector = material.attributes[1];
             vector.property_name = current_edge_vectorfield_name;
             vector.buffer_name = current_edge_vectorfield_name;
+            state->dispatcher.trigger<event::vectorfield_renderer::set_position_attribute>(id, current_face_vectorfield_name, position);
             state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, current_edge_vectorfield_name, vector);
         }
     }
@@ -50,9 +59,13 @@ void gui_vectorfields(viewer_state *state, vectorfields *vectors, entt::entity i
                                   current_face_vectorfield_name)){
         if(!current_face_vectorfield_name.empty()){
             auto &material = vectors->face_vectorfields[current_face_vectorfield_name];
+            auto &position = material.attributes[0];
+            position.buffer_name = "f_position";
+            position.property_name = "f_position";
             auto &vector = material.attributes[1];
             vector.property_name = current_face_vectorfield_name;
             vector.buffer_name = current_face_vectorfield_name;
+            state->dispatcher.trigger<event::vectorfield_renderer::set_position_attribute>(id, current_face_vectorfield_name, position);
             state->dispatcher.trigger<event::vectorfield_renderer::set_vector_attribute>(id, current_face_vectorfield_name, vector);
         }
     }

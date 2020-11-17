@@ -8,6 +8,7 @@
 #include "geometry/bcg_property_map_eigen.h"
 #include "bcg_library/geometry/mesh/bcg_mesh.h"
 #include "utils/bcg_string_utils.h"
+#include "renderers/bcg_renderer.h"
 
 namespace bcg {
 
@@ -48,17 +49,7 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
 
     auto *base_ptr = event.container->get_base_ptr(event.attrib.property_name);
     if (event.attrib.shader_attribute_name == "color" && base_ptr->dims() == 1) {
-        VectorS<-1> values;
-        if (base_ptr->void_ptr() == nullptr) {
-            values = MapConst(event.container->get<bool, 1>(event.attrib.property_name)).cast<float>();
-        } else {
-            values = MapConst(event.container->get<bcg_scalar_t, 1>(event.attrib.property_name));
-        }
-        colormap::base_colormap color_map = event.color_map;
-        if (color_map.colorpath.empty()) {
-            color_map = colormap::jet();
-        }
-        auto colors = color_map(values, values.minCoeff(), values.maxCoeff());
+        auto colors = renderer::map_to_colors(event.container, event.attrib.property_name, event.color_map);
         buffer->upload(colors[0].data(), base_ptr->size(), 3, 0, true);
     } else {
         if (base_ptr->void_ptr() != nullptr) {

@@ -125,7 +125,7 @@ void vectorfield_renderer::on_begin_frame(const event::internal::begin_frame &) 
     });
 }
 
-void render_vectorfield(material_vectorfield &material, Transform &model, glsl_program &program, ogl_shape &shape){
+void render_vectorfield(material_vectorfield &material, Transform &model, glsl_program &program){
     Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
     program.set_uniform_matrix_4f("model", model_matrix.data());
 
@@ -138,7 +138,7 @@ void render_vectorfield(material_vectorfield &material, Transform &model, glsl_p
     float alpha = material.uniform_alpha;
     program.set_uniform_f("material.alpha", alpha);
     material.vao.bind();
-    glDrawArrays(GL_POINTS, 0, shape.num_vertices);
+    glDrawArrays(GL_POINTS, 0, material.num_vectors);
     assert_ogl_error();
 }
 
@@ -162,21 +162,20 @@ void vectorfield_renderer::on_render(const event::internal::render &) {
 
         auto &model = state->scene.get<Transform>(id);
         auto &vectors = state->scene.get<vectorfields>(id);
-        auto &shape = state->scene.get<ogl_shape>(id);
         for(auto &item : vectors.vertex_vectorfields){
             if(!item.second.vao.is_valid()) continue;
             if(!item.second.enabled) continue;
-            render_vectorfield(item.second, model, program, shape);
+            render_vectorfield(item.second, model, program);
         }
         for(auto &item : vectors.edge_vectorfields){
             if(!item.second.vao.is_valid()) continue;
             if(!item.second.enabled) continue;
-            render_vectorfield(item.second, model, program, shape);
+            render_vectorfield(item.second, model, program);
         }
         for(auto &item : vectors.face_vectorfields){
             if(!item.second.vao.is_valid()) continue;
             if(!item.second.enabled) continue;
-            render_vectorfield(item.second, model, program, shape);
+            render_vectorfield(item.second, model, program);
         }
     }
     entities_to_draw.clear();
@@ -192,8 +191,10 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
     std::vector<attribute> attributes;
     if(event.position.buffer_name == "v_position"){
         auto *vertices = state->get_vertices(event.id);
-        if (vertices->get_base_ptr(event.position.property_name)->dims() != 3) return;
+        auto *base_ptr = vertices->get_base_ptr(event.position.property_name);
+        if (base_ptr->dims() != 3) return;
         auto &material = vectors.vertex_vectorfields[event.vectorfield_name];
+        material.num_vectors = base_ptr->size();
         auto &position = material.attributes[0];
         position.property_name = event.position.property_name;
         position.enable = true;
@@ -202,8 +203,10 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
     }else if(event.position.buffer_name == "e_position"){
         auto *edges = state->get_edges(event.id);
-        if (edges->get_base_ptr(event.position.property_name)->dims() != 3) return;
+        auto *base_ptr = edges->get_base_ptr(event.position.property_name);
+        if (base_ptr->dims() != 3) return;
         auto &material = vectors.edge_vectorfields[event.vectorfield_name];
+        material.num_vectors = base_ptr->size();
         auto &position = material.attributes[0];
         position.property_name = event.position.property_name;
         position.enable = true;
@@ -212,8 +215,10 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
     }else if(event.position.buffer_name  == "f_position"){
         auto *faces = state->get_faces(event.id);
-        if (faces->get_base_ptr(event.position.property_name)->dims() != 3) return;
+        auto *base_ptr = faces->get_base_ptr(event.position.property_name);
+        if (base_ptr->dims() != 3) return;
         auto &material = vectors.face_vectorfields[event.vectorfield_name];
+        material.num_vectors = base_ptr->size();
         auto &position = material.attributes[0];
         position.property_name = event.position.property_name;
         position.enable = true;

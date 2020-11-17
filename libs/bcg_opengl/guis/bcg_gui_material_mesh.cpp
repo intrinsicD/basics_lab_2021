@@ -34,17 +34,38 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
         }
         state->dispatcher.trigger<event::mesh_renderer::set_normal_attribute>(id, normal);
     }
-    auto &color = material->attributes[2];
-    if (gui_property_selector(state, vertices, {1, 3}, color.shader_attribute_name, color.property_name)) {
-        if (color.property_name.empty()) {
-            material->use_uniform_color = true;
-        } else {
-            state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+
+    ImGui::Checkbox("use_face_color", &material->use_face_color);
+    if(material->use_face_color){
+        auto &color = material->attributes[2];
+        auto *faces = state->get_faces(id);
+        ImGui::PushID("face_colors");
+        if (gui_property_selector(state, faces, {1, 3}, color.shader_attribute_name, color.property_name)) {
+            if (color.property_name.empty()) {
+                material->use_uniform_color = true;
+                material->use_face_color = false;
+            } else {
+                material->use_uniform_color = false;
+                state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+            }
+        }
+        ImGui::PopID();
+    }else{
+        auto &color = material->attributes[2];
+        if (gui_property_selector(state, vertices, {1, 3}, color.shader_attribute_name, color.property_name)) {
+            if (color.property_name.empty()) {
+                material->use_uniform_color = true;
+            } else {
+                state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+            }
+            material->use_face_color = false;
+        }
+        if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
+            color.property_name = "";
+            material->use_face_color = false;
         }
     }
-    if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
-        color.property_name = "";
-    }
+
     draw_coloredit(&state->window, "ambient", material->ambient);
     draw_coloredit(&state->window, "diffuse", material->diffuse);
     draw_coloredit(&state->window, "specular", material->specular);

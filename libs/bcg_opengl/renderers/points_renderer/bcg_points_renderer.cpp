@@ -117,14 +117,8 @@ void points_renderer::on_render(const event::internal::render &) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
-        program.set_uniform_i("material.use_uniform_point_size", material.use_uniform_size);
-        program.set_uniform_f("material.uniform_point_size", gl_state.point_size_value);
-
-        program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
-        Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
-        program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
-        float alpha = material.uniform_alpha;
-        program.set_uniform_f("material.alpha", alpha);
+        material.uniform_size = gl_state.point_size_value;
+        material.upload(program);
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();

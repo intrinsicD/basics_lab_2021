@@ -29,6 +29,7 @@ struct material_vectorfield{
     VectorS<3> uniform_color = color::random();
     bcg_scalar_t uniform_size = 1.0;
     bcg_scalar_t uniform_alpha = 1.0;
+    size_t num_vectors = 0;
 };
 
 }

@@ -12,6 +12,7 @@
 #include "bcg_material_mesh.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_mesh_renderer.h"
+#include "math/bcg_matrix_map_eigen.h"
 
 namespace bcg {
 
@@ -127,7 +128,12 @@ void mesh_renderer::on_render(const event::internal::render &) {
         program.set_uniform_f("material.shininess", shininess);
         float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
+        program.set_uniform_i("material.use_face_color", material.use_face_color);
+        program.set_uniform_i("width", material.width);
 
+        if(material.face_colors.is_valid()){
+            material.face_colors.activate();
+        }
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
         shape.triangle_buffer.bind();
@@ -173,15 +179,69 @@ void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_norm
 void mesh_renderer::on_set_color_attribute(const event::mesh_renderer::set_color_attribute &event){
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_mesh>(event.id);
-    //TODO convert to colormap if 1 dimensional.
-    auto &color = material.attributes[2];
-    color.property_name = event.color.property_name;
-    color.enable = true;
-    color.update = true;
-    material.use_uniform_color = false;
-    std::vector<attribute> vertex_attributes = {color};
-    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
-    state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
+    if(!material.use_face_color){
+        //TODO convert to colormap if 1 dimensional.
+        auto &color = material.attributes[2];
+        color.property_name = event.color.property_name;
+        color.enable = true;
+        color.update = true;
+        material.use_uniform_color = false;
+        std::vector<attribute> vertex_attributes = {color};
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+        state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
+    }else{
+        auto *faces = state->get_faces(event.id);
+        std::vector<VectorS<3>> colors = map_to_colors(faces, event.color.property_name, material.color_map);
+
+
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
+        material.width = std::min((int)colors.size(), material.width);
+        int height = colors.size() % material.width;
+        colors.resize(material.width * (height + 1));
+
+        if(material.face_colors){
+            material.face_colors.update_data(colors[0].data(),  material.width, height + 1);
+        }else{
+            auto &texture = material.face_colors;
+            texture = ogl_texture(GL_TEXTURE_2D, "face_color");
+            int unit = 0;
+            if (!texture.is_valid()) {
+                texture.create();
+                texture.activate(unit);
+            }
+            texture.bind();
+            texture.set_wrap_clamp_to_border();
+            texture.set_filter_linear();
+            auto *data = colors[0].data();
+            int channels = 3;
+            if (data) {
+                auto internal_format = TextureFormat(ogl_types::GetType(data), channels);
+                auto format = TextureDataFormat(ogl_types::GetType(data), channels);
+
+                texture.set_image_data(GL_TEXTURE_2D, 0, internal_format, material.width, height + 1, format,
+                                       ogl_types::GetGLType(data), data);
+
+                auto program = programs["mesh_renderer_program"];
+                program.bind();
+                if (program.get_uniform_location(material.face_colors.name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
+                    program.set_uniform_i(material.face_colors.name.c_str(), unit);
+                }
+            }
+            texture.release();
+
+            std::vector<VectorS<3>> test_data(material.width * (height + 1));
+            material.face_colors.download_data(test_data.data());
+            std::cout << MapConst(test_data) << "\n";
+        }
+
+        material.use_uniform_color = false;
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        auto edge_attributes = {attribute{"triangles", "triangles", "triangles", 0, true},
+                                attribute{"boundary", "boundary", "boundary", 0, true}};
+        state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, edge_attributes);
+        state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
+    }
+
 }
 
 }

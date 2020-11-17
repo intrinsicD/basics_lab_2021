@@ -10,6 +10,7 @@ struct Material{
     float shininess;
     float alpha;
     bool use_uniform_color;
+    bool use_face_color;
 };
 
 uniform Material material;
@@ -20,6 +21,9 @@ struct Light {
     vec3 diffuse;
     vec3 specular;
 };
+
+uniform int width;
+uniform sampler2D face_color;
 
 out vec4 final_color;
 
@@ -48,6 +52,12 @@ vec4 phong_shading(Light light, Material material){
     return color;
 }
 
+ivec2 get_tex_coords(int id){
+    int i = id % width;
+    int j = (id - i) / width;
+    return ivec2(i, j);
+}
+
 void main() {
     Light light;
     light.position = vec3(0, 0, 0);
@@ -55,5 +65,9 @@ void main() {
     light.diffuse = vec3(0.5, 0.5, 0.5);
     light.specular = vec3(1, 1, 1);
 
-    final_color = phong_shading(light, material);
+    if(material.use_face_color){
+        final_color = vec4(texelFetch(face_color, get_tex_coords(gl_PrimitiveID), 0).xyz, material.alpha);
+    }else{
+        final_color = phong_shading(light, material);
+    }
 }

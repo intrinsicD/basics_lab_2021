@@ -8,7 +8,6 @@
 
 #include "imgui/imgui.h"
 #include "bcg_library/math/bcg_linalg.h"
-#include "guis/bcg_gui_dihedral_angle.h"
 
 namespace bcg {
 

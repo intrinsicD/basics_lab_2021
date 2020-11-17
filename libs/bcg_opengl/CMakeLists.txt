@@ -12,6 +12,7 @@ if (BCG_OPENGL)
             bcg_opengl.h bcg_opengl.cpp
             bcg_camera.h bcg_camera.cpp
             bcg_viewer.h bcg_viewer.cpp
+            renderers/bcg_material.h
             bcg_viewer_state.h bcg_viewer_state.cpp
             guis/bcg_gui_viewer_state.h guis/bcg_gui_viewer_state.cpp
             guis/bcg_gui_vectorfields.h guis/bcg_gui_vectorfields.cpp
@@ -23,6 +24,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp
             guis/bcg_gui_mesh.h guis/bcg_gui_mesh.cpp
+            guis/bcg_gui_mesh_face_normals.h guis/bcg_gui_mesh_face_normals.cpp
             guis/bcg_gui_materials.h guis/bcg_gui_materials.cpp
             guis/bcg_gui_material_vectorfield.h guis/bcg_gui_material_vectorfield.cpp
             guis/bcg_gui_material_points.h guis/bcg_gui_material_points.cpp
@@ -32,7 +34,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_graph.h guis/bcg_gui_graph.cpp
             guis/bcg_gui_entity_info.h guis/bcg_gui_entity_info.cpp
             guis/bcg_gui_aligned_box3.h guis/bcg_gui_aligned_box3.cpp
-            guis/bcg_gui_dihedral_angle.h guis/bcg_gui_dihedral_angle.cpp
+            guis/bcg_gui_mesh_dihedral_angle.h guis/bcg_gui_mesh_dihedral_angle.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

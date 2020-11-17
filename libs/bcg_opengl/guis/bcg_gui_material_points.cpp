@@ -54,7 +54,7 @@ void gui_material_points(viewer_state *state, material_points *material, entt::e
         }
     }
     draw_coloredit(&state->window, "uniform_color", material->uniform_color);
-    ImGui::InputFloat("alpha", &material->uniform_alpha);
+    ImGui::InputFloat("alpha", &material->alpha);
     ImGui::PopID();
 }
 
