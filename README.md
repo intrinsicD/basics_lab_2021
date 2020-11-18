@@ -11,6 +11,12 @@
     **CMAKE_SOURCE_DIR** to **CMAKE_CURRENT_SOURCE_DIR**
   	and find_package(**Eigen3 NO_MODULE REQUIRED**) to find_package(**eigen3 REQUIRED**)
 
+**Compilation**
+- to compile please add a **/build** folder
+- from that folder run **cmake ..**
+- then run **make**
+  - if you want to build in parallel please run **make -j 5** for building with 5 cores
+
 **Usage**
 - Quit: Strg/Ctrl+Q
 - Scale Points: Strg + Mouse wheel
