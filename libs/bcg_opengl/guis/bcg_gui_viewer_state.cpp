@@ -21,6 +21,7 @@
 #include "bcg_gui_graph.h"
 #include "bcg_gui_point_cloud.h"
 #include "bcg_gui_ogl_shape.h"
+#include "geometry/curve/bcg_curve_bezier.h"
 
 namespace bcg {
 
@@ -40,6 +41,8 @@ void gui_viewer_state(viewer_state *state) {
                 if (mesh) gui_mesh(state, mesh);
                 auto *graph = state->scene.try_get<halfedge_graph>(id);
                 if (graph) gui_graph(state, graph);
+                auto *curve = state->scene.try_get<curve_bezier>(id);
+                if (curve) gui_graph(state, curve);
                 auto *pc = state->scene.try_get<point_cloud>(id);
                 if (pc) gui_point_cloud(state, pc);
                 gui_ogl_shape(state, state->scene.try_get<ogl_shape>(id));
@@ -55,10 +58,7 @@ void gui_viewer_state(viewer_state *state) {
     gui_viewer_time(state);
     gui_viewer_gui(state);
     gui_viewer_picker(state);
-
-
-
-
+    gui_viewer_camera(state);
 }
 
 }

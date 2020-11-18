@@ -20,7 +20,10 @@
 #include "bcg_opengl/systems/bcg_transform_system.h"
 #include "bcg_opengl/systems/bcg_aligned_box_system.h"
 #include "bcg_opengl/systems/bcg_loading_system.h"
+#include "bcg_opengl/systems/bcg_bezier_curve_system.h"
 #include "bcg_opengl/renderers/bcg_render_system.h"
+
+#include "geometry/curve/bcg_curve_bezier.h"
 
 namespace bcg {
 
@@ -110,6 +113,18 @@ viewer_state::viewer_state() : shaders(this){
     systems["keyboard_system"] = std::make_unique<keyboard_system>(this);
     systems["transform_system"] = std::make_unique<transform_system>(this);
     systems["aligned_box_system"] = std::make_unique<aligned_box_system>(this);
+    systems["bezier_curve_system"] = std::make_unique<bezier_curve_system>(this);
+}
+
+VectorS<3> viewer_state::ndc_to_view_space(const VectorS<2> &ndc){
+    VectorS<3> point;
+    point.head<2>() = ndc;
+    point[2] = 1.0f;
+    VectorS<4> result = (cam.model_matrix * cam.projection_matrix.inverse() * point.homogeneous());
+    result /= result[3];
+    point = result.head<3>();
+    //point[2] = 0.0f;
+    return point;
 }
 
 vertex_container *viewer_state::get_vertices(entt::entity id) {
@@ -123,9 +138,14 @@ vertex_container *viewer_state::get_vertices(entt::entity id) {
             if (graph) {
                 vertices = &graph->vertices;
             } else {
-                auto *mesh = scene.try_get<halfedge_mesh>(id);
-                if (mesh) {
-                    vertices = &mesh->vertices;
+                auto *curve = scene.try_get<curve_bezier>(id);
+                if (curve) {
+                    vertices = &curve->vertices;
+                } else {
+                    auto *mesh = scene.try_get<halfedge_mesh>(id);
+                    if (mesh) {
+                        vertices = &mesh->vertices;
+                    }
                 }
             }
         }
@@ -140,9 +160,14 @@ halfedge_container *viewer_state::get_halfedges(entt::entity id) {
         if (graph) {
             halfedges = &graph->halfedges;
         } else {
-            auto *mesh = scene.try_get<halfedge_mesh>(id);
-            if (mesh) {
-                halfedges = &mesh->halfedges;
+            auto *curve = scene.try_get<curve_bezier>(id);
+            if (curve) {
+                halfedges = &curve->halfedges;
+            } else {
+                auto *mesh = scene.try_get<halfedge_mesh>(id);
+                if (mesh) {
+                    halfedges = &mesh->halfedges;
+                }
             }
         }
     }
@@ -156,9 +181,14 @@ edge_container *viewer_state::get_edges(entt::entity id) {
         if (graph) {
             edges = &graph->edges;
         } else {
-            auto *mesh = scene.try_get<halfedge_mesh>(id);
-            if (mesh) {
-                edges = &mesh->edges;
+            auto *curve = scene.try_get<curve_bezier>(id);
+            if (curve) {
+                edges = &curve->edges;
+            } else {
+                auto *mesh = scene.try_get<halfedge_mesh>(id);
+                if (mesh) {
+                    edges = &mesh->edges;
+                }
             }
         }
     }

@@ -49,7 +49,9 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_O]) {}
     if (state->keyboard.keys[GLFW_KEY_P]) {}
     if (state->keyboard.keys[GLFW_KEY_Q]) {}
-    if (state->keyboard.keys[GLFW_KEY_R]) {}
+    if (state->keyboard.keys[GLFW_KEY_R]) {
+        state->cam.init(state->window.width, state->window.height);
+    }
     if (state->keyboard.keys[GLFW_KEY_S]) {}
     if (state->keyboard.keys[GLFW_KEY_T]) {
         state->dispatcher.trigger<event::mesh::make_quad>();
@@ -121,13 +123,13 @@ void keyboard_system::on_update(const event::internal::update &event) {
     if (state->keyboard.keys[GLFW_KEY_Q]) {}
     if (state->keyboard.keys[GLFW_KEY_R]) {}
     if (state->keyboard.keys[GLFW_KEY_S]) {
-        state->cam.model_matrix.translation() -= state->cam.front_vec() * state->time.time_delta;
+        state->cam.model_matrix.translation() += state->cam.front_vec() * state->time.time_delta;
     }
     if (state->keyboard.keys[GLFW_KEY_T]) {}
     if (state->keyboard.keys[GLFW_KEY_U]) {}
     if (state->keyboard.keys[GLFW_KEY_V]) {}
     if (state->keyboard.keys[GLFW_KEY_W]) {
-        state->cam.model_matrix.translation() += state->cam.front_vec() * state->time.time_delta;
+        state->cam.model_matrix.translation() -= state->cam.front_vec() * state->time.time_delta;
     }
     if (state->keyboard.keys[GLFW_KEY_X]) {}
     if (state->keyboard.keys[GLFW_KEY_Y]) {}

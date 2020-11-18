@@ -23,8 +23,6 @@ struct material_curve{
     VectorS<3> uniform_color = color::random();
     bcg_scalar_t uniform_alpha = 1;
     int tesselation_level = 16;
-    int width;
-    ogl_texture control_points = ogl_texture("control_points");
 };
 
 }

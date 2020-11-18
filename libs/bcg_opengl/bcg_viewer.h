@@ -13,7 +13,7 @@ namespace bcg {
 struct viewer {
     viewer_state state;
 
-    void run(const VectorI<2> &size = {800, 600}, const std::string &title = "default", int widgets_width = 320);
+    void run(const VectorI<2> &size = {800, 600}, const std::string &title = "default", int widgets_width = 500);
 };
 
 }

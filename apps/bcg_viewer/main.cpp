@@ -3,6 +3,7 @@
 #include "bcg_opengl/bcg_viewer.h"
 #include "bcg_opengl/bcg_imgui.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_state.h"
+#include "bcg_opengl/guis/bcg_gui_viewer_curve.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_normals.h"
@@ -38,7 +39,9 @@ int main() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools")) {
-            ImGui::MenuItem("Metrics", NULL, &self->show_app_metrics);
+            if(ImGui::MenuItem("Bezier Curves")){
+                state->gui.left = gui_viewer_curve;
+            }
             ImGui::EndMenu();
         }
 

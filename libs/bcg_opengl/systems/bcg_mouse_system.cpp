@@ -35,6 +35,9 @@ void mouse_system::on_motion(const event::mouse::motion &event){
     state->mouse.last_cursor_position = state->mouse.cursor_position;
     state->mouse.cursor_position[0] = event.x;
     state->mouse.cursor_position[1] = event.y;
+    const auto &vp = state->window.framebuffer_viewport;
+    state->mouse.normalized_device_coordinates[0] = (event.x - vp[0]) / bcg_scalar_t (vp[2]) * 2.0 - 1.0;
+    state->mouse.normalized_device_coordinates[1] = 1.0 - (event.y - vp[1]) / bcg_scalar_t (vp[3]) * 2.0;
     state->mouse.cursor_delta = state->mouse.cursor_position - state->mouse.last_cursor_position;
     state->mouse.is_moving = true;
 }

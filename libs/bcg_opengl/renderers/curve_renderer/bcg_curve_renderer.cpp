@@ -12,6 +12,7 @@
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_curve_renderer.h"
 #include "math/bcg_matrix_map_eigen.h"
+#include "geometry/curve/bcg_curve_bezier.h"
 
 namespace bcg {
 
@@ -22,8 +23,6 @@ curve_renderer::curve_renderer(viewer_state *state) : renderer("curve_renderer",
     state->dispatcher.sink<event::curve_renderer::setup_for_rendering>().connect<&curve_renderer::on_setup_for_rendering>(
             this);
     state->dispatcher.sink<event::curve_renderer::set_position_attribute>().connect<&curve_renderer::on_set_position_attribute>(
-            this);
-    state->dispatcher.sink<event::curve_renderer::set_control_points_texture>().connect<&curve_renderer::on_set_control_points_texture>(
             this);
 }
 
@@ -52,14 +51,15 @@ void curve_renderer::on_shutdown(const event::internal::shutdown &event) {
 
 void curve_renderer::on_enqueue(const event::curve_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.has<curve_bezier>(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
     if (!state->scene.has<material_curve>(event.id)) {
         auto &material = state->scene.emplace<material_curve>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
+        state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
         state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(event.id);
-        state->dispatcher.trigger<event::curve_renderer::set_control_points_texture>(event.id);
     }
 }
 
@@ -122,19 +122,24 @@ void curve_renderer::on_render(const event::internal::render &) {
 
         auto &model = state->scene.get<Transform>(id);
         auto &material = state->scene.get<material_curve>(id);
-
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
+
+/*        auto *curve = state->scene.try_get<curve_bezier>(id);
+        if(curve){
+            if(!curve->is_3d){
+                Matrix<float, 4, 4> id = Matrix<float, 4, 4>::Identity();
+                program.set_uniform_matrix_4f("proj", id.data());
+                program.set_uniform_matrix_4f("view", id.data());
+            }
+        }*/
 
         Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
         float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
         program.set_uniform_i("tesselation_level", material.tesselation_level);
-        program.set_uniform_i("width", material.width);
-        if(material.control_points.is_valid()){
-            material.control_points.activate();
-        }
+
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
         for(size_t offset = 0; offset < shape.num_vertices - 3; offset += 3){
@@ -175,58 +180,8 @@ void curve_renderer::on_set_position_attribute(const event::curve_renderer::set_
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
-    state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(event.id);
-}
-
-void curve_renderer::on_set_control_points_texture(const event::curve_renderer::set_control_points_texture &event){
-    if (!state->scene.valid(event.id)) return;
-    auto &material = state->scene.get<material_curve>(event.id);
-
-    auto *vertices = state->get_vertices(event.id);
-    if(!vertices) return;
-    auto position = vertices->get<VectorS<3>, 3>("v_position");
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
-    material.width = std::min((int)position.size(), material.width);
-    int height = position.size() % material.width;
-    position.resize(material.width * (height + 1));
-
-    if(material.control_points){
-        material.control_points.update_data(position[0].data(),  material.width, height + 1);
-    }else{
-        auto &texture = material.control_points;
-        texture = ogl_texture(GL_TEXTURE_2D, "control_points");
-        int unit = 0;
-        if (!texture.is_valid()) {
-            texture.create();
-            texture.activate(unit);
-        }
-        texture.bind();
-        texture.set_wrap_clamp_to_border();
-        texture.set_filter_linear();
-        auto *data = position[0].data();
-        int channels = 3;
-        if (data) {
-            auto internal_format = TextureFormat(ogl_types::GetType(data), channels);
-            auto format = TextureDataFormat(ogl_types::GetType(data), channels);
-
-            texture.set_image_data(GL_TEXTURE_2D, 0, internal_format, material.width, height + 1, format,
-                                   ogl_types::GetGLType(data), data);
-
-            auto program = programs["curve_renderer_program"];
-            program.bind();
-            if (program.get_uniform_location(material.control_points.name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
-                program.set_uniform_i(material.control_points.name.c_str(), unit);
-            }
-        }
-        texture.release();
-
-        std::vector<VectorS<3>> test_data(material.width * (height + 1));
-        material.control_points.download_data(test_data.data());
-        std::cout << MapConst(test_data) << "\n";
-    }
-
-    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+    auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
+    state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, vertex_attributes);
     state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(event.id);
 }
 

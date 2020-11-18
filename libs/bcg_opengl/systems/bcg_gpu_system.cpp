@@ -6,6 +6,7 @@
 #include "bcg_viewer_state.h"
 #include "math/bcg_matrix_map_eigen.h"
 #include "geometry/bcg_property_map_eigen.h"
+#include "geometry/curve/bcg_curve_bezier.h"
 #include "bcg_library/geometry/mesh/bcg_mesh.h"
 #include "utils/bcg_string_utils.h"
 #include "renderers/bcg_renderer.h"
@@ -102,6 +103,10 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
                     auto &graph = state->scene.get<halfedge_graph>(event.id);
                     property = graph.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = graph.get_connectivity();
+                }else if (state->scene.has<curve_bezier>(event.id)) {
+                    auto &curve = state->scene.get<curve_bezier>(event.id);
+                    property = curve.edges.get_or_add<VectorI<2>, 2>("edges");
+                    property.vector() = curve.get_connectivity();
                 }
 
                 halfedges->get<halfedge_graph::halfedge_connectivity, 4>("h_connectivity").set_clean();

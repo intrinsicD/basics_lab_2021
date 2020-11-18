@@ -14,6 +14,7 @@ struct curve_b_spline : curve {
         uniform,
         nonuniform
     }knot_type;
+
     curve_b_spline();
 
     explicit curve_b_spline(const std::vector<VectorS<3>> &control_points, KnotType knot_type);

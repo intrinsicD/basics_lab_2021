@@ -10,7 +10,7 @@ namespace bcg{
 
 template<typename Real, int N>
 bool draw_combo(viewer_state *, const property<Real, N> prop, size_t &current_entry) {
-    if (!prop) return false;
+    if (!prop || prop.empty()) return false;
     if (current_entry >= prop.size()) { current_entry = 0; }
     std::stringstream ss;
     ss << prop[current_entry];
@@ -37,7 +37,7 @@ bool draw_combo(viewer_state *, const property<Real, N> prop, size_t &current_en
 
 template<typename Real, int N>
 bool draw_combo(viewer_state *, const property<Vector<Real, N>, N> prop, size_t &current_entry) {
-    if (!prop) return false;
+    if (!prop || prop.empty()) return false;
     if (current_entry >= prop.size()) { current_entry = 0; }
     std::stringstream ss;
     ss << prop[current_entry].transpose();

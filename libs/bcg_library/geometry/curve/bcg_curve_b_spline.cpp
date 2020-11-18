@@ -47,10 +47,26 @@ VectorS<3> curve_b_spline::derivative_vector(bcg_scalar_t t, int order) const {
 }
 
 VectorS<3> curve_b_spline::de_boor(bcg_scalar_t t){
-
+    size_t i = 0;
+    if(knot_type == KnotType::uniform){
+        i = std::floor(t * knots.size());
+    }else{
+        i = std::floor(t * (knots.size() - 2 * (degree + 1))) + degree + 1;
+    }
+    std::vector<VectorS<3>> d(degree + 1);
+    for(size_t j = 0; j < degree + 1; ++j){
+        d[j] = control_points()[j + i - degree];
+    }
+    for(size_t r = 1; r < degree +1; ++r){
+        for(size_t j = degree; j > r - 1; --j){
+            bcg_scalar_t alpha = (t - knots[j + i - degree]) / (knots[j + 1 + i - r] - knots[j + i - degree]);
+            d[j] = (1.0 - alpha) * d[j - 1] + alpha * d[j];
+        }
+    }
+    return d[degree];
 }
 
-std::array<curve_b_spline, 2> curve_b_spline::subdivide(bcg_scalar_t t = 0.5){
+std::array<curve_b_spline, 2> curve_b_spline::subdivide(bcg_scalar_t t){
 
 }
 

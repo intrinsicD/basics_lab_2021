@@ -10,6 +10,10 @@
 namespace bcg {
 
 struct curve_bezier : curve {
+    bool is_3d = false;
+    bool finished = false;
+    int points_clicked = 0;
+
     curve_bezier();
 
     explicit curve_bezier(const std::vector<VectorS<3>> &control_points);

@@ -40,6 +40,7 @@ struct viewer_mouse {
     VectorS<2> last_middle_click = zero2s;
     VectorS<2> last_right_click = zero2s;
     VectorS<2> cursor_position = zero2s;
+    VectorS<2> normalized_device_coordinates = zero2s;
     VectorS<2> last_cursor_position = zero2s;
     VectorS<2> cursor_delta = zero2s;
     float scroll_value = 0;
@@ -47,7 +48,7 @@ struct viewer_mouse {
 
 struct viewer_keyboard {
     dynamic_bitset keys;
-    bool shift_pressed = false, alt_pressed = false, ctrl_pressed = false, command_pressed = false, no_modifier = false, is_captured_by_gui = false;
+    bool shift_pressed = false, alt_pressed = false, ctrl_pressed = false, command_pressed = false, no_modifier = true, is_captured_by_gui = false;
 };
 
 struct viewer_time {
@@ -186,6 +187,8 @@ struct viewer_state {
     viewer_systems systems;
     viewer_shaders shaders;
     camera cam;
+
+    VectorS<3> ndc_to_view_space(const VectorS<2> &ndc);
 
     vertex_container *get_vertices(entt::entity id);
 

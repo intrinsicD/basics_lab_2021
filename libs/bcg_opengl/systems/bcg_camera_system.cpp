@@ -35,7 +35,7 @@ void camera_system::on_mouse_scroll(const event::mouse::scroll &event) {
 }
 
 void camera_system::on_update(const event::internal::update &) {
-    if (state->mouse.is_dragging && !state->mouse.is_captured_by_gui) {
+    if (state->mouse.is_dragging && !state->mouse.is_captured_by_gui && state->keyboard.no_modifier) {
         if (state->mouse.middle) {
             //translate camera in plane
             state->cam.model_matrix =

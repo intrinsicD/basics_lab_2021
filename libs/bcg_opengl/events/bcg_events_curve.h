@@ -9,29 +9,29 @@
 
 namespace bcg{
     enum curve_mode{
-        DISABLED,
-        PLANE_MODE,
-        SURFACE_MODE
+        disabled,
+        drawing_2d,
+        drawing_3d
     };
 }
 namespace bcg::event::curve{
-struct disable_curve_mode{
+struct disable_drawing{
 
 };
-struct enable_plane_curve_mode{
+struct enable_2d_drawing{
 
 };
-struct enable_surface_curve_mode{
+struct enable_3d_drawing{
 
 };
 struct setup_curve{
     entt::entity id;
     std::string filename;
 };
-struct new_curve{
-
+struct setup{
+    entt::entity id;
 };
-struct delete_curve{
+struct make{
 
 };
 }

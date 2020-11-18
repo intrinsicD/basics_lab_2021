@@ -85,7 +85,6 @@ void picking_renderer::on_begin_frame(const event::internal::begin_frame &) {
 }
 
 void picking_renderer::on_mouse_button(const event::mouse::button &event) {
-    if (entities_to_draw.empty()) return;
     if (!state->mouse.left) return;
 
     const auto &vp = state->window.framebuffer_viewport;
@@ -121,8 +120,10 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         material.vao.bind();
 
         if (shape.edge_buffer) {
+            shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
         } else if(shape.triangle_buffer){
+            shape.triangle_buffer.bind();
             glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
         }else{
             glDrawArrays(GL_POINTS, 0, shape.num_vertices);
@@ -140,8 +141,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     gl_state.set_scissor_test(false);
     if (zf == 1.0f) {
+        zf = 0.999885023f;
         state->picker.valid = false;
-        return;
     } else {
         state->picker.valid = true;
     }
@@ -155,23 +156,27 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     state->picker.world_space_point = p.head<3>();
 
     auto id = entt::entity(data[0] + data[1] * 256 + data[2] * 256 * 256);
-    if (!state->scene.valid(id) || !state->scene.has<Transform>(id)) {
+    if (!state->scene.valid(id)) {
         state->picker.valid = false;
-        return;
+    }else{
+        state->picker.entity_id = id;
+        if(state->mouse.left && state->keyboard.ctrl_pressed && !state->keyboard.shift_pressed){
+            state->picker.selected_entities.clear();
+        }
+        if(state->mouse.left && state->keyboard.ctrl_pressed && state->keyboard.shift_pressed){
+            state->picker.selected_entities.push_back(id);
+        }
     }
-    state->picker.entity_id = id;
 
-    if(state->mouse.left && state->keyboard.ctrl_pressed && !state->keyboard.shift_pressed){
-        state->picker.selected_entities.clear();
+    Transform model = Transform::Identity();
+    if(state->scene.valid(id) && state->scene.has<Transform>(id)){
+        model = state->scene.get<Transform>(id);
     }
-    if(state->mouse.left && state->keyboard.ctrl_pressed && state->keyboard.shift_pressed){
-        state->picker.selected_entities.push_back(id);
-    }
-    auto &model = state->scene.get<Transform>(id);
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
     state->picker.view_space_point = (state->cam.view_matrix() *
                                       state->picker.world_space_point.homogeneous()).head<3>();
 
+    if(!state->scene.valid(id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t>>(id)) {
         auto *vertices = state->get_vertices(id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");

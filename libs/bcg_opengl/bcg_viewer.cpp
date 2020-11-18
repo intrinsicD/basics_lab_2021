@@ -160,7 +160,6 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwSetWindowSizeCallback(state->window.win,
                               [](GLFWwindow *glfw, int width, int height) {
                                   auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                  state->dispatcher.trigger<event::internal::resize>(width, height);
                                   state->window.width = width;
                                   state->window.height = height;
                                   int vw, vh;
@@ -169,10 +168,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                   state->window.framebuffer_viewport[1] = 0;
                                   state->window.framebuffer_viewport[2] = vw;
                                   state->window.framebuffer_viewport[3] = vh;
-                                  glViewport(state->window.framebuffer_viewport[0],
-                                             state->window.framebuffer_viewport[1],
-                                             state->window.framebuffer_viewport[2],
-                                             state->window.framebuffer_viewport[3]);
+                                  state->dispatcher.trigger<event::internal::resize>(width, height);
                               });
     glfwSwapInterval(1);
     // init gl extensions
@@ -188,6 +184,8 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwGetWindowSize(state->window.win, &state->window.width, &state->window.height);
     int vw, vh;
     glfwGetFramebufferSize(state->window.win, &vw, &vh);
+    state->window.framebuffer_viewport[0] = 0;
+    state->window.framebuffer_viewport[1] = 0;
     state->window.framebuffer_viewport[2] = vw;
     state->window.framebuffer_viewport[3] = vh;
     state->window.high_dpi_scaling =
@@ -195,7 +193,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     if (state->window.high_dpi_scaling != 1) {
         std::cout << "highDPI scaling: " << state->window.high_dpi_scaling << "\n";
     }
-
+    state->dispatcher.trigger<event::internal::resize>(state->window.width, state->window.height);
     std::cout << "GL       " << ogl_version_string() << "\n";
     std::cout << "GLSL     " << glsl_version_string() << "\n";
     std::cout << "Renderer " << ogl_renderer_string() << "\n";
@@ -296,6 +294,8 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
     // loop
     auto win = state.window.win;
     while (!glfwWindowShouldClose(win)) {
+        // event hadling
+        glfwPollEvents();
         // update input
         set_close(&state, (glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
                            glfwGetKey(win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) &&
@@ -304,10 +304,10 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         glfwGetWindowSize(win, &state.window.width, &state.window.height);
         int vw, vh;
         glfwGetFramebufferSize(win, &vw, &vh);
-        state.window.framebuffer_viewport[2] = vw;
-        state.window.framebuffer_viewport[3] = vh;
         state.window.framebuffer_viewport[0] = 0;
         state.window.framebuffer_viewport[1] = 0;
+        state.window.framebuffer_viewport[2] = vw;
+        state.window.framebuffer_viewport[3] = vh;
 
         if (state.gui.menu.show) {
             auto io = &ImGui::GetIO();
@@ -354,9 +354,8 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
         //------------------------------------------------------------------------------------------------------------------
 
-        // event hadling
+
         glfwSwapBuffers(win);
-        glfwPollEvents();
     }
 
     // clear

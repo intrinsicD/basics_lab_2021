@@ -23,6 +23,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_viewer_gui.h guis/bcg_gui_viewer_gui.cpp
             guis/bcg_gui_viewer_picker.h guis/bcg_gui_viewer_picker.cpp
             guis/bcg_gui_viewer_camera.h guis/bcg_gui_viewer_camera.cpp
+            guis/bcg_gui_viewer_curve.h guis/bcg_gui_viewer_curve.cpp
             guis/bcg_gui_vectorfields.h guis/bcg_gui_vectorfields.cpp
             guis/bcg_gui_transform.h guis/bcg_gui_transform.cpp
             guis/bcg_gui_rendering_options.h guis/bcg_gui_rendering_options.cpp
@@ -57,6 +58,7 @@ if (BCG_OPENGL)
             systems/bcg_keyboard_system.h systems/bcg_keyboard_system.cpp
             systems/bcg_aligned_box_system.h systems/bcg_aligned_box_system.cpp
             systems/bcg_loading_system.h systems/bcg_loading_system.cpp
+            systems/bcg_bezier_curve_system.h systems/bcg_bezier_curve_system.cpp
             renderers/bcg_renderer.h renderers/bcg_renderer.cpp
             renderers/bcg_render_system.h renderers/bcg_render_system.cpp
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_events_points_renderer.h
