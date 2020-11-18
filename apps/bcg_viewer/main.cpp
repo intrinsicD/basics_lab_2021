@@ -38,7 +38,7 @@ int main() {
             ImGui::MenuItem("Console", NULL, &self->show_app_console);
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Tools")) {
+        if (ImGui::BeginMenu("Exercises")) {
             if(ImGui::MenuItem("Bezier Curves")){
                 state->gui.left = gui_viewer_curve;
             }
