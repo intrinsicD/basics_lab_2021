@@ -33,7 +33,9 @@ private:
 
     void on_set_normal_attribute(const event::mesh_renderer::set_normal_attribute &event);
 
-    void on_set_color_attribute(const event::mesh_renderer::set_color_attribute &event);
+    void on_set_vertex_color_attribute(const event::mesh_renderer::set_vertex_color_attribute &event);
+
+    void on_set_face_color_attribute(const event::mesh_renderer::set_face_color_attribute &event);
 };
 
 }

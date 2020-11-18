@@ -34,6 +34,13 @@ struct normals{
 
 
 namespace vertex_normals{
+enum Type{
+    UNIFORM,
+    AREA,
+    ANGLE,
+    AREAANGLE
+};
+
 struct uniform{
     entt::entity id;
 };

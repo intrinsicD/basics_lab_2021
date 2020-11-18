@@ -9,6 +9,15 @@ uniform mat4  proj;
 uniform bool show_bezier;
 uniform bool show_hermite;
 
+uniform sampler2D control_points;
+uniform int width;
+
+ivec2 get_tex_coords(int id){
+    int i = id % width;
+    int j = (id - i) / width;
+    return ivec2(i, j);
+}
+
 ///////////////////////////////////////////////////
 // function to calculate the hermite function value
 vec3 hermite(float u, vec3 p0, vec3 p1, vec3 t0, vec3 t1)

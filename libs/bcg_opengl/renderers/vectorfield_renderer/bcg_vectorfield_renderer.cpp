@@ -14,6 +14,7 @@
 #include "renderers/bcg_vectorfields.h"
 #include "bcg_events_vectorfield_renderer.h"
 #include "utils/bcg_string_utils.h"
+#include "geometry/aligned_box/bcg_aligned_box.h"
 
 namespace bcg {
 
@@ -236,33 +237,40 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
     std::vector<attribute> attributes;
     if(contains(event.vector.buffer_name,"v_")){
         auto *vertices = state->get_vertices(event.id);
-        if (vertices->get_base_ptr(event.vector.property_name)->dims() != 3) return;
+        auto *base_ptr = vertices->get_base_ptr(event.vector.property_name);
+        if (base_ptr->dims() != 3) return;
         auto &material = vectors.vertex_vectorfields[event.vectorfield_name];
         auto &vector = material.attributes[1];
         vector.property_name = event.vector.property_name;
         vector.enable = true;
         vector.update = true;
         attributes = {vector};
+
+        material.uniform_size = state->scene.get<aligned_box3>(event.id).diagonal().norm() / std::sqrt(base_ptr->size());
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
     }else if(contains(event.vector.buffer_name,"e_")){
         auto *edges = state->get_edges(event.id);
-        if (edges->get_base_ptr(event.vector.property_name)->dims() != 3) return;
+        auto *base_ptr = edges->get_base_ptr(event.vector.property_name);
+        if (base_ptr->dims() != 3) return;
         auto &material = vectors.edge_vectorfields[event.vectorfield_name];
         auto &vector = material.attributes[1];
         vector.property_name = event.vector.property_name;
         vector.enable = true;
         vector.update = true;
         attributes = {vector};
+        material.uniform_size = state->scene.get<aligned_box3>(event.id).diagonal().norm() / std::sqrt(base_ptr->size());
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
     }else if(contains(event.vector.buffer_name,"f_")){
         auto *faces = state->get_faces(event.id);
-        if (faces->get_base_ptr(event.vector.property_name)->dims() != 3) return;
+        auto *base_ptr = faces->get_base_ptr(event.vector.property_name);
+        if (base_ptr->dims() != 3) return;
         auto &material = vectors.face_vectorfields[event.vectorfield_name];
         auto &vector = material.attributes[1];
         vector.property_name = event.vector.property_name;
         vector.enable = true;
         vector.update = true;
         attributes = {vector};
+        material.uniform_size = state->scene.get<aligned_box3>(event.id).diagonal().norm() / std::sqrt(base_ptr->size());
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
     }
 

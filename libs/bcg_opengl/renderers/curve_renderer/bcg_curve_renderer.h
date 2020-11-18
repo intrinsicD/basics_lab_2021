@@ -30,6 +30,8 @@ private:
     void on_end_frame(const event::internal::end_frame &event) override;
 
     void on_set_position_attribute(const event::curve_renderer::set_position_attribute &event);
+
+    void on_set_control_points_texture(const event::curve_renderer::set_control_points_texture &event);
 };
 
 }

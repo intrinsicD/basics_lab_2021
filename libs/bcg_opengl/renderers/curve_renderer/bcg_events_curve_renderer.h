@@ -18,6 +18,9 @@ struct set_position_attribute{
     entt::entity id;
     attribute position;
 };
+struct set_control_points_texture{
+    entt::entity id;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_CURVE_RENDERER_H

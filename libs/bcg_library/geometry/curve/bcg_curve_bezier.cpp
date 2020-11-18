@@ -73,5 +73,44 @@ VectorS<3> curve_bezier::derivative_vector(bcg_scalar_t t, int order) const {
     return result;
 }
 
+VectorS<3> curve_bezier::de_casteljau(bcg_scalar_t t){
+    std::vector<VectorS<3>> Q = control_points();
+    for(size_t k = 1; k < Q.size(); ++k){
+        for(size_t i = 0; i < Q.size() - k; ++i){
+            Q[i] = (1.0 - t) * Q[i] + t * Q[i + 1];
+        }
+    }
+    return Q[0];
+}
+
+std::array<curve_bezier, 2> curve_bezier::subdivide(bcg_scalar_t t){
+    std::array<curve_bezier, 2> segments;
+
+    segments[0].add_vertex(control_points()[0]);
+    segments[1].add_vertex(control_points().back());
+    std::vector<VectorS<3>> Q = control_points();
+    for(size_t k = 1; k < Q.size(); ++k){
+        for(size_t i = 0; i < Q.size() - k; ++i){
+            Q[i] = (1.0 - t) * Q[i] + t * Q[i + 1];
+            if(i == 0) segments[0].add_vertex(Q[i]);
+            if(i == Q.size() - k + 1) segments[1].add_vertex(Q[i]);
+        }
+    }
+    std::reverse(segments[1].positions.begin(),segments[1].positions.end());
+    return segments;
+}
+
+curve_bezier curve_bezier::increase_degree(){
+    curve_bezier higher_order;
+    higher_order.add_vertex(control_points()[0]);
+    size_t n = control_points().size() - 1;
+    for(size_t i = 1; i < n + 1; ++i){
+        bcg_scalar_t u = bcg_scalar_t(i) / bcg_scalar_t(n + 1);
+        higher_order.add_vertex( u * control_points()[i - 1] + (1 - u) * control_points()[i]);
+    }
+    higher_order.add_vertex(control_points().back());
+    return higher_order;
+}
+
 
 }

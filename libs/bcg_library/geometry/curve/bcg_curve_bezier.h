@@ -19,6 +19,12 @@ struct curve_bezier : curve {
     curve_bezier derivative(int order) const;
 
     VectorS<3> derivative_vector(bcg_scalar_t t, int order) const override;
+
+    VectorS<3> de_casteljau(bcg_scalar_t t);
+
+    std::array<curve_bezier, 2> subdivide(bcg_scalar_t t = 0.5);
+
+    curve_bezier increase_degree();
 };
 
 }

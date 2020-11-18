@@ -10,7 +10,7 @@ namespace bcg{
 
 void gui_mesh(viewer_state *state, halfedge_mesh *mesh){
     if (!mesh) return;
-    if (ImGui::CollapsingHeader("mesh")) {
+    if (ImGui::CollapsingHeader("mesh properties")) {
         gui_property_container_selector(state, &mesh->vertices, state->picker.vertex_id.idx);
         gui_property_container_selector(state, &mesh->halfedges, state->picker.halfedge_id.idx);
         gui_property_container_selector(state, &mesh->edges, state->picker.edge_id.idx);

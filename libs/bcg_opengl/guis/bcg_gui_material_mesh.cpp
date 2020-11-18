@@ -46,8 +46,7 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
                     material->use_uniform_color = true;
                     material->use_face_color = false;
                 } else {
-                    material->use_uniform_color = false;
-                    state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+                    state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(id, color);
                 }
             }
             ImGui::PopID();
@@ -57,7 +56,7 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
                 if (color.property_name.empty()) {
                     material->use_uniform_color = true;
                 } else {
-                    state->dispatcher.trigger<event::mesh_renderer::set_color_attribute>(id, color);
+                    state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(id, color);
                 }
                 material->use_face_color = false;
             }

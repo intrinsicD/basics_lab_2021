@@ -23,7 +23,11 @@ struct set_normal_attribute{
     entt::entity id;
     attribute normal;
 };
-struct set_color_attribute{
+struct set_vertex_color_attribute{
+    entt::entity id;
+    attribute color;
+};
+struct set_face_color_attribute{
     entt::entity id;
     attribute color;
 };

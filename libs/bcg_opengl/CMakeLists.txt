@@ -15,6 +15,14 @@ if (BCG_OPENGL)
             renderers/bcg_material.h
             bcg_viewer_state.h bcg_viewer_state.cpp
             guis/bcg_gui_viewer_state.h guis/bcg_gui_viewer_state.cpp
+            guis/bcg_gui_viewer_colors.h guis/bcg_gui_viewer_colors.cpp
+            guis/bcg_gui_viewer_window.h guis/bcg_gui_viewer_window.cpp
+            guis/bcg_gui_viewer_keyboard.h guis/bcg_gui_viewer_keyboard.cpp
+            guis/bcg_gui_viewer_mouse.h guis/bcg_gui_viewer_mouse.cpp
+            guis/bcg_gui_viewer_time.h guis/bcg_gui_viewer_time.cpp
+            guis/bcg_gui_viewer_gui.h guis/bcg_gui_viewer_gui.cpp
+            guis/bcg_gui_viewer_picker.h guis/bcg_gui_viewer_picker.cpp
+            guis/bcg_gui_viewer_camera.h guis/bcg_gui_viewer_camera.cpp
             guis/bcg_gui_vectorfields.h guis/bcg_gui_vectorfields.cpp
             guis/bcg_gui_transform.h guis/bcg_gui_transform.cpp
             guis/bcg_gui_rendering_options.h guis/bcg_gui_rendering_options.cpp
@@ -25,6 +33,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp
             guis/bcg_gui_mesh.h guis/bcg_gui_mesh.cpp
             guis/bcg_gui_mesh_face_normals.h guis/bcg_gui_mesh_face_normals.cpp
+            guis/bcg_gui_mesh_vertex_normals.h guis/bcg_gui_mesh_vertex_normals.cpp
             guis/bcg_gui_materials.h guis/bcg_gui_materials.cpp
             guis/bcg_gui_material_vectorfield.h guis/bcg_gui_material_vectorfield.cpp
             guis/bcg_gui_material_points.h guis/bcg_gui_material_points.cpp

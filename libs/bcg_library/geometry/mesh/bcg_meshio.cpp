@@ -370,7 +370,7 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
 
             // normal
         else if (strncmp(s, "vn ", 3) == 0) {
-            if (sscanf(s, "v %f %f %f", &x, &y, &z) == 3) {
+            if (sscanf(s, "vn %f %f %f", &x, &y, &z) == 3) {
                 // problematic as it can be either a vertex property when interpolated
                 // or a halfedge property for hard edges
             }
@@ -378,7 +378,8 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
 
             // texture coordinate
         else if (strncmp(s, "vt ", 3) == 0) {
-            if (sscanf(s, "v %f %f", &x, &y) == 2) {
+            auto result = sscanf(s, "vt %f %f", &x, &y);
+            if (result == 2) {
                 all_tex_coords.emplace_back(x, y);
             }
         }

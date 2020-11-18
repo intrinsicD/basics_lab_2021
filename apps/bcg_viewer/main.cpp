@@ -5,6 +5,7 @@
 #include "bcg_opengl/guis/bcg_gui_viewer_state.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_vertex_normals.h"
 
 int main() {
     using namespace bcg;
@@ -20,6 +21,9 @@ int main() {
         if (ImGui::BeginMenu("Mesh")) {
             if(ImGui::MenuItem("Dihedeal Angle")){
                 state->gui.left = gui_mesh_dihedral_angle;
+            }
+            if(ImGui::MenuItem("Vertex Normals")){
+                state->gui.left = gui_mesh_vertex_normals;
             }
             if(ImGui::MenuItem("Face Normals")){
                 state->gui.left = gui_mesh_face_normals;

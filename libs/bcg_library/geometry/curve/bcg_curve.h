@@ -12,13 +12,6 @@
 namespace bcg {
 
 struct curve : public halfedge_graph{
-    static enum Type{
-        CubicHermite,
-        CubicBezier
-    };
-
-    Type type;
-
     curve() = default;
 
     VectorS<3> operator()(bcg_scalar_t t) const;
