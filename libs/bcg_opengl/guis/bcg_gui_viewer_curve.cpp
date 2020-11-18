@@ -2,11 +2,10 @@
 // Created by alex on 18.11.20.
 //
 
-#include <vector>
 #include <string>
 #include "bcg_gui_viewer_curve.h"
 #include "bcg_gui_graph.h"
-#include "bcg_gui_material_curve.h"
+#include "bcg_gui_rendering_options.h"
 #include "bcg_viewer_state.h"
 #include "geometry/curve/bcg_curve_bezier.h"
 
@@ -40,8 +39,7 @@ void gui_viewer_curve(viewer_state *state){
         draw_label(&state->window, "is 3d", (curve.is_3d ? "1" : "0"));
         draw_label(&state->window, "points_clicked", std::to_string(curve.points_clicked));
         gui_graph(state, &curve);
-        auto *material = state->scene.try_get<material_curve>(id);
-        gui_material_curve(state, material, id);
+        gui_rendering_options(state, id);
     }
 
 

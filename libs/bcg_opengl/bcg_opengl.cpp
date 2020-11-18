@@ -1719,7 +1719,7 @@ ogl_state::ogl_state() {
     stencil_sfail = GL_KEEP;
     stencil_dpfail = GL_KEEP;
     stencil_dppass = GL_KEEP;
-    point_size_value = 1;
+    point_size_value = 5;
     polygon_mode_face = GL_FRONT_AND_BACK;
     polygon_mode = GL_FILL;
 }

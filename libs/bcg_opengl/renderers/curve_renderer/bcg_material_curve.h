@@ -18,7 +18,7 @@ struct material_curve{
 
     ogl_vertex_array vao;
 
-    bool show_bezier = true, show_hermite = false;
+    bool show_bezier = false, show_hermite = true;
 
     VectorS<3> uniform_color = color::random();
     bcg_scalar_t uniform_alpha = 1;

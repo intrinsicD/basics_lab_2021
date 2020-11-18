@@ -46,7 +46,7 @@ void mesh_renderer::on_shutdown(const event::internal::shutdown &event){
 
 void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->get_faces(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
     if(!state->scene.has<material_mesh>(event.id)){

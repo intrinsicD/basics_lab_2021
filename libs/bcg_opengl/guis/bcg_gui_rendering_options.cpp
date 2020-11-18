@@ -14,11 +14,11 @@
 namespace bcg{
 
 void gui_rendering_options(viewer_state *state, entt::entity id){
-    static bool show_points = state->scene.has<point_cloud>(id);
-    static bool show_edges = state->scene.has<halfedge_graph>(id);
-    static bool show_mesh = state->scene.has<halfedge_mesh>(id);
-    static bool show_vectors = false;
-    static bool show_curves = false;
+    bool show_points = state->scene.has<event::points_renderer::enqueue>(id);
+    bool show_edges = state->scene.has<event::graph_renderer::enqueue>(id);
+    bool show_mesh = state->scene.has<event::mesh_renderer::enqueue>(id);
+    bool show_vectors = state->scene.has<event::vectorfield_renderer::enqueue>(id);
+    bool show_curves = state->scene.has<event::curve_renderer::enqueue>(id);
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {

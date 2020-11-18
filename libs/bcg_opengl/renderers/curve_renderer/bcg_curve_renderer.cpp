@@ -125,15 +125,6 @@ void curve_renderer::on_render(const event::internal::render &) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
-/*        auto *curve = state->scene.try_get<curve_bezier>(id);
-        if(curve){
-            if(!curve->is_3d){
-                Matrix<float, 4, 4> id = Matrix<float, 4, 4>::Identity();
-                program.set_uniform_matrix_4f("proj", id.data());
-                program.set_uniform_matrix_4f("view", id.data());
-            }
-        }*/
-
         Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
         float alpha = material.uniform_alpha;

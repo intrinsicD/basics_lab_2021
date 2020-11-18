@@ -44,7 +44,7 @@ void graph_renderer::on_shutdown(const event::internal::shutdown &event){
 
 void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if(!state->get_edges(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
     if(!state->scene.has<material_graph>(event.id)){
@@ -64,7 +64,7 @@ void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_f
     auto &material = state->scene.get_or_emplace<material_graph>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
-        material.vao.name = "mesh";
+        material.vao.name = "graph";
         material.vao.create();
     }
     material.vao.bind();
