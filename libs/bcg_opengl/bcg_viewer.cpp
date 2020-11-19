@@ -18,8 +18,8 @@
 #include <GLFW/glfw3.h>
 
 #include "bcg_imgui.h"
-#include "imgui/examples/imgui_impl_glfw.h"
-#include "imgui/examples/imgui_impl_opengl3.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 #ifdef _WIN32
 #undef near
