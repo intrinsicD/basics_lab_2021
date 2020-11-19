@@ -88,8 +88,6 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
     property_container *halfedges = state->get_halfedges(event.id);
 
     if (edges && halfedges) {
-        auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
-
         const auto &attributes = event.attributes;
         for (const auto &attribute : attributes) {
 
@@ -145,8 +143,6 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
     property_container *faces = state->get_faces(event.id);
 
     if (faces) {
-        auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
-
         const auto &attributes = event.attributes;
         for (const auto &attribute : attributes) {
             if (faces->get<halfedge_mesh::face_connectivity, 1>("f_connectivity").is_dirty()) {

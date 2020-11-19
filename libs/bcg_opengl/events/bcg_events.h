@@ -14,5 +14,6 @@
 #include "bcg_events_mesh.h"
 #include "bcg_events_graph.h"
 #include "bcg_events_curve.h"
+#include "bcg_events_hierarchy.h"
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_H

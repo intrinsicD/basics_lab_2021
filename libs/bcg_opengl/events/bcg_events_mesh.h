@@ -81,6 +81,14 @@ struct sqrt3{
     entt::entity id;
 };
 }
+namespace connected_components{
+struct detect{
+    entt::entity id;
+};
+struct split{
+    entt::entity id;
+};
+}
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MESH_H

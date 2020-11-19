@@ -307,7 +307,7 @@ struct property {
 
     void reset(T value) {
         sptr->vector() = std::vector<T>(sptr->size(), value);
-        sptr->dirty = true;
+        sptr->set_dirty();
     }
 
     inline void swap(size_t i0, size_t i1) {

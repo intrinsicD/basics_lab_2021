@@ -36,6 +36,10 @@ struct mesh_system : public system {
 
     void on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event);
 
+    void on_connected_components_detect(const event::mesh::connected_components::detect &event);
+
+    void on_connected_components_split(const event::mesh::connected_components::split &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event);

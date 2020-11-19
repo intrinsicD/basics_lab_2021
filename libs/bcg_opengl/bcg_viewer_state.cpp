@@ -21,6 +21,7 @@
 #include "bcg_opengl/systems/bcg_aligned_box_system.h"
 #include "bcg_opengl/systems/bcg_loading_system.h"
 #include "bcg_opengl/systems/bcg_bezier_curve_system.h"
+#include "bcg_opengl/systems/bcg_hierarchy_system.h"
 #include "bcg_opengl/renderers/bcg_render_system.h"
 
 #include "geometry/curve/bcg_curve_bezier.h"
@@ -114,6 +115,7 @@ viewer_state::viewer_state() : shaders(this){
     systems["transform_system"] = std::make_unique<transform_system>(this);
     systems["aligned_box_system"] = std::make_unique<aligned_box_system>(this);
     systems["bezier_curve_system"] = std::make_unique<bezier_curve_system>(this);
+    systems["hierarchy_system"] = std::make_unique<hierarchy_system>(this);
 }
 
 VectorS<3> viewer_state::ndc_to_view_space(const VectorS<2> &ndc){

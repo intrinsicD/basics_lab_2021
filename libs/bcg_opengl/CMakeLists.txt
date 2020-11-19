@@ -45,6 +45,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_graph.h guis/bcg_gui_graph.cpp
             guis/bcg_gui_entity_info.h guis/bcg_gui_entity_info.cpp
             guis/bcg_gui_aligned_box3.h guis/bcg_gui_aligned_box3.cpp
+            guis/bcg_gui_entity_hierarchy.h guis/bcg_gui_entity_hierarchy.cpp
             guis/bcg_gui_mesh_dihedral_angle.h guis/bcg_gui_mesh_dihedral_angle.cpp
             guis/bcg_gui_mesh_vertex_convex_concave.h guis/bcg_gui_mesh_vertex_convex_concave.cpp
             guis/bcg_gui_mesh_features.h guis/bcg_gui_mesh_features.cpp
@@ -63,6 +64,7 @@ if (BCG_OPENGL)
             systems/bcg_aligned_box_system.h systems/bcg_aligned_box_system.cpp
             systems/bcg_loading_system.h systems/bcg_loading_system.cpp
             systems/bcg_bezier_curve_system.h systems/bcg_bezier_curve_system.cpp
+            systems/bcg_hierarchy_system.h systems/bcg_hierarchy_system.cpp
             renderers/bcg_renderer.h renderers/bcg_renderer.cpp
             renderers/bcg_render_system.h renderers/bcg_render_system.cpp
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_events_points_renderer.h
@@ -89,13 +91,17 @@ if (BCG_OPENGL)
 
     if (UNIX AND NOT APPLE)
         target_link_libraries(bcg_opengl dl)
-        target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+        #target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+        target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
+        target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")
     endif (UNIX AND NOT APPLE)
 endif (BCG_OPENGL)
 
 # warning flags
 if (APPLE)
-    target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    #target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
+    target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")
 endif (APPLE)
 if (MSVC)
     target_compile_options(bcg_opengl PUBLIC /D_CRT_SECURE_NO_WARNINGS /wd4018 /wd4244 /wd4305 /wd4800 /wd4267)

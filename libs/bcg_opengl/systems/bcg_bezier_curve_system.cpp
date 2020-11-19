@@ -71,6 +71,9 @@ void bezier_curve_system::on_setup(const event::curve::setup &event) {
             curve.is_3d = true;
             break;
         }
+        case curve_mode::disabled:{
+            break;
+        }
     }
     entity_info info;
     info.entity_name = "bezier_curve";

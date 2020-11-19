@@ -109,7 +109,7 @@ bool file_stream::check_valid() const {
 
 time_t file_stream::last_write_time() const{
     auto tp = std::filesystem::last_write_time(make_path(filename));
-    auto sctp = time_point_cast<std::chrono::system_clock::duration>(tp - std::filesystem::file_time_type::clock::now()
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - std::filesystem::file_time_type::clock::now()
                                                         + std::chrono::system_clock::now());
     return std::chrono::system_clock::to_time_t(sctp);
 }
