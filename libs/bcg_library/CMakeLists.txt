@@ -38,6 +38,8 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_edge_dihedral_angle.h geometry/mesh/bcg_mesh_edge_dihedral_angle.cpp
         geometry/mesh/bcg_mesh_boundary.h geometry/mesh/bcg_mesh_boundary.cpp
         geometry/mesh/bcg_mesh_vertex_convex_concave.h geometry/mesh/bcg_mesh_vertex_convex_concave.cpp
+        geometry/mesh/bcg_mesh_features.h geometry/mesh/bcg_mesh_features.cpp
+        geometry/mesh/bcg_mesh_subdivision.h geometry/mesh/bcg_mesh_subdivision.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h

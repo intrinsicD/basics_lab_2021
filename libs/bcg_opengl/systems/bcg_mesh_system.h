@@ -28,6 +28,14 @@ struct mesh_system : public system {
 
     void on_vertex_convex_concave(const event::mesh::vertex_convex_concave &event);
 
+    void on_features(const event::mesh::features &event);
+
+    void on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event);
+
+    void on_subdivision_loop(const event::mesh::subdivision::loop &event);
+
+    void on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event);

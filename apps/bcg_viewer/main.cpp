@@ -9,6 +9,8 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_normals.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_boundary.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_convex_concave.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_subdivision.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_features.h"
 
 int main() {
     using namespace bcg;
@@ -36,6 +38,12 @@ int main() {
             }
             if(ImGui::MenuItem("Convex Concave")){
                 state->gui.left = gui_mesh_vertex_convex_concave;
+            }
+            if(ImGui::MenuItem("Features")){
+                state->gui.left = gui_mesh_features;
+            }
+            if(ImGui::MenuItem("Subdivision")){
+                state->gui.left = gui_mesh_subdivision;
             }
             ImGui::EndMenu();
         }

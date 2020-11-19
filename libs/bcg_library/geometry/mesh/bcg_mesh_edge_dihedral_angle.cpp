@@ -25,7 +25,12 @@ void edge_dihedral_angles(halfedge_mesh &mesh, size_t parallel_grain_size) {
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    dihedral_angles[i] = edge_dihedral_angle(mesh, i);
+                    auto e = edge_handle(i);
+                    if(mesh.is_boundary(e)) {
+                        dihedral_angles[e] = 0;
+                    }else{
+                        dihedral_angles[e] = edge_dihedral_angle(mesh, e);
+                    }
                 }
             }
     );

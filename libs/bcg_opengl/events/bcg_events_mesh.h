@@ -63,6 +63,24 @@ struct boundary{
 struct vertex_convex_concave{
     entt::entity id;
 };
+struct features{
+    entt::entity id;
+    bool boundary = true;
+    bool angle = true;
+    bcg_scalar_t threshold_degrees = 45;
+};
+
+namespace subdivision{
+struct catmull_clark{
+    entt::entity id;
+};
+struct loop{
+    entt::entity id;
+};
+struct sqrt3{
+    entt::entity id;
+};
+}
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MESH_H
