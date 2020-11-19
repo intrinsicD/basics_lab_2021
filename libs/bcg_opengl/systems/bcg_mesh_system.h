@@ -26,6 +26,8 @@ struct mesh_system : public system {
 
     void on_boundary(const event::mesh::boundary &event);
 
+    void on_vertex_convex_concave(const event::mesh::vertex_convex_concave &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event);

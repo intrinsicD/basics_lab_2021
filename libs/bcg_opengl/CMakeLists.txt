@@ -46,6 +46,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_entity_info.h guis/bcg_gui_entity_info.cpp
             guis/bcg_gui_aligned_box3.h guis/bcg_gui_aligned_box3.cpp
             guis/bcg_gui_mesh_dihedral_angle.h guis/bcg_gui_mesh_dihedral_angle.cpp
+            guis/bcg_gui_mesh_vertex_convex_concave.h guis/bcg_gui_mesh_vertex_convex_concave.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

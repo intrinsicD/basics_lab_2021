@@ -60,6 +60,9 @@ struct area_angle{
 struct boundary{
     entt::entity id;
 };
+struct vertex_convex_concave{
+    entt::entity id;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MESH_H
