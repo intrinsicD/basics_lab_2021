@@ -22,7 +22,7 @@ graph_renderer::graph_renderer(viewer_state *state) : renderer("graph_renderer",
     state->dispatcher.sink<event::graph_renderer::enqueue>().connect<&graph_renderer::on_enqueue>(this);
     state->dispatcher.sink<event::graph_renderer::setup_for_rendering>().connect<&graph_renderer::on_setup_for_rendering>(this);
     state->dispatcher.sink<event::graph_renderer::set_position_attribute>().connect<&graph_renderer::on_set_position_attribute>(this);
-    state->dispatcher.sink<event::graph_renderer::set_color_attribute>().connect<&graph_renderer::on_set_color_attribute>(this);
+    state->dispatcher.sink<event::graph_renderer::set_color_texture>().connect<&graph_renderer::on_set_color_texture>(this);
 }
 
 void graph_renderer::on_startup(const event::internal::startup &) {
@@ -154,7 +154,7 @@ void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_
     state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
 }
 
-void graph_renderer::on_set_color_attribute(const event::graph_renderer::set_color_attribute &event){
+void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color_texture &event){
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_graph>(event.id);
 

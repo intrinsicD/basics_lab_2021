@@ -12,6 +12,11 @@
 #include "geometry/mesh/bcg_mesh_face_normals.h"
 #include "geometry/mesh/bcg_mesh_face_centers.h"
 #include "geometry/mesh/bcg_mesh_edge_dihedral_angle.h"
+#include "geometry/mesh/bcg_mesh_boundary.h"
+#include "geometry/mesh/bcg_mesh_vertex_convex_concave.h"
+#include "geometry/mesh/bcg_mesh_features.h"
+#include "geometry/mesh/bcg_mesh_subdivision.h"
+#include "geometry/mesh/bcg_mesh_connected_components.h"
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -22,6 +27,15 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::setup>().connect<&mesh_system::on_setup_mesh>(this);
     state->dispatcher.sink<event::mesh::make_triangle>().connect<&mesh_system::on_make_triangle>(this);
     state->dispatcher.sink<event::mesh::make_quad>().connect<&mesh_system::on_make_quad>(this);
+    state->dispatcher.sink<event::mesh::make_box>().connect<&mesh_system::on_make_box>(this);
+    state->dispatcher.sink<event::mesh::boundary>().connect<&mesh_system::on_boundary>(this);
+    state->dispatcher.sink<event::mesh::vertex_convex_concave>().connect<&mesh_system::on_vertex_convex_concave>(this);
+    state->dispatcher.sink<event::mesh::features>().connect<&mesh_system::on_features>(this);
+    state->dispatcher.sink<event::mesh::subdivision::catmull_clark>().connect<&mesh_system::on_subdivision_catmull_clark>(this);
+    state->dispatcher.sink<event::mesh::subdivision::loop>().connect<&mesh_system::on_subdivision_loop>(this);
+    state->dispatcher.sink<event::mesh::subdivision::sqrt3>().connect<&mesh_system::on_subdivision_sqrt3>(this);
+    state->dispatcher.sink<event::mesh::connected_components::detect>().connect<&mesh_system::on_connected_components_detect>(this);
+    state->dispatcher.sink<event::mesh::connected_components::split>().connect<&mesh_system::on_connected_components_split>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -73,6 +87,91 @@ void mesh_system::on_make_quad(const event::mesh::make_quad &) {
     auto id = state->scene.create();
     state->scene.emplace<halfedge_mesh>(id, mesh);
     state->dispatcher.trigger<event::mesh::setup>(id);
+}
+
+void mesh_system::on_make_box(const event::mesh::make_box &event){
+    mesh_factory factory;
+
+    auto mesh = factory.make_box();
+    auto id = state->scene.create();
+    state->scene.emplace<halfedge_mesh>(id, mesh);
+    state->dispatcher.trigger<event::mesh::setup>(id);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void mesh_system::on_boundary(const event::mesh::boundary &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_boundary(mesh, state->config.parallel_grain_size);
+}
+
+void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_concave &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    vertex_convex_concave(mesh, state->config.parallel_grain_size);
+}
+
+void mesh_system::on_features(const event::mesh::features &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_features(mesh, event.boundary, event.angle, event.threshold_degrees, state->config.parallel_grain_size);
+}
+
+void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_subdivision_catmull_clark(mesh, state->config.parallel_grain_size);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+}
+
+void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_subdivision_loop(mesh, state->config.parallel_grain_size);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+}
+
+void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_subdivision_sqrt3(mesh, state->config.parallel_grain_size);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+}
+
+void mesh_system::on_connected_components_detect(const event::mesh::connected_components::detect &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_connected_components_detect(mesh);
+}
+
+void mesh_system::on_connected_components_split(const event::mesh::connected_components::split &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto parts = mesh_connected_components_split(mesh);
+    for(const auto part : parts){
+        auto id = state->scene.create();
+        state->scene.emplace<halfedge_mesh>(id, part);
+        state->dispatcher.trigger<event::mesh::setup>(id);
+        state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
+        state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------

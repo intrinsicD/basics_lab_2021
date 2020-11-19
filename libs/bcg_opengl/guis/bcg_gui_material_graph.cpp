@@ -34,7 +34,7 @@ void gui_material_graph(viewer_state *state, material_graph *material, entt::ent
             if (color.property_name.empty()) {
                 material->use_uniform_color = true;
             } else {
-                state->dispatcher.trigger<event::graph_renderer::set_color_attribute>(id, color);
+                state->dispatcher.trigger<event::graph_renderer::set_color_texture>(id, color);
             }
         }
 

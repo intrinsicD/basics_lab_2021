@@ -21,6 +21,7 @@
 #include "bcg_gui_graph.h"
 #include "bcg_gui_point_cloud.h"
 #include "bcg_gui_ogl_shape.h"
+#include "bcg_gui_entity_hierarchy.h"
 #include "geometry/curve/bcg_curve_bezier.h"
 
 namespace bcg {
@@ -46,6 +47,7 @@ void gui_viewer_state(viewer_state *state) {
                 auto *pc = state->scene.try_get<point_cloud>(id);
                 if (pc) gui_point_cloud(state, pc);
                 gui_ogl_shape(state, state->scene.try_get<ogl_shape>(id));
+                gui_entity_hierarchy(state, state->scene.try_get<entity_hierarchy>(id));
                 ImGui::TreePop();
             }
         }

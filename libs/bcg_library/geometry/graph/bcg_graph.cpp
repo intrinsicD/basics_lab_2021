@@ -405,7 +405,6 @@ halfedge_graph::vertex_around_vertex_circulator::operator!=(const vertex_around_
 
 halfedge_graph::vertex_around_vertex_circulator &halfedge_graph::vertex_around_vertex_circulator::operator++() {
     assert(ds);
-    //halfedge = ds->rotate_ccw(halfedge);
     auto next = ds->rotate_ccw(halfedge);
     halfedge = ds->halfedges.is_valid(next) ? next : halfedge;
     active = true;

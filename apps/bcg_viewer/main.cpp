@@ -7,6 +7,10 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_normals.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_boundary.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_vertex_convex_concave.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_subdivision.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_features.h"
 
 int main() {
     using namespace bcg;
@@ -29,13 +33,18 @@ int main() {
             if(ImGui::MenuItem("Face Normals")){
                 state->gui.left = gui_mesh_face_normals;
             }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Examples")) {
-            if(ImGui::MenuItem("Mesh")){
-                /*state->gui.left = gui_mesh_factory;*/
+            if(ImGui::MenuItem("Boundary")){
+                state->gui.left = gui_mesh_boundary;
             }
-            ImGui::MenuItem("Console", NULL, &self->show_app_console);
+            if(ImGui::MenuItem("Convex Concave")){
+                state->gui.left = gui_mesh_vertex_convex_concave;
+            }
+            if(ImGui::MenuItem("Features")){
+                state->gui.left = gui_mesh_features;
+            }
+            if(ImGui::MenuItem("Subdivision")){
+                state->gui.left = gui_mesh_subdivision;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Exercises")) {

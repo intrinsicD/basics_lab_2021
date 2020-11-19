@@ -160,6 +160,9 @@ void mesh_renderer::on_set_position_attribute(const event::mesh_renderer::set_po
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true},
+                            attribute{"boundary", "boundary", "boundary", 0, true}};
+    state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
     state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 

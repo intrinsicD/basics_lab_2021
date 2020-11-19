@@ -36,6 +36,11 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_vertex_normals.h geometry/mesh/bcg_mesh_vertex_normals.cpp
         geometry/mesh/bcg_mesh_factory.h geometry/mesh/bcg_mesh_factory.cpp
         geometry/mesh/bcg_mesh_edge_dihedral_angle.h geometry/mesh/bcg_mesh_edge_dihedral_angle.cpp
+        geometry/mesh/bcg_mesh_boundary.h geometry/mesh/bcg_mesh_boundary.cpp
+        geometry/mesh/bcg_mesh_vertex_convex_concave.h geometry/mesh/bcg_mesh_vertex_convex_concave.cpp
+        geometry/mesh/bcg_mesh_features.h geometry/mesh/bcg_mesh_features.cpp
+        geometry/mesh/bcg_mesh_subdivision.h geometry/mesh/bcg_mesh_subdivision.cpp
+        geometry/mesh/bcg_mesh_connected_components.h geometry/mesh/bcg_mesh_connected_components.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
@@ -56,13 +61,18 @@ target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)
-    target_compile_options(bcg_graphics PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    #target_compile_options(bcg_graphics PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    #target_compile_options(bcg_graphics PUBLIC -Wall -Wpedantic -Wextra -Wno-missing-field-initializers -g -ggdb -fprofile-instr-generate -fcoverage-mapping -fstandalone-debug -O0)
+    target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
+    target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")
     target_link_libraries(bcg_graphics Threads::Threads)
 endif (UNIX AND NOT APPLE)
 
 # warning flags
 if (APPLE)
-    target_compile_options(bcg_graphics PUBLIC -Wall -Wno-deprecated -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    #target_compile_options(bcg_graphics PUBLIC -Wall -Wno-deprecated -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
+    target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
+    target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")
 endif (APPLE)
 if (MSVC)
     target_compile_options(bcg_graphics PUBLIC /D_CRT_SECURE_NO_WARNINGS /wd4018 /wd4244 /wd4305 /wd4800 /wd4267)

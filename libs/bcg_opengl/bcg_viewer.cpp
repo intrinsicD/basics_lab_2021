@@ -18,8 +18,8 @@
 #include <GLFW/glfw3.h>
 
 #include "bcg_imgui.h"
-#include "imgui/examples/imgui_impl_glfw.h"
-#include "imgui/examples/imgui_impl_opengl3.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 #ifdef _WIN32
 #undef near
@@ -73,6 +73,10 @@ void init_widgets(viewer_state *state, int width) {
     state->window.widgets_width = width;
 }
 
+void set_close(viewer_state *state, bool close) {
+    glfwSetWindowShouldClose(state->window.win, close ? GLFW_TRUE : GLFW_FALSE);
+}
+
 void
 init_window(viewer_state *state, const VectorI<2> &size, const std::string &title, bool widgets, int widgets_width) {
     if (!glfwInit()) {
@@ -114,7 +118,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                             }
                         });
     glfwSetKeyCallback(state->window.win,
-                       [](GLFWwindow *glfw, int key, int , int action, int ) {
+                       [](GLFWwindow *glfw, int key, int, int action, int) {
                            auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                            if (state->callbacks.key_cb) {
                                state->callbacks.key_cb(state, key, (bool) action);
@@ -130,7 +134,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                             }
                         });
     glfwSetMouseButtonCallback(state->window.win,
-                               [](GLFWwindow *glfw, int button, int action, int ) {
+                               [](GLFWwindow *glfw, int button, int action, int) {
                                    auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                                    if (state->callbacks.click_cb) {
                                        state->callbacks.click_cb(state, button == GLFW_MOUSE_BUTTON_LEFT,
@@ -145,7 +149,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                  state->dispatcher.trigger<event::mouse::motion>(x, y);
                              });
     glfwSetScrollCallback(state->window.win,
-                          [](GLFWwindow *glfw, double , double yoffset) {
+                          [](GLFWwindow *glfw, double, double yoffset) {
                               auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
                               if (state->callbacks.scroll_cb) {
                                   state->callbacks.scroll_cb(state, (float) yoffset);
@@ -163,17 +167,23 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                   state->window.width = width;
                                   state->window.height = height;
                                   int vw, vh;
-                                  glfwGetFramebufferSize(glfw, &vw,&vh);
+                                  glfwGetFramebufferSize(glfw, &vw, &vh);
                                   state->window.framebuffer_viewport[0] = 0;
                                   state->window.framebuffer_viewport[1] = 0;
                                   state->window.framebuffer_viewport[2] = vw;
                                   state->window.framebuffer_viewport[3] = vh;
                                   state->dispatcher.trigger<event::internal::resize>(width, height);
                               });
+
+    glfwSetWindowCloseCallback(state->window.win,
+                               [](GLFWwindow *glfw) {
+                                   auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
+                                   set_close(state, true);
+                               });
     glfwSwapInterval(1);
     // init gl extensions
     //if (!gladLoadGL()) {
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         throw std::runtime_error{"cannot initialize OpenGL extensions"};
     }
 
@@ -199,9 +209,6 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     std::cout << "Renderer " << ogl_renderer_string() << "\n";
 }
 
-void set_close(viewer_state *state, bool close) {
-    glfwSetWindowShouldClose(state->window.win, close ? GLFW_TRUE : GLFW_FALSE);
-}
 
 void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_width) {
     init_window(&state, size, title, (bool) state.callbacks.widgets_cb, widgets_width);
@@ -297,9 +304,12 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         // event hadling
         glfwPollEvents();
         // update input
-        set_close(&state, (glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
-                           glfwGetKey(win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) &&
-                          glfwGetKey(win, GLFW_KEY_Q) == GLFW_PRESS);
+        if ((glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+             glfwGetKey(win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) &&
+            glfwGetKey(win, GLFW_KEY_Q) == GLFW_PRESS) {
+            set_close(&state, true);
+        }
+
 
         glfwGetWindowSize(win, &state.window.width, &state.window.height);
         int vw, vh;
