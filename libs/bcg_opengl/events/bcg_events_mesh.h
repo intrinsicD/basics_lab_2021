@@ -18,6 +18,10 @@ struct make_triangle{
 struct make_quad{
 
 };
+struct make_box{
+
+};
+
 namespace edge{
 struct dihedral_angle{
     entt::entity id;
@@ -31,7 +35,6 @@ struct normals{
     entt::entity id;
 };
 }
-
 
 namespace vertex_normals{
 enum Type{
@@ -54,6 +57,9 @@ struct area_angle{
     entt::entity id;
 };
 }
+struct boundary{
+    entt::entity id;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MESH_H

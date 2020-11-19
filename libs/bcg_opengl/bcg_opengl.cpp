@@ -1511,6 +1511,7 @@ void ogl_vertex_array::release() const {
 }
 
 void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buffer &buffer) const {
+    if(index == -1) return;
     glVertexAttribPointer(index, buffer.dims, buffer.type, (bool) buffer.normalized, buffer.dims * sizeof(float),
                           (void *) 0);
     assert_ogl_error();
@@ -1520,6 +1521,7 @@ void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buf
 }
 
 void ogl_vertex_array::disable_attribute(unsigned int index) const {
+    if(index == -1) return;
     glDisableVertexAttribArray(index);
     assert_ogl_error();
 }

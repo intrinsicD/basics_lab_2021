@@ -75,6 +75,7 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
         colormap::jet color_map;
 
         for (const auto &attribute : attributes) {
+            if(attribute.index < 0) continue;
             state->dispatcher.trigger<event::gpu::update_property>(event.id, vertices, attribute, color_map);
         }
     }

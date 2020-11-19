@@ -12,4 +12,5 @@ struct viewer_state;
 void gui_mesh_dihedral_angle(viewer_state *state);
 
 }
+
 #endif //BCG_GRAPHICS_BCG_GUI_MESH_DIHEDRAL_ANGLE_H

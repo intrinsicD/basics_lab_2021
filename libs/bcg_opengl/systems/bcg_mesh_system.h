@@ -20,6 +20,12 @@ struct mesh_system : public system {
 
     void on_make_quad(const event::mesh::make_quad &event);
 
+    void on_make_box(const event::mesh::make_box &event);
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    void on_boundary(const event::mesh::boundary &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event);

@@ -101,11 +101,13 @@ halfedge_mesh mesh_factory::make_box(const aligned_box3 &aabb) {
     auto v7 = mesh.add_vertex(aabb.max);
 
     mesh.add_quad(v0, v1, v3, v2);
-    mesh.add_quad(v0, v1, v5, v4);
-    mesh.add_quad(v0, v4, v6, v2);
     mesh.add_quad(v1, v5, v7, v3);
     mesh.add_quad(v2, v3, v7, v6);
-    mesh.add_quad(v4, v5, v7, v6);
+    mesh.add_quad(v4, v5, v1, v0);
+    mesh.add_quad(v4, v0, v2, v6);
+    mesh.add_quad(v6, v7, v5, v4);
+
+    mesh.triangulate();
 
     return mesh;
 }

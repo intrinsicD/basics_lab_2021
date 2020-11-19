@@ -883,7 +883,6 @@ halfedge_mesh::vertex_around_face_circulator halfedge_mesh::get_vertices(face_ha
 
 halfedge_mesh::halfedge_around_face_circulator::halfedge_around_face_circulator(const halfedge_mesh *ds,
                                                                                 face_handle f) : ds(ds), active(false) {
-
     if (ds) {
         halfedge = ds->get_halfedge(f);
     }

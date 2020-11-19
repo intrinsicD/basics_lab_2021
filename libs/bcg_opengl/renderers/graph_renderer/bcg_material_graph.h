@@ -14,7 +14,7 @@ namespace bcg{
 struct material_graph{
     std::vector<attribute> attributes = {
             {"position", "v_position", "v_position", 0, true},
-            {"edge_color", "", "", 0, false}
+            {"edge_color", "", "", -1, true}
     };
 
     ogl_vertex_array vao;

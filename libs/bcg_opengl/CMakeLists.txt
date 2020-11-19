@@ -35,6 +35,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_mesh.h guis/bcg_gui_mesh.cpp
             guis/bcg_gui_mesh_face_normals.h guis/bcg_gui_mesh_face_normals.cpp
             guis/bcg_gui_mesh_vertex_normals.h guis/bcg_gui_mesh_vertex_normals.cpp
+            guis/bcg_gui_mesh_boundary.h guis/bcg_gui_mesh_boundary.cpp
             guis/bcg_gui_materials.h guis/bcg_gui_materials.cpp
             guis/bcg_gui_material_vectorfield.h guis/bcg_gui_material_vectorfield.cpp
             guis/bcg_gui_material_points.h guis/bcg_gui_material_points.cpp

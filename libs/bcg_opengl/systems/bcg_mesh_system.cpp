@@ -12,6 +12,7 @@
 #include "geometry/mesh/bcg_mesh_face_normals.h"
 #include "geometry/mesh/bcg_mesh_face_centers.h"
 #include "geometry/mesh/bcg_mesh_edge_dihedral_angle.h"
+#include "geometry/mesh/bcg_mesh_boundary.h"
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -22,6 +23,8 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::setup>().connect<&mesh_system::on_setup_mesh>(this);
     state->dispatcher.sink<event::mesh::make_triangle>().connect<&mesh_system::on_make_triangle>(this);
     state->dispatcher.sink<event::mesh::make_quad>().connect<&mesh_system::on_make_quad>(this);
+    state->dispatcher.sink<event::mesh::make_box>().connect<&mesh_system::on_make_box>(this);
+    state->dispatcher.sink<event::mesh::boundary>().connect<&mesh_system::on_boundary>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -73,6 +76,25 @@ void mesh_system::on_make_quad(const event::mesh::make_quad &) {
     auto id = state->scene.create();
     state->scene.emplace<halfedge_mesh>(id, mesh);
     state->dispatcher.trigger<event::mesh::setup>(id);
+}
+
+void mesh_system::on_make_box(const event::mesh::make_box &event){
+    mesh_factory factory;
+
+    auto mesh = factory.make_box();
+    auto id = state->scene.create();
+    state->scene.emplace<halfedge_mesh>(id, mesh);
+    state->dispatcher.trigger<event::mesh::setup>(id);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void mesh_system::on_boundary(const event::mesh::boundary &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_boundary(mesh, state->config.parallel_grain_size);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

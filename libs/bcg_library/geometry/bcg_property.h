@@ -33,6 +33,10 @@ struct base_handle {
         return *this;
     }
 
+    [[nodiscard]] inline operator size_t() const {
+        return idx;
+    }
+
     [[nodiscard]] inline bool is_valid() const {
         return idx != BCG_INVALID_ID;
     }

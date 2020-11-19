@@ -19,7 +19,7 @@ struct set_position_attribute{
     entt::entity id;
     attribute position;
 };
-struct set_color_attribute{
+struct set_color_texture{
     entt::entity id;
     attribute color;
 };

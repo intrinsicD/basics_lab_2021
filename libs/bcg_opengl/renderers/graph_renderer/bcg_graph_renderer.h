@@ -31,7 +31,7 @@ private:
 
     void on_set_position_attribute(const event::graph_renderer::set_position_attribute &event);
 
-    void on_set_color_attribute(const event::graph_renderer::set_color_attribute &event);
+    void on_set_color_texture(const event::graph_renderer::set_color_texture &event);
 };
 
 }
