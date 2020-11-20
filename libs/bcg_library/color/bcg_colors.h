@@ -5,6 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_COLORS_H
 #define BCG_GRAPHICS_BCG_COLORS_H
 
+#include <vector>
 #include "math/bcg_linalg.h"
 
 namespace bcg {

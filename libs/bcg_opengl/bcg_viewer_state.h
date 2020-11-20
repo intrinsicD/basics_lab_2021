@@ -165,7 +165,8 @@ struct viewer_picker {
 };
 
 struct viewer_config {
-    std::string renderers_path = "../../libs/bcg_opengl/renderers/";
+    std::string renderers_path = "../libs/bcg_opengl/renderers/";
+    //std::string renderers_path = "../../libs/bcg_opengl/renderers/";
     size_t parallel_grain_size = 1024;
 };
 

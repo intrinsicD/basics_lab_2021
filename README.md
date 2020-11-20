@@ -7,6 +7,7 @@
   - API gl **Version 4.6** if possible, but at least **Version 4.1**
   - Options mark **Generate a loader**
 - add the **glad.{c, h}** files to *external/glad*
+- add the **KHR** folder to *external/*
 - change in *external/spectral/CMakeLists.txt* all occurrences of
     **CMAKE_SOURCE_DIR** to **CMAKE_CURRENT_SOURCE_DIR**
   	and find_package(**Eigen3 NO_MODULE REQUIRED**) to find_package(**eigen3 REQUIRED**)
