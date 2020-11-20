@@ -16,3 +16,6 @@
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest.git
+[submodule "external/GeometricTools"]
+	path = external/GeometricTools
+	url = https://github.com/davideberly/GeometricTools.git
