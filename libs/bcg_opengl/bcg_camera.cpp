@@ -104,8 +104,8 @@ void camera::update_projection() {
 bool map_to_sphere(const VectorS<2> &point, int width, int height, VectorS<3> &result) {
     if ((point[0] >= 0) && (point[0] <= bcg_scalar_t(width)) && (point[1] >= 0) && (point[1] <= bcg_scalar_t(height))) {
         VectorS<2> ndc({(point[0] / bcg_scalar_t(width) - 0.5), (0.5 - point[1] / bcg_scalar_t(height))});
-        result[0] = std::sin(M_PI * ndc[0] * 0.5);
-        result[1] = std::sin(M_PI * ndc[1] * 0.5);
+        result[0] = std::sin(pi * ndc[0] * 0.5);
+        result[1] = std::sin(pi * ndc[1] * 0.5);
         bcg_scalar_t sinx2siny2 = result[0] * result[0] + result[1] * result[1];
         result[2] = sinx2siny2 < 1.0 ? std::sqrt(1.0 - sinx2siny2) : 0.0;
         return true;

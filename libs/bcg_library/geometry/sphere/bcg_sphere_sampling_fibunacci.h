@@ -23,7 +23,7 @@ sphere_fibunacci_sampling(const sphere3 &sphere, size_t n, FibunacciLattice type
     std::vector<VectorS<3>> points;
     points.reserve(n);
     bcg_scalar_t golden_ratio = (1.0 + std::sqrt(5.0)) / 2;
-    bcg_scalar_t TWOPI = 2 * M_PI;
+    bcg_scalar_t TWOPI = 2 * pi;
 
     switch (type) {
         default:
