@@ -18,7 +18,7 @@ VectorS<3> color::constant(bcg_scalar_t value) {
 }
 
 VectorS<3> color::rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-    return {r / 255.0, g / 255.0, b / 255.0};
+    return VectorS<3>(r / 255.0, g / 255.0, b / 255.0);
 }
 
 VectorS<3> color::packed_int(unsigned int id) {

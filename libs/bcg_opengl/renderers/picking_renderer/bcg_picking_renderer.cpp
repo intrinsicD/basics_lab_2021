@@ -95,6 +95,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     gl_state.set_depth_test(true);
     gl_state.set_depth_mask(true);
     gl_state.set_depth_func(GL_LESS);
+    gl_state.set_program_point_size(true);
 
     auto program = programs["picking_renderer_program"];
     program.bind();
@@ -115,6 +116,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
         Vector<float, 3> picking_color = material.picking_color.cast<float>();
         program.set_uniform_3f("material.picking_color", 1, picking_color.data());
+        program.set_uniform_f("uniform_point_size", 20.0f);
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
@@ -122,6 +124,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         if (shape.edge_buffer) {
             shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_POINTS, 0, shape.num_vertices);
         } else if(shape.triangle_buffer){
             shape.triangle_buffer.bind();
             glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
@@ -177,12 +180,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
                                       state->picker.world_space_point.homogeneous()).head<3>();
 
     if(!state->scene.valid(id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t>>(id)) {
-        auto *vertices = state->get_vertices(id);
-        auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &kd_tree = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(id);
-        kd_tree.build(positions);
-    }
+    state->dispatcher.trigger<event::spatial_index::setup_kdtree>(id);
 
     auto &kd_tree = state->scene.get<kdtree_property<bcg_scalar_t>>(id);
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);

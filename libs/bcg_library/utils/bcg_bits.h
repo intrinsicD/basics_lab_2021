@@ -122,7 +122,7 @@ inline BIT_REP to_bits(double value) {
     return {tmp,
             (tmp & 0x8000000000000000) != 0,
             (unsigned int) ((tmp & 0x7FF0000000000000) >> 52) - 1022 - 53,
-            (tmp & 0x000FFFFFFFFFFFFF) | 0x0010000000000000};
+            (unsigned long) ((tmp & 0x000FFFFFFFFFFFFF) | 0x0010000000000000)};
 }
 
 inline float bin_to_float(std::uint32_t x) {

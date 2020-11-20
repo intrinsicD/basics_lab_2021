@@ -267,7 +267,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
                         }
                         p /= k;
 
-                        auto beta = (0.625 - std::pow(0.375 + 0.25 * std::cos(2.0 * M_PI / k), 2.0));
+                        auto beta = (0.625 - std::pow(0.375 + 0.25 * std::cos(2.0 * pi / k), 2.0));
 
                         v_point[v] = positions[v] * (1.0 - beta) + beta * p;
                     }
@@ -376,7 +376,7 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
                     auto v = vertex_handle(i);
                     if (!mesh.is_boundary(v)) {
                         auto n = mesh.halfedge_graph::get_valence(v);
-                        auto alpha = (4.0 - 2.0 * cos(2.0 * M_PI / n)) / 9.0;
+                        auto alpha = (4.0 - 2.0 * cos(2.0 * pi / n)) / 9.0;
                         VectorS<3> p(VectorS<3>::Zero());
 
                         for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {
