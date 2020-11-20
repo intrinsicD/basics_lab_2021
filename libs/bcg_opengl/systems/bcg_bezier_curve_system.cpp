@@ -162,11 +162,13 @@ void bezier_curve_system::on_mouse_button(const event::mouse::button &event) {
             state->scene.emplace_or_replace<event::picking_renderer::enqueue>(current_curve_id);
             state->scene.emplace_or_replace<event::curve_renderer::enqueue>(current_curve_id);
             state->scene.emplace_or_replace<event::graph_renderer::enqueue>(current_curve_id);
+            state->dispatcher.trigger<event::spatial_index::setup_kdtree>(current_curve_id);
         }
         state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(current_curve_id);
         state->dispatcher.trigger<event::picking_renderer::setup_for_rendering>(current_curve_id);
         state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(current_curve_id);
         state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(current_curve_id);
+        state->dispatcher.trigger<event::spatial_index::update_indices>(current_curve_id);
     }
 }
 
