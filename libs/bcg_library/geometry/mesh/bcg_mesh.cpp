@@ -106,13 +106,13 @@ void halfedge_mesh::garbage_collection() {
     auto fmap = faces.add<face_handle, 1>("f_garbage_collection");
 
     for (size_t i = 0; i < nV; ++i) {
-        vmap[i] = i;
+        vmap[i] = vertex_handle(i);
     }
     for (size_t i = 0; i < nH; ++i) {
-        hmap[i] = i;
+        hmap[i] = halfedge_handle(i);
     }
     for (size_t i = 0; i < nF; ++i) {
-        fmap[i] = i;
+        fmap[i] = face_handle(i);
     }
 
     if (nV > 0) {
