@@ -4,6 +4,9 @@
 [submodule "external/eigen"]
 	path = external/eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "external/entt"]
+	path = external/entt
+	url = https://github.com/skypjack/entt.git
 [submodule "external/glfw"]
 	path = external/glfw
 	url = https://github.com/glfw/glfw.git
@@ -13,21 +16,18 @@
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest.git
-[submodule "external/googletest"]
-	path = external/googletest
-	url = https://github.com/google/googletest.git
 [submodule "external/GeometricTools"]
 	path = external/GeometricTools
 	url = https://github.com/davideberly/GeometricTools.git
 [submodule "external/imgui"]
 	path = external/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "external/json"]
-	path = external/json
-	url = https://github.com/nlohmann/json.git
 [submodule "external/nanoflann"]
 	path = external/nanoflann
 	url = https://github.com/jlblancoc/nanoflann.git
+[submodule "external/rply"]
+	path = external/rply
+	url = https://github.com/diegonehab/rply.git
 [submodule "external/spectra"]
 	path = external/spectra
 	url = https://github.com/yixuan/spectra.git
@@ -37,12 +37,3 @@
 [submodule "external/tbb"]
 	path = external/tbb
 	url = https://github.com/wjakob/tbb.git
-[submodule "external/tinyexr"]
-	path = external/tinyexr
-	url = https://github.com/syoyo/tinyexr.git
-[submodule "external/rply"]
-	path = external/rply
-	url = https://github.com/diegonehab/rply.git
-[submodule "external/entt"]
-	path = external/entt
-	url = https://github.com/skypjack/entt.git

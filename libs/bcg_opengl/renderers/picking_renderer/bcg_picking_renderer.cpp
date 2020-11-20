@@ -186,14 +186,14 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     auto &kd_tree = state->scene.get<kdtree_property<bcg_scalar_t>>(id);
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);
-    state->picker.vertex_id = result.indices[0];
+    state->picker.vertex_id = vertex_handle(result.indices[0]);
 
     if (state->scene.has<halfedge_graph>(id)) {
         auto &graph = state->scene.get<halfedge_graph>(id);
         state->picker.edge_id = graph.find_closest_edge_in_neighborhood(state->picker.vertex_id,
                                                                         state->picker.model_space_point);
     } else {
-        state->picker.edge_id = BCG_INVALID_ID;
+        state->picker.edge_id = edge_handle();
     }
 
     if (state->scene.has<halfedge_mesh>(id)) {
@@ -203,8 +203,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         state->picker.face_id = mesh.find_closest_face_in_neighborhood(state->picker.vertex_id,
                                                                        state->picker.model_space_point);
     } else {
-        state->picker.edge_id = BCG_INVALID_ID;
-        state->picker.face_id = BCG_INVALID_ID;
+        state->picker.edge_id = edge_handle();
+        state->picker.face_id = face_handle();
     }
 }
 

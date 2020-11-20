@@ -51,13 +51,14 @@ add_library(bcg_graphics
         ${RPLY_SOURCE_DIRS}/rply.c
         )
 
+target_compile_features(bcg_graphics PRIVATE cxx_std_17)
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(bcg_graphics PUBLIC ${EIGEN3_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${RPLY_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${NANOFLANN_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
 
-target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb)
+target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb stdc++fs)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)
@@ -77,4 +78,6 @@ endif (APPLE)
 if (MSVC)
     target_compile_options(bcg_graphics PUBLIC /D_CRT_SECURE_NO_WARNINGS /wd4018 /wd4244 /wd4305 /wd4800 /wd4267)
     target_compile_options(bcg_graphics PUBLIC /EHsc)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+
 endif (MSVC)
