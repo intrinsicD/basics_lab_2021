@@ -19,3 +19,6 @@
 [submodule "external/GeometricTools"]
 	path = external/GeometricTools
 	url = https://github.com/davideberly/GeometricTools.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui.git
