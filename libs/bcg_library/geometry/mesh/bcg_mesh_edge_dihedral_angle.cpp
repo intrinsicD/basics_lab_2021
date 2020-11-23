@@ -13,7 +13,7 @@ bcg_scalar_t edge_dihedral_angle(halfedge_mesh &mesh, edge_handle e) {
     auto f0 = mesh.get_face(e, 0);
     auto f1 = mesh.get_face(e, 1);
     if (mesh.faces.is_valid(f0) && mesh.faces.is_valid(f1)) {
-        return vector_angle(face_normal(mesh, f0), face_normal(mesh, f1));
+        return vector_angle<3>(face_normal(mesh, f0), face_normal(mesh, f1));
     }
     return 0;
 }

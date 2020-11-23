@@ -11,8 +11,14 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif ()
 
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
+
+if (EXISTS "${CMAKE_BINARY_DIR}" AND IS_DIRECTORY "${CMAKE_BINARY_DIR}")
+else ()
+    make_directory("${CMAKE_BINARY_DIR}")
+endif ()
 
 if (NOT GENERATOR_IS_MULTI_CONFIG AND CMAKE_BUILD_TYPE MATCHES Debug)
     set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
@@ -33,6 +39,6 @@ add_subdirectory(external)
 add_subdirectory(libs)
 add_subdirectory(apps)
 
-if(BCG_TESTS)
+if (BCG_TESTS)
     add_subdirectory(tests)
-endif(BCG_TESTS)
+endif (BCG_TESTS)

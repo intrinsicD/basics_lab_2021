@@ -55,15 +55,15 @@ renderer::map_to_colors(property_container *container, const std::string &proper
         if(!values){
             auto values1 = container->get<VectorI<3>, 3>(base_ptr->name());
             colors1.resize(values1.size());
-            Map(colors1) = MapConst(values1).cast<bcg_scalar_t>();
+            Map<3>(colors1) = MapConst(values1).cast<bcg_scalar_t>();
         }else{
             colors1.resize(values.size());
-            Map(colors1) = MapConst(values);
+            Map<3>(colors1) = MapConst(values);
         }
-        auto min = MapConst(colors1).minCoeff();
-        auto max = MapConst(colors1).maxCoeff();
+        auto min = MapConst<3>(colors1).minCoeff();
+        auto max = MapConst<3>(colors1).maxCoeff();
         colors.resize(colors1.size());
-        Map(colors) = (MapConst(colors1).array() - min) /  (max - min);
+        Map<3>(colors) = (MapConst<3>(colors1).array() - min) /  (max - min);
     }
     return colors;
 }

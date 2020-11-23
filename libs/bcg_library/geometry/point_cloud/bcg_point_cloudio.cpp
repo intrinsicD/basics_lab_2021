@@ -92,7 +92,7 @@ bool point_cloudio::read_pts(point_cloud &pc) {
             } else if (ScalarTypePerLineCount < 4) {
                 intensities[v] = bcg_scalar_t(result);
             } else if (ScalarTypePerLineCount < 7) {
-                colors[v][ScalarTypePerLineCount - 4] = bcg_scalar_t(result) / 255.0f;
+                colors[v][ScalarTypePerLineCount - 4] = bcg_scalar_t(result) / 255.0;
             }
         }
     };

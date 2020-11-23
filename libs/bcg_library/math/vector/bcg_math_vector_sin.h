@@ -11,7 +11,7 @@ namespace bcg{
 
 template<int N>
 inline bcg_scalar_t vector_sin(const VectorS<N> &v0, const VectorS<N> &v1) {
-    return std::sin(vector_angle(v0, v1));
+    return std::sin(vector_angle<N>(v0, v1));
 }
 
 }

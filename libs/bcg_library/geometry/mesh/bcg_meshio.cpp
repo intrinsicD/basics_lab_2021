@@ -364,7 +364,7 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
             // vertex
         else if (strncmp(s, "v ", 2) == 0) {
             if (sscanf(s, "v %f %f %f", &x, &y, &z) == 3) {
-                v = mesh.add_vertex({x, y, z});
+                v = mesh.add_vertex(VectorS<3>(x, y, z));
             }
         }
 
@@ -799,9 +799,9 @@ bool meshio::read_xyz(halfedge_mesh &mesh) {
                    reinterpret_cast<double *>(&z), reinterpret_cast<double *>(&nx), reinterpret_cast<double *>(&ny),
                    reinterpret_cast<double *>(&nz));
         if (n >= 3) {
-            v = mesh.add_vertex({x, y, z});
+            v = mesh.add_vertex(VectorS<3>(x, y, z));
             if (n >= 6) {
-                vnormal[v] = {nx, ny, nz};
+                vnormal[v] = VectorS<3>(nx, ny, nz);
             }
         }
     }
@@ -835,11 +835,11 @@ bool meshio::read_agi(halfedge_mesh &mesh) {
                    reinterpret_cast<double *>(&g), reinterpret_cast<double *>(&b),
                    reinterpret_cast<double *>(&nx), reinterpret_cast<double *>(&ny), reinterpret_cast<double *>(&nz));
         if (n >= 3) {
-            v = mesh.add_vertex({x, y, z});
+            v = mesh.add_vertex(VectorS<3>(x, y, z));
             if (n >= 6) {
-                color[v] = {r / 255.0, g / 255.0, b / 255.0};
+                color[v] = VectorS<3>(r / 255.0, g / 255.0, b / 255.0);
                 if (n >= 9) {
-                    normal[v] = {nx, ny, nz};
+                    normal[v] = VectorS<3>(nx, ny, nz);
                 }
             }
         }

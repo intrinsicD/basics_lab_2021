@@ -11,7 +11,7 @@ namespace bcg {
 
 template<int N>
 inline bcg_scalar_t vector_angle(const VectorS<N> &v0, const VectorS<N> &v1) {
-    return safe_acos(vector_cos(v0, v1));
+    return safe_acos(vector_cos<N>(v0, v1));
 }
 
 }
