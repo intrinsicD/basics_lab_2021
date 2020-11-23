@@ -50,6 +50,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_mesh_vertex_convex_concave.h guis/bcg_gui_mesh_vertex_convex_concave.cpp
             guis/bcg_gui_mesh_features.h guis/bcg_gui_mesh_features.cpp
             guis/bcg_gui_mesh_subdivision.h guis/bcg_gui_mesh_subdivision.cpp
+            guis/bcg_gui_mesh_laplacian.h guis/bcg_gui_mesh_laplacian.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

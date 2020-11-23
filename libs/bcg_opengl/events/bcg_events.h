@@ -16,5 +16,6 @@
 #include "bcg_events_curve.h"
 #include "bcg_events_hierarchy.h"
 #include "bcg_events_spatial_index.h"
+#include "bcg_events_laplacian.h"
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_H

@@ -21,7 +21,25 @@ add_library(bcg_graphics
         math/bcg_factorial.h math/bcg_factorial.cpp
         math/bcg_binomial_coefficient.h math/bcg_binomial_coefficient.cpp
         math/bcg_bernstein_basis.h math/bcg_bernstein_basis.cpp
+        math/laplacian/bcg_laplacian_matrix.h
+        math/laplacian/bcg_laplacian_heat_diffusion.h
+        math/laplacian/bcg_laplacian_smoothing.h
+        math/matrix/bcg_matrix.h
+        math/matrix/bcg_matrix_check_finite.h
+        math/matrix/bcg_matrix_horizontal_stack.h
+        math/matrix/bcg_matrix_vertical_stack.h
+        math/matrix/bcg_matrix_anti_symmetric_part.h
         math/vector/bcg_math_vector_angle.h math/vector/bcg_math_vector_cos.h math/vector/bcg_math_vector_sin.h
+        math/sparse_matrix/bcg_sparse_matrix.h
+        math/sparse_matrix/bcg_sparse_check_symmetric.h math/sparse_matrix/bcg_sparse_check_symmetric.cpp
+        math/sparse_matrix/bcg_sparse_check_hermetian.h math/sparse_matrix/bcg_sparse_check_hermetian.cpp
+        math/sparse_matrix/bcg_sparse_check_finite.h math/sparse_matrix/bcg_sparse_check_finite.cpp
+        math/sparse_matrix/bcg_sparse_vertical_stack.h math/sparse_matrix/bcg_sparse_vertical_stack.cpp
+        math/sparse_matrix/bcg_sparse_horizontal_stack.h math/sparse_matrix/bcg_sparse_horizontal_stack.cpp
+        math/laplacian/bcg_laplacian_matrix.h
+        math/laplacian/bcg_laplacian_smoothing.h
+        math/laplacian/bcg_laplacian_heat_diffusion.h
+        math/laplacian/bcg_laplacian_harmonic_field.h
         geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
         geometry/bcg_property.h
         geometry/bcg_property_map_eigen.h
@@ -33,14 +51,28 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_face_area_vector.h geometry/mesh/bcg_mesh_face_area_vector.cpp
         geometry/mesh/bcg_mesh_face_normals.h geometry/mesh/bcg_mesh_face_normals.cpp
         geometry/mesh/bcg_mesh_face_centers.h geometry/mesh/bcg_mesh_face_centers.cpp
-        geometry/mesh/bcg_mesh_vertex_normals.h geometry/mesh/bcg_mesh_vertex_normals.cpp
+        geometry/mesh/bcg_mesh_face_gradient.h geometry/mesh/bcg_mesh_face_gradient.cpp
         geometry/mesh/bcg_mesh_factory.h geometry/mesh/bcg_mesh_factory.cpp
+        geometry/mesh/bcg_mesh_triangle_area_from_metric.h geometry/mesh/bcg_mesh_triangle_area_from_metric.cpp
+        geometry/mesh/bcg_mesh_triangle_cotan_weight.h geometry/mesh/bcg_mesh_triangle_cotan_weight.cpp
         geometry/mesh/bcg_mesh_edge_dihedral_angle.h geometry/mesh/bcg_mesh_edge_dihedral_angle.cpp
-        geometry/mesh/bcg_mesh_boundary.h geometry/mesh/bcg_mesh_boundary.cpp
+        geometry/mesh/bcg_mesh_edge_cotan.h geometry/mesh/bcg_mesh_edge_cotan.cpp
+        geometry/mesh/bcg_mesh_edge_normals.h geometry/mesh/bcg_mesh_edge_normals.cpp
+        geometry/mesh/bcg_mesh_edge_fujiwara.h geometry/mesh/bcg_mesh_edge_fujiwara.cpp
+        geometry/mesh/bcg_mesh_vertex_normals.h geometry/mesh/bcg_mesh_vertex_normals.cpp
         geometry/mesh/bcg_mesh_vertex_convex_concave.h geometry/mesh/bcg_mesh_vertex_convex_concave.cpp
+        geometry/mesh/bcg_mesh_vertex_voronoi_areas.h geometry/mesh/bcg_mesh_vertex_voronoi_areas.cpp
+        geometry/mesh/bcg_mesh_vertex_barycentric_areas.h geometry/mesh/bcg_mesh_vertex_barycentric_areas.cpp
+        geometry/mesh/bcg_mesh_vertex_cotan.h geometry/mesh/bcg_mesh_vertex_cotan.cpp
+        geometry/mesh/bcg_mesh_vertex_valences.h geometry/mesh/bcg_mesh_vertex_valences.cpp
+        geometry/mesh/bcg_mesh_boundary.h geometry/mesh/bcg_mesh_boundary.cpp
         geometry/mesh/bcg_mesh_features.h geometry/mesh/bcg_mesh_features.cpp
         geometry/mesh/bcg_mesh_subdivision.h geometry/mesh/bcg_mesh_subdivision.cpp
         geometry/mesh/bcg_mesh_connected_components.h geometry/mesh/bcg_mesh_connected_components.cpp
+        geometry/mesh/bcg_mesh_curvature_taubin.h geometry/mesh/bcg_mesh_curvature_taubin.cpp
+        geometry/mesh/bcg_mesh_smoothing.h geometry/mesh/bcg_mesh_smoothing.cpp
+        geometry/mesh/bcg_mesh_laplacian.h geometry/mesh/bcg_mesh_laplacian.cpp
+        geometry/mesh/bcg_mesh_surface_area.h geometry/mesh/bcg_mesh_surface_area.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h

@@ -11,7 +11,7 @@
 #include "bcg_material_curve.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_curve_renderer.h"
-#include "math/bcg_matrix_map_eigen.h"
+#include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 #include "geometry/curve/bcg_curve_bezier.h"
 
 namespace bcg {

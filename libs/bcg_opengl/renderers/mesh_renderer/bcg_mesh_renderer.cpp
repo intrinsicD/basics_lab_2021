@@ -12,7 +12,7 @@
 #include "bcg_material_mesh.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_mesh_renderer.h"
-#include "math/bcg_matrix_map_eigen.h"
+#include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 
 namespace bcg {
 

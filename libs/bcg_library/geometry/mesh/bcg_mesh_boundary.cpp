@@ -7,7 +7,7 @@
 
 namespace bcg{
 
-void mesh_boundary(halfedge_mesh &mesh, size_t parallel_grain_size){
+boundary_elements mesh_boundary(halfedge_mesh &mesh, size_t parallel_grain_size){
     auto v_boundary = mesh.vertices.get_or_add<bool, 1>("v_boundary");
     auto e_boundary = mesh.edges.get_or_add<bool, 1>("e_boundary");
     auto f_boundary = mesh.faces.get_or_add<bool, 1>("f_boundary");
@@ -28,9 +28,27 @@ void mesh_boundary(halfedge_mesh &mesh, size_t parallel_grain_size){
                 }
             }
     );
+
+    boundary_elements boundary;
+    for(const auto f : mesh.faces){
+        if(f_boundary[f]){
+            boundary.boundary_faces.emplace_back(f);
+        }
+    }
+    for(const auto e : mesh.edges){
+        if(e_boundary[e]){
+            boundary.boundary_edges.emplace_back(e);
+        }
+    }
+    for(const auto v : mesh.vertices){
+        if(v_boundary[v]){
+            boundary.boundary_vertices.emplace_back(v);
+        }
+    }
     v_boundary.set_dirty();
     e_boundary.set_dirty();
     f_boundary.set_dirty();
+    return boundary;
 }
 
 void mesh_clear_boundary(halfedge_mesh &mesh){

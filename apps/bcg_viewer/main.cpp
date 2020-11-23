@@ -11,6 +11,7 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_convex_concave.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_subdivision.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_features.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_laplacian.h"
 
 int main() {
     using namespace bcg;
@@ -44,6 +45,9 @@ int main() {
             }
             if(ImGui::MenuItem("Subdivision")){
                 state->gui.left = gui_mesh_subdivision;
+            }
+            if(ImGui::MenuItem("Laplacian")){
+                state->gui.left = gui_mesh_laplacian;
             }
             ImGui::EndMenu();
         }

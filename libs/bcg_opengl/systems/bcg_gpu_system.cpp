@@ -4,7 +4,7 @@
 
 #include "bcg_gpu_system.h"
 #include "bcg_viewer_state.h"
-#include "math/bcg_matrix_map_eigen.h"
+#include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 #include "geometry/bcg_property_map_eigen.h"
 #include "geometry/curve/bcg_curve_bezier.h"
 #include "bcg_library/geometry/mesh/bcg_mesh.h"

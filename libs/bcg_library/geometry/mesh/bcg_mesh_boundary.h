@@ -9,7 +9,13 @@
 
 namespace bcg {
 
-void mesh_boundary(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
+struct boundary_elements{
+    std::vector<vertex_handle> boundary_vertices;
+    std::vector<edge_handle> boundary_edges;
+    std::vector<face_handle> boundary_faces;
+};
+
+boundary_elements mesh_boundary(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
 
 void mesh_clear_boundary(halfedge_mesh &mesh);
 

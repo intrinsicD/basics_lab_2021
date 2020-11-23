@@ -5,7 +5,7 @@
 #include "bcg_polynomial.h"
 
 #include <utility>
-#include "math/bcg_vector_map_eigen.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 #include "math/bcg_factorial.h"
 
 namespace bcg {

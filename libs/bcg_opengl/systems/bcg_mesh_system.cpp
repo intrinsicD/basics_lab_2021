@@ -17,6 +17,7 @@
 #include "geometry/mesh/bcg_mesh_features.h"
 #include "geometry/mesh/bcg_mesh_subdivision.h"
 #include "geometry/mesh/bcg_mesh_connected_components.h"
+#include "geometry/mesh/bcg_mesh_laplacian.h"
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -31,11 +32,15 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::boundary>().connect<&mesh_system::on_boundary>(this);
     state->dispatcher.sink<event::mesh::vertex_convex_concave>().connect<&mesh_system::on_vertex_convex_concave>(this);
     state->dispatcher.sink<event::mesh::features>().connect<&mesh_system::on_features>(this);
-    state->dispatcher.sink<event::mesh::subdivision::catmull_clark>().connect<&mesh_system::on_subdivision_catmull_clark>(this);
+    state->dispatcher.sink<event::mesh::subdivision::catmull_clark>().connect<&mesh_system::on_subdivision_catmull_clark>(
+            this);
     state->dispatcher.sink<event::mesh::subdivision::loop>().connect<&mesh_system::on_subdivision_loop>(this);
     state->dispatcher.sink<event::mesh::subdivision::sqrt3>().connect<&mesh_system::on_subdivision_sqrt3>(this);
-    state->dispatcher.sink<event::mesh::connected_components::detect>().connect<&mesh_system::on_connected_components_detect>(this);
-    state->dispatcher.sink<event::mesh::connected_components::split>().connect<&mesh_system::on_connected_components_split>(this);
+    state->dispatcher.sink<event::mesh::connected_components::detect>().connect<&mesh_system::on_connected_components_detect>(
+            this);
+    state->dispatcher.sink<event::mesh::connected_components::split>().connect<&mesh_system::on_connected_components_split>(
+            this);
+    state->dispatcher.sink<event::mesh::laplacian::build>().connect<&mesh_system::on_build_laplacian>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -89,7 +94,7 @@ void mesh_system::on_make_quad(const event::mesh::make_quad &) {
     state->dispatcher.trigger<event::mesh::setup>(id);
 }
 
-void mesh_system::on_make_box(const event::mesh::make_box &event){
+void mesh_system::on_make_box(const event::mesh::make_box &event) {
     mesh_factory factory;
 
     auto mesh = factory.make_box();
@@ -100,7 +105,7 @@ void mesh_system::on_make_box(const event::mesh::make_box &event){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void mesh_system::on_boundary(const event::mesh::boundary &event){
+void mesh_system::on_boundary(const event::mesh::boundary &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -108,7 +113,7 @@ void mesh_system::on_boundary(const event::mesh::boundary &event){
     mesh_boundary(mesh, state->config.parallel_grain_size);
 }
 
-void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_concave &event){
+void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_concave &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -116,7 +121,7 @@ void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_conc
     vertex_convex_concave(mesh, state->config.parallel_grain_size);
 }
 
-void mesh_system::on_features(const event::mesh::features &event){
+void mesh_system::on_features(const event::mesh::features &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -124,7 +129,7 @@ void mesh_system::on_features(const event::mesh::features &event){
     mesh_features(mesh, event.boundary, event.angle, event.threshold_degrees, state->config.parallel_grain_size);
 }
 
-void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event){
+void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -133,7 +138,7 @@ void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::c
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
-void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &event){
+void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -142,7 +147,7 @@ void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &even
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
-void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event){
+void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -151,7 +156,7 @@ void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &ev
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
-void mesh_system::on_connected_components_detect(const event::mesh::connected_components::detect &event){
+void mesh_system::on_connected_components_detect(const event::mesh::connected_components::detect &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -159,19 +164,29 @@ void mesh_system::on_connected_components_detect(const event::mesh::connected_co
     mesh_connected_components_detect(mesh);
 }
 
-void mesh_system::on_connected_components_split(const event::mesh::connected_components::split &event){
+void mesh_system::on_connected_components_split(const event::mesh::connected_components::split &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto parts = mesh_connected_components_split(mesh);
-    for(const auto part : parts){
+    for (const auto part : parts) {
         auto id = state->scene.create();
         state->scene.emplace<halfedge_mesh>(id, part);
         state->dispatcher.trigger<event::mesh::setup>(id);
         state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }
+}
+
+void mesh_system::on_build_laplacian(const event::mesh::laplacian::build &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto laplacian = build_laplacian(mesh, event.s_type, event.m_type, state->config.parallel_grain_size,
+                                     event.edge_scaling_property_name);
+    state->scene.emplace_or_replace<mesh_laplacian>(event.id, laplacian);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -219,7 +234,7 @@ void mesh_system::on_dihedral_angle(const event::mesh::edge::dihedral_angle &eve
 }
 
 
-void mesh_system::on_edge_centers(const event::graph::edge::centers &event){
+void mesh_system::on_edge_centers(const event::graph::edge::centers &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -229,7 +244,7 @@ void mesh_system::on_edge_centers(const event::graph::edge::centers &event){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void mesh_system::on_face_centers(const event::mesh::face::centers &event){
+void mesh_system::on_face_centers(const event::mesh::face::centers &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
@@ -237,7 +252,7 @@ void mesh_system::on_face_centers(const event::mesh::face::centers &event){
     face_centers(mesh, state->config.parallel_grain_size);
 }
 
-void mesh_system::on_face_normals(const event::mesh::face::normals &event){
+void mesh_system::on_face_normals(const event::mesh::face::normals &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 

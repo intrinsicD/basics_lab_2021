@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_MATRIX_MAP_EIGEN_H
 #define BCG_GRAPHICS_BCG_MATRIX_MAP_EIGEN_H
 
-#include "bcg_linalg.h"
+#include "math/bcg_linalg.h"
 
 namespace bcg {
 

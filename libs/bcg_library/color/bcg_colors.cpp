@@ -4,7 +4,7 @@
 
 #include "bcg_colors.h"
 #include "Eigen/Core"
-#include "math/bcg_vector_map_eigen.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 
 namespace bcg {
 

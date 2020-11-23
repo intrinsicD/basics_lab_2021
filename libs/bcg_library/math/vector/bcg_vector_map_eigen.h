@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_VECTOR_MAP_EIGEN_H
 
 #include "Eigen/Core"
-#include "bcg_linalg.h"
+#include "math/bcg_linalg.h"
 
 namespace bcg {
 

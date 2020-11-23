@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_EVENTS_MESH_H
 
 #include "entt/entt.hpp"
+#include "geometry/mesh/bcg_mesh_laplacian.h"
 
 namespace bcg::event::mesh{
 struct setup{
@@ -69,6 +70,14 @@ struct features{
     bool angle = true;
     bcg_scalar_t threshold_degrees = 45;
 };
+namespace laplacian{
+struct build{
+    entt::entity id;
+    MeshLaplacianStiffness s_type;
+    MeshLaplacianMass m_type;
+    std::string edge_scaling_property_name;
+};
+}
 
 namespace subdivision{
 struct catmull_clark{

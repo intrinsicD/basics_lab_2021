@@ -12,7 +12,7 @@
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_graph_renderer.h"
 #include "bcg_property_map_eigen.h"
-#include "math/bcg_matrix_map_eigen.h"
+#include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 
 namespace bcg {
 
