@@ -5,10 +5,6 @@
 #ifndef BCG_GRAPHICS_BCG_ALIGNED_BOX_H
 #define BCG_GRAPHICS_BCG_ALIGNED_BOX_H
 
-// -----------------------------------------------------------------------------
-// INCLUDES
-// -----------------------------------------------------------------------------
-
 #include <vector>
 #include <iostream>
 #include "math/bcg_linalg.h"

@@ -21,6 +21,7 @@ add_library(bcg_graphics
         math/bcg_factorial.h math/bcg_factorial.cpp
         math/bcg_binomial_coefficient.h math/bcg_binomial_coefficient.cpp
         math/bcg_bernstein_basis.h math/bcg_bernstein_basis.cpp
+        math/bcg_pca.h
         math/laplacian/bcg_laplacian_matrix.h
         math/laplacian/bcg_laplacian_heat_diffusion.h
         math/laplacian/bcg_laplacian_smoothing.h
@@ -29,6 +30,7 @@ add_library(bcg_graphics
         math/matrix/bcg_matrix_horizontal_stack.h
         math/matrix/bcg_matrix_vertical_stack.h
         math/matrix/bcg_matrix_anti_symmetric_part.h
+        math/matrix/bcg_matrix_covariance.h
         math/vector/bcg_math_vector_angle.h math/vector/bcg_math_vector_cos.h math/vector/bcg_math_vector_sin.h
         math/sparse_matrix/bcg_sparse_matrix.h
         math/sparse_matrix/bcg_sparse_check_symmetric.h math/sparse_matrix/bcg_sparse_check_symmetric.cpp
@@ -77,6 +79,9 @@ add_library(bcg_graphics
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
         geometry/sphere/bcg_sphere.h geometry/sphere/bcg_sphere_fit.h geometry/sphere/bcg_sphere_sampling_fibunacci.h
+        geometry/grid/bcg_base_grid.h geometry/grid/bcg_base_grid.cpp
+        geometry/grid/bcg_voxel_grid.h geometry/grid/bcg_voxel_grid.cpp
+        geometry/grid/bcg_occupancy_grid.h geometry/grid/bcg_occupancy_grid.cpp
         geometry/distance_query/bcg_distance_segment_point.h
         geometry/distance_query/bcg_distance_aligned_box_point.h
         geometry/distance_query/bcg_distance_triangle_point.h
