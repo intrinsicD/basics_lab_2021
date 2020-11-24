@@ -30,6 +30,8 @@ struct color {
 
     static VectorS<3> rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b);
 
+    static VectorS<4> rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
+
     static VectorS<3> packed_int(unsigned int id);
 };
 

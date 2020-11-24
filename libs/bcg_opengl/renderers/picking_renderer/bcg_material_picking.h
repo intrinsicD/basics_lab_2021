@@ -14,7 +14,7 @@ namespace bcg{
 struct material_picking{
     material_picking() = default;
 
-    explicit material_picking(entt::entity id) : picking_color(color::packed_int((unsigned int)id)){}
+    explicit material_picking(entt::entity id) : picking_color(color::packed_int(static_cast<std::uint32_t>(id))){}
 
     std::vector<attribute> attributes = {
             {"position", "v_position", "v_position", 0, true}

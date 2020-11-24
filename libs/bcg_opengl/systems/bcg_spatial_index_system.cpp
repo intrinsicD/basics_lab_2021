@@ -20,8 +20,7 @@ void spatial_index_system::on_setup_kdtree(const event::spatial_index::setup_kdt
     if (!state->scene.has<kdtree_property<bcg_scalar_t>>(event.id)) {
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &kd_tree = state->scene.emplace<kdtree_property<bcg_scalar_t>>(event.id);
-        kd_tree.build(positions);
+        auto &kd_tree = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(event.id, positions, 10);
     }
 }
 

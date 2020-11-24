@@ -83,7 +83,11 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_ENTER]) {}
     if (state->keyboard.keys[GLFW_KEY_SPACE]) {}
     if (state->keyboard.keys[GLFW_KEY_BACKSPACE]) {}
-    if (state->keyboard.keys[GLFW_KEY_DELETE]) {}
+    if (state->keyboard.keys[GLFW_KEY_DELETE]) {
+        if(state->picker.valid && state->scene.valid(state->picker.entity_id)){
+            state->scene.destroy(state->picker.entity_id);
+        }
+    }
     if (state->keyboard.keys[GLFW_KEY_F1]) {}
     if (state->keyboard.keys[GLFW_KEY_F2]) {}
     if (state->keyboard.keys[GLFW_KEY_F3]) {}

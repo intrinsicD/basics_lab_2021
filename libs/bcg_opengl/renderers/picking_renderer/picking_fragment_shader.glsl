@@ -9,5 +9,5 @@ struct Material {
 uniform Material material;
 
 void main(){
-    final_color = vec4(material.picking_color, 1.0f);
+    final_color = vec4(material.picking_color, 1.0);
 }

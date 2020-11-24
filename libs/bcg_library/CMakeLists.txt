@@ -110,6 +110,4 @@ endif (APPLE)
 if (MSVC)
     target_compile_options(bcg_graphics PUBLIC /D_CRT_SECURE_NO_WARNINGS /wd4018 /wd4244 /wd4305 /wd4800 /wd4267 /wd4838)
     target_compile_options(bcg_graphics PUBLIC /EHsc)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-
 endif (MSVC)

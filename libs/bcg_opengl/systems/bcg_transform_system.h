@@ -19,6 +19,8 @@ struct transform_system : public system {
     void on_scale(const event::transform::scale &event);
 
     void on_rotate(const event::transform::rotate &event);
+
+    void on_update(const event::internal::update &event);
 };
 
 }

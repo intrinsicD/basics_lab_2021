@@ -52,7 +52,7 @@ void picking_renderer::on_setup_for_rendering(const event::picking_renderer::set
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
 
-    auto &material = state->scene.get_or_emplace<material_picking>(event.id, event.id);
+    auto &material = state->scene.emplace_or_replace<material_picking>(event.id, event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "picking";
@@ -158,6 +158,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     p /= p[3];
     state->picker.world_space_point = p.head<3>();
 
+    //auto id = entt::entity(data[0] + data[1] * 255 + data[2] * 255 * 255 + data[3] * 255 * 255 * 255);
     auto id = entt::entity(data[0] + data[1] * 256 + data[2] * 256 * 256);
     if (!state->scene.valid(id)) {
         state->picker.valid = false;
@@ -183,6 +184,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     state->dispatcher.trigger<event::spatial_index::setup_kdtree>(id);
 
     auto &kd_tree = state->scene.get<kdtree_property<bcg_scalar_t>>(id);
+
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);
     state->picker.vertex_id = vertex_handle(result.indices[0]);
 

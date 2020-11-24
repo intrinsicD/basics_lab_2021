@@ -9,6 +9,7 @@ namespace bcg{
 
 void gui_viewer_picker(viewer_state *state){
     if (ImGui::CollapsingHeader("Picker")) {
+        draw_label(&state->window, "valid", std::to_string(state->picker.valid));
         draw_label(&state->window, "entity_id", std::to_string((unsigned int) state->picker.entity_id));
         draw_label(&state->window, "vertex_id", std::to_string(state->picker.vertex_id.idx));
         draw_label(&state->window, "edge_id", std::to_string(state->picker.edge_id.idx));
