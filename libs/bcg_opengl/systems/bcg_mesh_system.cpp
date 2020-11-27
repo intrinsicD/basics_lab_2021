@@ -18,6 +18,7 @@
 #include "geometry/mesh/bcg_mesh_subdivision.h"
 #include "geometry/mesh/bcg_mesh_connected_components.h"
 #include "geometry/mesh/bcg_mesh_laplacian.h"
+#include "geometry/mesh/bcg_mesh_curvature_taubin.h"
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -41,6 +42,7 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::connected_components::split>().connect<&mesh_system::on_connected_components_split>(
             this);
     state->dispatcher.sink<event::mesh::laplacian::build>().connect<&mesh_system::on_build_laplacian>(this);
+    state->dispatcher.sink<event::mesh::curvature::taubin>().connect<&mesh_system::on_curvature_taubin>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -187,6 +189,14 @@ void mesh_system::on_build_laplacian(const event::mesh::laplacian::build &event)
     auto laplacian = build_laplacian(mesh, event.s_type, event.m_type, state->config.parallel_grain_size,
                                      event.edge_scaling_property_name);
     state->scene.emplace_or_replace<mesh_laplacian>(event.id, laplacian);
+}
+
+void mesh_system::on_curvature_taubin(const event::mesh::curvature::taubin &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_curvature_taubin(mesh, event.post_smoothing_steps, event.two_ring_neighborhood, state->config.parallel_grain_size);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

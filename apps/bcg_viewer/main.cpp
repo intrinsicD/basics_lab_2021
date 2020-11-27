@@ -12,6 +12,7 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_subdivision.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_features.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_laplacian.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_curvature_taubin.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
 
 int main() {
@@ -49,6 +50,9 @@ int main() {
             }
             if(ImGui::MenuItem("Laplacian")){
                 state->gui.left = gui_mesh_laplacian;
+            }
+            if(ImGui::MenuItem("Curvature Taubin")){
+                state->gui.left = gui_mesh_curvature_taubin;
             }
             if(ImGui::MenuItem("Marching Cubes")){
                 state->gui.left = gui_marching_cubes;

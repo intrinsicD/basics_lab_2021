@@ -21,9 +21,8 @@ void post_smoothing(halfedge_mesh &mesh, int post_smoothing_steps, size_t parall
     auto mean_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_mean");
 
     // precompute cotan weight per edge
-    if (!mesh.edges.has("e_cotan")) {
-        edge_cotans(mesh, parallel_grain_size);
-    }
+    edge_cotans(mesh, parallel_grain_size);
+
     auto e_cotan = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_cotan");
 
     for (int i = 0; i < post_smoothing_steps; ++i) {
@@ -85,14 +84,12 @@ void mesh_curvature_taubin(halfedge_mesh &mesh, int post_smoothing_steps, bool t
     auto max_direction = mesh.vertices.get_or_add<VectorS<3>, 3>("v_curv_max_dir");
 
     // precompute Voronoi area per vertex
-    if (!mesh.vertices.has("v_voronoi_area")) {
-        vertex_voronoi_areas(mesh, parallel_grain_size);
-    }
+    vertex_voronoi_areas(mesh, parallel_grain_size);
+
     auto v_voronoi_area = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_voronoi_area");
     // precompute face normals
-    if (!mesh.faces.has("f_normal")) {
-        face_normals(mesh, parallel_grain_size);
-    }
+    face_normals(mesh, parallel_grain_size);
+
     auto f_normal = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal");
 
 

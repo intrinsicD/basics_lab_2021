@@ -42,6 +42,8 @@ struct mesh_system : public system {
 
     void on_build_laplacian(const event::mesh::laplacian::build &event);
 
+    void on_curvature_taubin(const event::mesh::curvature::taubin &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event);

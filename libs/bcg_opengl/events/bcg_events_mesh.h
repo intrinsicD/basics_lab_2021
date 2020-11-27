@@ -79,6 +79,14 @@ struct build{
 };
 }
 
+namespace curvature{
+    struct taubin{
+        entt::entity id;
+        int post_smoothing_steps = 3;
+        bool two_ring_neighborhood = true;
+    };
+};
+
 namespace subdivision{
 struct catmull_clark{
     entt::entity id;
