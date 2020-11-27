@@ -2,8 +2,8 @@
 // Created by alex on 07.11.20.
 //
 
-#ifndef BCG_GRAPHICS_KDTREE_H
-#define BCG_GRAPHICS_KDTREE_H
+#ifndef BCG_GRAPHICS_BCG_KDTREE_H
+#define BCG_GRAPHICS_BCG_KDTREE_H
 
 #include <memory>
 #include "nanoflann.hpp"
@@ -71,4 +71,4 @@ struct kdtree_property {
 
 }
 
-#endif //BCG_GRAPHICS_KDTREE_H
+#endif //BCG_GRAPHICS_BCG_KDTREE_H

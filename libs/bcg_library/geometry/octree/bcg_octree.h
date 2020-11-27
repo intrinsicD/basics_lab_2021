@@ -8,6 +8,7 @@
 #include "math/vector/bcg_vector.h"
 #include "bcg_property.h"
 #include "aligned_box/bcg_aligned_box.h"
+#include "sphere/bcg_sphere.h"
 #include "bcg_neighbors_query.h"
 
 namespace bcg{
@@ -29,7 +30,12 @@ struct octree{
     property<VectorS<3>, 3> positions;
     aligned_box3 aabb;
     std::vector<octree_node> storage;
-    std::vector<vertex_handle> successor;
+    std::vector<vertex_handle> indices;
+    int max_depth;
+private:
+    void query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set);
+
+    void query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest, neighbors_query &result_set);
 };
 
 }

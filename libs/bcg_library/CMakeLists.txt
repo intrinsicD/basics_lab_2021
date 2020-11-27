@@ -85,6 +85,9 @@ add_library(bcg_graphics
         geometry/distance_query/bcg_distance_segment_point.h
         geometry/distance_query/bcg_distance_aligned_box_point.h
         geometry/distance_query/bcg_distance_triangle_point.h
+        geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
+        geometry/kdtree/bcg_kdtree.h
+        geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         )
 

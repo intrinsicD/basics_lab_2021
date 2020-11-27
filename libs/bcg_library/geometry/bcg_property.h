@@ -853,7 +853,6 @@ struct face_container : public property_container {
     inline face_iterator end() const { return face_iterator(size(), get<bool, 1>("f_deleted"), this); }
 };
 
-
 }
 
 #endif //BCG_GRAPHICS_BCG_PROPERTY_H

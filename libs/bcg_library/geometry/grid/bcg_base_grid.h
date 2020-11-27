@@ -11,6 +11,10 @@
 namespace bcg {
 
 struct base_grid {
+    base_grid() = default;
+
+    base_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
+
     size_t to_idx(const VectorS<3> &item) const;
 
     VectorI<3> to_coord(const VectorS<3> &item) const;
@@ -49,9 +53,17 @@ struct base_grid {
 
     void build_aabb(property<VectorS<3>, 3> positions);
 
-    VectorI<3> dims;
     aligned_box3 aabb;
+    VectorI<3> dims;
 };
+
+inline std::ostream &operator<<(std::ostream &stream, const base_grid &grid) {
+    stream << grid.aabb << "\n";
+    stream << "dims: " << grid.dims.transpose() << "\n";
+    stream << "capacity: " << grid.capacity() << "\n";
+    stream << "voxel_side_length: " << grid.voxel_side_length().transpose() << "\n";
+    return stream;
+}
 
 }
 

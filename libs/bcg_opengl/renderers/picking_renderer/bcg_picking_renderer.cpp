@@ -11,7 +11,7 @@
 #include "bcg_opengl.h"
 #include "bcg_material_picking.h"
 #include "bcg_events_picking_renderer.h"
-#include "kdtree/kdtree.h"
+#include "kdtree/bcg_kdtree.h"
 
 namespace bcg {
 

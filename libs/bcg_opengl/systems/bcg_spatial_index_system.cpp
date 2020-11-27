@@ -4,7 +4,7 @@
 
 #include "bcg_spatial_index_system.h"
 #include "bcg_viewer_state.h"
-#include "geometry/kdtree/kdtree.h"
+#include "geometry/kdtree/bcg_kdtree.h"
 
 namespace bcg{
 

@@ -11,9 +11,9 @@
 using namespace bcg;
 
 #ifdef _WIN32
-static std::string test_data_path = "..\\..\\tests\\data\\";
+static std::string test_data_path = "..\\tests\\data\\";
 #else
-static std::string test_data_path = "../../tests/";
+static std::string test_data_path = "../tests/";
 #endif
 
 class HalfedgeMeshTest : public ::testing::Test {

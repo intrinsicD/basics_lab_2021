@@ -18,9 +18,9 @@ public:
     }
 
 #ifdef _WIN32
-    std::string test_data_path = "..\\..\\tests\\data\\";
+    std::string test_data_path = "..\\tests\\data\\";
 #else
-    std::string test_data_path = "../../tests/data/";
+    std::string test_data_path = "../tests/data/";
 #endif
     file_stream file;
     file_stream test_file;

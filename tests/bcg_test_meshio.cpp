@@ -8,9 +8,9 @@
 #include "geometry/mesh/bcg_mesh_factory.h"
 
 #ifdef _WIN32
-static std::string test_data_path = "..\\..\\tests\\data\\";
+static std::string test_data_path = "..\\tests\\data\\";
 #else
-static std::string test_data_path = "../../tests/data/";
+static std::string test_data_path = "../tests/data/";
 #endif
 
 using namespace bcg;

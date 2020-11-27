@@ -22,6 +22,7 @@ set(TEST_SOURCES
         bcg_test_polynomial.cpp
         bcg_test_monomial_basis.cpp
         bcg_test_bernstein_basis.cpp
+        bcg_test_occupancy_grid.cpp
         )
 
 add_executable(bcg_library_test ${TEST_SOURCES})

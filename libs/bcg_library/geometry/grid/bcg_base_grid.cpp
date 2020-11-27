@@ -6,6 +6,10 @@
 
 namespace bcg{
 
+base_grid::base_grid(const VectorI<3> &dims, const aligned_box3 &aabb) : aabb(aabb), dims(dims){
+
+}
+
 size_t base_grid::to_idx(const VectorS<3> &item) const { return coord_to_idx(to_coord(item)); }
 
 VectorI<3> base_grid::to_coord(const VectorS<3> &item) const {
@@ -101,7 +105,8 @@ std::vector<VectorI<3>> base_grid::boundary_coords() const {
 }
 
 aligned_box3 base_grid::voxel_bounds(const VectorI<3> &coord) const {
-    return aligned_box3(coord_to_voxel_min(coord), coord_to_voxel_max(coord));
+    auto min = coord_to_voxel_min(coord);
+    return aligned_box3(min, min + voxel_side_length());
 }
 
 void base_grid::build_aabb(property<VectorS<3>, 3> positions){

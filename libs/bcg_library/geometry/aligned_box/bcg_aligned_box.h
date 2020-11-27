@@ -120,27 +120,47 @@ inline std::ostream &operator<<(std::ostream &stream, const aligned_box<N> &alig
     return stream;
 }
 
+/*               e11
+ *                v
+ *         v6-------------v7
+ *        /|             /|
+ *   e6 >/ |< e9    e7 >/ |
+ *      /  |   e5      /  |< e10
+ *     /   |   v      /   |
+ *    v2-------------v3   |
+ *    |    v4--------|----v5
+ *e1 >|   /     ^    |   /
+ *    |  /     e8    |  / < e4
+ *    | /< e2    e3 >| /
+ *    |/             |/
+ *    v0-------------v1
+ *           ^
+ *           e0
+ * */
+
 template<int N>
 std::vector<VectorS<N>> get_vetices(const aligned_box<N> &alignedBox) {
     VectorS<N> center, halfextent;
     alignedBox.get_centered_form(center, halfextent);
 
     std::vector<VectorS<N>> vertices;
-    for (unsigned int i = 0; i < alignedBox.NumVertices(); ++i) {
+
+    size_t num_vertices = BIT(N);
+    for (unsigned int i = 0; i < num_vertices; ++i) {
         vertices.push_back(center);
         for (unsigned int d = 0, mask = 1; d < N; ++d, mask <<= (unsigned int) 1) {
             bcg_scalar_t sign = (i & mask ? (bcg_scalar_t) 1 : (bcg_scalar_t) -1);
             vertices[i][d] += sign * halfextent[d];
         }
     }
-    assert(vertices.size() == alignedBox.NumVertices());
+    assert(vertices.size() == num_vertices);
     return vertices;
 }
 
 template<int N>
-std::vector<VectorI<2>> fet_edges(const aligned_box<N> &alignedBox, size_t offset = 0) {
+std::vector<VectorI<2>> get_edges(const aligned_box<N> &alignedBox, size_t offset = 0) {
     std::vector<VectorI<2>> edges;
-    size_t n = alignedBox.NumVertices();
+    size_t n = BIT(N);
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i; j < n; ++j) {
             if (HAMMING(i, j) == 1) {
@@ -148,7 +168,8 @@ std::vector<VectorI<2>> fet_edges(const aligned_box<N> &alignedBox, size_t offse
             }
         }
     }
-    assert(edges.size() == alignedBox.NumEdges());
+    size_t num_eges = (BIT(N - 1)) * N;
+    assert(edges.size() == num_eges);
     return edges;
 }
 

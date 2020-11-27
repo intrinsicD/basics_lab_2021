@@ -51,6 +51,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_mesh_features.h guis/bcg_gui_mesh_features.cpp
             guis/bcg_gui_mesh_subdivision.h guis/bcg_gui_mesh_subdivision.cpp
             guis/bcg_gui_mesh_laplacian.h guis/bcg_gui_mesh_laplacian.cpp
+            guis/bcg_gui_marching_cubes.h guis/bcg_gui_marching_cubes.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp
