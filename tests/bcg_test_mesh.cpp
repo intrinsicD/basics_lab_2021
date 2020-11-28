@@ -269,6 +269,10 @@ TEST_F(HalfedgeMeshTest, face_iterators) {
 TEST_F(HalfedgeMeshTest, is_triangle_mesh) {
     add_triangle();
     EXPECT_TRUE(mesh.is_triangle_mesh());
+    EXPECT_FALSE(mesh.is_quad_mesh());
+    add_quad();
+    EXPECT_FALSE(mesh.is_triangle_mesh());
+    EXPECT_FALSE(mesh.is_quad_mesh());
 }
 
 TEST_F(HalfedgeMeshTest, is_quad_mesh) {
@@ -315,6 +319,25 @@ TEST_F(HalfedgeMeshTest, collapse) {
         mesh.collapse(h0);
     mesh.garbage_collection();
     EXPECT_EQ(mesh.num_faces(), size_t(1));
+
+    read(test_data_path + "pmp-data/off/vertex_onering.off");
+    for (const auto v : mesh.vertices) {
+        EXPECT_TRUE(mesh.is_manifold(v));
+    }
+}
+
+TEST_F(HalfedgeMeshTest, collapse2) {
+    read(test_data_path + "pmp-data/off/vertex_onering.off");
+    EXPECT_EQ(mesh.num_faces(), size_t(6));
+    EXPECT_EQ(mesh.num_edges(), size_t(12));
+    EXPECT_EQ(mesh.num_vertices(), size_t(7));
+    h0 = mesh.find_halfedge(3, 2);
+    if (mesh.is_collapse_ok(h0))
+        mesh.collapse(h0);
+    mesh.garbage_collection();
+    EXPECT_EQ(mesh.num_faces(), size_t(4));
+    EXPECT_EQ(mesh.num_edges(), size_t(9));
+    EXPECT_EQ(mesh.num_vertices(), size_t(6));
 }
 
 TEST_F(HalfedgeMeshTest, face_split) {

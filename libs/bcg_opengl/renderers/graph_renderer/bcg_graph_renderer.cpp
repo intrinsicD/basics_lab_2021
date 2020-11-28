@@ -156,6 +156,10 @@ void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_
 
 void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color_texture &event){
     if (!state->scene.valid(event.id)) return;
+    if(!state->scene.has<event::graph_renderer::enqueue>(event.id)){
+        state->scene.emplace_or_replace<event::graph_renderer::enqueue>(event.id);
+        state->dispatcher.trigger<event::graph_renderer::enqueue>(event.id);
+    }
     auto &material = state->scene.get<material_graph>(event.id);
 
     material.color_map = colormap::jet();
@@ -202,7 +206,7 @@ void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color
 
         std::vector<VectorS<3>> test_data(material.width * (height + 1));
         material.edge_colors.download_data(test_data.data());
-        std::cout << MapConst<3>(test_data) << "\n";
+        std::cout << MapConst<3>(test_data).block<3, 3>(0, 0) << "\n";
     }
 
     material.use_uniform_color = false;

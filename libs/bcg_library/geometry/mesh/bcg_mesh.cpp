@@ -91,6 +91,10 @@ size_t halfedge_mesh::num_faces() const {
     return faces.size() - size_faces_deleted;
 }
 
+bool halfedge_mesh::is_valid(face_handle f) const {
+    return f.idx < faces.size();
+}
+
 bool halfedge_mesh::has_garbage() const {
     return size_faces_deleted > 0 || halfedge_graph::has_garbage();
 }
@@ -185,17 +189,19 @@ void halfedge_mesh::garbage_collection() {
     }
 
     // update vertex connectivity
+    vertex_handle v;
     for (size_t i = 0; i < nV; ++i) {
-        auto v = vertex_handle(i);
-        if (!this->is_isolated(v)) {
+        v = vertex_handle(i);
+        if (!is_isolated(v)) {
             halfedge_graph::set_halfedge(v, hmap[halfedge_graph::get_halfedge(v)]);
         }
     }
 
     // update halfedge connectivity
+    halfedge_handle h;
     for (size_t i = 0; i < nH; ++i) {
-        auto h = halfedge_handle(i);
-        halfedge_graph::set_vertex(h, vmap[halfedge_graph::get_to_vertex(h).idx]);
+        h = halfedge_handle(i);
+        halfedge_graph::set_vertex(h, vmap[halfedge_graph::get_to_vertex(h)]);
         halfedge_graph::set_next(h, hmap[halfedge_graph::get_next(h)]);
         if (!is_boundary(h)) {
             set_face(h, fmap[get_face(h)]);
@@ -203,8 +209,9 @@ void halfedge_mesh::garbage_collection() {
     }
 
     // update handles of faces
+    face_handle f;
     for (size_t i = 0; i < nF; ++i) {
-        auto f = face_handle(i);
+        f = face_handle(i);
         set_halfedge(f, hmap[get_halfedge(f)]);
     }
 
@@ -248,11 +255,12 @@ bool halfedge_mesh::is_boundary(edge_handle e) const {
 }
 
 bool halfedge_mesh::is_boundary(face_handle f) const {
-    auto h = get_halfedge(f);
-    auto hh = h;
+    halfedge_handle h = get_halfedge(f);
+    halfedge_handle hh = h;
     do {
-        if (is_boundary(get_opposite(h)))
+        if (is_boundary(get_opposite(h))) {
             return true;
+        }
         h = get_next(h);
     } while (h != hh);
     return false;
@@ -289,12 +297,14 @@ bool halfedge_mesh::is_quad_mesh() const {
 }
 
 bool halfedge_mesh::is_removal_ok(edge_handle e) const {
-    auto h0 = halfedge_graph::get_halfedge(e, 0);
-    auto h1 = halfedge_graph::get_halfedge(e, 1);
-    auto v0 = halfedge_graph::get_to_vertex(h0);
-    auto v1 = halfedge_graph::get_to_vertex(h1);
-    auto f0 = get_face(h0);
-    auto f1 = get_face(h1);
+    halfedge_handle h0 = halfedge_graph::get_halfedge(e, 0);
+    halfedge_handle h1 = halfedge_graph::get_halfedge(e, 1);
+
+    vertex_handle v0 = halfedge_graph::get_to_vertex(h0);
+    vertex_handle v1 = halfedge_graph::get_to_vertex(h1);
+
+    face_handle f0 = get_face(h0);
+    face_handle f1 = get_face(h1);
 
     // boundary?
     if (!f0.is_valid() || !f1.is_valid()) {
@@ -321,16 +331,16 @@ bool halfedge_mesh::is_removal_ok(edge_handle e) const {
 }
 
 bool halfedge_mesh::is_collapse_ok(halfedge_handle h) const {
-    auto v1v0 = halfedge_graph::get_opposite(h);
-    auto v0 = halfedge_graph::get_to_vertex(v1v0);
-    auto v1 = halfedge_graph::get_to_vertex(h);
+    halfedge_handle v1v0 = halfedge_graph::get_opposite(h);
+    vertex_handle v0 = halfedge_graph::get_to_vertex(v1v0);
+    vertex_handle v1 = halfedge_graph::get_to_vertex(h);
     vertex_handle vl, vr;
     halfedge_handle h1, h2;
 
     // the edges v1-vl and vl-v0 must not be both boundary edges
     if (!is_boundary(h)) {
-        vl = halfedge_graph::get_to_vertex(halfedge_graph::get_next(h));
         h1 = halfedge_graph::get_next(h);
+        vl = halfedge_graph::get_to_vertex(h1);
         h2 = halfedge_graph::get_next(h1);
         if (is_boundary(halfedge_graph::get_opposite(h1)) && is_boundary(halfedge_graph::get_opposite(h2))) {
             return false;
@@ -339,8 +349,8 @@ bool halfedge_mesh::is_collapse_ok(halfedge_handle h) const {
 
     // the edges v0-vr and vr-v1 must not be both boundary edges
     if (!is_boundary(v1v0)) {
-        vr = halfedge_graph::get_to_vertex(halfedge_graph::get_next(v1v0));
         h1 = halfedge_graph::get_next(v1v0);
+        vr = halfedge_graph::get_to_vertex(h1);
         h2 = halfedge_graph::get_next(h1);
         if (is_boundary(halfedge_graph::get_opposite(h1)) && is_boundary(halfedge_graph::get_opposite(h2))) {
             return false;
@@ -358,13 +368,16 @@ bool halfedge_mesh::is_collapse_ok(halfedge_handle h) const {
     }
 
     // test intersection of the one-rings of v0 and v1
-    for (const auto vv : halfedge_graph::get_vertices(v0)) {
-        if (vv != v1 && vv != vl && vv != vr) {
-            if (halfedge_graph::find_halfedge(vv, v1).is_valid()) {
+    vertex_around_vertex_circulator vvit, vvend;
+    vvit = vvend = halfedge_graph::get_vertices(v0);
+    vertex_handle vv;
+    do {
+        vv = *vvit;
+        if (vv != v1 && vv != vl && vv != vr)
+            if (find_halfedge(vv, v1).is_valid()) {
                 return false;
             }
-        }
-    }
+    } while (++vvit != vvend);
 
     // passed all tests
     return true;
@@ -376,17 +389,17 @@ bool halfedge_mesh::is_flip_ok(edge_handle e) const {
         return false;
     }
 
-    auto h0 = halfedge_graph::get_halfedge(e, 0);
-    auto h1 = halfedge_graph::get_halfedge(e, 1);
+    halfedge_handle h0 = halfedge_graph::get_halfedge(e, 0);
+    halfedge_handle h1 = halfedge_graph::get_halfedge(e, 1);
 
     //flip is only allowed in triangles
-    if (get_valence(get_face(h0)) != 3 || get_valence(get_face(h1)) != 3) {
+/*    if (get_valence(get_face(h0)) != 3 || get_valence(get_face(h1)) != 3) {
         return false;
-    }
+    }*/
 
     // check if the flipped edge is already present in the mesh
-    auto v0 = halfedge_graph::get_to_vertex(halfedge_graph::get_next(h0));
-    auto v1 = halfedge_graph::get_to_vertex(halfedge_graph::get_next(h1));
+    vertex_handle v0 = halfedge_graph::get_to_vertex(halfedge_graph::get_next(h0));
+    vertex_handle v1 = halfedge_graph::get_to_vertex(halfedge_graph::get_next(h1));
 
     // this is generally a bad sign !!!
     if (v0 == v1) {
@@ -595,8 +608,8 @@ face_handle halfedge_mesh::add_quad(vertex_handle v0, vertex_handle v1, vertex_h
 }
 
 void halfedge_mesh::adjust_outgoing_halfedge(vertex_handle v) {
-    auto h = halfedge_graph::get_halfedge(v);
-    const auto hh = h;
+    halfedge_handle h = halfedge_graph::get_halfedge(v);
+    const halfedge_handle hh = h;
 
     if (h.is_valid()) {
         do {
@@ -613,6 +626,7 @@ void halfedge_mesh::delete_face(face_handle f) {
     if (faces_deleted[f]) {
         return;
     }
+
     mark_face_deleted(f);
 
     // boundary edges of face f to be deleted
@@ -700,20 +714,19 @@ void halfedge_mesh::delete_face(face_handle f) {
 void halfedge_mesh::remove_edge(edge_handle e) {
     if (!is_removal_ok(e)) return;
 
-    auto h0 = halfedge_graph::get_halfedge(e, 0);
-    auto h1 = halfedge_graph::get_halfedge(e, 1);
+    halfedge_handle h0 = halfedge_graph::get_halfedge(e, 0);
+    halfedge_handle h1 = halfedge_graph::get_halfedge(e, 1);
 
-    auto v0 = halfedge_graph::get_to_vertex(h0);
-    auto v1 = halfedge_graph::get_to_vertex(h1);
+    vertex_handle v0 = halfedge_graph::get_to_vertex(h0);
+    vertex_handle v1 = halfedge_graph::get_to_vertex(h1);
 
-    auto f0 = get_face(h0);
-    auto f1 = get_face(h1);
+    face_handle f0 = get_face(h0);
+    face_handle f1 = get_face(h1);
 
-    auto h0_prev = halfedge_graph::get_prev(h0);
-    auto h0_next = halfedge_graph::get_next(h0);
-
-    auto h1_prev = halfedge_graph::get_prev(h1);
-    auto h1_next = halfedge_graph::get_next(h1);
+    halfedge_handle h0_prev = halfedge_graph::get_prev(h0);
+    halfedge_handle h0_next = halfedge_graph::get_next(h0);
+    halfedge_handle h1_prev = halfedge_graph::get_prev(h1);
+    halfedge_handle h1_next = halfedge_graph::get_next(h1);
 
     // adjust vertex->halfedge
     if (halfedge_graph::get_halfedge(v0) == h1) {
@@ -747,28 +760,37 @@ void halfedge_mesh::delete_edge(edge_handle e) {
     if (edges_deleted[e]) {
         return;
     }
-    auto f0 = get_face(e, 0);
-    auto f1 = get_face(e, 1);
+
+    face_handle f0 = get_face(e, 0);
+    face_handle f1 = get_face(e, 1);
+
     if (faces.is_valid(f0)) {
         delete_face(f0);
     }
     if (faces.is_valid(f1)) {
         delete_face(f1);
     }
-    mark_edge_deleted(e);
+    //mark_edge_deleted(e);
 }
 
 void halfedge_mesh::delete_vertex(vertex_handle v) {
-    if (vertices_deleted[v]) return;
+    if (vertices_deleted[v]) {
+        return;
+    }
+
     std::vector<face_handle> incident_faces;
     incident_faces.reserve(6);
+
     for (const auto &f : get_faces(v)) {
         incident_faces.push_back(f);
     }
+
     for (const auto &f : incident_faces) {
         delete_face(f);
     }
+
     mark_vertex_deleted(v);
+    assert(has_garbage());
 }
 
 halfedge_mesh::face_around_vertex_circulator::face_around_vertex_circulator(const halfedge_mesh *ds, vertex_handle v) :
@@ -938,17 +960,17 @@ void halfedge_mesh::triangulate() {
 }
 
 void halfedge_mesh::triangulate(face_handle f) {
-    auto h = get_halfedge(f);
-    auto v0 = halfedge_graph::get_from_vertex(h);
-    auto nh = halfedge_graph::get_next(h);
+    halfedge_handle h = get_halfedge(f);
+    vertex_handle v0 = halfedge_graph::get_from_vertex(h);
+    halfedge_handle nh = halfedge_graph::get_next(h);
 
     while (halfedge_graph::get_to_vertex(halfedge_graph::get_next(nh)) != v0) {
-        auto nnh(halfedge_graph::get_next(nh));
+        halfedge_handle nnh(halfedge_graph::get_next(nh));
 
-        auto new_f = new_face();
+        face_handle new_f = new_face();
         set_halfedge(new_f, h);
 
-        auto new_h = halfedge_graph::new_edge(halfedge_graph::get_to_vertex(nh), v0);
+        halfedge_handle new_h = halfedge_graph::new_edge(halfedge_graph::get_to_vertex(nh), v0);
 
         halfedge_graph::set_next(h, nh);
         halfedge_graph::set_next(nh, new_h);
@@ -969,12 +991,11 @@ void halfedge_mesh::triangulate(face_handle f) {
     set_face(h, f);
 }
 
-void halfedge_mesh::collapse(halfedge_handle h) {
+void halfedge_mesh::collapse(halfedge_handle h0) {
     //move v0 to v1
-    auto h0 = h;
-    auto h1 = halfedge_graph::get_prev(h0);
-    auto o0 = halfedge_graph::get_opposite(h0);
-    auto o1 = halfedge_graph::get_next(o0);
+    halfedge_handle h1 = halfedge_graph::get_prev(h0);
+    halfedge_handle o0 = halfedge_graph::get_opposite(h0);
+    halfedge_handle o1 = halfedge_graph::get_next(o0);
 
     // remove edge
     remove_edge_helper(h0);
@@ -989,26 +1010,29 @@ void halfedge_mesh::collapse(halfedge_handle h) {
 
     assert(faces.is_dirty());
     assert(edges.is_dirty());
+    assert(has_garbage());
 }
 
 void halfedge_mesh::remove_edge_helper(halfedge_handle h) {
-    auto hn = halfedge_graph::get_next(h);
-    auto hp = halfedge_graph::get_prev(h);
+    halfedge_handle hn = halfedge_graph::get_next(h);
+    halfedge_handle hp = halfedge_graph::get_prev(h);
 
-    auto o = halfedge_graph::get_opposite(h);
-    auto on = halfedge_graph::get_next(o);
-    auto op = halfedge_graph::get_prev(o);
+    halfedge_handle o = halfedge_graph::get_opposite(h);
+    halfedge_handle on = halfedge_graph::get_next(o);
+    halfedge_handle op = halfedge_graph::get_prev(o);
 
-    auto fh = get_face(h);
-    auto fo = get_face(o);
+    face_handle fh = get_face(h);
+    face_handle fo = get_face(o);
 
-    auto vh = halfedge_graph::get_to_vertex(h);
-    auto vo = halfedge_graph::get_to_vertex(o);
+    vertex_handle vh = halfedge_graph::get_to_vertex(h);
+    vertex_handle vo = halfedge_graph::get_to_vertex(o);
 
     // halfedge -> vertex
-    for (const auto hh : halfedge_graph::get_halfedges(vo)) {
-        halfedge_graph::set_vertex(halfedge_graph::get_opposite(hh), vh);
-    }
+    halfedge_around_vertex_circulator vhit, vhend;
+    vhit = vhend = halfedge_graph::get_halfedges(vo);
+    do {
+        set_vertex(get_opposite(*vhit), vh);
+    } while (++vhit != vhend);
 
     // halfedge -> halfedge
     halfedge_graph::set_next(hp, hn);
@@ -1035,18 +1059,17 @@ void halfedge_mesh::remove_edge_helper(halfedge_handle h) {
     assert(has_garbage());
 }
 
-void halfedge_mesh::remove_loop_helper(halfedge_handle h) {
-    auto h0 = h;
-    auto h1 = halfedge_graph::get_next(h0);
+void halfedge_mesh::remove_loop_helper(halfedge_handle h0) {
+    halfedge_handle h1 = halfedge_graph::get_next(h0);
 
-    auto o0 = halfedge_graph::get_opposite(h0);
-    auto o1 = halfedge_graph::get_opposite(h1);
+    halfedge_handle o0 = halfedge_graph::get_opposite(h0);
+    halfedge_handle o1 = halfedge_graph::get_opposite(h1);
 
-    auto v0 = halfedge_graph::get_to_vertex(h0);
-    auto v1 = halfedge_graph::get_to_vertex(h1);
+    vertex_handle v0 = halfedge_graph::get_to_vertex(h0);
+    vertex_handle v1 = halfedge_graph::get_to_vertex(h1);
 
-    auto fh = get_face(h0);
-    auto fo = get_face(o0);
+    face_handle fh = get_face(h0);
+    face_handle fo = get_face(o0);
 
     // is it a loop ?
     assert((halfedge_graph::get_next(h1) == h0) && (h1 != o0));
@@ -1074,7 +1097,7 @@ void halfedge_mesh::remove_loop_helper(halfedge_handle h) {
         mark_face_deleted(fh);
     }
 
-    mark_edge_deleted(halfedge_graph::get_edge(h));
+    mark_edge_deleted(halfedge_graph::get_edge(h0));
 
     assert(has_garbage());
 }
@@ -1084,10 +1107,10 @@ vertex_handle halfedge_mesh::split(face_handle f, const position_t &point) {
 }
 
 vertex_handle halfedge_mesh::split(face_handle f, vertex_handle v) {
-    auto hend = get_halfedge(f);
-    auto h = halfedge_graph::get_next(hend);
+    halfedge_handle hend = get_halfedge(f);
+    halfedge_handle h = halfedge_graph::get_next(hend);
 
-    auto hold = halfedge_graph::new_edge(halfedge_graph::get_to_vertex(hend), v);
+    halfedge_handle hold = halfedge_graph::new_edge(halfedge_graph::get_to_vertex(hend), v);
 
     halfedge_graph::set_next(hend, hold);
     set_face(hold, f);
@@ -1095,12 +1118,12 @@ vertex_handle halfedge_mesh::split(face_handle f, vertex_handle v) {
     hold = halfedge_graph::get_opposite(hold);
 
     while (h != hend) {
-        auto hnext = halfedge_graph::get_next(h);
+        halfedge_handle hnext = halfedge_graph::get_next(h);
 
-        auto fnew = new_face();
+        face_handle fnew = new_face();
         set_halfedge(fnew, h);
 
-        auto hnew = halfedge_graph::new_edge(halfedge_graph::get_to_vertex(h), v);
+        halfedge_handle hnew = halfedge_graph::new_edge(halfedge_graph::get_to_vertex(h), v);
 
         halfedge_graph::set_next(hnew, hold);
         halfedge_graph::set_next(hold, h);
@@ -1131,30 +1154,30 @@ halfedge_handle halfedge_mesh::split(edge_handle e, const position_t &point) {
 }
 
 halfedge_handle halfedge_mesh::split(edge_handle e, vertex_handle v) {
-    auto h0 = halfedge_graph::get_halfedge(e, 0);
-    auto o0 = halfedge_graph::get_halfedge(e, 1);
+    halfedge_handle h0 = halfedge_graph::get_halfedge(e, 0);
+    halfedge_handle o0 = halfedge_graph::get_halfedge(e, 1);
 
-    auto v2 = halfedge_graph::get_to_vertex(o0);
+    vertex_handle v2 = halfedge_graph::get_to_vertex(o0);
 
-    auto e1 = halfedge_graph::new_edge(v, v2);
-    auto t1 = halfedge_graph::get_opposite(e1);
+    halfedge_handle e1 = halfedge_graph::new_edge(v, v2);
+    halfedge_handle t1 = halfedge_graph::get_opposite(e1);
 
-    auto f0 = get_face(h0);
-    auto f3 = get_face(o0);
+    face_handle f0 = get_face(h0);
+    face_handle f3 = get_face(o0);
 
     halfedge_graph::set_halfedge(v, h0);
     halfedge_graph::set_vertex(o0, v);
 
     if (!is_boundary(h0)) {
-        auto h1 = halfedge_graph::get_next(h0);
-        auto h2 = halfedge_graph::get_next(h1);
+        halfedge_handle h1 = halfedge_graph::get_next(h0);
+        halfedge_handle h2 = halfedge_graph::get_next(h1);
 
-        auto v1 = halfedge_graph::get_to_vertex(h1);
+        vertex_handle v1 = halfedge_graph::get_to_vertex(h1);
 
-        auto e0 = halfedge_graph::new_edge(v, v1);
-        auto t0 = halfedge_graph::get_opposite(e0);
+        halfedge_handle e0 = halfedge_graph::new_edge(v, v1);
+        halfedge_handle t0 = halfedge_graph::get_opposite(e0);
 
-        auto f1 = new_face();
+        face_handle f1 = new_face();
         set_halfedge(f0, h0);
         set_halfedge(f1, h2);
 
@@ -1180,15 +1203,15 @@ halfedge_handle halfedge_mesh::split(edge_handle e, vertex_handle v) {
     }
 
     if (!is_boundary(o0)) {
-        auto o1 = halfedge_graph::get_next(o0);
-        auto o2 = halfedge_graph::get_next(o1);
+        halfedge_handle o1 = halfedge_graph::get_next(o0);
+        halfedge_handle o2 = halfedge_graph::get_next(o1);
 
-        auto v3 = halfedge_graph::get_to_vertex(o1);
+        vertex_handle v3 = halfedge_graph::get_to_vertex(o1);
 
-        auto e2 = halfedge_graph::new_edge(v, v3);
-        auto t2 = halfedge_graph::get_opposite(e2);
+        halfedge_handle e2 = halfedge_graph::new_edge(v, v3);
+        halfedge_handle t2 = halfedge_graph::get_opposite(e2);
 
-        auto f2 = new_face();
+        face_handle f2 = new_face();
         set_halfedge(f2, o1);
         set_halfedge(f3, o0);
 
@@ -1243,15 +1266,15 @@ halfedge_handle halfedge_mesh::insert_vertex(halfedge_handle h0, vertex_handle v
     //   <------ <-------
     //     o0       o1
 
-    auto h2 = halfedge_graph::get_next(h0);
-    auto o0 = halfedge_graph::get_opposite(h0);
-    auto o2 = halfedge_graph::get_prev(o0);
-    auto v2 = halfedge_graph::get_to_vertex(h0);
-    auto fh = get_face(h0);
-    auto fo = get_face(o0);
+    halfedge_handle h2 = halfedge_graph::get_next(h0);
+    halfedge_handle o0 = halfedge_graph::get_opposite(h0);
+    halfedge_handle o2 = halfedge_graph::get_prev(o0);
+    vertex_handle v2 = halfedge_graph::get_to_vertex(h0);
+    face_handle fh = get_face(h0);
+    face_handle fo = get_face(o0);
 
-    auto h1 = halfedge_graph::new_edge(v, v2);
-    auto o1 = halfedge_graph::get_opposite(h1);
+    halfedge_handle h1 = halfedge_graph::new_edge(v, v2);
+    halfedge_handle o1 = halfedge_graph::get_opposite(h1);
 
     // adjust halfedge connectivity
     halfedge_graph::set_next(h1, h2);
@@ -1291,14 +1314,14 @@ halfedge_handle halfedge_mesh::insert_edge(halfedge_handle h0, halfedge_handle h
     assert(get_face(h0) == get_face(h1));
     assert(get_face(h0).is_valid());
 
-    auto v0 = halfedge_graph::get_to_vertex(h0);
-    auto v1 = halfedge_graph::get_to_vertex(h1);
-    auto h2 = halfedge_graph::get_next(h0);
-    auto h3 = halfedge_graph::get_next(h1);
-    auto h4 = halfedge_graph::new_edge(v0, v1);
-    auto h5 = halfedge_graph::get_opposite(h4);
-    auto f0 = get_face(h0);
-    auto f1 = new_face();
+    vertex_handle v0 = halfedge_graph::get_to_vertex(h0);
+    vertex_handle v1 = halfedge_graph::get_to_vertex(h1);
+    halfedge_handle h2 = halfedge_graph::get_next(h0);
+    halfedge_handle h3 = halfedge_graph::get_next(h1);
+    halfedge_handle h4 = halfedge_graph::new_edge(v0, v1);
+    halfedge_handle h5 = halfedge_graph::get_opposite(h4);
+    face_handle f0 = get_face(h0);
+    face_handle f1 = new_face();
 
     set_halfedge(f0, h0);
     set_halfedge(f1, h1);
@@ -1309,7 +1332,7 @@ halfedge_handle halfedge_mesh::insert_edge(halfedge_handle h0, halfedge_handle h
 
     halfedge_graph::set_next(h1, h5);
     halfedge_graph::set_next(h5, h2);
-    auto h = h2;
+    halfedge_handle h = h2;
     do {
         set_face(h, f1);
         h = halfedge_graph::get_next(h);
@@ -1323,18 +1346,23 @@ halfedge_handle halfedge_mesh::insert_edge(halfedge_handle h0, halfedge_handle h
 void halfedge_mesh::flip(edge_handle e) {
     assert(is_flip_ok(e));
 
-    auto a0 = halfedge_graph::get_halfedge(e, 0);
-    auto b0 = halfedge_graph::get_halfedge(e, 1);
-    auto a1 = halfedge_graph::get_next(a0);
-    auto a2 = halfedge_graph::get_next(a1);
-    auto b1 = halfedge_graph::get_next(b0);
-    auto b2 = halfedge_graph::get_next(b1);
-    auto va0 = halfedge_graph::get_to_vertex(a0);
-    auto va1 = halfedge_graph::get_to_vertex(a1);
-    auto vb0 = halfedge_graph::get_to_vertex(b0);
-    auto vb1 = halfedge_graph::get_to_vertex(b1);
-    auto fa = get_face(a0);
-    auto fb = get_face(b0);
+    halfedge_handle a0 = halfedge_graph::get_halfedge(e, 0);
+    halfedge_handle b0 = halfedge_graph::get_halfedge(e, 1);
+
+    halfedge_handle a1 = halfedge_graph::get_next(a0);
+    halfedge_handle a2 = halfedge_graph::get_next(a1);
+
+    halfedge_handle b1 = halfedge_graph::get_next(b0);
+    halfedge_handle b2 = halfedge_graph::get_next(b1);
+
+    vertex_handle va0 = halfedge_graph::get_to_vertex(a0);
+    vertex_handle va1 = halfedge_graph::get_to_vertex(a1);
+
+    vertex_handle vb0 = halfedge_graph::get_to_vertex(b0);
+    vertex_handle vb1 = halfedge_graph::get_to_vertex(b1);
+
+    face_handle fa = get_face(a0);
+    face_handle fb = get_face(b0);
 
     halfedge_graph::set_vertex(a0, va1);
     halfedge_graph::set_vertex(b0, vb1);
@@ -1342,6 +1370,7 @@ void halfedge_mesh::flip(edge_handle e) {
     halfedge_graph::set_next(a0, a2);
     halfedge_graph::set_next(a2, b1);
     halfedge_graph::set_next(b1, a0);
+
     halfedge_graph::set_next(b0, b2);
     halfedge_graph::set_next(b2, a1);
     halfedge_graph::set_next(a1, b0);
@@ -1389,11 +1418,11 @@ property<VectorI<6>, 6> halfedge_mesh::get_triangles_adjacencies() {
         for (const auto h : get_halfedges(f)) {
             adjacency.push_back((unsigned int) halfedge_graph::get_from_vertex(h).idx);
             if (!is_boundary(h)) {
-                auto o = halfedge_graph::get_opposite(h);
-                auto op = halfedge_graph::get_prev(o);
+                halfedge_handle o = halfedge_graph::get_opposite(h);
+                halfedge_handle op = halfedge_graph::get_prev(o);
                 adjacency.push_back((unsigned int) halfedge_graph::get_from_vertex(op).idx);
             } else {
-                auto p = halfedge_graph::get_prev(h);
+                halfedge_handle p = halfedge_graph::get_prev(h);
                 adjacency.push_back((unsigned int) halfedge_graph::get_from_vertex(p).idx);
             }
         }
@@ -1406,15 +1435,15 @@ property<VectorI<6>, 6> halfedge_mesh::get_triangles_adjacencies() {
 face_handle halfedge_mesh::find_closest_face(const position_t &point) const {
     distance_point3_triangle3 distance;
     face_handle closest_yet;
-    auto min_distance = scalar_max;
+    bcg_scalar_t min_distance = scalar_max;
     for (const auto f : faces) {
-        auto h = get_halfedge(f);
+        halfedge_handle h = get_halfedge(f);
 
         triangle3 triangle(positions[halfedge_graph::get_to_vertex(halfedge_graph::get_next(h))],
                            positions[halfedge_graph::get_to_vertex(h)],
                            positions[halfedge_graph::get_from_vertex(h)]);
 
-        auto dist = distance(point, triangle).distance;
+        bcg_scalar_t dist = distance(point, triangle).distance;
         if (dist < min_distance) {
             min_distance = dist;
             closest_yet = f;
@@ -1430,13 +1459,13 @@ std::vector<face_handle> halfedge_mesh::find_closest_k_face(const position_t &po
     std::vector<DistIndex> closest_k;
 
     for (const auto f : faces) {
-        auto h = get_halfedge(f);
+        halfedge_handle h = get_halfedge(f);
 
         triangle3 triangle(positions[halfedge_graph::get_to_vertex(halfedge_graph::get_next(h))],
                            positions[halfedge_graph::get_to_vertex(h)],
                            positions[halfedge_graph::get_from_vertex(h)]);
 
-        auto dist = distance(point, triangle).distance;
+        bcg_scalar_t dist = distance(point, triangle).distance;
         if (closest_k.size() < k + 1) {
             closest_k.emplace_back(dist, f);
             if (closest_k.size() == k) {
@@ -1491,15 +1520,15 @@ face_handle halfedge_mesh::find_closest_face_in_neighborhood(vertex_handle v, co
     face_handle closest_yet;
     bcg_scalar_t min_dist_yet = scalar_max;
 
-    auto valence = halfedge_graph::get_valence(v);
+    size_t valence = halfedge_graph::get_valence(v);
     size_t count = 0;
     for (const auto f : get_faces(v)) {
-        auto h = get_halfedge(f);
+        halfedge_handle h = get_halfedge(f);
         triangle3 triangle(positions[halfedge_graph::get_to_vertex(halfedge_graph::get_next(h))],
                            positions[halfedge_graph::get_to_vertex(h)],
                            positions[v]);
 
-        auto sqr_dist = distance(point, triangle).sqr_distance;
+        bcg_scalar_t sqr_dist = distance(point, triangle).sqr_distance;
         if (sqr_dist < min_dist_yet) {
             min_dist_yet = sqr_dist;
             closest_yet = f;

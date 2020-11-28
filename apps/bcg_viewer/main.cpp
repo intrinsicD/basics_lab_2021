@@ -13,6 +13,9 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_features.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_laplacian.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_curvature_taubin.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_simplification.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_remeshing.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_statistics.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
 
 int main() {
@@ -54,6 +57,18 @@ int main() {
             if(ImGui::MenuItem("Curvature Taubin")){
                 state->gui.left = gui_mesh_curvature_taubin;
             }
+            if(ImGui::MenuItem("Simplification")){
+                state->gui.left = gui_mesh_simplification;
+            }
+            if(ImGui::MenuItem("Remeshing")){
+                state->gui.left = gui_mesh_remeshing;
+            }
+            if(ImGui::MenuItem("Statistics")){
+                state->gui.left = gui_mesh_statistics;
+            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Implicit")) {
             if(ImGui::MenuItem("Marching Cubes")){
                 state->gui.left = gui_marching_cubes;
             }

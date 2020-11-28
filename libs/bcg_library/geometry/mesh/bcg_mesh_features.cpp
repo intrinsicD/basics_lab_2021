@@ -13,13 +13,8 @@ void mesh_features_boundary(halfedge_mesh &mesh, size_t parallel_grain_size){
     auto feature_vertices = mesh.vertices.get_or_add<bool, 1>("v_feature");
     auto feature_edges = mesh.edges.get_or_add<bool, 1>("e_feature");
 
-    if(!mesh.vertices.has("v_boundary") || !mesh.edges.has("e_boundary")){
-        mesh_boundary(mesh, parallel_grain_size);
-    }
+    mesh_boundary(mesh, parallel_grain_size);
 
-    if(!mesh.vertices.has("e_dihedral_angle")){
-        edge_dihedral_angles(mesh, parallel_grain_size);
-    }
     auto v_boundary = mesh.vertices.get<bool, 1>("v_boundary");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
@@ -31,7 +26,6 @@ void mesh_features_boundary(halfedge_mesh &mesh, size_t parallel_grain_size){
             }
     );
     auto e_boundary = mesh.edges.get<bool, 1>("e_boundary");
-    auto e_dihedral_angle = mesh.edges.get<bcg_scalar_t, 1>("e_dihedral_angle");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -52,9 +46,9 @@ void mesh_features_dihedral_angle(halfedge_mesh &mesh, bcg_scalar_t threshold_de
     auto feature_vertices = mesh.vertices.get_or_add<bool, 1>("v_feature");
     auto feature_edges = mesh.edges.get_or_add<bool, 1>("e_feature");
 
-    if(!mesh.vertices.has("e_dihedral_angle")){
-        edge_dihedral_angles(mesh, parallel_grain_size);
-    }
+    threshold_degrees = threshold_degrees / 180.0 * pi;
+
+    edge_dihedral_angles(mesh, parallel_grain_size);
 
     auto e_dihedral_angle = mesh.edges.get<bcg_scalar_t, 1>("e_dihedral_angle");
     tbb::parallel_for(
@@ -63,7 +57,7 @@ void mesh_features_dihedral_angle(halfedge_mesh &mesh, bcg_scalar_t threshold_de
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto e = edge_handle(i);
 
-                    feature_edges[e] = feature_edges[e]  || (e_dihedral_angle[e] > threshold_degrees);
+                    feature_edges[e] = feature_edges[e]  || (e_dihedral_angle[e] >= threshold_degrees);
 
                 }
             }
@@ -74,6 +68,10 @@ void mesh_features_dihedral_angle(halfedge_mesh &mesh, bcg_scalar_t threshold_de
 }
 
 void mesh_features(halfedge_mesh &mesh, bool boundary, bool angle, bcg_scalar_t threshold_degrees, size_t parallel_grain_size){
+    auto feature_vertices = mesh.vertices.get_or_add<bool, 1>("v_feature");
+    feature_vertices.reset(0);
+    auto feature_edges = mesh.edges.get_or_add<bool, 1>("e_feature");
+    feature_edges.reset(0);
     if(boundary) mesh_features_boundary(mesh, parallel_grain_size);
     if(angle) mesh_features_dihedral_angle(mesh, threshold_degrees, parallel_grain_size);
 }

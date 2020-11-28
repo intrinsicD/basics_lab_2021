@@ -74,6 +74,14 @@ size_t halfedge_graph::num_halfedges() const {
     return halfedges.size() - size_halfedges_deleted;
 }
 
+bool halfedge_graph::is_valid(halfedge_handle h) const{
+    return h.idx < halfedges.size();
+}
+
+bool halfedge_graph::is_valid(edge_handle e) const{
+    return e.idx < edges.size();
+}
+
 bool halfedge_graph::has_garbage() const {
     return size_edges_deleted > 0 || size_edges_deleted > 0 || point_cloud::has_garbage();
 }

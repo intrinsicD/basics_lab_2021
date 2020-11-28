@@ -30,6 +30,8 @@ struct mesh_system : public system {
 
     void on_features(const event::mesh::features &event);
 
+    void on_features_clear(const event::mesh::features_clear &event);
+
     void on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event);
 
     void on_subdivision_loop(const event::mesh::subdivision::loop &event);
@@ -43,6 +45,14 @@ struct mesh_system : public system {
     void on_build_laplacian(const event::mesh::laplacian::build &event);
 
     void on_curvature_taubin(const event::mesh::curvature::taubin &event);
+
+    void on_simplification(const event::mesh::simplification &event);
+
+    void on_remeshing_uniform(const event::mesh::remeshing::uniform &event);
+
+    void on_remeshing_adaptive(const event::mesh::remeshing::adaptive &event);
+
+    void on_statistics(const event::mesh::statistics &event);
 
     //------------------------------------------------------------------------------------------------------------------
 

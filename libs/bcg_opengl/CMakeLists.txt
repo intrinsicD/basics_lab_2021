@@ -53,6 +53,9 @@ if (BCG_OPENGL)
             guis/bcg_gui_mesh_laplacian.h guis/bcg_gui_mesh_laplacian.cpp
             guis/bcg_gui_marching_cubes.h guis/bcg_gui_marching_cubes.cpp
             guis/bcg_gui_mesh_curvature_taubin.h guis/bcg_gui_mesh_curvature_taubin.cpp
+            guis/bcg_gui_mesh_simplification.h guis/bcg_gui_mesh_simplification.cpp
+            guis/bcg_gui_mesh_remeshing.h guis/bcg_gui_mesh_remeshing.cpp
+            guis/bcg_gui_mesh_statistics.h guis/bcg_gui_mesh_statistics.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

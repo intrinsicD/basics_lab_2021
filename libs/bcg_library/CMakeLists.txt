@@ -48,9 +48,11 @@ add_library(bcg_graphics
         geometry/point_cloud/bcg_point_cloud.h geometry/point_cloud/bcg_point_cloud.cpp geometry/point_cloud/bcg_point_cloudio.h geometry/point_cloud/bcg_point_cloudio.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
+        geometry/graph/bcg_graph_edge_lengths.h geometry/graph/bcg_graph_edge_lengths.cpp
         geometry/mesh/bcg_mesh.h geometry/mesh/bcg_mesh.cpp
         geometry/mesh/bcg_meshio.h geometry/mesh/bcg_meshio.cpp
         geometry/mesh/bcg_mesh_face_area_vector.h geometry/mesh/bcg_mesh_face_area_vector.cpp
+        geometry/mesh/bcg_mesh_face_areas.h geometry/mesh/bcg_mesh_face_areas.cpp
         geometry/mesh/bcg_mesh_face_normals.h geometry/mesh/bcg_mesh_face_normals.cpp
         geometry/mesh/bcg_mesh_face_centers.h geometry/mesh/bcg_mesh_face_centers.cpp
         geometry/mesh/bcg_mesh_face_gradient.h geometry/mesh/bcg_mesh_face_gradient.cpp
@@ -75,6 +77,9 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_smoothing.h geometry/mesh/bcg_mesh_smoothing.cpp
         geometry/mesh/bcg_mesh_laplacian.h geometry/mesh/bcg_mesh_laplacian.cpp
         geometry/mesh/bcg_mesh_surface_area.h geometry/mesh/bcg_mesh_surface_area.cpp
+        geometry/mesh/bcg_mesh_simplification.h geometry/mesh/bcg_mesh_simplification.cpp
+        geometry/mesh/bcg_mesh_remeshing.h geometry/mesh/bcg_mesh_remeshing.cpp
+        geometry/mesh/bcg_mesh_statistics.h geometry/mesh/bcg_mesh_statistics.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
@@ -87,6 +92,7 @@ add_library(bcg_graphics
         geometry/distance_query/bcg_distance_triangle_point.h
         geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/kdtree/bcg_kdtree.h
+        geometry/kdtree/bcg_triangle_kdtree.h geometry/kdtree/bcg_triangle_kdtree.cpp
         geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         )

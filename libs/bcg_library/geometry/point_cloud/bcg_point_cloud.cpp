@@ -38,8 +38,25 @@ point_cloud &point_cloud::operator=(const point_cloud &other) {
     return *this;
 }
 
+void point_cloud::clear() {
+    // remove all properties
+    vertices.clear();
+
+    // really free their memory
+    vertices.free_unused_memory();
+
+    // add the standard properties back
+    positions = vertices.add<position_t, 3>("v_position");
+    vertices_deleted = vertices.add<bool, 1>("v_deleted");
+    size_vertices_deleted = 0;
+}
+
 bool point_cloud::empty() const {
     return vertices.size() == 0;
+}
+
+bool point_cloud::is_valid(vertex_handle v) const {
+    return v.idx < vertices.size();
 }
 
 bool point_cloud::has_garbage() const {
@@ -170,7 +187,7 @@ point_cloud::find_closest_vertices_radius(const point_cloud::position_t &point, 
     return indices;
 }
 
-std::string point_cloud::to_string() const{
+std::string point_cloud::to_string() const {
     std::stringstream stream;
     stream << "point cloud\n";
     if (has_garbage()) {

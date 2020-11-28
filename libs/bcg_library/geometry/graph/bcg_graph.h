@@ -59,6 +59,10 @@ struct halfedge_graph : public point_cloud {
 
     size_t num_halfedges() const;
 
+    bool is_valid(halfedge_handle h) const;
+
+    bool is_valid(edge_handle e) const;
+
     bool has_garbage() const override;
 
     void garbage_collection() override;

@@ -40,6 +40,8 @@ struct halfedge_mesh : public halfedge_graph {
 
     size_t num_faces() const;
 
+    bool is_valid(face_handle f) const;
+
     bool has_garbage() const override;
 
     void garbage_collection() override;

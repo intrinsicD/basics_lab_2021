@@ -19,6 +19,9 @@
 #include "geometry/mesh/bcg_mesh_connected_components.h"
 #include "geometry/mesh/bcg_mesh_laplacian.h"
 #include "geometry/mesh/bcg_mesh_curvature_taubin.h"
+#include "geometry/mesh/bcg_mesh_simplification.h"
+#include "geometry/mesh/bcg_mesh_remeshing.h"
+#include "geometry/mesh/bcg_mesh_statistics.h"
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -33,6 +36,7 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::boundary>().connect<&mesh_system::on_boundary>(this);
     state->dispatcher.sink<event::mesh::vertex_convex_concave>().connect<&mesh_system::on_vertex_convex_concave>(this);
     state->dispatcher.sink<event::mesh::features>().connect<&mesh_system::on_features>(this);
+    state->dispatcher.sink<event::mesh::features_clear>().connect<&mesh_system::on_features_clear>(this);
     state->dispatcher.sink<event::mesh::subdivision::catmull_clark>().connect<&mesh_system::on_subdivision_catmull_clark>(
             this);
     state->dispatcher.sink<event::mesh::subdivision::loop>().connect<&mesh_system::on_subdivision_loop>(this);
@@ -43,6 +47,10 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
             this);
     state->dispatcher.sink<event::mesh::laplacian::build>().connect<&mesh_system::on_build_laplacian>(this);
     state->dispatcher.sink<event::mesh::curvature::taubin>().connect<&mesh_system::on_curvature_taubin>(this);
+    state->dispatcher.sink<event::mesh::simplification>().connect<&mesh_system::on_simplification>(this);
+    state->dispatcher.sink<event::mesh::remeshing::uniform>().connect<&mesh_system::on_remeshing_uniform>(this);
+    state->dispatcher.sink<event::mesh::remeshing::adaptive>().connect<&mesh_system::on_remeshing_adaptive>(this);
+    state->dispatcher.sink<event::mesh::statistics>().connect<&mesh_system::on_statistics>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -131,6 +139,14 @@ void mesh_system::on_features(const event::mesh::features &event) {
     mesh_features(mesh, event.boundary, event.angle, event.threshold_degrees, state->config.parallel_grain_size);
 }
 
+void mesh_system::on_features_clear(const event::mesh::features_clear &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_clear_features(mesh);
+}
+
 void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
@@ -138,6 +154,7 @@ void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::c
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_subdivision_catmull_clark(mesh, state->config.parallel_grain_size);
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
 }
 
 void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &event) {
@@ -147,6 +164,7 @@ void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &even
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_subdivision_loop(mesh, state->config.parallel_grain_size);
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
 }
 
 void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event) {
@@ -156,6 +174,7 @@ void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &ev
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_subdivision_sqrt3(mesh, state->config.parallel_grain_size);
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
 }
 
 void mesh_system::on_connected_components_detect(const event::mesh::connected_components::detect &event) {
@@ -191,12 +210,59 @@ void mesh_system::on_build_laplacian(const event::mesh::laplacian::build &event)
     state->scene.emplace_or_replace<mesh_laplacian>(event.id, laplacian);
 }
 
-void mesh_system::on_curvature_taubin(const event::mesh::curvature::taubin &event){
+void mesh_system::on_curvature_taubin(const event::mesh::curvature::taubin &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    mesh_curvature_taubin(mesh, event.post_smoothing_steps, event.two_ring_neighborhood, state->config.parallel_grain_size);
+    mesh_curvature_taubin(mesh, event.post_smoothing_steps, event.two_ring_neighborhood,
+                          state->config.parallel_grain_size);
+}
+
+void mesh_system::on_simplification(const event::mesh::simplification &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_simplification(mesh, event.n_vertices, event.aspect_ratio,
+                        event.edge_length,
+                        event.max_valence,
+                        event.normal_deviation,
+                        event.hausdorff_error);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
+}
+
+void mesh_system::on_remeshing_uniform(const event::mesh::remeshing::uniform &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_remeshing_uniform(mesh, event.edge_length, event.iterations, event.use_projection);
+
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
+}
+
+void mesh_system::on_remeshing_adaptive(const event::mesh::remeshing::adaptive &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    mesh_remeshing_adaptive(mesh, event.min_edge_length, event.max_edge_length, event.approx_error, event.iterations,
+                            event.use_projection);
+
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
+}
+
+void mesh_system::on_statistics(const event::mesh::statistics &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto stats = mesh_statistics(mesh, state->config.parallel_grain_size);
+    state->scene.emplace_or_replace<mesh_stats>(event.id, stats);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -26,7 +26,11 @@ struct point_cloud {
 
     point_cloud &operator=(const point_cloud &other);
 
+    virtual void clear();
+
     bool empty() const;
+
+    bool is_valid(vertex_handle v) const;
 
     virtual bool has_garbage() const;
 

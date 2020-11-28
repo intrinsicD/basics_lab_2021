@@ -23,6 +23,38 @@ struct make_box{
 
 };
 
+struct simplification{
+    entt::entity id;
+    unsigned int n_vertices;
+    bcg_scalar_t aspect_ratio = 0.0;
+    bcg_scalar_t edge_length = 0.0;
+    unsigned int max_valence = 0;
+    bcg_scalar_t normal_deviation = 0.0;
+    bcg_scalar_t hausdorff_error = 0.0;
+};
+
+struct statistics{
+    entt::entity id;
+};
+
+namespace remeshing{
+    struct uniform{
+        entt::entity id;
+        bcg_scalar_t edge_length;
+        unsigned int iterations = 10;
+        bool use_projection = true;
+    };
+
+    struct adaptive{
+        entt::entity id;
+        bcg_scalar_t min_edge_length;
+        bcg_scalar_t max_edge_length;
+        bcg_scalar_t approx_error;
+        unsigned int iterations = 10;
+        bool use_projection = true;
+    };
+};
+
 namespace edge{
 struct dihedral_angle{
     entt::entity id;
@@ -69,6 +101,9 @@ struct features{
     bool boundary = true;
     bool angle = true;
     bcg_scalar_t threshold_degrees = 45;
+};
+struct features_clear{
+    entt::entity id;
 };
 namespace laplacian{
 struct build{
