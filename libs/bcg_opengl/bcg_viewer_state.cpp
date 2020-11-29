@@ -120,17 +120,6 @@ viewer_state::viewer_state() : shaders(this){
     systems["spatial_index_system"] = std::make_unique<spatial_index_system>(this);
 }
 
-VectorS<3> viewer_state::ndc_to_view_space(const VectorS<2> &ndc){
-    VectorS<3> point;
-    point.head<2>() = ndc;
-    point[2] = 1.0f;
-    VectorS<4> result = (cam.model_matrix * cam.projection_matrix.inverse() * point.homogeneous());
-    result /= result[3];
-    point = result.head<3>();
-    //point[2] = 0.0f;
-    return point;
-}
-
 vertex_container *viewer_state::get_vertices(entt::entity id) {
     vertex_container *vertices = nullptr;
     if (scene.valid(id)) {

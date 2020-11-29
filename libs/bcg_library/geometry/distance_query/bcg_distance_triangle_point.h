@@ -12,12 +12,12 @@ namespace bcg {
 template<int N>
 struct distance_point_triangle {
     struct result {
-        bcg_scalar_t distance, sqr_distance;
-        VectorS<N> closest;
+        bcg_scalar_t distance = scalar_max, sqr_distance = scalar_max;
+        VectorS <N> closest;
         VectorS<3> barycentric_coords;
     };
 
-    result operator()(const VectorS<N> &point, const triangle<N> &triangle) const {
+    result operator()(const VectorS <N> &point, const triangle <N> &triangle) const {
         VectorS<N> diff = point - triangle.points[0];
         VectorS<N> edge0 = triangle.points[1] - triangle.points[0];
         VectorS<N> edge1 = triangle.points[2] - triangle.points[0];

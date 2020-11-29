@@ -12,7 +12,7 @@ namespace bcg {
 template<bcg_index_t N>
 struct distance_point_aligned_box {
     struct result {
-        bcg_scalar_t distance, sqr_distance;
+        bcg_scalar_t distance = scalar_max, sqr_distance = scalar_max;
         VectorS<N> closest;
     };
 
@@ -24,8 +24,8 @@ struct distance_point_aligned_box {
 
 protected:
     result do_query(const VectorS<N> &point,
-                   const VectorS<N> &box_center,
-                   const VectorS<N> &box_extent) const {
+                    const VectorS<N> &box_center,
+                    const VectorS<N> &box_extent) const {
         result res{0, 0, point};
         for (int i = 0; i < N; ++i) {
             if (res.closest[i] < -box_extent[i]) {

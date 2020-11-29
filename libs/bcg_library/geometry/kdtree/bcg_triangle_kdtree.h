@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_TRIANGLE_KDTREE_H
 
 #include "mesh/bcg_mesh.h"
-#include "triangle/bcg_triangle_distance.h"
+#include "distance_query/bcg_distance_triangle_point.h"
 
 namespace bcg {
 
@@ -19,7 +19,7 @@ struct triangle_kdtree {
 
     //! nearest neighbor information
     struct NearestNeighbor {
-        triangle_distance::result result;
+        distance_point3_triangle3::result result;
         face_handle face;
         int tests;
     };

@@ -40,9 +40,11 @@ struct viewer_mouse {
     VectorS<2> last_middle_click = zero2s;
     VectorS<2> last_right_click = zero2s;
     VectorS<2> cursor_position = zero2s;
+    VectorS<2> window_coordinates = zero2s;
     VectorS<2> normalized_device_coordinates = zero2s;
     VectorS<2> last_cursor_position = zero2s;
     VectorS<2> cursor_delta = zero2s;
+    VectorS<3> world_space_position = zero3s;
     float scroll_value = 0;
 };
 
@@ -152,6 +154,14 @@ private:
 };
 
 struct viewer_picker {
+    enum class Mode{
+        disabled,
+        points,
+        vertices,
+        edges,
+        faces
+    }mode;
+
     bool valid = false;
     entt::entity entity_id;
     vertex_handle vertex_id;
@@ -188,8 +198,6 @@ struct viewer_state {
     viewer_systems systems;
     viewer_shaders shaders;
     camera cam;
-
-    VectorS<3> ndc_to_view_space(const VectorS<2> &ndc);
 
     vertex_container *get_vertices(entt::entity id);
 

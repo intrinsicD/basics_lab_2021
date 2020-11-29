@@ -209,18 +209,7 @@ void bezier_curve_system::on_mouse_motion(const event::mouse::motion &event) {
 
 VectorS<3> bezier_curve_system::get_point() const{
     if(mode == curve_mode::drawing_2d){
-        const auto &vp = state->window.framebuffer_viewport;
-        int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
-        int y = static_cast<int>( vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling);
-
-        float zf = 0.999885023f;
-        float xf = float(x - vp[0]) / ((float) vp[2]) * 2.0f - 1.0f; //ndc
-        float yf = float(y - vp[1]) / ((float) vp[3]) * 2.0f - 1.0f; //ndc
-        zf = zf * 2.0f - 1.0f;
-        VectorS<4> p = (state->cam.projection_matrix * state->cam.view_matrix()).inverse() *
-                VectorS<4>(xf, yf, zf, 1.0);
-        p /= p[3];
-        return p.head<3>();
+        return state->mouse.world_space_position;
     }else{
         return state->picker.model_space_point;
     }

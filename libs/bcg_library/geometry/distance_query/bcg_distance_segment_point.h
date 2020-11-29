@@ -12,7 +12,7 @@ namespace bcg {
 template<int N>
 struct distance_point_segment {
     struct result {
-        bcg_scalar_t distance, sqr_distance;
+        bcg_scalar_t distance = scalar_max, sqr_distance = scalar_max;
         VectorS<N> closest;
         bcg_scalar_t t;
     };

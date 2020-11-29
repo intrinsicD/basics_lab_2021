@@ -12,13 +12,11 @@ namespace bcg {
 struct mouse_system : public system {
     explicit mouse_system(viewer_state *state);
 
-    void on_button(const event::mouse::button &event);
+    void on_button(const event::internal::mouse::button &event);
 
-    void on_motion(const event::mouse::motion &event);
+    void on_motion(const event::internal::mouse::motion &event);
 
-    void on_scroll(const event::mouse::scroll &event);
-
-    void on_update(const event::internal::update &event);
+    void on_scroll(const event::internal::mouse::scroll &event);
 };
 
 }

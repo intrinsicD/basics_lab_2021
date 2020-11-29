@@ -27,7 +27,7 @@ uniform sampler2D face_color;
 
 out vec4 final_color;
 
-vec4 phong_shading(Light light, Material material){
+vec4 phong_shading(Light light, Material material, vec3 color, bool use_uniform_color){
     //ambient
     vec3 ambient = light.ambient * material.ambient;
 
@@ -43,13 +43,13 @@ vec4 phong_shading(Light light, Material material){
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
     vec3 specular = light.specular * (spec * material.specular);
 
-    vec4 color;
-    if (!material.use_uniform_color){
-        color = vec4(ambient + f_color + specular, material.alpha);
+    vec4 result_color;
+    if (!use_uniform_color){
+        result_color = vec4(ambient + color + specular, material.alpha);
     } else {
-        color = vec4(ambient + diffuse + specular, material.alpha);
+        result_color = vec4(ambient + diffuse + specular, material.alpha);
     }
-    return color;
+    return result_color;
 }
 
 ivec2 get_tex_coords(int id){
@@ -66,8 +66,11 @@ void main() {
     light.specular = vec3(1, 1, 1);
 
     if(material.use_face_color){
-        final_color = vec4(texelFetch(face_color, get_tex_coords(gl_PrimitiveID), 0).xyz, material.alpha);
+        //final_color = vec4(texelFetch(face_color, get_tex_coords(gl_PrimitiveID), 0).xyz, material.alpha);
+        bool use_uniform_color = false;
+        vec3 color = texelFetch(face_color, get_tex_coords(gl_PrimitiveID), 0).xyz;
+        final_color = phong_shading(light, material, color, use_uniform_color);
     }else{
-        final_color = phong_shading(light, material);
+        final_color = phong_shading(light, material, f_color, material.use_uniform_color);
     }
 }

@@ -415,6 +415,7 @@ halfedge_graph::vertex_around_vertex_circulator &halfedge_graph::vertex_around_v
     assert(ds);
     auto next = ds->rotate_ccw(halfedge);
     halfedge = ds->halfedges.is_valid(next) ? next : halfedge;
+    halfedge = ds->rotate_ccw(halfedge);
     active = true;
     return *this;
 }

@@ -85,11 +85,13 @@ void picking_renderer::on_begin_frame(const event::internal::begin_frame &) {
 }
 
 void picking_renderer::on_mouse_button(const event::mouse::button &event) {
-    if (!state->mouse.left) return;
+    if (!state->mouse.left || event.action == GLFW_RELEASE) return;
 
     const auto &vp = state->window.framebuffer_viewport;
-    int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
-    int y = static_cast<int>( vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling);
+/*    int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
+    int y = static_cast<int>( vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling);*/
+    int x = static_cast<int>( state->mouse.window_coordinates[0]);
+    int y = static_cast<int>( state->mouse.window_coordinates[1]);
     gl_state.set_scissor_test(true);
     gl_state.set_scissor_values(x, y, 1, 1);
     gl_state.set_depth_test(true);
@@ -135,13 +137,15 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     }
 
     entities_to_draw.clear();
-
+    glFlush();
+    glFinish();
     float zf = 1.0;
     glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zf);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     unsigned char data[4];
     glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
+    glFlush();
+    glFinish();
     gl_state.set_scissor_test(false);
     if (zf == 1.0f) {
         zf = 0.999885023f;
@@ -150,8 +154,10 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         state->picker.valid = true;
     }
 
-    float xf = float(x - vp[0]) / ((float) vp[2]) * 2.0f - 1.0f;
-    float yf = float(y - vp[1]) / ((float) vp[3]) * 2.0f - 1.0f;
+/*    float xf = float(x - vp[0]) / ((float) vp[2]) * 2.0f - 1.0f;
+    float yf = float(y - vp[1]) / ((float) vp[3]) * 2.0f - 1.0f;*/
+    float xf = state->mouse.normalized_device_coordinates[0];
+    float yf = state->mouse.normalized_device_coordinates[1];
     zf = zf * 2.0f - 1.0f;
     VectorS<4> p = (state->cam.projection_matrix * state->cam.view_matrix()).inverse() *
                    VectorS<4>(xf, yf, zf, 1.0);
@@ -205,6 +211,30 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     } else {
         state->picker.edge_id = edge_handle();
         state->picker.face_id = face_handle();
+    }
+
+    if(!state->mouse.is_dragging){
+        switch (state->picker.mode) {
+            case viewer_picker::Mode::disabled:{
+                break;
+            }
+            case viewer_picker::Mode::points:{
+                state->dispatcher.trigger<event::picker::pick::point>(state->picker.entity_id);
+                break;
+            }
+            case viewer_picker::Mode::vertices:{
+                state->dispatcher.trigger<event::picker::pick::vertex>(state->picker.entity_id);
+                break;
+            }
+            case viewer_picker::Mode::edges:{
+                state->dispatcher.trigger<event::picker::pick::edge>(state->picker.entity_id);
+                break;
+            }
+            case viewer_picker::Mode::faces:{
+                state->dispatcher.trigger<event::picker::pick::face>(state->picker.entity_id);
+                break;
+            }
+        }
     }
 }
 

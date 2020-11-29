@@ -4,7 +4,6 @@
 
 #include "bcg_mesh.h"
 #include "triangle/bcg_triangle.h"
-#include "triangle/bcg_triangle_distance.h"
 #include "distance_query/bcg_distance_triangle_point.h"
 #include "math/vector/bcg_vector_map_eigen.h"
 #include "utils/bcg_stl_utils.h"
@@ -1526,7 +1525,7 @@ face_handle halfedge_mesh::find_closest_face_in_neighborhood(vertex_handle v, co
         halfedge_handle h = get_halfedge(f);
         triangle3 triangle(positions[halfedge_graph::get_to_vertex(halfedge_graph::get_next(h))],
                            positions[halfedge_graph::get_to_vertex(h)],
-                           positions[v]);
+                           positions[halfedge_graph::get_from_vertex(h)]);
 
         bcg_scalar_t sqr_dist = distance(point, triangle).sqr_distance;
         if (sqr_dist < min_dist_yet) {

@@ -16,5 +16,16 @@ struct scroll {
     double value;
 };
 }
+namespace bcg::event::internal::mouse{
+struct button {
+    int button, action;
+};
+struct motion {
+    double x, y;
+};
+struct scroll {
+    double value;
+};
+}
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_MOUSE_H

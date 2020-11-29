@@ -82,7 +82,7 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_statistics.h geometry/mesh/bcg_mesh_statistics.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
-        geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_distance.h geometry/triangle/bcg_triangle_metric.h
+        geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_metric.h
         geometry/sphere/bcg_sphere.h geometry/sphere/bcg_sphere_fit.h geometry/sphere/bcg_sphere_sampling_fibunacci.h
         geometry/grid/bcg_base_grid.h geometry/grid/bcg_base_grid.cpp
         geometry/grid/bcg_voxel_grid.h geometry/grid/bcg_voxel_grid.cpp

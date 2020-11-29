@@ -8,6 +8,24 @@
 namespace bcg{
 
 void gui_viewer_picker(viewer_state *state){
+    if (ImGui::CollapsingHeader("Picker Mode")) {
+        static int e = 0;
+        if(ImGui::RadioButton("disabled", &e, 0)){
+            state->dispatcher.trigger<event::picker::disable>();
+        }
+        if(ImGui::RadioButton("point", &e, 1)){
+            state->dispatcher.trigger<event::picker::enable::point>();
+        }
+        if(ImGui::RadioButton("vertex", &e, 2)){
+            state->dispatcher.trigger<event::picker::enable::vertex>();
+        }
+        if(ImGui::RadioButton("edge", &e, 3)){
+            state->dispatcher.trigger<event::picker::enable::edge>();
+        }
+        if(ImGui::RadioButton("face", &e, 4)){
+            state->dispatcher.trigger<event::picker::enable::face>();
+        }
+    }
     if (ImGui::CollapsingHeader("Picker")) {
         draw_label(&state->window, "valid", std::to_string(state->picker.valid));
         draw_label(&state->window, "entity_id", std::to_string((unsigned int) state->picker.entity_id));

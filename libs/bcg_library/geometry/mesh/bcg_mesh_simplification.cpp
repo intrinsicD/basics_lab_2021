@@ -5,7 +5,7 @@
 
 #include <utility>
 #include "bcg_mesh_face_normals.h"
-#include "triangle/bcg_triangle_distance.h"
+#include "distance_query/bcg_distance_triangle_point.h"
 #include "utils/bcg_heap.h"
 
 namespace bcg {
@@ -1087,8 +1087,8 @@ bcg_scalar_t simplification::distance(face_handle f, const VectorS<3> &p) const 
     const VectorS<3> p1 = vpoint[*(++fvit)];
     const VectorS<3> p2 = vpoint[*(++fvit)];
 
-    triangle_distance distance;
-    auto result = distance(triangle3(p0, p1, p2), p);
+    distance_point3_triangle3 distance;
+    auto result = distance(p, triangle3(p0, p1, p2));
     return result.distance;
 }
 

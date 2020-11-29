@@ -140,13 +140,13 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                        state->callbacks.click_cb(state, button == GLFW_MOUSE_BUTTON_LEFT,
                                                                  (bool) action);
                                    } else {
-                                       state->dispatcher.trigger<event::mouse::button>(button, action);
+                                       state->dispatcher.trigger<event::internal::mouse::button>(button, action);
                                    }
                                });
     glfwSetCursorPosCallback(state->window.win,
                              [](GLFWwindow *glfw, double x, double y) {
                                  auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                 state->dispatcher.trigger<event::mouse::motion>(x, y);
+                                 state->dispatcher.trigger<event::internal::mouse::motion>(x, y);
                              });
     glfwSetScrollCallback(state->window.win,
                           [](GLFWwindow *glfw, double, double yoffset) {
@@ -157,7 +157,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
                                   if (state->keyboard.ctrl_pressed) {
                                       state->dispatcher.trigger<event::internal::uniform_point_size>(yoffset);
                                   } else {
-                                      state->dispatcher.trigger<event::mouse::scroll>(yoffset);
+                                      state->dispatcher.trigger<event::internal::mouse::scroll>(yoffset);
                                   }
                               }
                           });

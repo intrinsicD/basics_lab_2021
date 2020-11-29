@@ -164,10 +164,10 @@ void triangle_kdtree::nearest_recurse(Node *node, const VectorS<3> &point,
                                      NearestNeighbor &data) const {
     // terminal node?
     if (!node->left_child) {
-        triangle_distance distance;
+        distance_point3_triangle3 distance;
 
         for (const auto &t : *node->faces) {
-            auto result = distance(t, point);
+            auto result = distance(point, t);
             ++data.tests;
             if (result.distance< data.result.distance) {
                 data.result = result;
