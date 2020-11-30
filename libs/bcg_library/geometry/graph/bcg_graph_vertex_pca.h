@@ -10,16 +10,16 @@
 
 namespace bcg {
 
-Pca<3> graph_local_pca_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
+Pca<3> graph_vertex_pca_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
 
-Pca<3> graph_local_pca_weighted_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
+Pca<3> graph_vertex_pca_weighted_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
 
-Pca<3> graph_local_pca_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
+Pca<3> graph_vertex_pca_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
 
-Pca<3> graph_local_pca_weighted_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
+Pca<3> graph_vertex_pca_weighted_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean = true);
 
-void graph_local_pcas(halfedge_graph &graph, std::function<Pca<3>(halfedge_graph &, vertex_handle, bool)> method,
-                      bool compute_mean = true, size_t parallel_grain_size = 1024);
+void graph_vertex_pcas(halfedge_graph &graph, std::function<Pca<3>(halfedge_graph &, vertex_handle, bool)> method,
+                       bool compute_mean = true, size_t parallel_grain_size = 1024);
 
 }
 

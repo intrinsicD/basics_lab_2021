@@ -11,6 +11,18 @@ namespace bcg{
 
 struct viewer_state;
 
+enum class GraphType{
+    kdtree_knn = 0,
+    kdtree_radius,
+    __last__
+};
+static std::vector<std::string> graph_type_names(){
+    std::vector<std::string> names(static_cast<int>(GraphType::__last__));
+    names[static_cast<int>(GraphType::kdtree_knn)] = "kdtree_knn";
+    names[static_cast<int>(GraphType::kdtree_radius)] = "kdtree_radius";
+    return names;
+}
+
 void gui_point_cloud_graph_builder(viewer_state *state){
     static std::vector<std::string> names = graph_type_names();
     static int idx = 0;
@@ -25,21 +37,13 @@ void gui_point_cloud_graph_builder(viewer_state *state){
         ImGui::InputFloat("radius", &radius);
     }
     if(ImGui::Button("Build Graph")){
-        switch (idx){
-            case 0 : {
-                state->dispatcher.trigger<event::point_cloud::build_graph>(state->picker.entity_id, static_cast<GraphType>(idx), num_closest);
+        switch (static_cast<GraphType>(idx)){
+            case GraphType::kdtree_knn : {
+                state->dispatcher.trigger<event::point_cloud::build::graph_knn>(state->picker.entity_id, num_closest);
                 break;
             }
-            case 1 : {
-                state->dispatcher.trigger<event::point_cloud::build_graph>(state->picker.entity_id, static_cast<GraphType>(idx), 0, radius);
-                break;
-            }
-            case 2 : {
-                state->dispatcher.trigger<event::point_cloud::build_graph>(state->picker.entity_id, static_cast<GraphType>(idx), num_closest);
-                break;
-            }
-            case 3 : {
-                state->dispatcher.trigger<event::point_cloud::build_graph>(state->picker.entity_id, static_cast<GraphType>(idx), 0, radius);
+            case GraphType::kdtree_radius : {
+                state->dispatcher.trigger<event::point_cloud::build::graph_radius>(state->picker.entity_id, radius);
                 break;
             }
             default:{

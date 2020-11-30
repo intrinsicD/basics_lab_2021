@@ -14,7 +14,13 @@ struct graph_system : public system {
 
     void on_setup(const event::graph::setup &event);
 
-    void on_vertex_pca(const event::graph::vertex::pca &event);
+    void on_vertex_pca_svd(const event::graph::vertex::pca::svd &event);
+
+    void on_vertex_pca_weighted_svd(const event::graph::vertex::pca::weighted_svd &event);
+
+    void on_vertex_pca_eig(const event::graph::vertex::pca::eig &event);
+
+    void on_vertex_pca_weighted_eig(const event::graph::vertex::pca::weighted_eig &event);
 };
 
 

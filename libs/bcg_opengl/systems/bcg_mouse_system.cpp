@@ -11,6 +11,7 @@ mouse_system::mouse_system(viewer_state *state) : system("mouse_system", state) 
     state->dispatcher.sink<event::internal::mouse::button>().connect<&mouse_system::on_button>(this);
     state->dispatcher.sink<event::internal::mouse::motion>().connect<&mouse_system::on_motion>(this);
     state->dispatcher.sink<event::internal::mouse::scroll>().connect<&mouse_system::on_scroll>(this);
+    state->dispatcher.sink<event::internal::end_frame>().connect<&mouse_system::on_end_frame>(this);
 }
 
 void mouse_system::on_button(const event::internal::mouse::button &event) {
@@ -63,6 +64,10 @@ void mouse_system::on_scroll(const event::internal::mouse::scroll &event) {
     state->mouse.scroll_value = event.value;
     state->mouse.is_scrolling = true;
     state->dispatcher.trigger<event::mouse::scroll>(event.value);
+}
+
+void mouse_system::on_end_frame(const event::internal::end_frame &event){
+    state->mouse.cursor_delta.setZero();
 }
 
 }

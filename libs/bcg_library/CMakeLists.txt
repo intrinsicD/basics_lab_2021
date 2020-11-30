@@ -47,6 +47,7 @@ add_library(bcg_graphics
         geometry/bcg_property_map_eigen.h
         geometry/point_cloud/bcg_point_cloud.h geometry/point_cloud/bcg_point_cloud.cpp geometry/point_cloud/bcg_point_cloudio.h geometry/point_cloud/bcg_point_cloudio.cpp
         geometry/point_cloud/bcg_point_cloud_graph_builder.h geometry/point_cloud/bcg_point_cloud_graph_builder.cpp
+        geometry/point_cloud/bcg_point_cloud_vertex_pca.h geometry/point_cloud/bcg_point_cloud_vertex_pca.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
         geometry/graph/bcg_graph_edge_lengths.h geometry/graph/bcg_graph_edge_lengths.cpp

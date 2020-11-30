@@ -8,7 +8,7 @@
 
 namespace bcg {
 
-Pca<3> graph_local_pca_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
+Pca<3> graph_vertex_pca_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
     std::vector<VectorS<3>> points;
     for (const auto vv : graph.get_vertices(v)) {
         points.push_back(graph.positions[vv]);
@@ -19,11 +19,11 @@ Pca<3> graph_local_pca_least_squares_svd(halfedge_graph &graph, vertex_handle v,
     if (compute_mean) {
         mean = P.colwise().mean();
     }
-    LeastSquaresFitSVD(pca, P, mean);
+    least_squares_fit_svd(pca, P, mean);
     return pca;
 }
 
-Pca<3> graph_local_pca_weighted_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
+Pca<3> graph_vertex_pca_weighted_least_squares_svd(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
     std::vector<VectorS<3>> points;
     for (const auto h : graph.get_halfedges(v)) {
         auto vv = graph.get_to_vertex(h);
@@ -36,11 +36,11 @@ Pca<3> graph_local_pca_weighted_least_squares_svd(halfedge_graph &graph, vertex_
         mean = P.colwise().mean();
     }
     VectorS<-1> weights((P.rowwise() - mean.transpose()).rowwise().norm());
-    WeightedLeastSquaresFitSVD(pca, P, mean, weights);
+    weighted_least_squares_fit_svd(pca, P, mean, weights);
     return pca;
 }
 
-Pca<3> graph_local_pca_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
+Pca<3> graph_vertex_pca_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
     std::vector<VectorS<3>> points;
     for (const auto h : graph.get_halfedges(v)) {
         auto vv = graph.get_to_vertex(h);
@@ -52,11 +52,11 @@ Pca<3> graph_local_pca_least_squares_eig(halfedge_graph &graph, vertex_handle v,
     if (compute_mean) {
         mean = P.colwise().mean();
     }
-    LeastSquaresFitEigen(pca, P, mean);
+    least_squares_fit_eig(pca, P, mean);
     return pca;
 }
 
-Pca<3> graph_local_pca_weighted_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
+Pca<3> graph_vertex_pca_weighted_least_squares_eig(halfedge_graph &graph, vertex_handle v, bool compute_mean) {
     std::vector<VectorS<3>> points;
     for (const auto h : graph.get_halfedges(v)) {
         auto vv = graph.get_to_vertex(h);
@@ -69,12 +69,12 @@ Pca<3> graph_local_pca_weighted_least_squares_eig(halfedge_graph &graph, vertex_
         mean = P.colwise().mean();
     }
     VectorS<-1> weights((P.rowwise() - mean.transpose()).rowwise().norm());
-    WeightedLeastSquaresFitEigen(pca, P, mean, weights);
+    weighted_least_squares_fit_eig(pca, P, mean, weights);
     return pca;
 }
 
-void graph_local_pcas(halfedge_graph &graph, std::function<Pca<3>(halfedge_graph &, vertex_handle, bool)> method,
-                      bool compute_mean, size_t parallel_grain_size) {
+void graph_vertex_pcas(halfedge_graph &graph, std::function<Pca<3>(halfedge_graph &, vertex_handle, bool)> method,
+                       bool compute_mean, size_t parallel_grain_size) {
     auto v_pca_mean = graph.vertices.get_or_add<VectorS<3>, 3>("v_pca_mean");
     auto v_pca_normal = graph.vertices.get_or_add<VectorS<3>, 3>("v_pca_normal");
     auto v_pca_tangent1 = graph.vertices.get_or_add<VectorS<3>, 3>("v_pca_tangent1");

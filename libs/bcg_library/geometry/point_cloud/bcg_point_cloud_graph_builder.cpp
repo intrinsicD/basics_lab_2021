@@ -22,8 +22,7 @@ halfedge_graph point_cloud_build_knn_graph(vertex_container &vertices, const kdt
             h = graph.add_edge(v, vertex_handle(idx));
         }
 
-        auto valence = graph.get_valence(v);
-        assert(valence == num_closest - 1);
+        assert( graph.get_valence(v) == num_closest - 1);
     }
     return graph;
 }
@@ -34,7 +33,7 @@ halfedge_graph point_cloud_build_radius_graph(vertex_container &vertices, const 
     graph.vertices.link(vertices);
     graph.positions = graph.vertices.get<VectorS<3>, 3>("v_position");
     graph.vertices_deleted = graph.vertices.get<bool, 1>("v_deleted");
-    graph.vconn = graph.vertices.add<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
+    graph.vconn = graph.vertices.get<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
     graph.vertices.resize(vertices.size());
 
     halfedge_handle h;
@@ -44,47 +43,8 @@ halfedge_graph point_cloud_build_radius_graph(vertex_container &vertices, const 
             if(v.idx == idx) continue;
             h = graph.add_edge(v, vertex_handle(idx));
         }
-    }
-    return graph;
-}
 
-halfedge_graph point_cloud_build_knn_graph(vertex_container &vertices, const octree &octree, int num_closest){
-
-    halfedge_graph graph;
-    graph.vertices.link(vertices);
-    graph.positions = graph.vertices.get<VectorS<3>, 3>("v_position");
-    graph.vertices_deleted = graph.vertices.get<bool, 1>("v_deleted");
-    graph.vconn = graph.vertices.add<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
-    graph.vertices.resize(vertices.size());
-
-    halfedge_handle h;
-    for(const auto v : graph.vertices){
-        auto result = octree.query_knn(graph.positions[v], num_closest);
-        assert(result.indices.size() == num_closest);
-        for(const auto &idx : result.indices){
-            if(v.idx == idx) continue;
-            h = graph.add_edge(v, vertex_handle(idx));
-        }
-    }
-    return graph;
-}
-
-halfedge_graph point_cloud_build_radius_graph(vertex_container &vertices, const octree &octree,
-                                              bcg_scalar_t radius){
-    halfedge_graph graph;
-    graph.vertices.link(vertices);
-    graph.positions = graph.vertices.get<VectorS<3>, 3>("v_position");
-    graph.vertices_deleted = graph.vertices.get<bool, 1>("v_deleted");
-    graph.vconn = graph.vertices.add<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
-    graph.vertices.resize(vertices.size());
-
-    halfedge_handle h;
-    for(const auto v : graph.vertices){
-        auto result = octree.query_radius(graph.positions[v], radius);
-        for(const auto &idx : result.indices){
-            if(v.idx == idx) continue;
-            h = graph.add_edge(v, vertex_handle(idx));
-        }
+        assert( graph.get_valence(v) == result.indices.size() - 1);
     }
     return graph;
 }

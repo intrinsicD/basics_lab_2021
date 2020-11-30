@@ -5,6 +5,7 @@
 #include "bcg_opengl/guis/bcg_gui_viewer_state.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_curve.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_graph_builder.h"
+#include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_pca.h"
 #include "bcg_opengl/guis/bcg_gui_graph_vertex_pca.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
@@ -34,6 +35,9 @@ int main() {
         if (ImGui::BeginMenu("Point Cloud")) {
             if(ImGui::MenuItem("Build Graph")){
                 state->gui.left = gui_point_cloud_graph_builder;
+            }
+            if(ImGui::MenuItem("Vertex Pca")){
+                state->gui.left = gui_point_cloud_vertex_pca;
             }
             ImGui::EndMenu();
         }

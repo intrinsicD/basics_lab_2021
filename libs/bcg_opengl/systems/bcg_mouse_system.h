@@ -17,6 +17,8 @@ struct mouse_system : public system {
     void on_motion(const event::internal::mouse::motion &event);
 
     void on_scroll(const event::internal::mouse::scroll &event);
+
+    void on_end_frame(const event::internal::end_frame &event);
 };
 
 }

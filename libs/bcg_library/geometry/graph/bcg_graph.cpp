@@ -307,11 +307,14 @@ point_cloud::position_t halfedge_graph::get_vector(edge_handle e) const {
 
 halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
     auto h = find_halfedge(v0, v1);
-    if(h.is_valid()) return h;
+    if(h.is_valid()){
+        return h;
+    }
 
     h = get_halfedge(v0);
     if(!h.is_valid()){
         auto new_h = new_edge(v0, v1);
+
         auto new_o = get_opposite(new_h);
         set_next(new_h, new_o);
         set_next(new_o, new_h);
@@ -402,7 +405,7 @@ halfedge_graph::vertex_around_vertex_circulator &halfedge_graph::vertex_around_v
     assert(ds);
     auto next = ds->rotate_ccw(halfedge);
     halfedge = ds->halfedges.is_valid(next) ? next : halfedge;
-    halfedge = ds->rotate_ccw(halfedge);
+/*    halfedge = ds->rotate_ccw(halfedge);*/
     active = true;
     return *this;
 }
