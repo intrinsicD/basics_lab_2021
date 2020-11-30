@@ -169,7 +169,6 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     auto id = entt::entity(data[0] + data[1] * 256 + data[2] * 256 * 256);
     if (!state->scene.valid(id)) {
         state->picker.valid = false;
-        state->picker.entity_id = entt::null;
         return;
     }else{
         state->picker.entity_id = id;

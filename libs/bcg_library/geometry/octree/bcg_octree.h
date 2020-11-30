@@ -21,21 +21,26 @@ struct octree_node{
 };
 
 struct octree{
-    void build(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 21);
+    octree() = default;
 
-    neighbors_query query_radius(const VectorS<3> &query_point, bcg_scalar_t radius);
+    octree(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 20);
 
-    neighbors_query query_knn(const VectorS<3> &query_point, int num_closest);
+    void build(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 20);
+
+    neighbors_query query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) const;
+
+    neighbors_query query_knn(const VectorS<3> &query_point, int num_closest) const;
 
     property<VectorS<3>, 3> positions;
     aligned_box3 aabb;
     std::vector<octree_node> storage;
     std::vector<vertex_handle> indices;
     int max_depth;
+    int leaf_size;
 private:
-    void query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set);
+    void query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set) const;
 
-    void query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest, neighbors_query &result_set);
+    void query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest, neighbors_query &result_set) const;
 };
 
 }

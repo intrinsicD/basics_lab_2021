@@ -7,46 +7,48 @@
 
 #include "math/matrix/bcg_matrix_covariance.h"
 #include "Eigen/Eigenvalues"
+#include "Eigen/SVD"
 
 namespace bcg{
 
-template<int N>
-struct pca{
-    MatrixS<N, N> directions;
-    VectorS<N> loadings;
-    VectorS<N> mean;
+template<int D>
+struct Pca{
+    MatrixS<D, D> directions;
+    VectorS<D> loadings;
+    VectorS<D> mean;
 };
 
 template<int N, int D>
-inline void LeastSquaresFitSVD(pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean){
-    Eigen::JacobiSVD<MatrixS<N, D>> svd((P.rowwise() - mean.transpose()) / std::sqrt(P.rows() - 1), Eigen::ComputeFullV);
+inline void LeastSquaresFitSVD(Pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean){
+    Eigen::JacobiSVD<MatrixS<N, D>> svd((P.rowwise() - mean.transpose()) / std::sqrt(P.rows() - 1), Eigen::ComputeFullV | Eigen::ComputeFullU);
+    pca.directions = svd.matrixV();
+
+    pca.loadings.head(svd.singularValues().size()) = svd.singularValues();
+    pca.mean = mean;
+}
+
+template<int N, int D>
+inline void WeightedLeastSquaresFitSVD(Pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean, const VectorS<N> &weights){
+    Eigen::JacobiSVD<MatrixS<N, D>> svd(weights.asDiagonal() * (P.rowwise() - mean.transpose())  / std::sqrt(P.rows() - 1), Eigen::ComputeFullV | Eigen::ComputeFullU);
     pca.directions = svd.matrixV();
     pca.loadings = svd.singularValues();
     pca.mean = mean;
 }
 
 template<int N, int D>
-inline void WeightedLeastSquaresFitSVD(pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean, const VectorS<N> &weights){
-    Eigen::JacobiSVD<MatrixS<N, D>> svd((P.rowwise() - mean.transpose()).colwise().array() * weights / std::sqrt(P.rows() - 1), Eigen::ComputeFullV);
-    pca.directions = svd.matrixV();
-    pca.loadings = svd.singularValues();
-    pca.mean = mean;
-}
-
-template<int N, int D>
-inline void LeastSquaresFitEigen(pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean){
+inline void LeastSquaresFitEigen(Pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean){
     MatrixS<N, D> P_hat = P.rowwise() - mean.transpose();
     Eigen::SelfAdjointEigenSolver<MatrixS<D, D>> eig(covariance(P_hat, P_hat));
-    pca.components = eig.eigenvectors().rowwise().reverse();
+    pca.directions = eig.eigenvectors().rowwise().reverse();
     pca.loadings = eig.eigenvalues().reverse();
     pca.mean = mean;
 }
 
 template<int N, int D>
-inline void WeightedLeastSquaresFitEigen(pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean, const VectorS<N> &weights){
+inline void WeightedLeastSquaresFitEigen(Pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean, const VectorS<N> &weights){
     MatrixS<N, D> P_hat = P.rowwise() - mean.transpose();
     Eigen::SelfAdjointEigenSolver<MatrixS<D, D>> eig(covariance(P_hat, weights, P_hat));
-    pca.components = eig.eigenvectors().rowwise().reverse();
+    pca.directions = eig.eigenvectors().rowwise().reverse();
     pca.loadings = eig.eigenvalues().reverse();
     pca.mean = mean;
 }

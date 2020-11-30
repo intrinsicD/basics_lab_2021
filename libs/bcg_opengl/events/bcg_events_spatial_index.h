@@ -15,6 +15,8 @@ struct setup_kdtree{
 
 struct setup_octree{
     entt::entity id;
+    int leaf_size = 10;
+    int max_depth = 21;
 };
 
 struct setup_sampling_octree{

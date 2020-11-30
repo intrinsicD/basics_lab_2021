@@ -12,7 +12,7 @@ namespace bcg {
 struct mesh_system : public system {
     explicit mesh_system(viewer_state *state);
 
-    void on_setup_mesh(const event::mesh::setup &event);
+    void on_setup(const event::mesh::setup &event);
 
     //------------------------------------------------------------------------------------------------------------------
 

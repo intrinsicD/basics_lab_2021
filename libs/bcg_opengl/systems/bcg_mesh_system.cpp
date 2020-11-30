@@ -29,7 +29,7 @@
 namespace bcg {
 
 mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
-    state->dispatcher.sink<event::mesh::setup>().connect<&mesh_system::on_setup_mesh>(this);
+    state->dispatcher.sink<event::mesh::setup>().connect<&mesh_system::on_setup>(this);
     state->dispatcher.sink<event::mesh::make_triangle>().connect<&mesh_system::on_make_triangle>(this);
     state->dispatcher.sink<event::mesh::make_quad>().connect<&mesh_system::on_make_quad>(this);
     state->dispatcher.sink<event::mesh::make_box>().connect<&mesh_system::on_make_box>(this);
@@ -63,7 +63,7 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::edge::dihedral_angle>().connect<&mesh_system::on_dihedral_angle>(this);
 }
 
-void mesh_system::on_setup_mesh(const event::mesh::setup &event) {
+void mesh_system::on_setup(const event::mesh::setup &event) {
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
 
     state->dispatcher.trigger<event::transform::add>(event.id);

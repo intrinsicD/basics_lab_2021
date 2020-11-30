@@ -46,9 +46,11 @@ add_library(bcg_graphics
         geometry/bcg_property.h
         geometry/bcg_property_map_eigen.h
         geometry/point_cloud/bcg_point_cloud.h geometry/point_cloud/bcg_point_cloud.cpp geometry/point_cloud/bcg_point_cloudio.h geometry/point_cloud/bcg_point_cloudio.cpp
+        geometry/point_cloud/bcg_point_cloud_graph_builder.h geometry/point_cloud/bcg_point_cloud_graph_builder.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
         geometry/graph/bcg_graph_edge_lengths.h geometry/graph/bcg_graph_edge_lengths.cpp
+        geometry/graph/bcg_graph_vertex_pca.h geometry/graph/bcg_graph_vertex_pca.cpp
         geometry/mesh/bcg_mesh.h geometry/mesh/bcg_mesh.cpp
         geometry/mesh/bcg_meshio.h geometry/mesh/bcg_meshio.cpp
         geometry/mesh/bcg_mesh_face_area_vector.h geometry/mesh/bcg_mesh_face_area_vector.cpp
@@ -90,9 +92,9 @@ add_library(bcg_graphics
         geometry/distance_query/bcg_distance_segment_point.h
         geometry/distance_query/bcg_distance_aligned_box_point.h
         geometry/distance_query/bcg_distance_triangle_point.h
-        geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/kdtree/bcg_kdtree.h
         geometry/kdtree/bcg_triangle_kdtree.h geometry/kdtree/bcg_triangle_kdtree.cpp
+        geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         )

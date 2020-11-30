@@ -10,6 +10,7 @@
 #include "math/bcg_linalg.h"
 #include "bcg_neighbors_query.h"
 #include "bcg_property.h"
+#include "utils/bcg_stl_utils.h"
 
 namespace bcg {
 
@@ -44,10 +45,11 @@ struct kdtree_property {
 
     std::shared_ptr<index_t> index;
     std::shared_ptr<DatasetAdaptor> dataset;
+    int leaf_size;
 
     kdtree_property() = default;
 
-    explicit kdtree_property(property<VectorS<D>, D> positions, int leaf_max_size = 10) : dataset(std::make_shared<DatasetAdaptor>(positions)) {
+    explicit kdtree_property(property<VectorS<D>, D> positions, int leaf_max_size = 10) : dataset(std::make_shared<DatasetAdaptor>(positions)), leaf_size(leaf_max_size){
         index = std::make_shared<index_t>(static_cast<int>(D), *dataset,
                                           nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
         index->buildIndex();
@@ -65,6 +67,16 @@ struct kdtree_property {
         nanoflann::KNNResultSet<Real, bcg_index_t> resultSet(num_closest);
         resultSet.init(result.indices.data(), result.distances.data());
         index->findNeighbors(resultSet, query_point.data(), nanoflann::SearchParams());
+        return result;
+    }
+
+    inline neighbors_query query_radius(const VectorS<D> &query_point, const bcg_scalar_t radius) const {
+        neighbors_query result;
+        std::vector<std::pair<bcg_index_t, bcg_scalar_t>> items;
+        nanoflann::RadiusResultSet<Real, bcg_index_t> resultSet(radius, items);
+        resultSet.init();
+        index->findNeighbors(resultSet, query_point.data(), nanoflann::SearchParams());
+        unzip(items, &result.indices, &result.distances);
         return result;
     }
 };

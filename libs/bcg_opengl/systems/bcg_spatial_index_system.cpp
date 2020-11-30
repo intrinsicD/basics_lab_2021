@@ -5,6 +5,7 @@
 #include "bcg_spatial_index_system.h"
 #include "bcg_viewer_state.h"
 #include "geometry/kdtree/bcg_kdtree.h"
+#include "geometry/octree/bcg_octree.h"
 
 namespace bcg{
 
@@ -20,12 +21,17 @@ void spatial_index_system::on_setup_kdtree(const event::spatial_index::setup_kdt
     if (!state->scene.has<kdtree_property<bcg_scalar_t>>(event.id)) {
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &kd_tree = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(event.id, positions, 10);
+        auto &index = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(event.id, positions, 10);
     }
 }
 
 void spatial_index_system::on_setup_octree(const event::spatial_index::setup_octree &event){
     if(!state->scene.valid(event.id)) return;
+    if (!state->scene.has<octree>(event.id)) {
+        auto *vertices = state->get_vertices(event.id);
+        auto positions = vertices->get<VectorS<3>, 3>("v_position");
+        auto &index = state->scene.get_or_emplace<octree>(event.id, positions, event.leaf_size, event.max_depth);
+    }
 }
 
 void spatial_index_system::on_setup_sampling_octree(const event::spatial_index::setup_sampling_octree &event){
@@ -37,8 +43,12 @@ void spatial_index_system::on_update_indices(const event::spatial_index::update_
     auto *vertices = state->get_vertices(event.id);
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
     if (state->scene.has<kdtree_property<bcg_scalar_t>>(event.id)) {
-        auto &kd_tree = state->scene.get<kdtree_property<bcg_scalar_t>>(event.id);
-        kd_tree.build(positions);
+        auto &index = state->scene.get<kdtree_property<bcg_scalar_t>>(event.id);
+        index.build(positions, index.leaf_size);
+    }
+    if (state->scene.has<octree>(event.id)) {
+        auto &index = state->scene.get<octree>(event.id);
+        index.build(positions, index.leaf_size, index.max_depth);
     }
 }
 

@@ -52,6 +52,9 @@ std::vector<VectorS<3>> base_colormap::operator()(const VectorS<-1> &scalarfield
     }
     for (size_t i = 0; i < scalarfield.size(); ++i) {
         auto s = scalarfield[i];
+        if(std::isnan(s)){
+            s = c_min;
+        }
         auto t = std::min<bcg_scalar_t>(std::max<bcg_scalar_t>((s - c_min) / range, 0.0), 1.0);
         size_t j = interval(t);
 

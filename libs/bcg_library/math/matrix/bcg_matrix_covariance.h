@@ -17,7 +17,7 @@ inline MatrixS<D, D> covariance(const MatrixS<M, D> &mat1, const MatrixS<M, D> &
 
 template<int M, int D>
 inline MatrixS<D, D> covariance(const MatrixS<M, D> &mat1, const VectorS<M> &weights, const MatrixS<M, D> &mat2){
-    return mat1.transpose() * weights.asDiagoanl() * mat2  / weights.sum();
+    return mat1.transpose() * weights.asDiagonal() * mat2  / weights.sum();
 }
 
 }

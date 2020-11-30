@@ -551,6 +551,12 @@ struct property_container {
 
     explicit property_container(std::string name) : name(std::move(name)) {}
 
+    void link(property_container &other){
+        for(const auto &item : other.container){
+            container[item.first] = item.second;
+        }
+    }
+
     struct Iterator : public property_iterator<Iterator, base_handle, property_container> {
         explicit Iterator(base_handle v = base_handle(), property<bool, 1> deleted = {},
                           const property_container *container = nullptr) : property_iterator(v, container,

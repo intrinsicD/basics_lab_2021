@@ -12,7 +12,9 @@ namespace bcg {
 struct graph_system : public system {
     explicit graph_system(viewer_state *state);
 
-    void on_edge_centers(const event::graph::edge::centers &event);
+    void on_setup(const event::graph::setup &event);
+
+    void on_vertex_pca(const event::graph::vertex::pca &event);
 };
 
 

@@ -11,6 +11,10 @@
 
 namespace bcg {
 
+octree::octree(property<VectorS<3>, 3> positions, int leaf_size, int max_depth){
+    build(positions, leaf_size, max_depth);
+}
+
 inline uint8_t MortonCode(const VectorS<3> &center, const VectorS<3> &other) {
     uint8_t mortonCode = 0;
     if (other[0] > center[0]) {
@@ -35,6 +39,8 @@ inline void SetChildExists(uint8_t &config, uint8_t i) {
 
 void octree::build(property<VectorS<3>, 3> positions, int leaf_size, int max_depth) {
     this->max_depth = max_depth;
+    this->leaf_size = leaf_size;
+    this->positions = positions;
     indices = std::vector<vertex_handle>(positions.size());
     for (size_t i = 0; i < positions.size(); ++i) {
         aabb.grow(positions[i]);
@@ -92,60 +98,63 @@ void octree::build(property<VectorS<3>, 3> positions, int leaf_size, int max_dep
                 assert(storage.back().size <= storage[counter].size);
             }
         }
+        ++counter;
         queue.pop();
     }
 }
 
 //test if sphere overlaps with aabb
-bool overlaps(const sphere3 &sphere, const aligned_box3 &aabb){
+bool overlaps(const sphere3 &sphere, const aligned_box3 &aabb) {
     VectorS<3> xyz = (sphere.center - aabb.center()).cwiseAbs() - aabb.halfextent();
-    if(xyz[0] > sphere.radius || xyz[1] > sphere.radius || xyz[2] > sphere.radius) return false;
+    if (xyz[0] > sphere.radius || xyz[1] > sphere.radius || xyz[2] > sphere.radius) return false;
     int num_less_extent = (xyz[0] < 0) + (xyz[1] < 0) + (xyz[2] < 0);
-    if(num_less_extent > 1) return true;
+    if (num_less_extent > 1) return true;
     xyz.cwiseMax(0);
     return xyz.squaredNorm() < sphere.radius * sphere.radius;
 }
 
 //test if sphere contains aabb
-bool contains(const sphere3 &sphere, const aligned_box3 &aabb){
-    return ((sphere.center - aabb.center()).cwiseAbs() + aabb.halfextent()).squaredNorm() < sphere.radius * sphere.radius;
+bool contains(const sphere3 &sphere, const aligned_box3 &aabb) {
+    return ((sphere.center - aabb.center()).cwiseAbs() + aabb.halfextent()).squaredNorm() <
+           sphere.radius * sphere.radius;
 }
 
 //test if sphere is completely inside aabb
-bool inside(const sphere3 &sphere, const aligned_box3 &aabb){
+bool inside(const sphere3 &sphere, const aligned_box3 &aabb) {
     VectorS<3> xyz = ((sphere.center - aabb.center()).cwiseAbs().array() + sphere.radius).matrix() - aabb.halfextent();
-    if(xyz[0] > 0) return false;
-    if(xyz[1] > 0) return false;
-    if(xyz[2] > 0) return false;
+    if (xyz[0] > 0) return false;
+    if (xyz[1] > 0) return false;
+    if (xyz[2] > 0) return false;
     return true;
 }
 
-neighbors_query octree::query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) {
+neighbors_query octree::query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) const {
     neighbors_query result_set;
     query_radius(0, aabb, sphere3(query_point, radius), result_set);
     return result_set;
 }
 
-neighbors_query octree::query_knn(const VectorS<3> &query_point, int num_closest) {
+neighbors_query octree::query_knn(const VectorS<3> &query_point, int num_closest) const {
     neighbors_query result_set;
     query_knn(0, aabb, query_point, num_closest, result_set);
     return result_set;
 }
 
-void octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set){
-    if(index >= storage.size()) return;
-    if(contains(sphere, aabb)){
+void
+octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set) const {
+    if (index >= storage.size()) return;
+    if (contains(sphere, aabb)) {
         for (size_t j = storage[index].v_start; j <= storage[index].v_end; ++j) {
             result_set.indices.push_back(indices[j]);
         }
         return;
     }
 
-    if(storage[index].depth == max_depth || storage[index].config == 0){
+    if (storage[index].depth == max_depth || storage[index].config == 0) {
         bcg_scalar_t sqr_radius = sphere.radius * sphere.radius;
         for (size_t j = storage[index].v_start; j <= storage[index].v_end; ++j) {
             bcg_scalar_t sqr_distance = (positions[indices[j]] - sphere.center).squaredNorm();
-            if(sqr_distance <= sqr_radius){
+            if (sqr_distance <= sqr_radius) {
                 result_set.indices.push_back(indices[j]);
             }
         }
@@ -154,25 +163,26 @@ void octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 
 
     uint8_t offset = 0;
     for (uint8_t octant = 0; octant < 8; ++octant) {
-        if(!child_exists(storage[index].config, octant)){
+        if (!child_exists(storage[index].config, octant)) {
             continue;
         }
         aligned_box3 cbox = child_box(aabb, octant);
-        if(overlaps(sphere, cbox)){
+        if (overlaps(sphere, cbox)) {
             query_radius(storage[index].first_child_index + offset, cbox, sphere, result_set);
         }
         ++offset;
     }
 }
 
-void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest, neighbors_query &result_set){
-    if(storage[index].depth == max_depth || storage[index].config == 0){
+void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest,
+                       neighbors_query &result_set) const {
+    if (storage[index].depth == max_depth || storage[index].config == 0) {
         for (size_t j = storage[index].v_start; j <= storage[index].v_end; ++j) {
             bcg_scalar_t sqr_distance = (positions[indices[j]] - query_point).squaredNorm();
             result_set.indices.push_back(indices[j]);
             result_set.distances.push_back(sqr_distance);
         }
-        if(result_set.indices.size() >= num_closest){
+        if (result_set.indices.size() >= num_closest) {
             sort_by_first(result_set.distances, result_set.indices);
             result_set.distances.resize(num_closest);
             result_set.indices.resize(num_closest);
@@ -188,11 +198,12 @@ void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> 
         ++offset;
     }
     if (child_exists(storage[index].config, morton_code)) {
-        query_knn(storage[index].first_child_index + offset, child_box(aabb, morton_code), query_point  , num_closest, result_set);
+        query_knn(storage[index].first_child_index + offset, child_box(aabb, morton_code), query_point, num_closest,
+                  result_set);
     }
 
     for (uint8_t octant = 0; octant < 8; ++octant) {
-        if (!child_exists(storage[index].config, octant)){
+        if (!child_exists(storage[index].config, octant)) {
             continue;
         }
         if (morton_code == octant) {
@@ -201,7 +212,8 @@ void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> 
         }
         aligned_box3 cbox = child_box(aabb, octant);
 
-        if (result_set.indices.size() < num_closest || overlaps(sphere3(query_point, result_set.distances.back()), cbox)) {
+        if (result_set.indices.size() < num_closest ||
+            overlaps(sphere3(query_point, result_set.distances.back()), cbox)) {
             query_knn(storage[index].first_child_index + offset, cbox, query_point, num_closest, result_set);
         }
         ++offset;

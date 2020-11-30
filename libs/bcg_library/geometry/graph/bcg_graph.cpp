@@ -306,6 +306,7 @@ point_cloud::position_t halfedge_graph::get_vector(edge_handle e) const {
 }
 
 halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
+    //TODO fix this, it seems the one ring is not closed for the iterators
     auto h = find_halfedge(v0, v1);
     if (!h.is_valid()) {
         h = new_edge(v0, v1);
