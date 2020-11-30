@@ -306,42 +306,28 @@ point_cloud::position_t halfedge_graph::get_vector(edge_handle e) const {
 }
 
 halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
-    //TODO fix this, it seems the one ring is not closed for the iterators
     auto h = find_halfedge(v0, v1);
-    if (!h.is_valid()) {
-        h = new_edge(v0, v1);
+    if(h.is_valid()) return h;
+
+    h = get_halfedge(v0);
+    if(!h.is_valid()){
+        auto new_h = new_edge(v0, v1);
+        auto new_o = get_opposite(new_h);
+        set_next(new_h, new_o);
+        set_next(new_o, new_h);
+        set_halfedge(v0, new_h);
+        return h;
     }
 
     auto o = get_opposite(h);
+    auto no = get_next(o);
 
-    auto v0_outgoing = get_halfedge(v0);
+    auto new_h = new_edge(v0, v1);
+    auto new_o = get_opposite(new_h);
 
-    if (halfedges.is_valid(v0_outgoing)) {
-        auto prev_v0_outgoing = get_prev(v0_outgoing);
-        if (halfedges.is_valid(prev_v0_outgoing)) {
-            set_next(prev_v0_outgoing, h);
-            set_next(o, v0_outgoing);
-        } else {
-            set_next(get_opposite(v0_outgoing), h);
-            set_next(o, v0_outgoing);
-        }
-    }
-
-    set_halfedge(v0, h);
-
-    auto v1_outgoing = get_halfedge(v1);
-    if (halfedges.is_valid(v1_outgoing)) {
-        auto prev_v1_outgoing = get_prev(v1_outgoing);
-        if (halfedges.is_valid(prev_v1_outgoing)) {
-            set_next(h, v1_outgoing);
-            set_next(prev_v1_outgoing, o);
-        } else {
-            set_next(h, v1_outgoing);
-            set_next(get_opposite(v1_outgoing), o);
-        }
-    }
-
-    set_halfedge(v1, o);
+    set_next(new_o, no);
+    set_next(o, new_h);
+    set_halfedge(v0, new_h);
 
     assert(halfedges.is_dirty());
     assert(edges.is_dirty());
