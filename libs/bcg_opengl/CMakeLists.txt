@@ -10,7 +10,7 @@ if (BCG_OPENGL)
     add_library(bcg_opengl
             bcg_imgui.h bcg_imgui.cpp
             bcg_opengl.h bcg_opengl.cpp
-            bcg_camera.h bcg_camera.cpp
+            bcg_camera.h bcg_camera.cpp bcg_projection_matrix.h bcg_projection_matrix.cpp
             bcg_viewer.h bcg_viewer.cpp
             renderers/bcg_material.h
             bcg_viewer_state.h bcg_viewer_state.cpp

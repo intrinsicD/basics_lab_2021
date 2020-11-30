@@ -6,12 +6,13 @@
 #define BCG_GRAPHICS_BCG_CAMERA_H
 
 #include "math/bcg_linalg.h"
+#include "bcg_projection_matrix.h"
 
 namespace bcg {
 
 struct camera {
     //TODO Fix camera like in learnopengl
-    MatrixS<4, 4> projection_matrix;
+    projection proj;
     Transform model_matrix;
     VectorS<3> target_point;
     bcg_scalar_t near, far, aspect, fovy_degrees;
@@ -31,15 +32,17 @@ struct camera {
 
     bcg_scalar_t fovy_radians() const;
 
-    VectorS<3> front_vec() const;
+    VectorS<3> direction_vec() const;
 
     VectorS<3> up_vec() const;
 
-    VectorS<3> left_vec() const;
+    VectorS<3> right_vec() const;
 
     VectorS<3> position() const;
 
     MatrixS<4, 4> view_matrix() const;
+
+    MatrixS<4, 4> projection_matrix() const;
 
     void update_projection();
 

@@ -102,7 +102,7 @@ void graph_renderer::on_render(const event::internal::render &) {
 
     auto program = programs["graph_renderer_program"];
     program.bind();
-    Matrix<float, 4, 4> proj = state->cam.projection_matrix.cast<float>();
+    Matrix<float, 4, 4> proj = state->cam.projection_matrix().cast<float>();
     program.set_uniform_matrix_4f("proj", proj.data());
     Matrix<float, 4, 4> view = state->cam.view_matrix().cast<float>();
     program.set_uniform_matrix_4f("view", view.data());

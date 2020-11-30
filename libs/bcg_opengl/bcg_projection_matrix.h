@@ -5,11 +5,23 @@
 #ifndef BCG_GRAPHICS_BCG_PROJECTION_MATRIX_H
 #define BCG_GRAPHICS_BCG_PROJECTION_MATRIX_H
 
-#include "bcg_linalg.h"
+#include "math/matrix/bcg_matrix.h"
 
 namespace bcg{
 
+struct projection{
+    MatrixS<4, 4> matrix;
 
+    projection();
+
+    void perspective(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t aspect, bcg_scalar_t fovy_radians);
+
+    void perspective(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t top, bcg_scalar_t bottom, bcg_scalar_t left, bcg_scalar_t right);
+
+    void orthographic(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t aspect, bcg_scalar_t fovy_radians);
+
+    void orthographic(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t top, bcg_scalar_t bottom, bcg_scalar_t left, bcg_scalar_t right) ;
+};
 
 }
 

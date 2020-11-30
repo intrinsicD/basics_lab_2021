@@ -35,18 +35,18 @@ void mouse_system::on_button(const event::internal::mouse::button &event) {
 
 void mouse_system::on_motion(const event::internal::mouse::motion &event) {
     state->mouse.last_cursor_position = state->mouse.cursor_position;
-    state->mouse.cursor_position[0] = event.x;
-    state->mouse.cursor_position[1] = event.y;
+    state->mouse.cursor_position[0] = event.x * state->window.high_dpi_scaling;
+    state->mouse.cursor_position[1] = event.y * state->window.high_dpi_scaling;
     const auto &vp = state->window.framebuffer_viewport;
-    state->mouse.window_coordinates[0] = state->mouse.cursor_position[0] * state->window.high_dpi_scaling;
-    state->mouse.window_coordinates[1] = vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling;;
+    state->mouse.window_coordinates[0] = state->mouse.cursor_position[0];
+    state->mouse.window_coordinates[1] = vp[3] - state->mouse.cursor_position[1];
 
     state->mouse.normalized_device_coordinates[0] =
             (state->mouse.window_coordinates[0] - vp[0]) / bcg_scalar_t(vp[2]) * 2.0 - 1.0;
     state->mouse.normalized_device_coordinates[1] =
             (state->mouse.window_coordinates[1] - vp[1]) / bcg_scalar_t(vp[3]) * 2.0 - 1.0;
 
-    VectorS<4> p = (state->cam.projection_matrix * state->cam.view_matrix()).inverse() *
+    VectorS<4> p = (state->cam.projection_matrix() * state->cam.view_matrix()).inverse() *
                    VectorS<4>(state->mouse.normalized_device_coordinates[0],
                               state->mouse.normalized_device_coordinates[1], 0.999885023 * 2.0 - 1.0, 1.0);
     p /= p[3];
@@ -56,7 +56,7 @@ void mouse_system::on_motion(const event::internal::mouse::motion &event) {
     state->mouse.is_moving = true;
     state->mouse.is_dragging =
             state->mouse.is_moving && (state->mouse.left || state->mouse.middle || state->mouse.right);
-    state->dispatcher.trigger<event::mouse::motion>(event.x, event.y);
+    state->dispatcher.trigger<event::mouse::motion>(state->mouse.cursor_position[0], state->mouse.cursor_position[1]);
 }
 
 void mouse_system::on_scroll(const event::internal::mouse::scroll &event) {

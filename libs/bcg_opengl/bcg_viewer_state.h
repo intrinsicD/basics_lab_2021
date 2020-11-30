@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_VIEWER_CORE_H
 
 #include <memory>
+#include <unordered_map>
 
 #include "bcg_camera.h"
 #include "bcg_imgui.h"
@@ -171,7 +172,7 @@ struct viewer_picker {
     VectorS<3> model_space_point;
     VectorS<3> world_space_point;
     VectorS<3> view_space_point;
-    std::vector<entt::entity> selected_entities;
+    std::unordered_map<size_t, entt::entity> selected_entities;
 };
 
 struct viewer_config {
@@ -198,6 +199,8 @@ struct viewer_state {
     viewer_systems systems;
     viewer_shaders shaders;
     camera cam;
+
+    VectorS<4> get_viewport() const;
 
     vertex_container *get_vertices(entt::entity id);
 

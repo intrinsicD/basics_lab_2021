@@ -545,13 +545,13 @@ void halfedge_graph::mark_edge_deleted(edge_handle e) {
 edge_handle halfedge_graph::find_closest_edge(const halfedge_graph::position_t &point) {
     edge_handle closest_yet;
     distance_point3_segment3 distance;
-    bcg_scalar_t min_sqr_dist_yet = scalar_max;
+    bcg_scalar_t min_dist_yet = scalar_max;
     for (const auto e : edges) {
         segment3 seg(positions[get_vertex(e, 0)], positions[get_vertex(e, 1)]);
 
-        bcg_scalar_t sqr_dist = distance(point, seg).sqr_distance;
-        if (sqr_dist < min_sqr_dist_yet) {
-            min_sqr_dist_yet = sqr_dist;
+        bcg_scalar_t dist = distance(point, seg).distance;
+        if (dist < min_dist_yet) {
+            min_dist_yet = dist;
             closest_yet = e;
         }
     }
@@ -565,9 +565,9 @@ std::vector<edge_handle> halfedge_graph::find_closest_k_edges(const halfedge_gra
     for (const auto e : edges) {
         segment3 seg(positions[get_vertex(e, 0)], positions[get_vertex(e, 1)]);
 
-        bcg_scalar_t sqr_dist = distance(point, seg).sqr_distance;
+        bcg_scalar_t dist = distance(point, seg).distance;
         if (closest_k.size() < k + 1) {
-            closest_k.emplace_back(sqr_dist, e);
+            closest_k.emplace_back(dist, e);
             if (closest_k.size() == k) {
                 std::sort(closest_k.begin(), closest_k.end(), [](const DistIndex &lhs, const DistIndex &rhs) {
                     return lhs.first < rhs.first;
@@ -577,8 +577,8 @@ std::vector<edge_handle> halfedge_graph::find_closest_k_edges(const halfedge_gra
             continue;
         }
 
-        if (sqr_dist < closest_k.back().first) {
-            closest_k.back() = std::make_pair(sqr_dist, e);
+        if (dist < closest_k.back().first) {
+            closest_k.back() = std::make_pair(dist, e);
             std::sort(closest_k.begin(), closest_k.end(), [](const DistIndex &lhs, const DistIndex &rhs) {
                 return lhs.first < rhs.first;
             });
@@ -597,9 +597,9 @@ halfedge_graph::find_closest_edges_radius(const halfedge_graph::position_t &poin
     for (const auto e : edges) {
         segment3 seg(positions[get_vertex(e, 0)], positions[get_vertex(e, 1)]);
 
-        bcg_scalar_t sqr_dist = distance(point, seg).sqr_distance;
-        if (sqr_dist <= radius) {
-            closest.emplace_back(sqr_dist, e);
+        bcg_scalar_t dist = distance(point, seg).distance;
+        if (dist <= radius) {
+            closest.emplace_back(dist, e);
         }
     }
     std::sort(closest.begin(), closest.end(), [](const DistIndex &lhs, const DistIndex &rhs) {
@@ -618,9 +618,9 @@ edge_handle halfedge_graph::find_closest_edge_in_neighborhood(vertex_handle v,
     for (const auto h : get_halfedges(v)) {
         segment3 seg(positions[get_from_vertex(h)], positions[get_to_vertex(h)]);
 
-        bcg_scalar_t sqr_dist = distance(point, seg).sqr_distance;
-        if (sqr_dist < min_dist_yet) {
-            min_dist_yet = sqr_dist;
+        bcg_scalar_t dist = distance(point, seg).distance;
+        if (dist < min_dist_yet) {
+            min_dist_yet = dist;
             closest_yet = get_edge(h);
         }
     }

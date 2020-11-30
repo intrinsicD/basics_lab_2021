@@ -60,7 +60,7 @@ void gui_viewer_camera(viewer_state *state){
         ss << state->cam.view_matrix();
         draw_label(&state->window, "view\n\n\n\n", ss.str());
         ss.str("");
-        ss << state->cam.projection_matrix;
+        ss << state->cam.projection_matrix();
         draw_label(&state->window, "projection\n\n\n\n", ss.str());
         ss.str("");
         ImGui::Separator();

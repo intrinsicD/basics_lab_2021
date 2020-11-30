@@ -85,13 +85,14 @@ void picking_renderer::on_begin_frame(const event::internal::begin_frame &) {
 }
 
 void picking_renderer::on_mouse_button(const event::mouse::button &event) {
+    if(state->mouse.is_captured_by_gui) return;
     if (!state->mouse.left || event.action == GLFW_RELEASE) return;
 
     const auto &vp = state->window.framebuffer_viewport;
 /*    int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
     int y = static_cast<int>( vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling);*/
-    int x = static_cast<int>( state->mouse.window_coordinates[0]);
-    int y = static_cast<int>( state->mouse.window_coordinates[1]);
+    float x = state->mouse.window_coordinates[0];
+    float y = state->mouse.window_coordinates[1];
     gl_state.set_scissor_test(true);
     gl_state.set_scissor_values(x, y, 1, 1);
     gl_state.set_depth_test(true);
@@ -101,7 +102,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     auto program = programs["picking_renderer_program"];
     program.bind();
-    Matrix<float, 4, 4> proj = state->cam.projection_matrix.cast<float>();
+    Matrix<float, 4, 4> proj = state->cam.projection_matrix().cast<float>();
     program.set_uniform_matrix_4f("proj", proj.data());
     Matrix<float, 4, 4> view = state->cam.view_matrix().cast<float>();
     program.set_uniform_matrix_4f("view", view.data());
@@ -123,11 +124,11 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
 
-        if (shape.edge_buffer) {
+        if (state->scene.has<halfedge_graph>(id)) {
             shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
             glDrawArrays(GL_POINTS, 0, shape.num_vertices);
-        } else if(shape.triangle_buffer){
+        } else if(state->scene.has<halfedge_mesh>(id)){
             shape.triangle_buffer.bind();
             glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
         }else{
@@ -147,6 +148,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     glFlush();
     glFinish();
     gl_state.set_scissor_test(false);
+
     if (zf == 1.0f) {
         zf = 0.999885023f;
         state->picker.valid = false;
@@ -156,11 +158,10 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
 /*    float xf = float(x - vp[0]) / ((float) vp[2]) * 2.0f - 1.0f;
     float yf = float(y - vp[1]) / ((float) vp[3]) * 2.0f - 1.0f;*/
-    float xf = state->mouse.normalized_device_coordinates[0];
-    float yf = state->mouse.normalized_device_coordinates[1];
-    zf = zf * 2.0f - 1.0f;
-    VectorS<4> p = (state->cam.projection_matrix * state->cam.view_matrix()).inverse() *
-                   VectorS<4>(xf, yf, zf, 1.0);
+    bcg_scalar_t xf = state->mouse.normalized_device_coordinates[0];
+    bcg_scalar_t yf = state->mouse.normalized_device_coordinates[1];
+    VectorS<4> p = (state->cam.projection_matrix() * state->cam.view_matrix()).inverse() *
+                   VectorS<4>(xf, yf, zf * 2.0f - 1.0f, 1.0);
     p /= p[3];
     state->picker.world_space_point = p.head<3>();
 
@@ -168,13 +169,21 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     auto id = entt::entity(data[0] + data[1] * 256 + data[2] * 256 * 256);
     if (!state->scene.valid(id)) {
         state->picker.valid = false;
+        state->picker.entity_id = entt::null;
+        return;
     }else{
         state->picker.entity_id = id;
+        std::cout << "clicked on entity_id: " << (unsigned int) id << "\n";
         if(state->mouse.left && state->keyboard.ctrl_pressed && !state->keyboard.shift_pressed){
             state->picker.selected_entities.clear();
         }
         if(state->mouse.left && state->keyboard.ctrl_pressed && state->keyboard.shift_pressed){
-            state->picker.selected_entities.push_back(id);
+            auto iter = state->picker.selected_entities.find((size_t)id);
+            if(iter != state->picker.selected_entities.end()){
+                state->picker.selected_entities[(size_t)id] = id;
+            }else{
+                state->picker.selected_entities.erase(iter);
+            }
         }
     }
 

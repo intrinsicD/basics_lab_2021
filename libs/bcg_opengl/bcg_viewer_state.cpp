@@ -120,6 +120,12 @@ viewer_state::viewer_state() : shaders(this){
     systems["spatial_index_system"] = std::make_unique<spatial_index_system>(this);
 }
 
+VectorS<4> viewer_state::get_viewport() const{
+    Vector<int, 4> vp(Vector<int, 4>::Zero());
+    glGetIntegerv(GL_VIEWPORT, vp.data());
+    return vp.cast<bcg_scalar_t>();
+}
+
 vertex_container *viewer_state::get_vertices(entt::entity id) {
     vertex_container *vertices = nullptr;
     if (scene.valid(id)) {

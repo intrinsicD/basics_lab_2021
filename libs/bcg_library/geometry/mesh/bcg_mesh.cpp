@@ -1527,16 +1527,16 @@ face_handle halfedge_mesh::find_closest_face_in_neighborhood(vertex_handle v, co
                            positions[halfedge_graph::get_to_vertex(h)],
                            positions[halfedge_graph::get_from_vertex(h)]);
 
-        bcg_scalar_t sqr_dist = distance(point, triangle).sqr_distance;
-        if (sqr_dist < min_dist_yet) {
-            min_dist_yet = sqr_dist;
+        bcg_scalar_t dist = distance(point, triangle).distance;
+        if (dist < min_dist_yet) {
+            min_dist_yet = dist;
             closest_yet = f;
         }
         ++count;
         if (count > valence) {
             std::cerr << "infinite loop?\n";
         }
-        if (sqr_dist == 0) break;
+        if (dist == 0) break;
     }
     return closest_yet;
 }

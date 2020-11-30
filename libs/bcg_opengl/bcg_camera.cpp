@@ -8,7 +8,7 @@
 
 namespace bcg {
 
-camera::camera() : projection_matrix(MatrixS<4, 4>::Identity()),
+camera::camera() : proj(),
                    model_matrix(Translation(0.0, 0.0, 8.0)),
                    target_point(zero3s),
                    near(0.01),
@@ -22,7 +22,7 @@ camera::camera() : projection_matrix(MatrixS<4, 4>::Identity()),
                    orthographic(false),
                    last_point_3d(0, 0, 0),
                    last_point_ok(false),
-                   rot_speed(5){
+                   rot_speed(5) {
 
 }
 
@@ -43,7 +43,7 @@ void camera::init(int width, int height) {
 void camera::set_target(const VectorS<3> &target) {
     target_point = target;
     VectorS<3> diff = target_point - position();
-    VectorS<3> front = front_vec();
+    VectorS<3> front = direction_vec();
     model_matrix = Translation(diff - front * front.dot(diff)) * model_matrix;
 }
 
@@ -51,7 +51,7 @@ bcg_scalar_t camera::fovy_radians() const {
     return fovy_degrees * pi / 360.0;
 }
 
-VectorS<3> camera::front_vec() const {
+VectorS<3> camera::direction_vec() const {
     return model_matrix.matrix().col(2).head<3>();
 }
 
@@ -59,7 +59,7 @@ VectorS<3> camera::up_vec() const {
     return model_matrix.matrix().col(1).head<3>();
 }
 
-VectorS<3> camera::left_vec() const {
+VectorS<3> camera::right_vec() const {
     return model_matrix.matrix().col(0).head<3>();
 }
 
@@ -71,33 +71,15 @@ MatrixS<4, 4> camera::view_matrix() const {
     return model_matrix.inverse().matrix();
 }
 
+MatrixS<4, 4> camera::projection_matrix() const{
+    return proj.matrix;
+}
+
 void camera::update_projection() {
-    projection_matrix.setIdentity();
-
     if (orthographic) {
-        projection_matrix(0, 0) = 2.0 / (right - left);
-        projection_matrix(1, 1) = 2.0 / (top - bottom);
-        projection_matrix(2, 2) = -2.0 / (far - near);
-        projection_matrix(3, 0) = -(right + left) / (right - left);
-        projection_matrix(3, 1) = -(top + bottom) / (top - bottom);
-        projection_matrix(3, 2) = -(far + near) / (far - near);
-        projection_matrix(3, 3) = 0.0;
+        proj.orthographic(0, (target_point - position()).norm(), aspect, fovy_radians());
     } else {
-        assert(std::abs(aspect - scalar_eps) > 0);
-
-        top = near * std::tan(fovy_radians());
-        bottom = -top;
-        left = bottom * aspect;
-        right = top * aspect;
-
-        projection_matrix(0, 0) = (near + near) / (right - left);
-        projection_matrix(0, 2) = (right + left) / (right - left);
-        projection_matrix(1, 1) = (near + near) / (top - bottom);
-        projection_matrix(1, 2) = (top + bottom) / (top - bottom);
-        projection_matrix(2, 2) = -(far + near) / (far - near);
-        projection_matrix(2, 3) = -2.0 * far * near / (far - near);
-        projection_matrix(3, 2) = -1.0;
-        projection_matrix(3, 3) = 0.0;
+        proj.perspective(near, far, aspect, fovy_radians());
     }
 }
 

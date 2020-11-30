@@ -310,7 +310,6 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
             set_close(&state, true);
         }
 
-
         glfwGetWindowSize(win, &state.window.width, &state.window.height);
         int vw, vh;
         glfwGetFramebufferSize(win, &vw, &vh);

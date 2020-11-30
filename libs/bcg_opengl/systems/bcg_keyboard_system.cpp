@@ -105,12 +105,12 @@ void keyboard_system::on_update(const event::internal::update &event) {
      * use on_keyboard if you want to enable, disable stuff
     * */
     if (state->keyboard.keys[GLFW_KEY_A]) {
-        state->cam.model_matrix.translation() -= state->cam.left_vec() * state->time.time_delta;
+        state->cam.model_matrix.translation() -= state->cam.right_vec() * state->time.time_delta;
     }
     if (state->keyboard.keys[GLFW_KEY_B]) {}
     if (state->keyboard.keys[GLFW_KEY_C]) {}
     if (state->keyboard.keys[GLFW_KEY_D]) {
-        state->cam.model_matrix.translation() += state->cam.left_vec() * state->time.time_delta;
+        state->cam.model_matrix.translation() += state->cam.right_vec() * state->time.time_delta;
     }
     if (state->keyboard.keys[GLFW_KEY_E]) {}
     if (state->keyboard.keys[GLFW_KEY_F]) {}
@@ -127,13 +127,13 @@ void keyboard_system::on_update(const event::internal::update &event) {
     if (state->keyboard.keys[GLFW_KEY_Q]) {}
     if (state->keyboard.keys[GLFW_KEY_R]) {}
     if (state->keyboard.keys[GLFW_KEY_S]) {
-        state->cam.model_matrix.translation() += state->cam.front_vec() * state->time.time_delta;
+        state->cam.model_matrix.translation() += state->cam.direction_vec() * state->time.time_delta;
     }
     if (state->keyboard.keys[GLFW_KEY_T]) {}
     if (state->keyboard.keys[GLFW_KEY_U]) {}
     if (state->keyboard.keys[GLFW_KEY_V]) {}
     if (state->keyboard.keys[GLFW_KEY_W]) {
-        state->cam.model_matrix.translation() -= state->cam.front_vec() * state->time.time_delta;
+        state->cam.model_matrix.translation() -= state->cam.direction_vec() * state->time.time_delta;
     }
     if (state->keyboard.keys[GLFW_KEY_X]) {}
     if (state->keyboard.keys[GLFW_KEY_Y]) {}
