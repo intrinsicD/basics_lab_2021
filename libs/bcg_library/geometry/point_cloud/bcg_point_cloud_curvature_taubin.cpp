@@ -3,26 +3,30 @@
 //
 
 #include "bcg_gui_point_cloud_curvature_taubin.h"
+#include "math/bcg_vertex_classify_curvature.h"
+#include "bcg_property_map_eigen.h"
 #include "tbb/tbb.h"
 #include "Eigen/Eigenvalues"
 
-namespace bcg{
+namespace bcg {
 
-void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index , int num_closest , size_t parallel_grain_size){
+void
+point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index, int num_closest,
+                             size_t parallel_grain_size) {
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
-    auto min = vertices->get_or_add<bcg_scalar_t , 1>("v_pc_curv_min");
+    auto min = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_min");
     auto max = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_max");
     auto mean = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_mean");
     auto gauss = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_gauss");
     auto min_direction = vertices->get_or_add<VectorS<3>, 3>("v_pc_curv_min_dir");
     auto max_direction = vertices->get_or_add<VectorS<3>, 3>("v_pc_curv_max_dir");
-    if(!vertices->has("v_pca_loading")){
+    if (!vertices->has("v_pca_loading")) {
         std::cout << "please compute vertex pca first!\n";
         return;
     }
     auto v_pca_loading = vertices->get<VectorS<3>, 3>("v_pca_loading");
     auto normals = vertices->get<VectorS<3>, 3>("v_normal");
-    if(!normals){
+    if (!normals || MapConst(normals).sum() == 0) {
         normals = vertices->get<VectorS<3>, 3>("v_pca_normal");
     }
 
@@ -47,6 +51,12 @@ void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_prope
                         ev /= l;
                         l *= 0.5;
                         ev *= sqrt(l);
+
+/*                        bcg_scalar_t sign = normals[v].dot(normals[result.indices[j]]) < 0 ? -1 : 1;
+                        bcg_scalar_t beta = (2 * (normals[v] - sign * normals[result.indices[j]]).dot(ev) / (l * l));
+                        ev /= l;
+                        l *= 0.5;
+                        ev *= sqrt(l);*/
 
                         tensor += beta * ev * ev.transpose();
                     }
@@ -117,23 +127,26 @@ void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_prope
     max_direction.set_dirty();
     mean.set_dirty();
     gauss.set_dirty();
+
+    vertex_classify_curvature(vertices, min, max, parallel_grain_size);
 }
 
-void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index , bcg_scalar_t radius , size_t parallel_grain_size){
+void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index,
+                                  bcg_scalar_t radius, size_t parallel_grain_size) {
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
-    auto min = vertices->get_or_add<bcg_scalar_t , 1>("v_pc_curv_min");
+    auto min = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_min");
     auto max = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_max");
     auto mean = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_mean");
     auto gauss = vertices->get_or_add<bcg_scalar_t, 1>("v_pc_curv_gauss");
     auto min_direction = vertices->get_or_add<VectorS<3>, 3>("v_pc_curv_min_dir");
     auto max_direction = vertices->get_or_add<VectorS<3>, 3>("v_pc_curv_max_dir");
-    if(!vertices->has("v_pca_loading")){
+    if (!vertices->has("v_pca_loading")) {
         std::cout << "please compute vertex pca first!\n";
         return;
     }
     auto v_pca_loading = vertices->get<VectorS<3>, 3>("v_pca_loading");
     auto normals = vertices->get<VectorS<3>, 3>("v_normal");
-    if(!normals){
+    if (!normals || MapConst(normals).sum() == 0) {
         normals = vertices->get<VectorS<3>, 3>("v_pca_normal");
     }
 
@@ -158,6 +171,12 @@ void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_prope
                         ev /= l;
                         l *= 0.5;
                         ev *= sqrt(l);
+
+/*                        bcg_scalar_t sign = normals[v].dot(normals[result.indices[j]]) < 0 ? -1 : 1;
+                        bcg_scalar_t beta = (2 * (normals[v] - sign * normals[result.indices[j]]).dot(ev) / (l * l));
+                        ev /= l;
+                        l *= 0.5;
+                        ev *= sqrt(l);*/
 
                         tensor += beta * ev * ev.transpose();
                     }
@@ -226,6 +245,8 @@ void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_prope
     max_direction.set_dirty();
     mean.set_dirty();
     gauss.set_dirty();
+
+    vertex_classify_curvature(vertices, min, max, parallel_grain_size);
 }
 
 }

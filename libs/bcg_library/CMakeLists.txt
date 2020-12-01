@@ -22,6 +22,7 @@ add_library(bcg_graphics
         math/bcg_binomial_coefficient.h math/bcg_binomial_coefficient.cpp
         math/bcg_bernstein_basis.h math/bcg_bernstein_basis.cpp
         math/bcg_pca.h
+        math/bcg_vertex_classify_curvature.h math/bcg_vertex_classify_curvature.cpp
         math/laplacian/bcg_laplacian_matrix.h
         math/laplacian/bcg_laplacian_heat_diffusion.h
         math/laplacian/bcg_laplacian_smoothing.h

@@ -6,6 +6,7 @@
 #include "bcg_mesh_face_normals.h"
 #include "bcg_mesh_vertex_voronoi_areas.h"
 #include "bcg_mesh_edge_cotan.h"
+#include "math/bcg_vertex_classify_curvature.h"
 #include "Eigen/Eigenvalues"
 #include "tbb/tbb.h"
 
@@ -238,6 +239,8 @@ void mesh_curvature_taubin(halfedge_mesh &mesh, int post_smoothing_steps, bool t
 
     // smooth curvature values
     post_smoothing(mesh, post_smoothing_steps, parallel_grain_size);
+
+    vertex_classify_curvature(&mesh.vertices, min_curvature, max_curvature, parallel_grain_size);
 }
 
 }
