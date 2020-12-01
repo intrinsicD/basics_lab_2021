@@ -43,7 +43,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // compute face vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
                     std::vector<vertex_handle> V;
@@ -59,7 +59,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // compute edge vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto e = edge_handle(i);
                     if (mesh.is_boundary(e) || (e_feature && e_feature[e])) {
@@ -82,7 +82,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // compute new positions for old vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     // isolated vertex?
@@ -145,7 +145,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // assign new positions to old vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     positions[v] = v_point[v];
@@ -221,7 +221,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // compute vertex positions
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
 
@@ -278,7 +278,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // compute edge positions
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto e = edge_handle(i);
                     // boundary or feature edge?
@@ -302,7 +302,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // set new vertex positions
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     positions[v] = v_point[v];
@@ -351,8 +351,8 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
 
 void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
     auto positions = mesh.positions;
-    auto  v_feature  = mesh.vertices.get<bool, 1>("v_feature");
-    auto  e_feature  = mesh.edges.get<bool, 1>("e_feature");
+    auto v_feature = mesh.vertices.get<bool, 1>("v_feature");
+    auto e_feature = mesh.edges.get<bool, 1>("e_feature");
 
     // reserve memory
     auto nv = mesh.vertices.size();
@@ -371,7 +371,7 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
     auto new_pos = mesh.vertices.add<VectorS<3>, 3>("sqrt3:np");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
+            [&](const tbb::blocked_range <uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     if (!mesh.is_boundary(v)) {
@@ -404,18 +404,16 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
 
     // set new positions of old vertices
     for (auto vit = mesh.vertices.begin(); vit != vend; ++vit) {
-        if (!mesh.is_boundary(*vit) && ( v_feature  && ! v_feature [*vit])) {
-            positions[*vit] = new_pos[*vit];
-        }
+        if(mesh.is_boundary(*vit) || (v_feature && v_feature[*vit])) continue;
+        positions[*vit] = new_pos[*vit];
     }
 
     mesh.vertices.remove(new_pos);
 
     // flip old edges
     for (auto eit = mesh.edges.begin(); eit != eend; ++eit) {
-        if (mesh.is_flip_ok(*eit) && ( e_feature  && ! e_feature [*eit])) {
-            mesh.flip(*eit);
-        }
+        if(!mesh.is_flip_ok(*eit) || (e_feature && e_feature[*eit])) continue;
+        mesh.flip(*eit);
     }
 
     post_postprocessing(mesh);
