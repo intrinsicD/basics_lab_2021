@@ -25,6 +25,10 @@ struct point_cloud_system : public system{
     void on_vertex_pca_eig(const event::point_cloud::vertex::pca::eig &event);
 
     void on_vertex_pca_weighted_eig(const event::point_cloud::vertex::pca::weighted_eig &event);
+
+    void on_vertex_curvature_taubin_knn(const event::point_cloud::vertex::curvature::taubin_knn &event);
+
+    void on_vertex_curvature_taubin_radius(const event::point_cloud::vertex::curvature::taubin_radius &event);
 };
 
 }

@@ -27,6 +27,16 @@ struct graph_radius{
 }
 
 namespace vertex{
+namespace curvature{
+struct taubin_knn{
+    entt::entity id;
+    int num_closest = 0;
+};
+struct taubin_radius{
+    entt::entity id;
+    bcg_scalar_t radius = 0;
+};
+}
 namespace pca{
 struct svd{
     entt::entity id;

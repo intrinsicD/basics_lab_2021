@@ -15,10 +15,10 @@ void post_smoothing(halfedge_mesh &mesh, int post_smoothing_steps, size_t parall
     // properties
     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
 
-    auto min_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_min");
-    auto max_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_max");
-    auto gauss_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_gauss");
-    auto mean_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_mean");
+    auto min_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_mesh_curv_min");
+    auto max_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_mesh_curv_max");
+    auto gauss_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_mesh_curv_gauss");
+    auto mean_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_mesh_curv_mean");
 
     // precompute cotan weight per edge
     edge_cotans(mesh, parallel_grain_size);
@@ -73,15 +73,15 @@ void post_smoothing(halfedge_mesh &mesh, int post_smoothing_steps, size_t parall
 
 void mesh_curvature_taubin(halfedge_mesh &mesh, int post_smoothing_steps, bool two_ring_neighborhood,
                            size_t parallel_grain_size) {
-    auto evec = mesh.edges.get_or_add<VectorS<3>, 3>("e_curv_evec");
-    auto angle = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_curv_angle");
+    auto evec = mesh.edges.get_or_add<VectorS<3>, 3>("e_mesh_curv_evec");
+    auto angle = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_mesh_curv_angle");
 
-    auto min_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_curv_min");
-    auto max_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_curv_max");
-    auto gauss_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_curv_gauss");
-    auto mean_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_curv_mean");
-    auto min_direction = mesh.vertices.get_or_add<VectorS<3>, 3>("v_curv_min_dir");
-    auto max_direction = mesh.vertices.get_or_add<VectorS<3>, 3>("v_curv_max_dir");
+    auto min_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_mesh_curv_min");
+    auto max_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_mesh_curv_max");
+    auto gauss_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_mesh_curv_gauss");
+    auto mean_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_mesh_curv_mean");
+    auto min_direction = mesh.vertices.get_or_add<VectorS<3>, 3>("v_mesh_curv_min_dir");
+    auto max_direction = mesh.vertices.get_or_add<VectorS<3>, 3>("v_mesh_curv_max_dir");
 
     // precompute Voronoi area per vertex
     vertex_voronoi_areas(mesh, parallel_grain_size);
@@ -104,7 +104,7 @@ void mesh_curvature_taubin(halfedge_mesh &mesh, int post_smoothing_steps, bool t
                     auto f0 = mesh.get_face(h0);
                     auto f1 = mesh.get_face(h1);
                     if (f0.is_valid() && f1.is_valid()) {
-                        VectorS<3> ev = mesh.halfedge_graph::get_vector(h0);
+                        VectorS<3> ev = -mesh.halfedge_graph::get_vector(h0);
                         bcg_scalar_t l = ev.norm();
                         ev /= l;
                         l *= 0.5; // only consider half of the edge (matchig Voronoi area)

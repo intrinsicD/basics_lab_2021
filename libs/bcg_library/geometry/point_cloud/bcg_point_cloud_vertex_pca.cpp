@@ -51,7 +51,7 @@ Pca<3> point_cloud_vertex_pca_weighted_least_squares_eig(const MatrixS<-1, 3> &P
     return pca;
 }
 
-void point_cloud_vertex_pcas(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index, int num_closest,
+void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index, int num_closest,
                              std::function<Pca<3>(const MatrixS<-1, 3> &, const VectorS<3> &, bool)> method,
                              bool compute_mean, size_t parallel_grain_size) {
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
@@ -100,7 +100,7 @@ void point_cloud_vertex_pcas(vertex_container *vertices, const kdtree_property<b
 
 
 void
-point_cloud_vertex_pcas(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index, bcg_scalar_t radius,
+point_cloud_vertex_pcas_radius(vertex_container *vertices, const kdtree_property<bcg_scalar_t> &index, bcg_scalar_t radius,
                         std::function<Pca<3>(const MatrixS<-1, 3> &, const VectorS<3> &, bool)> method,
                         bool compute_mean, size_t parallel_grain_size) {
     auto positions = vertices->get<VectorS<3>, 3>("v_position");

@@ -453,10 +453,10 @@ bool meshio::read_obj(halfedge_mesh &mesh) {
                 }
             }
 
-            auto f = mesh.add_face(vertices);
+            face_handle f = mesh.add_face(vertices);
 
             // add texture coordinates
-            if (with_tex_coord) {
+            if (with_tex_coord && f.is_valid()) {
                 unsigned v_idx = 0;
                 for (const auto h : mesh.get_halfedges(f)) {
                     tex_coords[h] = all_tex_coords[halfedge_tex_idx[v_idx]];

@@ -11,6 +11,7 @@
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "point_cloud/bcg_point_cloud_graph_builder.h"
 #include "point_cloud/bcg_point_cloud_vertex_pca.h"
+#include "point_cloud/bcg_gui_point_cloud_curvature_taubin.h"
 
 namespace bcg {
 
@@ -27,6 +28,10 @@ point_cloud_system::point_cloud_system(viewer_state *state) : system("point_clou
     state->dispatcher.sink<event::point_cloud::vertex::pca::eig>().connect<&point_cloud_system::on_vertex_pca_eig>(
             this);
     state->dispatcher.sink<event::point_cloud::vertex::pca::weighted_eig>().connect<&point_cloud_system::on_vertex_pca_weighted_eig>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::curvature::taubin_knn>().connect<&point_cloud_system::on_vertex_curvature_taubin_knn>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::curvature::taubin_radius>().connect<&point_cloud_system::on_vertex_curvature_taubin_radius>(
             this);
 }
 
@@ -81,88 +86,121 @@ void point_cloud_system::on_build_graph_radius(const event::point_cloud::build::
     }
 }
 
-void point_cloud_system::on_vertex_pca_svd(const event::point_cloud::vertex::pca::svd &event){
-    if(!state->scene.valid(event.id)) return;
+void point_cloud_system::on_vertex_pca_svd(const event::point_cloud::vertex::pca::svd &event) {
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
 
     auto *vertices = state->get_vertices(event.id);
-    if(!vertices) return;
+    if (!vertices) return;
 
-    if(event.num_closest > 0){
-        point_cloud_vertex_pcas(vertices, index, event.num_closest, point_cloud_vertex_pca_least_squares_svd, event.compute_mean,
-                                state->config.parallel_grain_size);
-    }else if(event.radius > 0){
-        if(event.num_closest > 0){
-            point_cloud_vertex_pcas(vertices, index, event.radius, point_cloud_vertex_pca_least_squares_svd, event.compute_mean,
+    if (event.num_closest > 0) {
+        point_cloud_vertex_pcas_knn(vertices, index, event.num_closest, point_cloud_vertex_pca_least_squares_svd,
+                                    event.compute_mean,
                                     state->config.parallel_grain_size);
-        }
+    } else if (event.radius > 0) {
+        point_cloud_vertex_pcas_radius(vertices, index, event.radius, point_cloud_vertex_pca_least_squares_svd,
+                                       event.compute_mean,
+                                       state->config.parallel_grain_size);
     }
 }
 
-void point_cloud_system::on_vertex_pca_weighted_svd(const event::point_cloud::vertex::pca::weighted_svd &event){
-    if(!state->scene.valid(event.id)) return;
+void point_cloud_system::on_vertex_pca_weighted_svd(const event::point_cloud::vertex::pca::weighted_svd &event) {
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
 
     auto *vertices = state->get_vertices(event.id);
-    if(!vertices) return;
+    if (!vertices) return;
 
-    if(event.num_closest > 0){
-        point_cloud_vertex_pcas(vertices, index, event.num_closest, point_cloud_vertex_pca_weighted_least_squares_svd, event.compute_mean,
-                                state->config.parallel_grain_size);
-    }else if(event.radius > 0){
-        if(event.num_closest > 0){
-            point_cloud_vertex_pcas(vertices, index, event.radius, point_cloud_vertex_pca_weighted_least_squares_svd, event.compute_mean,
+    if (event.num_closest > 0) {
+        point_cloud_vertex_pcas_knn(vertices, index, event.num_closest,
+                                    point_cloud_vertex_pca_weighted_least_squares_svd,
+                                    event.compute_mean,
                                     state->config.parallel_grain_size);
-        }
+    } else if (event.radius > 0) {
+        point_cloud_vertex_pcas_radius(vertices, index, event.radius, point_cloud_vertex_pca_weighted_least_squares_svd,
+                                       event.compute_mean,
+                                       state->config.parallel_grain_size);
+
     }
 }
 
-void point_cloud_system::on_vertex_pca_eig(const event::point_cloud::vertex::pca::eig &event){
-    if(!state->scene.valid(event.id)) return;
+void point_cloud_system::on_vertex_pca_eig(const event::point_cloud::vertex::pca::eig &event) {
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
 
     auto *vertices = state->get_vertices(event.id);
-    if(!vertices) return;
+    if (!vertices) return;
 
-    if(event.num_closest > 0){
-        point_cloud_vertex_pcas(vertices, index, event.num_closest, point_cloud_vertex_pca_least_squares_eig, event.compute_mean,
-                                state->config.parallel_grain_size);
-    }else if(event.radius > 0){
-        if(event.num_closest > 0){
-            point_cloud_vertex_pcas(vertices, index, event.radius, point_cloud_vertex_pca_least_squares_eig, event.compute_mean,
+    if (event.num_closest > 0) {
+        point_cloud_vertex_pcas_knn(vertices, index, event.num_closest, point_cloud_vertex_pca_least_squares_eig,
+                                    event.compute_mean,
                                     state->config.parallel_grain_size);
-        }
+    } else if (event.radius > 0) {
+        point_cloud_vertex_pcas_radius(vertices, index, event.radius, point_cloud_vertex_pca_least_squares_eig,
+                                       event.compute_mean,
+                                       state->config.parallel_grain_size);
+
     }
 }
 
-void point_cloud_system::on_vertex_pca_weighted_eig(const event::point_cloud::vertex::pca::weighted_eig &event){
-    if(!state->scene.valid(event.id)) return;
+void point_cloud_system::on_vertex_pca_weighted_eig(const event::point_cloud::vertex::pca::weighted_eig &event) {
+    if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
 
     auto *vertices = state->get_vertices(event.id);
-    if(!vertices) return;
+    if (!vertices) return;
 
-    if(event.num_closest > 0){
-        point_cloud_vertex_pcas(vertices, index, event.num_closest, point_cloud_vertex_pca_weighted_least_squares_eig, event.compute_mean,
-                                state->config.parallel_grain_size);
-    }else if(event.radius > 0){
-        if(event.num_closest > 0){
-            point_cloud_vertex_pcas(vertices, index, event.radius, point_cloud_vertex_pca_weighted_least_squares_eig, event.compute_mean,
+    if (event.num_closest > 0) {
+        point_cloud_vertex_pcas_knn(vertices, index, event.num_closest,
+                                    point_cloud_vertex_pca_weighted_least_squares_eig,
+                                    event.compute_mean,
                                     state->config.parallel_grain_size);
-        }
+    } else if (event.radius > 0) {
+        point_cloud_vertex_pcas_radius(vertices, index, event.radius, point_cloud_vertex_pca_weighted_least_squares_eig,
+                                       event.compute_mean,
+                                       state->config.parallel_grain_size);
+
     }
+}
+
+void
+point_cloud_system::on_vertex_curvature_taubin_knn(const event::point_cloud::vertex::curvature::taubin_knn &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_curvature_taubin(vertices, index, event.num_closest, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_curvature_taubin_radius(
+        const event::point_cloud::vertex::curvature::taubin_radius &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_curvature_taubin(vertices, index, event.radius, state->config.parallel_grain_size);
 }
 
 }
