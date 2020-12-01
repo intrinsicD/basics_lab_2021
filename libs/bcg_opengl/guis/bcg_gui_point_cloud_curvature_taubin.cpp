@@ -18,6 +18,7 @@ void gui_point_cloud_curvature_taubin(viewer_state *state){
     static int num_closest = 12;
     static bcg_scalar_t radius = 0.001;
     static int e = 0;
+    ImGui::PushID("pc_curvature_taubin");
     ImGui::RadioButton("knn query", &e, 0);
     ImGui::RadioButton("radius query", &e, 1);
 
@@ -39,6 +40,7 @@ void gui_point_cloud_curvature_taubin(viewer_state *state){
         gui_material_points(state, state->scene.try_get<material_points>(state->picker.entity_id),
                             state->picker.entity_id);
     }
+    ImGui::PopID();
 }
 
 }

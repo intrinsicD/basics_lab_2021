@@ -32,6 +32,7 @@ void gui_point_cloud_vertex_pca(viewer_state *state) {
     static int num_closest = 12;
     static float radius = 0.001;
     static bool compute_mean = true;
+    ImGui::PushID("vertex_pca");
     draw_combobox(&state->window, "pca_type", idx, names);
     ImGui::Checkbox("compute mean", &compute_mean);
     if (ImGui::InputInt("num closest", &num_closest)) {
@@ -73,7 +74,7 @@ void gui_point_cloud_vertex_pca(viewer_state *state) {
         gui_material_points(state, state->scene.try_get<material_points>(state->picker.entity_id),
                             state->picker.entity_id);
     }
-
+    ImGui::PopID();
 }
 
 }

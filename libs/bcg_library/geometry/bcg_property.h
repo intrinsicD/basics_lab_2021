@@ -125,6 +125,8 @@ struct base_property {
 
     [[nodiscard]] virtual bool is_dirty() const = 0;
 
+    virtual void set_name(const std::string &name) = 0;
+
     virtual void set_dirty() = 0;
 
     virtual void set_clean() = 0;
@@ -167,6 +169,10 @@ struct property_vector : public base_property {
 
     const std::string &name() const override {
         return property_name;
+    }
+
+    void set_name(const std::string &name) override{
+        property_name = name;
     }
 
     inline void swap(size_t i0, size_t i1) override {
