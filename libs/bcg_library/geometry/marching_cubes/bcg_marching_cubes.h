@@ -20,6 +20,8 @@ struct marching_cubes : private occupancy_grid{
     static double hearts_function(const Vector<double, 3> &p);
 
     halfedge_mesh reconstruct(bcg_scalar_t isovalue, const VectorS<3> &min, const VectorS<3> &max, const VectorI<3> &dims);
+
+    void compute_vertex_normals(halfedge_mesh &mesh);
 };
 
 }

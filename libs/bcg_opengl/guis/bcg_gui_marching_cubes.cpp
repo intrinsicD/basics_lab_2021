@@ -24,6 +24,13 @@ void gui_marching_cubes(viewer_state *state){
         state->scene.emplace<halfedge_mesh>(id, mesh);
         state->dispatcher.trigger<event::mesh::setup>(id, "marching cubes");
     }
+
+    if(ImGui::Button("compute vertex normals")){
+        if(state->scene.valid(state->picker.entity_id)){
+            auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
+            mc.compute_vertex_normals(mesh);
+        }
+    }
 }
 
 }

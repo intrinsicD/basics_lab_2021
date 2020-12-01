@@ -375,15 +375,22 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     if (!mesh.is_boundary(v)) {
+                        ///Exercise: Please implement the new positions of the old vertices
+                        ///          - you can query for the valence of a vertex using:
+                        ///                  auto valence = mesh.halfedge_graph::get_valence(v);
+                        ///          - you can iterate over the vertices in the one-ring around a vertex v using:
+                        ///                        for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {/*your code here*/}
+                        ///          - the property new_pos can be used to store the new positions of the old vertices
+                        ///          - the formula can be found on Slideset-Surface-RepresentationsI.pdf Slide 53
                         auto n = mesh.halfedge_graph::get_valence(v);
-                        auto alpha = (4.0 - 2.0 * cos(2.0 * pi / n)) / 9.0;
+                        auto beta = (4.0 - 2.0 * cos(2.0 * pi / n)) / 9.0;
                         VectorS<3> p(VectorS<3>::Zero());
 
                         for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {
                             p += positions[vv];
                         }
 
-                        p = (1.0 - alpha) * positions[v] + alpha / n * p;
+                        p = (1.0 - beta) * positions[v] + beta / n * p;
                         new_pos[v] = p;
                     }
                 }
@@ -393,6 +400,10 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // split faces
     vertex_handle v_;
     for (const auto f : mesh.faces) {
+        ///Exercise: Please implement the face splits
+        ///          - you can iterate over the vertices of a face using:
+        ///                  for (const auto v: mesh.get_vertices(f)) { /*your code here*/ }
+        ///          - split the faces at the centroid of each face
         std::vector<vertex_handle> V;
         for (const auto v: mesh.get_vertices(f)) {
             V.push_back(v);
@@ -412,8 +423,12 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
 
     // flip old edges
     for (auto eit = mesh.edges.begin(); eit != eend; ++eit) {
-        if(!mesh.is_flip_ok(*eit) || (e_feature && e_feature[*eit])) continue;
-        mesh.flip(*eit);
+        edge_handle e = *eit;
+        ///Exercise: Please implement the edge flips
+        ///          - make sure you check whether a flip is feasable with mesh.is_flip_ok(e)
+        ///          - make sure you don't flip an edge which is a feature edge which is stored in e_feature
+        if(!mesh.is_flip_ok(e) || (e_feature && e_feature[e])) continue;
+        mesh.flip(e);
     }
 
     post_postprocessing(mesh);

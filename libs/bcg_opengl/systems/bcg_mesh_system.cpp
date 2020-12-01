@@ -74,7 +74,9 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
     Map(mesh.positions) =
             (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
 
-    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    if(!mesh.vertices.has("v_normal")){
+        state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
+    }
     state->dispatcher.trigger<event::mesh::face::centers>(event.id);
     state->dispatcher.trigger<event::graph::edge::centers>(event.id);
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
