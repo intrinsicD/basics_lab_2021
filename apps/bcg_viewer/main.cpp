@@ -100,6 +100,12 @@ int main() {
             if(ImGui::MenuItem("Bezier Curves")){
                 state->gui.left = gui_viewer_curve;
             }
+            if(ImGui::MenuItem("Marching Cubes")){
+                state->gui.left = gui_marching_cubes;
+            }
+            if(ImGui::MenuItem("Subdivision Surfaces")){
+                state->gui.left = gui_mesh_subdivision;
+            }
             ImGui::EndMenu();
         }
 
