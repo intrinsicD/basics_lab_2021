@@ -14,12 +14,12 @@ Pca<3> graph_vertex_pca_least_squares_svd(halfedge_graph &graph, vertex_handle v
         points.push_back(graph.positions[vv]);
     }
     Pca<3> pca;
-    MatrixS<-1, 3> P(MapConst(points));
+    MatrixS<-1, 3> P(MapConst<3>(points));
     VectorS<3> mean = graph.positions[v];
     if (compute_mean) {
         mean = P.colwise().mean();
     }
-    least_squares_fit_svd(pca, P, mean);
+    least_squares_fit_svd<-1, 3>(pca, P, mean);
     return pca;
 }
 
@@ -30,13 +30,13 @@ Pca<3> graph_vertex_pca_weighted_least_squares_svd(halfedge_graph &graph, vertex
         points.push_back(graph.positions[vv]);
     }
     Pca<3> pca;
-    MatrixS<-1, 3> P(MapConst(points));
+    MatrixS<-1, 3> P(MapConst<3>(points));
     VectorS<3> mean = graph.positions[v];
     if (compute_mean) {
         mean = P.colwise().mean();
     }
     VectorS<-1> weights((P.rowwise() - mean.transpose()).rowwise().norm());
-    weighted_least_squares_fit_svd(pca, P, mean, weights);
+    weighted_least_squares_fit_svd<-1, 3>(pca, P, mean, weights);
     return pca;
 }
 
@@ -47,12 +47,12 @@ Pca<3> graph_vertex_pca_least_squares_eig(halfedge_graph &graph, vertex_handle v
         points.push_back(graph.positions[vv]);
     }
     Pca<3> pca;
-    MatrixS<-1, 3> P(MapConst(points));
+    MatrixS<-1, 3> P(MapConst<3>(points));
     VectorS<3> mean = graph.positions[v];
     if (compute_mean) {
         mean = P.colwise().mean();
     }
-    least_squares_fit_eig(pca, P, mean);
+    least_squares_fit_eig<-1, 3>(pca, P, mean);
     return pca;
 }
 
@@ -63,13 +63,13 @@ Pca<3> graph_vertex_pca_weighted_least_squares_eig(halfedge_graph &graph, vertex
         points.push_back(graph.positions[vv]);
     }
     Pca<3> pca;
-    MatrixS<-1, 3> P(MapConst(points));
+    MatrixS<-1, 3> P(MapConst<3>(points));
     VectorS<3> mean = graph.positions[v];
     if (compute_mean) {
         mean = P.colwise().mean();
     }
     VectorS<-1> weights((P.rowwise() - mean.transpose()).rowwise().norm());
-    weighted_least_squares_fit_eig(pca, P, mean, weights);
+    weighted_least_squares_fit_eig<-1, 3>(pca, P, mean, weights);
     return pca;
 }
 

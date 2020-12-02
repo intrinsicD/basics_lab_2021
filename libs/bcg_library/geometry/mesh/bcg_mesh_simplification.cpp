@@ -301,7 +301,7 @@ public:
         auto nom1 = m_b0 * ce_bf + m_b1 * (af - m_A02 * m_A02) + m_b2 * bc_ae;
         auto nom2 = m_b0 * be_cd + m_b1 * bc_ae + m_b2 * (ad - m_A01 * m_A01);
 
-        return {nom0 * denom, nom1 * denom, nom2 * denom};
+        return VectorS<3>(nom0 * denom, nom1 * denom, nom2 * denom);
     }
 
     void clear() {

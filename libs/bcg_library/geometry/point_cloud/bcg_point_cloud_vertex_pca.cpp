@@ -14,7 +14,7 @@ Pca<3> point_cloud_vertex_pca_least_squares_svd(const MatrixS<-1, 3> &P, const V
     if (compute_mean) {
         mean = P.colwise().mean();
     }
-    least_squares_fit_svd(pca, P, mean);
+    least_squares_fit_svd<-1, 3>(pca, P, mean);
     return pca;
 }
 
@@ -26,7 +26,7 @@ point_cloud_vertex_pca_weighted_least_squares_svd(const MatrixS<-1, 3> &P, const
         mean = P.colwise().mean();
     }
     VectorS<-1> weights((P.rowwise() - mean.transpose()).rowwise().norm());
-    weighted_least_squares_fit_svd(pca, P, mean, weights);
+    weighted_least_squares_fit_svd<-1, 3>(pca, P, mean, weights);
     return pca;
 }
 
@@ -36,7 +36,7 @@ Pca<3> point_cloud_vertex_pca_least_squares_eig(const MatrixS<-1, 3> &P, const V
     if (compute_mean) {
         mean = P.colwise().mean();
     }
-    least_squares_fit_eig(pca, P, mean);
+    least_squares_fit_eig<-1, 3>(pca, P, mean);
     return pca;
 }
 
@@ -47,7 +47,7 @@ Pca<3> point_cloud_vertex_pca_weighted_least_squares_eig(const MatrixS<-1, 3> &P
         mean = P.colwise().mean();
     }
     VectorS<-1> weights((P.rowwise() - mean.transpose()).rowwise().norm());
-    weighted_least_squares_fit_eig(pca, P, mean, weights);
+    weighted_least_squares_fit_eig<-1, 3>(pca, P, mean, weights);
     return pca;
 }
 

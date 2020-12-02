@@ -47,7 +47,7 @@ void post_smoothing(halfedge_mesh &mesh, int post_smoothing_steps, size_t parall
                                     continue;
                                 }
 
-                                bcg_scalar_t weight = std::max(0.0f, e_cotan[mesh.get_edge(vh)]);
+                                bcg_scalar_t weight = fmax(0.0f, e_cotan[mesh.get_edge(vh)]);
                                 sum_weights += weight;
                                 kmin += weight * min_curvature[tv];
                                 kmax += weight * max_curvature[tv];

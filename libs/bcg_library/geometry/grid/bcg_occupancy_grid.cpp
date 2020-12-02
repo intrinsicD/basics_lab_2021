@@ -175,7 +175,7 @@ neighbors_query query_knn(const occupancy_grid &grid, const VectorS<3> &query_po
 neighbors_query query_radius(const occupancy_grid &grid, const VectorS<3> &query_point, bcg_scalar_t radius){
     VectorI<3> query_coord = grid.to_coord(query_point);
     neighbors_query result_set;
-    int kring = std::max(radius / grid.voxel_side_length().maxCoeff(), bcg_scalar_t (1));
+    int kring = fmax(radius / grid.voxel_side_length().maxCoeff(), bcg_scalar_t (1));
     occupancy_grid moore(VectorI<3>::Constant(2 * kring + 1), grid.aabb);
     VectorI<3> center_coord = moore.to_coord(grid.aabb.center());
 
