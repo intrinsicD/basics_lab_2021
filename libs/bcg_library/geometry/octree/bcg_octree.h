@@ -5,6 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_OCTREE_H
 #define BCG_GRAPHICS_BCG_OCTREE_H
 
+#include <vector>
 #include "math/vector/bcg_vector.h"
 #include "bcg_property.h"
 #include "aligned_box/bcg_aligned_box.h"
@@ -14,7 +15,7 @@
 namespace bcg{
 
 struct octree_node{
-    vertex_handle v_start, v_end;
+    size_t v_start, v_end;
     size_t size;
     uint64_t first_child_index, parent_index;
     uint8_t config, depth;
@@ -34,7 +35,7 @@ struct octree{
     property<VectorS<3>, 3> positions;
     aligned_box3 aabb;
     std::vector<octree_node> storage;
-    std::vector<vertex_handle> indices;
+    std::vector<size_t> indices;
     int max_depth;
     int leaf_size;
 private:

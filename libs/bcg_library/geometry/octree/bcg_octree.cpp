@@ -41,7 +41,7 @@ void octree::build(property<VectorS<3>, 3> positions, int leaf_size, int max_dep
     this->max_depth = max_depth;
     this->leaf_size = leaf_size;
     this->positions = positions;
-    indices = std::vector<vertex_handle>(positions.size());
+    indices = std::vector<size_t>(positions.size());
     for (size_t i = 0; i < positions.size(); ++i) {
         aabb.grow(positions[i]);
         indices[i] = i;
