@@ -2,9 +2,12 @@
 // Created by alex on 25.11.20.
 //
 
+#include <renderers/mesh_renderer/bcg_events_mesh_renderer.h>
 #include "geometry/marching_cubes/bcg_marching_cubes.h"
 #include "bcg_gui_marching_cubes.h"
 #include "bcg_viewer_state.h"
+#include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
+#include "renderers/mesh_renderer/bcg_material_mesh.h"
 
 namespace bcg{
 
@@ -16,8 +19,8 @@ void gui_marching_cubes(viewer_state *state){
     ImGui::InputFloat3("min", min.data());
     ImGui::InputFloat3("max", max.data());
     ImGui::InputInt3("dims", dims.data());
-    marching_cubes mc;
-    mc.function = marching_cubes::hearts_function;
+    static marching_cubes mc;
+    mc.implicit_function = marching_cubes::hearts_function;
     if(ImGui::Button("convert to mesh")){
         auto mesh = mc.reconstruct(0, min, max, dims.cast<bcg_index_t>());
         auto id = state->scene.create();
@@ -29,6 +32,8 @@ void gui_marching_cubes(viewer_state *state){
         if(state->scene.valid(state->picker.entity_id)){
             auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
             mc.compute_vertex_normals(mesh);
+            auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
+            state->dispatcher.trigger<event::mesh_renderer::set_normal_attribute>(state->picker.entity_id, material.attributes[1]);
         }
     }
 }
