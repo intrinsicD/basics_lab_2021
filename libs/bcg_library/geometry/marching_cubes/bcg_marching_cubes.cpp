@@ -78,7 +78,7 @@ marching_cubes::marching_cubes() {
 
 halfedge_mesh marching_cubes::reconstruct(bcg_scalar_t isovalue, const VectorS<3> &min, const VectorS<3> &max,
                                           const VectorI<3> &dims) {
-    if (!function) return {};
+    if (!implicit_function) return {};
     clear();
     aabb = aligned_box3(min, max);
     this->dims = dims;
@@ -97,7 +97,7 @@ halfedge_mesh marching_cubes::reconstruct(bcg_scalar_t isovalue, const VectorS<3
             /// Exercise: Please implement the computation of the sdf values
             ///           1. dont forget to set the bit values of the cubeindex with SET_BIT(cubeindex, i);
             ///           2. if the surface seems to be inverted, just invert your comparison with the isovalue
-            sdf[i] = function(vertices[i].cast<double>());
+            sdf[i] = implicit_function(vertices[i].cast<double>());
             if (sdf[i] >= isovalue) {
                 SET_BIT(cubeindex, i);
             }

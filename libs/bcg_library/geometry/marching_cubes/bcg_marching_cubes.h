@@ -15,7 +15,7 @@ namespace bcg{
 struct marching_cubes : private occupancy_grid{
     marching_cubes();
 
-    std::function<double(const Vector<double, 3>&)> function;
+    std::function<double(const Vector<double, 3>&)> implicit_function;
 
     static double hearts_function(const Vector<double, 3> &p);
 
