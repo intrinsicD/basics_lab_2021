@@ -51,6 +51,16 @@ struct remove{
     bcg_scalar_t threshold = scalar_eps;
 };
 }
+namespace kernel_density{
+struct knn{
+    entt::entity id;
+    int num_closest = 0;
+};
+struct radius{
+    entt::entity id;
+    bcg_scalar_t radius = 0;
+};
+}
 namespace pca{
 struct svd{
     entt::entity id;

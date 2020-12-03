@@ -35,6 +35,10 @@ struct point_cloud_system : public system{
     void on_vertex_outlier_probability_radius(const event::point_cloud::vertex::outliers::probability_radius &event);
 
     void on_vertex_outlier_remove(const event::point_cloud::vertex::outliers::remove &event);
+
+    void on_vertex_kernel_density_estimation_knn(const event::point_cloud::vertex::kernel_density::knn &event);
+
+    void on_vertex_kernel_density_estimation_radius(const event::point_cloud::vertex::kernel_density::radius &event);
 };
 
 }

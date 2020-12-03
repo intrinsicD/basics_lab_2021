@@ -22,6 +22,7 @@ add_library(bcg_graphics
         math/bcg_binomial_coefficient.h math/bcg_binomial_coefficient.cpp
         math/bcg_bernstein_basis.h math/bcg_bernstein_basis.cpp
         math/bcg_pca.h
+        math/bcg_gaussian.h
         math/bcg_vertex_classify_curvature.h math/bcg_vertex_classify_curvature.cpp
         math/laplacian/bcg_laplacian_matrix.h
         math/laplacian/bcg_laplacian_heat_diffusion.h
@@ -52,6 +53,7 @@ add_library(bcg_graphics
         geometry/point_cloud/bcg_point_cloud_vertex_pca.h geometry/point_cloud/bcg_point_cloud_vertex_pca.cpp
         geometry/point_cloud/bcg_point_cloud_curvature_taubin.h geometry/point_cloud/bcg_point_cloud_curvature_taubin.cpp
         geometry/point_cloud/bcg_point_cloud_vertex_outlier_probability.h geometry/point_cloud/bcg_point_cloud_vertex_outlier_probability.cpp
+        geometry/point_cloud/bcg_point_cloud_kernel_density_estimation.h geometry/point_cloud/bcg_point_cloud_kernel_density_estimation.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
         geometry/graph/bcg_graph_edge_lengths.h geometry/graph/bcg_graph_edge_lengths.cpp
