@@ -21,7 +21,7 @@ void loading_system::on_file_drop(const event::internal::file_drop &event){
         halfedge_mesh mesh;
         mesh_io.read(mesh);
 
-        if(mesh.empty()){
+        if(mesh.empty() || mesh.edges.size() == 0 || mesh.faces.size() == 0){
             point_cloudio point_cloud_io(filename, point_cloudio_flags());
             point_cloud pc;
             point_cloud_io.read(pc);

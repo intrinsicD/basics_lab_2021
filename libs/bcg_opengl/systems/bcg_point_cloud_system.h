@@ -29,6 +29,12 @@ struct point_cloud_system : public system{
     void on_vertex_curvature_taubin_knn(const event::point_cloud::vertex::curvature::taubin_knn &event);
 
     void on_vertex_curvature_taubin_radius(const event::point_cloud::vertex::curvature::taubin_radius &event);
+
+    void on_vertex_outlier_probability_knn(const event::point_cloud::vertex::outliers::probability_knn &event);
+
+    void on_vertex_outlier_probability_radius(const event::point_cloud::vertex::outliers::probability_radius &event);
+
+    void on_vertex_outlier_remove(const event::point_cloud::vertex::outliers::remove &event);
 };
 
 }

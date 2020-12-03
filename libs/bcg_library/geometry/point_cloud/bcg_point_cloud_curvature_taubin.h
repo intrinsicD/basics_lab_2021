@@ -2,8 +2,8 @@
 // Created by alex on 01.12.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_GUI_POINT_CLOUD_CURVATURE_TAUBIN_H
-#define BCG_GRAPHICS_BCG_GUI_POINT_CLOUD_CURVATURE_TAUBIN_H
+#ifndef BCG_GRAPHICS_BCG_POINT_CLOUD_CURVATURE_TAUBIN_H
+#define BCG_GRAPHICS_BCG_POINT_CLOUD_CURVATURE_TAUBIN_H
 
 #include "bcg_point_cloud.h"
 #include "kdtree/bcg_kdtree.h"

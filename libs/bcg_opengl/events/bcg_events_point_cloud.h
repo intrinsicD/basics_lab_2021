@@ -37,6 +37,20 @@ struct taubin_radius{
     bcg_scalar_t radius = 0;
 };
 }
+namespace outliers{
+struct probability_knn{
+    entt::entity id;
+    int num_closest = 0;
+};
+struct probability_radius{
+    entt::entity id;
+    bcg_scalar_t radius = 0;
+};
+struct remove{
+    entt::entity id;
+    bcg_scalar_t threshold = scalar_eps;
+};
+}
 namespace pca{
 struct svd{
     entt::entity id;

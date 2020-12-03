@@ -2,7 +2,7 @@
 // Created by alex on 01.12.20.
 //
 
-#include "bcg_gui_point_cloud_curvature_taubin.h"
+#include "bcg_point_cloud_curvature_taubin.h"
 #include "math/bcg_vertex_classify_curvature.h"
 #include "bcg_property_map_eigen.h"
 #include "tbb/tbb.h"

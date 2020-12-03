@@ -26,6 +26,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_viewer_curve.h guis/bcg_gui_viewer_curve.cpp
             guis/bcg_gui_vectorfields.h guis/bcg_gui_vectorfields.cpp
             guis/bcg_gui_transform.h guis/bcg_gui_transform.cpp
+            guis/bcg_gui_kdtree_selector.h guis/bcg_gui_kdtree_selector.cpp
             guis/bcg_gui_rendering_options.h guis/bcg_gui_rendering_options.cpp
             guis/bcg_gui_property_selector.h guis/bcg_gui_property_selector.cpp
             guis/bcg_gui_property_container_selector.h guis/bcg_gui_property_container_selector.cpp
@@ -34,6 +35,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_point_cloud_graph_builder.h guis/bcg_gui_point_cloud_graph_builder.cpp
             guis/bcg_gui_point_cloud_vertex_pca.h guis/bcg_gui_point_cloud_vertex_pca.cpp
             guis/bcg_gui_point_cloud_curvature_taubin.h guis/bcg_gui_point_cloud_curvature_taubin.cpp
+            guis/bcg_gui_point_cloud_vertex_outlier_probability.h guis/bcg_gui_point_cloud_vertex_outlier_probability.cpp
             guis/bcg_gui_graph_vertex_pca.h guis/bcg_gui_graph_vertex_pca.cpp
             guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp

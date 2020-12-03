@@ -5,6 +5,7 @@
 #include "bcg_gui_point_cloud_curvature_taubin.h"
 #include "bcg_gui_point_cloud_vertex_pca.h"
 #include "bcg_gui_material_points.h"
+#include "bcg_gui_kdtree_selector.h"
 #include "bcg_viewer_state.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 
@@ -15,26 +16,16 @@ void gui_point_cloud_curvature_taubin(viewer_state *state){
         gui_point_cloud_vertex_pca(state);
         ImGui::Separator();
     }
-    static int num_closest = 12;
-    static bcg_scalar_t radius = 0.001;
-    static int e = 0;
-    ImGui::PushID("pc_curvature_taubin");
-    ImGui::RadioButton("knn query", &e, 0);
-    ImGui::RadioButton("radius query", &e, 1);
 
-    if(e == 0){
-        ImGui::InputInt("num_closest", &num_closest);
-    }else if(e == 1){
-        ImGui::InputFloat("radius", &radius);
-    }
+    ImGui::PushID("pc_curvature_taubin");
+    auto parameters = gui_kd_tree_selector(state);
 
     if(ImGui::Button("Compute")){
-        if(e == 0){
-            state->dispatcher.trigger<event::point_cloud::vertex::curvature::taubin_knn>(state->picker.entity_id, num_closest);
-        }else if(e == 1){
-            state->dispatcher.trigger<event::point_cloud::vertex::curvature::taubin_radius>(state->picker.entity_id, (bcg_scalar_t)radius);
+        if(parameters.type == kdtree_parameters::Type::knn){
+            state->dispatcher.trigger<event::point_cloud::vertex::curvature::taubin_knn>(state->picker.entity_id, parameters.num_closest);
+        }else if(parameters.type == kdtree_parameters::Type::radius){
+            state->dispatcher.trigger<event::point_cloud::vertex::curvature::taubin_radius>(state->picker.entity_id, parameters.radius);
         }
-
     }
     if (state->scene.valid(state->picker.entity_id)) {
         gui_material_points(state, state->scene.try_get<material_points>(state->picker.entity_id),

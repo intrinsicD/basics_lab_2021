@@ -11,7 +11,8 @@
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "point_cloud/bcg_point_cloud_graph_builder.h"
 #include "point_cloud/bcg_point_cloud_vertex_pca.h"
-#include "point_cloud/bcg_gui_point_cloud_curvature_taubin.h"
+#include "point_cloud/bcg_point_cloud_curvature_taubin.h"
+#include "point_cloud/bcg_point_cloud_vertex_outlier_probability.h"
 
 namespace bcg {
 
@@ -32,6 +33,12 @@ point_cloud_system::point_cloud_system(viewer_state *state) : system("point_clou
     state->dispatcher.sink<event::point_cloud::vertex::curvature::taubin_knn>().connect<&point_cloud_system::on_vertex_curvature_taubin_knn>(
             this);
     state->dispatcher.sink<event::point_cloud::vertex::curvature::taubin_radius>().connect<&point_cloud_system::on_vertex_curvature_taubin_radius>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::outliers::probability_knn>().connect<&point_cloud_system::on_vertex_outlier_probability_knn>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::outliers::probability_radius>().connect<&point_cloud_system::on_vertex_outlier_probability_radius>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::outliers::remove>().connect<&point_cloud_system::on_vertex_outlier_remove>(
             this);
 }
 
@@ -201,6 +208,42 @@ void point_cloud_system::on_vertex_curvature_taubin_radius(
     if (!vertices) return;
 
     point_cloud_curvature_taubin(vertices, index, event.radius, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_outlier_probability_knn(
+        const event::point_cloud::vertex::outliers::probability_knn &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_outlier_probability_knn(vertices, index, event.num_closest, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_outlier_probability_radius(
+        const event::point_cloud::vertex::outliers::probability_radius &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_outlier_probability_radius(vertices, index, event.radius, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_outlier_remove(const event::point_cloud::vertex::outliers::remove &event) {
+    if (!state->scene.valid(event.id)) return;
+
+    auto *pc = state->scene.try_get<point_cloud>(event.id);
+    if (!pc) return;
+    point_cloud_vertex_remove_outliers(*pc, event.threshold, state->config.parallel_grain_size);
 }
 
 }
