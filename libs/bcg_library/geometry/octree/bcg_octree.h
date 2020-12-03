@@ -26,6 +26,8 @@ struct octree{
 
     octree(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 20);
 
+    void clear();
+
     void build(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 20);
 
     neighbors_query query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) const;
