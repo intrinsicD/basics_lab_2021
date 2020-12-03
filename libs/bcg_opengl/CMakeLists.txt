@@ -37,6 +37,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_point_cloud_curvature_taubin.h guis/bcg_gui_point_cloud_curvature_taubin.cpp
             guis/bcg_gui_point_cloud_vertex_outlier_probability.h guis/bcg_gui_point_cloud_vertex_outlier_probability.cpp
             guis/bcg_gui_point_cloud_kernel_density_estimation.h guis/bcg_gui_point_cloud_kernel_density_estimation.cpp
+            guis/bcg_gui_point_cloud_quadric.h guis/bcg_gui_point_cloud_quadric.cpp
             guis/bcg_gui_graph_vertex_pca.h guis/bcg_gui_graph_vertex_pca.cpp
             guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp

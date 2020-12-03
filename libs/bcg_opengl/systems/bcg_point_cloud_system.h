@@ -39,6 +39,24 @@ struct point_cloud_system : public system{
     void on_vertex_kernel_density_estimation_knn(const event::point_cloud::vertex::kernel_density::knn &event);
 
     void on_vertex_kernel_density_estimation_radius(const event::point_cloud::vertex::kernel_density::radius &event);
+
+    void on_vertex_quadric_point(const event::point_cloud::vertex::quadric::point &event);
+
+    void on_vertex_quadric_plane(const event::point_cloud::vertex::quadric::plane &event);
+
+    void on_vertex_quadric_probabilistic_plane_quadric_isotropic_knn(
+            const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_knn &event);
+
+    void on_vertex_quadric_probabilistic_plane_quadric_isotropic_radius(
+            const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_radius &event);
+
+    void on_vertex_quadric_probabilistic_plane_quadric_anisotropic_knn(
+            const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_knn &event);
+
+    void on_vertex_quadric_probabilistic_plane_quadric_anisotropic_radius(
+            const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_radius &event);
+
+    void on_vertex_quadric_collect(const event::point_cloud::vertex::quadric::collect &event);
 };
 
 }

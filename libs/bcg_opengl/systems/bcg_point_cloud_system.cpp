@@ -14,6 +14,7 @@
 #include "point_cloud/bcg_point_cloud_curvature_taubin.h"
 #include "point_cloud/bcg_point_cloud_vertex_outlier_probability.h"
 #include "point_cloud/bcg_point_cloud_kernel_density_estimation.h"
+#include "point_cloud/bcg_point_cloud_vertex_quadric.h"
 
 namespace bcg {
 
@@ -44,6 +45,20 @@ point_cloud_system::point_cloud_system(viewer_state *state) : system("point_clou
     state->dispatcher.sink<event::point_cloud::vertex::kernel_density::knn>().connect<&point_cloud_system::on_vertex_kernel_density_estimation_knn>(
             this);
     state->dispatcher.sink<event::point_cloud::vertex::kernel_density::radius>().connect<&point_cloud_system::on_vertex_kernel_density_estimation_radius>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::point>().connect<&point_cloud_system::on_vertex_quadric_point>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::plane>().connect<&point_cloud_system::on_vertex_quadric_plane>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_knn>().connect<&point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic_knn>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_radius>().connect<&point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic_radius>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_knn>().connect<&point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_knn>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_radius>().connect<&point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_radius>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::quadric::collect>().connect<&point_cloud_system::on_vertex_quadric_collect>(
             this);
 }
 
@@ -251,7 +266,8 @@ void point_cloud_system::on_vertex_outlier_remove(const event::point_cloud::vert
     point_cloud_vertex_remove_outliers(*pc, event.threshold, state->config.parallel_grain_size);
 }
 
-void point_cloud_system::on_vertex_kernel_density_estimation_knn(const event::point_cloud::vertex::kernel_density::knn &event){
+void point_cloud_system::on_vertex_kernel_density_estimation_knn(
+        const event::point_cloud::vertex::kernel_density::knn &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
@@ -264,7 +280,8 @@ void point_cloud_system::on_vertex_kernel_density_estimation_knn(const event::po
     point_cloud_kernel_density_estimation_knn(vertices, index, event.num_closest, state->config.parallel_grain_size);
 }
 
-void point_cloud_system::on_vertex_kernel_density_estimation_radius(const event::point_cloud::vertex::kernel_density::radius &event){
+void point_cloud_system::on_vertex_kernel_density_estimation_radius(
+        const event::point_cloud::vertex::kernel_density::radius &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
@@ -276,5 +293,100 @@ void point_cloud_system::on_vertex_kernel_density_estimation_radius(const event:
 
     point_cloud_kernel_density_estimation_radius(vertices, index, event.radius, state->config.parallel_grain_size);
 }
+
+void point_cloud_system::on_vertex_quadric_point(const event::point_cloud::vertex::quadric::point &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_knn(vertices, point_quadric, index, 1, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_quadric_plane(const event::point_cloud::vertex::quadric::plane &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_knn(vertices, plane_quadric, index, 1, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic_knn(
+        const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_knn &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_knn(vertices, probabilistic_plane_quadric_isotropic, index, event.num_closest,
+                                   state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic_radius(
+        const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_radius &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_radius(vertices, probabilistic_plane_quadric_isotropic, index, event.radius,
+                                      state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_knn(
+        const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_knn &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_knn(vertices, probabilistic_plane_quadric_anisotropic, index, event.num_closest,
+                                   state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_radius(
+        const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_radius &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_radius(vertices, probabilistic_plane_quadric_anisotropic, index, event.radius,
+                                      state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_quadric_collect(const event::point_cloud::vertex::quadric::collect &event) {
+    if (!state->scene.valid(event.id)) return;
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+
+    point_cloud_vertex_quadric_collect_neighbors(vertices, state->config.parallel_grain_size);
+}
+
 
 }

@@ -7,80 +7,108 @@
 
 #include "entt/entt.hpp"
 
-namespace bcg{
+namespace bcg {
 
 }
-namespace bcg::event::point_cloud{
-struct setup{
+namespace bcg::event::point_cloud {
+struct setup {
     entt::entity id;
     std::string filename;
 };
-namespace build{
-struct graph_knn{
+namespace build {
+struct graph_knn {
     entt::entity id;
     int num_closest = 0;
 };
-struct graph_radius{
+struct graph_radius {
     entt::entity id;
     bcg_scalar_t radius = 0;
 };
 }
 
-namespace vertex{
-namespace curvature{
-struct taubin_knn{
+namespace vertex {
+namespace curvature {
+struct taubin_knn {
     entt::entity id;
     int num_closest = 0;
 };
-struct taubin_radius{
+struct taubin_radius {
     entt::entity id;
     bcg_scalar_t radius = 0;
 };
 }
-namespace outliers{
-struct probability_knn{
+namespace outliers {
+struct probability_knn {
     entt::entity id;
     int num_closest = 0;
 };
-struct probability_radius{
+struct probability_radius {
     entt::entity id;
     bcg_scalar_t radius = 0;
 };
-struct remove{
+struct remove {
     entt::entity id;
     bcg_scalar_t threshold = scalar_eps;
 };
 }
-namespace kernel_density{
-struct knn{
+namespace quadric {
+struct point {
+    entt::entity id;
+};
+struct plane {
+    entt::entity id;
+};
+struct probabilistic_plane_quadric_isotropic_knn {
     entt::entity id;
     int num_closest = 0;
 };
-struct radius{
+struct probabilistic_plane_quadric_isotropic_radius {
+    entt::entity id;
+    bcg_scalar_t radius = 0;
+};
+struct probabilistic_plane_quadric_anisotropic_knn {
+    entt::entity id;
+    int num_closest = 0;
+};
+struct probabilistic_plane_quadric_anisotropic_radius {
+    entt::entity id;
+    bcg_scalar_t radius = 0;
+};
+struct collect{
+    entt::entity id;
+};
+
+}
+namespace kernel_density {
+struct knn {
+    entt::entity id;
+    int num_closest = 0;
+};
+struct radius {
     entt::entity id;
     bcg_scalar_t radius = 0;
 };
 }
-namespace pca{
-struct svd{
+namespace pca {
+struct svd {
     entt::entity id;
     bool compute_mean = true;
     int num_closest = 0;
     bcg_scalar_t radius = 0;
 };
-struct weighted_svd{
+struct weighted_svd {
     entt::entity id;
     bool compute_mean = true;
     int num_closest = 0;
     bcg_scalar_t radius = 0;
 };
-struct eig{
+struct eig {
     entt::entity id;
     bool compute_mean = true;
     int num_closest = 0;
     bcg_scalar_t radius = 0;
 };
-struct weighted_eig{
+struct weighted_eig {
     entt::entity id;
     bool compute_mean = true;
     int num_closest = 0;

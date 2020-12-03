@@ -9,6 +9,7 @@
 #include "bcg_opengl/guis/bcg_gui_point_cloud_curvature_taubin.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_outlier_probability.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_kernel_density_estimation.h"
+#include "bcg_opengl/guis/bcg_gui_point_cloud_quadric.h"
 #include "bcg_opengl/guis/bcg_gui_graph_vertex_pca.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
@@ -50,6 +51,9 @@ int main() {
             }
             if(ImGui::MenuItem("Kernel Density Estimation")){
                 state->gui.left = gui_point_cloud_kernel_density_estimation;
+            }
+            if(ImGui::MenuItem("Quadrics")){
+                state->gui.left = gui_point_cloud_quadric;
             }
             ImGui::EndMenu();
         }
