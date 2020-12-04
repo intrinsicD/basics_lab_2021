@@ -60,8 +60,11 @@ void point_cloud_vertex_outlier_probability_knn(vertex_container *vertices, cons
 
     Map<bcg_scalar_t, 1>(outlier_probability) = 1.0 - MapConst<bcg_scalar_t, 1>(likelihood).array();
 
+    vertices->remove(covs);
     vertices->remove(knn);
     vertices->remove(knn_dists);
+    vertices->remove(normalizers);
+    vertices->remove(avg_distance);
 }
 
 void
@@ -118,10 +121,10 @@ point_cloud_vertex_outlier_probability_radius(vertex_container *vertices, const 
     Map<bcg_scalar_t, 1>(outlier_probability) = 1.0 - MapConst<bcg_scalar_t, 1>(likelihood).array();
 
     vertices->remove(covs);
-    vertices->remove(normalizers);
-    vertices->remove(avg_distance);
     vertices->remove(knn);
     vertices->remove(knn_dists);
+    vertices->remove(normalizers);
+    vertices->remove(avg_distance);
 }
 
 void point_cloud_vertex_remove_outliers(point_cloud &pc, bcg_scalar_t threshold, size_t parallel_grain_size) {

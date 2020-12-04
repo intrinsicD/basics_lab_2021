@@ -55,6 +55,14 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
         auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
         state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
+    }else{
+        auto &material = state->scene.get<material_mesh>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
+        state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+        for(auto &attribute : material.attributes){
+            attribute.update = false;
+        }
     }
 }
 
@@ -171,11 +179,12 @@ void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_norm
     auto &material = state->scene.get<material_mesh>(event.id);
     auto *vertices = state->get_vertices(event.id);
     if (vertices->get_base_ptr(event.normal.property_name)->dims() != 3) return;
-    auto &position = material.attributes[1];
-    position.property_name = event.normal.property_name;
-    position.enable = true;
-    position.update = true;
-    std::vector<attribute> vertex_attributes = {position};
+    auto &normal = material.attributes[1];
+    normal.property_name = event.normal.property_name;
+    normal.buffer_name = normal.property_name;
+    normal.enable = true;
+    normal.update = true;
+    std::vector<attribute> vertex_attributes = {normal};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
     state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
@@ -186,6 +195,7 @@ void mesh_renderer::on_set_vertex_color_attribute(const event::mesh_renderer::se
 
     auto &color = material.attributes[2];
     color.property_name = event.color.property_name;
+    color.buffer_name = color.property_name;
     color.enable = true;
     color.update = true;
     material.use_uniform_color = false;

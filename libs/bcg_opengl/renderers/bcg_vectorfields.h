@@ -17,6 +17,24 @@ struct vectorfields{
     std::unordered_map<std::string, material_vectorfield> vertex_vectorfields;
     std::unordered_map<std::string, material_vectorfield> edge_vectorfields;
     std::unordered_map<std::string, material_vectorfield> face_vectorfields;
+
+    void set_clean() {
+        for(auto &item : vertex_vectorfields){
+            for(auto &attribute : item.second.attributes){
+                attribute.update = false;
+            }
+        }
+        for(auto &item : edge_vectorfields){
+            for(auto &attribute : item.second.attributes){
+                attribute.update = false;
+            }
+        }
+        for(auto &item : face_vectorfields){
+            for(auto &attribute : item.second.attributes){
+                attribute.update = false;
+            }
+        }
+    }
 };
 
 }

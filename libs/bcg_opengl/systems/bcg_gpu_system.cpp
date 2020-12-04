@@ -29,6 +29,7 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
     if (!state->scene.valid(event.id)) return;
     if (!event.container->has(event.attrib.property_name)) return;
 
+    if(!event.container->get_base_ptr(event.attrib.property_name)->is_dirty() && !event.attrib.update) return;
     auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
     ogl_buffer_object *buffer = nullptr;
     if (event.attrib.property_name == "edges") {
@@ -70,11 +71,11 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
     if (vertices) {
         auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
         shape.num_vertices = vertices->size();
-        const auto &attributes = event.attributes;
+        auto &attributes = event.attributes;
 
         colormap::jet color_map;
 
-        for (const auto &attribute : attributes) {
+        for (auto &attribute : attributes) {
             if(attribute.index < 0) continue;
             state->dispatcher.trigger<event::gpu::update_property>(event.id, vertices, attribute, color_map);
         }

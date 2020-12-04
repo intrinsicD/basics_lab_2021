@@ -14,9 +14,9 @@ namespace bcg{
 
 struct material_vectorfield{
     std::vector<attribute> attributes = {
-            {"position", "v_position","v_position", 0, true},
-            {"vectors", "", "", 1, false},
-            {"color", "", "", 2, false},
+            {"position", "v_position","v_position", 0, true, false},
+            {"vectors", "", "", 1, false, false},
+            {"color", "", "", 2, false, false},
     };
 
     bool enabled = false;

@@ -73,6 +73,18 @@ void vectorfield_renderer::on_enqueue(const event::vectorfield_renderer::enqueue
             state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, item.second.attributes);
         }
         state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
+    }else{
+        auto &vectors = state->scene.get<vectorfields>(event.id);
+        for(auto &item : vectors.vertex_vectorfields){
+            state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, item.second.attributes);
+        }
+        for(auto &item : vectors.edge_vectorfields){
+            state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, item.second.attributes);
+        }
+        for(auto &item : vectors.face_vectorfields){
+            state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, item.second.attributes);
+        }
+        vectors.set_clean();
     }
 }
 
@@ -198,6 +210,7 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         material.num_vectors = base_ptr->size();
         auto &position = material.attributes[0];
         position.property_name = event.position.property_name;
+        position.buffer_name = position.property_name;
         position.enable = true;
         position.update = true;
         attributes = {position};
@@ -210,6 +223,7 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         material.num_vectors = base_ptr->size();
         auto &position = material.attributes[0];
         position.property_name = event.position.property_name;
+        position.buffer_name = position.property_name;
         position.enable = true;
         position.update = true;
         attributes = {position};
@@ -222,6 +236,7 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         material.num_vectors = base_ptr->size();
         auto &position = material.attributes[0];
         position.property_name = event.position.property_name;
+        position.buffer_name = position.property_name;
         position.enable = true;
         position.update = true;
         attributes = {position};
@@ -242,6 +257,7 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
         auto &material = vectors.vertex_vectorfields[event.vectorfield_name];
         auto &vector = material.attributes[1];
         vector.property_name = event.vector.property_name;
+        vector.buffer_name = vector.property_name;
         vector.enable = true;
         vector.update = true;
         attributes = {vector};
@@ -255,6 +271,7 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
         auto &material = vectors.edge_vectorfields[event.vectorfield_name];
         auto &vector = material.attributes[1];
         vector.property_name = event.vector.property_name;
+        vector.buffer_name = vector.property_name;
         vector.enable = true;
         vector.update = true;
         attributes = {vector};
@@ -267,6 +284,7 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
         auto &material = vectors.face_vectorfields[event.vectorfield_name];
         auto &vector = material.attributes[1];
         vector.property_name = event.vector.property_name;
+        vector.buffer_name = vector.property_name;
         vector.enable = true;
         vector.update = true;
         attributes = {vector};
@@ -287,6 +305,7 @@ void vectorfield_renderer::on_set_color_attribute(const event::vectorfield_rende
         auto &material = vectors.vertex_vectorfields[event.vectorfield_name];
         auto &color = material.attributes[2];
         color.property_name = event.color.property_name;
+        color.buffer_name = color.property_name;
         color.enable = true;
         color.update = true;
         attributes = {color};
@@ -297,6 +316,7 @@ void vectorfield_renderer::on_set_color_attribute(const event::vectorfield_rende
         auto &material = vectors.edge_vectorfields[event.vectorfield_name];
         auto &color = material.attributes[2];
         color.property_name = event.color.property_name;
+        color.buffer_name = color.property_name;
         color.enable = true;
         color.update = true;
         attributes = {color};
@@ -307,6 +327,7 @@ void vectorfield_renderer::on_set_color_attribute(const event::vectorfield_rende
         auto &material = vectors.face_vectorfields[event.vectorfield_name];
         auto &color = material.attributes[2];
         color.property_name = event.color.property_name;
+        color.buffer_name = color.property_name;
         color.enable = true;
         color.update = true;
         attributes = {color};

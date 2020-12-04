@@ -38,7 +38,7 @@ inline void weighted_least_squares_fit_svd(Pca<D> &pca, const MatrixS<N, D> &P, 
 template<int N, int D>
 inline void least_squares_fit_eig(Pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean){
     MatrixS<N, D> P_hat = P.rowwise() - mean.transpose();
-    Eigen::SelfAdjointEigenSolver<MatrixS<D, D>> eig(covariance<D, D>(P_hat, P_hat));
+    Eigen::SelfAdjointEigenSolver<MatrixS<D, D>> eig(covariance<N, D>(P_hat, P_hat));
     pca.directions = eig.eigenvectors().rowwise().reverse();
     pca.loadings = eig.eigenvalues().reverse();
     pca.mean = mean;
@@ -47,7 +47,7 @@ inline void least_squares_fit_eig(Pca<D> &pca, const MatrixS<N, D> &P, const Vec
 template<int N, int D>
 inline void weighted_least_squares_fit_eig(Pca<D> &pca, const MatrixS<N, D> &P, const VectorS<D> &mean, const VectorS<N> &weights){
     MatrixS<N, D> P_hat = P.rowwise() - mean.transpose();
-    Eigen::SelfAdjointEigenSolver<MatrixS<D, D>> eig(covariance<D, D>(P_hat, weights, P_hat));
+    Eigen::SelfAdjointEigenSolver<MatrixS<D, D>> eig(covariance<N, D>(P_hat, weights, P_hat));
     pca.directions = eig.eigenvectors().rowwise().reverse();
     pca.loadings = eig.eigenvalues().reverse();
     pca.mean = mean;

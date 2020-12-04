@@ -55,6 +55,13 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
         auto &material = state->scene.emplace<material_points>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
+    }else{
+        auto &material = state->scene.get<material_points>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
+        for(auto &attribute : material.attributes){
+            attribute.update = false;
+        }
     }
 }
 
@@ -148,6 +155,7 @@ void points_renderer::on_set_position_attribute(const event::points_renderer::se
     if (vertices->get_base_ptr(event.position.property_name)->dims() != 3) return;
     auto &position = material.attributes[0];
     position.property_name = event.position.property_name;
+    position.buffer_name = position.property_name;
     position.enable = true;
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};
@@ -161,6 +169,7 @@ void points_renderer::on_set_color_attribute(const event::points_renderer::set_c
     //TODO convert to colormap if 1 dimensional.
     auto &color = material.attributes[1];
     color.property_name = event.color.property_name;
+    color.buffer_name = color.property_name;
     color.enable = true;
     color.update = true;
     material.use_uniform_color = false;
@@ -178,6 +187,7 @@ void points_renderer::on_set_point_size_attribute(const event::points_renderer::
     if (ptr->dims() != 1) return;
     auto &point_size = material.attributes[2];
     point_size.property_name = event.point_size.property_name;
+    point_size.buffer_name = point_size.property_name;
     point_size.enable = true;
     point_size.update = true;
     material.use_uniform_size = false;

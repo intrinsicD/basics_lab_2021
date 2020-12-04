@@ -53,6 +53,14 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
         auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
         state->dispatcher.trigger<event::graph_renderer::setup_for_rendering>(event.id);
+    }else{
+        auto &material = state->scene.get<material_graph>(event.id);
+        state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
+        auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
+        state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
+        for(auto &attribute : material.attributes){
+            attribute.update = false;
+        }
     }
 }
 
@@ -147,6 +155,7 @@ void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_
     if (vertices->get_base_ptr(event.position.property_name)->dims() != 3) return;
     auto &position = material.attributes[0];
     position.property_name = event.position.property_name;
+    position.buffer_name = position.property_name;
     position.enable = true;
     position.update = true;
     std::vector<attribute> vertex_attributes = {position};

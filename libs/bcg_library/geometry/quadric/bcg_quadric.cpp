@@ -8,12 +8,12 @@ namespace bcg{
 
 
 MatrixS<3, 3> cross_product_squared_transpose(const VectorS<3> &v) {
-    auto a = v[0];
-    auto b = v[1];
-    auto c = v[2];
-    auto a2 = a * a;
-    auto b2 = b * b;
-    auto c2 = c * c;
+    bcg_scalar_t a = v[0];
+    bcg_scalar_t b = v[1];
+    bcg_scalar_t c = v[2];
+    bcg_scalar_t a2 = a * a;
+    bcg_scalar_t b2 = b * b;
+    bcg_scalar_t c2 = c * c;
 
     MatrixS<3, 3> M;
 
@@ -34,12 +34,12 @@ MatrixS<3, 3> cross_product_squared_transpose(const VectorS<3> &v) {
 MatrixS<3, 3> first_order_tri_quad(const VectorS<3> &a, const MatrixS<3, 3> &sigma) {
     MatrixS<3, 3> M;
 
-    auto xx = a[0] * a[0];
-    auto xy = a[0] * a[1];
-    auto xz = a[0] * a[2];
-    auto yy = a[1] * a[1];
-    auto yz = a[1] * a[2];
-    auto zz = a[2] * a[2];
+    bcg_scalar_t xx = a[0] * a[0];
+    bcg_scalar_t xy = a[0] * a[1];
+    bcg_scalar_t xz = a[0] * a[2];
+    bcg_scalar_t yy = a[1] * a[1];
+    bcg_scalar_t yz = a[1] * a[2];
+    bcg_scalar_t zz = a[2] * a[2];
 
     bcg_scalar_t two = 2;
 
@@ -60,13 +60,13 @@ MatrixS<3, 3> first_order_tri_quad(const VectorS<3> &a, const MatrixS<3, 3> &sig
 MatrixS<3, 3> cross_interference_matrix(const MatrixS<3, 3> &A, const MatrixS<3, 3> &B) {
     MatrixS<3, 3> m;
 
-    auto constexpr x = 0;
-    auto constexpr y = 1;
-    auto constexpr z = 2;
+    bcg_scalar_t constexpr x = 0;
+    bcg_scalar_t constexpr y = 1;
+    bcg_scalar_t constexpr z = 2;
 
-    auto cxx = A(y, z) * B(y, z);
-    auto cyy = A(x, z) * B(x, z);
-    auto czz = A(x, y) * B(x, y);
+    bcg_scalar_t cxx = A(y, z) * B(y, z);
+    bcg_scalar_t cyy = A(x, z) * B(x, z);
+    bcg_scalar_t czz = A(x, y) * B(x, y);
 
     m(x, x) = A(y, y) * B(z, z) - cxx - cxx + A(z, z) * B(y, y);
     m(y, y) = A(x, x) * B(z, z) - cyy - cyy + A(z, z) * B(x, x);
@@ -121,15 +121,15 @@ void quadric::point_quadric(const VectorS<3> &p) {
 }
 
 void quadric::plane_quadric(const VectorS<3> &p, const VectorS<3> &n) {
-    auto d = p.dot(n);
+    bcg_scalar_t d = p.dot(n);
     from_coefficients(n * n.transpose(), n * d, d * d);
 }
 
 void quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const VectorS<3> &mean_n, bcg_scalar_t stddev_p,
                                  bcg_scalar_t stddev_n) {
-    auto sn2 = stddev_n * stddev_n;
-    auto sp2 = stddev_p * stddev_p;
-    auto d = mean_p.dot(mean_n);
+    bcg_scalar_t sn2 = stddev_n * stddev_n;
+    bcg_scalar_t sp2 = stddev_p * stddev_p;
+    bcg_scalar_t d = mean_p.dot(mean_n);
 
     from_coefficients(mean_n * mean_n.transpose() + MatrixS<3, 3>::Identity() * sn2,
                       mean_n * d + mean_p * sn2,
@@ -138,7 +138,7 @@ void quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const Vector
 
 void quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const VectorS<3> &mean_n,
                                  const MatrixS<3, 3> &sigma_p, const MatrixS<3, 3> &sigma_n) {
-    auto d = mean_p.dot(mean_n);
+    bcg_scalar_t d = mean_p.dot(mean_n);
 
     from_coefficients(mean_n * mean_n.transpose() + sigma_n,
                       mean_n * d + sigma_n * mean_p,
@@ -149,7 +149,7 @@ void quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const Vector
 void quadric::triangle_quadric(const VectorS<3> &p, const VectorS<3> &q, const VectorS<3> &r) {
     VectorS<3> pxq = p.cross(q);
     VectorS<3> xsum = pxq + q.cross(r) + r.cross(p);
-    auto det = pxq.dot(r);
+    bcg_scalar_t det = pxq.dot(r);
     from_coefficients(xsum * xsum.transpose(), xsum * det, det * det);
 }
 
@@ -203,7 +203,7 @@ quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q
     VectorS<3> qxr = q.cross(r);
     VectorS<3> rxp = r.cross(p);
 
-    auto det_pqr = pxq.dot(r);
+    bcg_scalar_t det_pqr = pxq.dot(r);
 
     VectorS<3> cross_pqr = pxq + qxr + rxp;
 
@@ -237,7 +237,7 @@ quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q
     b = b + ci_qr * p;
     b = b + ci_rp * q;
 
-    auto c = det_pqr * det_pqr;
+    bcg_scalar_t c = det_pqr * det_pqr;
 
     c += pxq.dot(sigma_r * pxq);
     c += qxr.dot(sigma_p * qxr);
@@ -275,24 +275,24 @@ quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q
 }
 
 [[nodiscard]] VectorS<3> quadric::minimizer() const {
-    auto ad = m_A00 * m_A11;
-    auto ae = m_A00 * m_A12;
-    auto af = m_A00 * m_A22;
-    auto bc = m_A01 * m_A02;
-    auto be = m_A01 * m_A12;
-    auto bf = m_A01 * m_A22;
-    auto df = m_A11 * m_A22;
-    auto ce = m_A02 * m_A12;
-    auto cd = m_A02 * m_A11;
+    bcg_scalar_t ad = m_A00 * m_A11;
+    bcg_scalar_t ae = m_A00 * m_A12;
+    bcg_scalar_t af = m_A00 * m_A22;
+    bcg_scalar_t bc = m_A01 * m_A02;
+    bcg_scalar_t be = m_A01 * m_A12;
+    bcg_scalar_t bf = m_A01 * m_A22;
+    bcg_scalar_t df = m_A11 * m_A22;
+    bcg_scalar_t ce = m_A02 * m_A12;
+    bcg_scalar_t cd = m_A02 * m_A11;
 
-    auto be_cd = be - cd;
-    auto bc_ae = bc - ae;
-    auto ce_bf = ce - bf;
+    bcg_scalar_t be_cd = be - cd;
+    bcg_scalar_t bc_ae = bc - ae;
+    bcg_scalar_t ce_bf = ce - bf;
 
-    auto denom = 1.0 / (m_A00 * df + 2.0 * m_A01 * ce - ae * m_A12 - bf * m_A01 - cd * m_A02);
-    auto nom0 = m_b0 * (df - m_A12 * m_A12) + m_b1 * ce_bf + m_b2 * be_cd;
-    auto nom1 = m_b0 * ce_bf + m_b1 * (af - m_A02 * m_A02) + m_b2 * bc_ae;
-    auto nom2 = m_b0 * be_cd + m_b1 * bc_ae + m_b2 * (ad - m_A01 * m_A01);
+    bcg_scalar_t denom = 1.0 / (m_A00 * df + 2.0 * m_A01 * ce - ae * m_A12 - bf * m_A01 - cd * m_A02);
+    bcg_scalar_t nom0 = m_b0 * (df - m_A12 * m_A12) + m_b1 * ce_bf + m_b2 * be_cd;
+    bcg_scalar_t nom1 = m_b0 * ce_bf + m_b1 * (af - m_A02 * m_A02) + m_b2 * bc_ae;
+    bcg_scalar_t nom2 = m_b0 * be_cd + m_b1 * bc_ae + m_b2 * (ad - m_A01 * m_A01);
 
     return VectorS<3>(nom0 * denom, nom1 * denom, nom2 * denom);
 }
@@ -377,25 +377,25 @@ quadric quadric::operator-() const {
 }
 
 quadric quadric::operator+(const quadric &rhs) const {
-    auto r = *this; // copy
+    quadric r = *this; // copy
     r += rhs;
     return r;
 }
 
 quadric quadric::operator-(const quadric &rhs) const {
-    auto r = *this; // copy
+    quadric r = *this; // copy
     r -= rhs;
     return r;
 }
 
 quadric quadric::operator*(bcg_scalar_t s) const {
-    auto r = *this; // copy
+    quadric r = *this; // copy
     r *= s;
     return r;
 }
 
 quadric quadric::operator/(bcg_scalar_t s) const {
-    auto r = *this; // copy
+    quadric r = *this; // copy
     r /= s;
     return r;
 }
