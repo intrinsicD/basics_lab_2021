@@ -9,7 +9,6 @@
 #include "math/bcg_linalg.h"
 #include "bcg_rotation_robust_elementwise_median.h"
 #include "bcg_rotations_convert.h"
-#include "QuaternionMean.h"
 
 namespace bcg{
 

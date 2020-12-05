@@ -21,7 +21,7 @@ struct geodesic_mean_so3{
 
     geodesic_mean_so3(const MatrixS<3, 3> &initial_estimate, std::vector<bcg_scalar_t> weights, bool outlier_reject);
 
-    MatrixS<3, 3> operator()(const std::vector<MatrixS<3, 3>> &rotations, bcg_scalar_t eps = 1e-7, int max_iterations = 1000);
+    MatrixS<3, 3> operator()(const std::vector<MatrixS<3, 3>> &rotations, bcg_scalar_t eps = scalar_eps, int max_iterations = 1000);
 
 private:
     bool m_robust, m_outlier_reject;

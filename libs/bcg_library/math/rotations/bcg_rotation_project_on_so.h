@@ -9,7 +9,7 @@
 
 namespace bcg{
 
-template<int N, int M>
+template<int M, int N>
 inline MatrixS<M, N> project_on_so(const MatrixS<M, N> &A, bool no_reflections = true) {
     Eigen::BDCSVD<MatrixS<M, N>> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
     VectorS<N> C(VectorS<N>::Ones(A.cols()));

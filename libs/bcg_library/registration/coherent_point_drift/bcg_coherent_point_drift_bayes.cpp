@@ -67,7 +67,7 @@ void coherent_point_drift_bayes::expectation_step(const MatrixS<-1, -1> &Y, cons
         }
     }
     VectorS<-1> denominator = 1.0 / ((VectorS<-1>::Ones(M).transpose() * P).array() + omega * p_out.array());
-    P.rowwise() = P * denominator.asDiagonal();
+    P = P * denominator.asDiagonal();
 }
 
 void coherent_point_drift_bayes::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {

@@ -9,9 +9,9 @@
 
 namespace bcg{
 
-template<int N, int M>
-inline MatrixS<M, N> optimal_rotation(const MatrixS<M, N> &source, const MatrixS<M, N> &target, bool no_reflections = true) {
-    return project_on_so(target.transpose() * source, no_reflections);
+template<int M, int N>
+inline MatrixS<N, N> optimal_rotation(const MatrixS<M, N> &source, const MatrixS<M, N> &target, bool no_reflections = true) {
+    return project_on_so<N, N>(target.transpose() * source, no_reflections);
 }
 
 }

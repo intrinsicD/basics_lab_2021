@@ -19,8 +19,8 @@ Transform minimize_point_2_point(const MatrixS<-1, 3> &source, const Transform &
                 tbb::blocked_range<uint32_t>(0u, (uint32_t) N, parallel_grain_size),
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                        S.row(i) = source_model * source.row(i);
-                        T.row(i) = target_model * target.row(i);
+                        S.row(i) = source_model * source.row(i).transpose();
+                        T.row(i) = target_model * target.row(i).transpose();
                     }
                 }
         );
@@ -76,9 +76,9 @@ Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const Transform &
                 tbb::blocked_range<uint32_t>(0u, (uint32_t) N, parallel_grain_size),
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                        S.row(i) = source_model * source.row(i);
-                        T.row(i) = target_model * target.row(i);
-                        Normals.row(i) = target_model.linear() * target_normals.row(i);
+                        S.row(i) = source_model * source.row(i).transpose();
+                        T.row(i) = target_model * target.row(i).transpose();
+                        Normals.row(i) = target_model.linear() * target_normals.row(i).transpose();
                     }
                 }
         );

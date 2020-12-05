@@ -38,7 +38,7 @@ void coherent_point_drift_rigid::expectation_step(const MatrixS<-1, -1> &Y, cons
     VectorS<-1> denominator = 1.0 / (VectorS<-1>::Ones(M).transpose() * P).array() +
                               std::pow(2 * pi * sigma_squared, D / 2.0) * omega / (1.0 - omega) * bcg_scalar_t(M) /
                               bcg_scalar_t(N);
-    P.rowwise() = P * denominator.asDiagonal();
+    P = P * denominator.asDiagonal();
 }
 
 void coherent_point_drift_rigid::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {

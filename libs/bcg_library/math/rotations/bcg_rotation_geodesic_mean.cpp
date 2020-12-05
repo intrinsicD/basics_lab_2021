@@ -14,7 +14,7 @@ geodesic_mean_so3::geodesic_mean_so3(const MatrixS<3, 3> &initial_estimate, bool
 
 geodesic_mean_so3::geodesic_mean_so3(const MatrixS<3, 3> &initial_estimate, std::vector<bcg_scalar_t> weights, bool outlier_reject): m_robust(false), m_outlier_reject(outlier_reject), m_R(initial_estimate), m_weights(std::move(weights)){}
 
-MatrixS<3, 3> geodesic_mean_so3::operator()(const std::vector<MatrixS<3, 3>> &rotations, bcg_scalar_t eps = 1e-7, int max_iterations = 1000){
+MatrixS<3, 3> geodesic_mean_so3::operator()(const std::vector<MatrixS<3, 3>> &rotations, bcg_scalar_t eps, int max_iterations){
     if(m_robust){
         m_R = robust_elementwise_median(rotations);
     }else{
