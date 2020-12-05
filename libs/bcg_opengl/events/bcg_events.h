@@ -18,5 +18,6 @@
 #include "bcg_events_spatial_index.h"
 #include "bcg_events_laplacian.h"
 #include "bcg_events_picker.h"
+#include "bcg_events_correspondences.h"
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_H

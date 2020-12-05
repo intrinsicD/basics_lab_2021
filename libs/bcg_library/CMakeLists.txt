@@ -22,6 +22,7 @@ add_library(bcg_graphics
         math/bcg_binomial_coefficient.h math/bcg_binomial_coefficient.cpp
         math/bcg_bernstein_basis.h math/bcg_bernstein_basis.cpp
         math/bcg_pca.h
+        math/bcg_robust_pca.h
         math/bcg_gaussian.h
         math/bcg_vertex_classify_curvature.h math/bcg_vertex_classify_curvature.cpp
         math/laplacian/bcg_laplacian_matrix.h
@@ -44,6 +45,18 @@ add_library(bcg_graphics
         math/laplacian/bcg_laplacian_smoothing.h
         math/laplacian/bcg_laplacian_heat_diffusion.h
         math/laplacian/bcg_laplacian_harmonic_field.h
+        math/rotations/bcg_rotation_chordal_mean.h math/rotations/bcg_rotation_chordal_mean.cpp
+        math/rotations/bcg_rotation_geodesic_mean.h math/rotations/bcg_rotation_geodesic_mean.cpp
+        math/rotations/bcg_rotation_geodesic_median.h math/rotations/bcg_rotation_geodesic_median.cpp
+        math/rotations/bcg_rotation_quaternion_mean.h math/rotations/bcg_rotation_quaternion_mean.cpp
+        math/rotations/bcg_rotation_quaternion_median.h math/rotations/bcg_rotation_quaternion_median.cpp
+        math/rotations/bcg_rotation_cross_product_matrix.h
+        math/rotations/bcg_rotation_robust_elementwise_median.h
+        math/rotations/bcg_rotation_matrix_exponential.h
+        math/rotations/bcg_rotation_matrix_logarithm.h
+        math/rotations/bcg_rotation_optimal.h
+        math/rotations/bcg_rotation_project_on_so.h
+        math/rotations/bcg_rotation_random.h
         geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
         geometry/plane/bcg_plane.h
         geometry/bcg_property.h
@@ -105,6 +118,11 @@ add_library(bcg_graphics
         geometry/kdtree/bcg_triangle_kdtree.h geometry/kdtree/bcg_triangle_kdtree.cpp
         geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
+        registration/rigid_idp/bcg_rigid_icp.h registration/rigid_idp/bcg_rigid_icp.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_rigid.h registration/coherent_point_drift/bcg_coherent_point_drift_rigid.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_affine.h registration/coherent_point_drift/bcg_coherent_point_drift_affine.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.h registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_bayes.h registration/coherent_point_drift/bcg_coherent_point_drift_bayes.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         )
 

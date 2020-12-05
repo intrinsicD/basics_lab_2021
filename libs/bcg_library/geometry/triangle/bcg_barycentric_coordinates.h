@@ -42,7 +42,7 @@ inline VectorS<3> to_barycentric_coordinates(const triangle<N> &t, const VectorS
 template<int N>
 inline VectorS<N>
 from_barycentric_coords(const triangle<N> &t, const VectorS<3> &bc) {
-    return VectorS<N>(t.points[0] * bc[0] + t.points[1] * bc[1] + t.points[2] * bc[2]);
+    return VectorS<N>(t.points[0] * bc[0] + t.points[1] * bc[1] + t.points[2] * bc[2]) / bc.sum();
 }
 
 template<int N>
