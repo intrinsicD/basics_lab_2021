@@ -30,13 +30,17 @@ struct running_stats {
 
     double median() const;
 
+    double min() const;
+
+    double max() const;
+
     friend running_stats operator+(const running_stats a, const running_stats b);
 
     running_stats &operator+=(const running_stats &rhs);
 
 private:
     size_t n;
-    double M1, M2, M3, M4, M5;
+    double M1, M2, M3, M4, M5, MIN, MAX;
 };
 
 }

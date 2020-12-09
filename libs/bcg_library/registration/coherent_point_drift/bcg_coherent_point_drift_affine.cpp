@@ -4,60 +4,46 @@
 
 #include "bcg_coherent_point_drift_affine.h"
 
-namespace bcg{
+namespace bcg {
 
 void coherent_point_drift_affine::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega) {
-    assert(Y.cols() == X.cols());
-    assert(omega <= 1 && omega >= 0);
-    M = Y.rows();
-    N = X.rows();
-    D = Y.cols();
+    coherent_point_drift_base::init(Y, X, omega);
 
     B = MatrixS<-1, -1>::Identity(D, D);
     t = VectorS<-1>::Zero(D);
 
-    sigma_squared = 0;
-    for (long i = 0; i < M; ++i) {
-        for (long j = 0; j < N; ++j) {
-            sigma_squared += (X.row(j) - Y.row(i)).squaredNorm();
-        }
+    if (!optimized) {
+        P = MatrixS<-1, -1>::Zero(M, N);
     }
-    sigma_squared /= bcg_scalar_t(D * M * N);
-    P = MatrixS<-1, -1>::Zero(M, N);
 }
 
-void coherent_point_drift_affine::expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    for (long i = 0; i < M; ++i) {
-        for (long j = 0; j < N; ++j) {
-            P(i, j) = std::exp(-(X.row(j) - (B * Y.row(i) + t)).squaredNorm() / (2 * sigma_squared));
-        }
-    }
-    VectorS<-1> denominator = 1.0 / (VectorS<-1>::Ones(M).transpose() * P).array() +
-                              std::pow(2 * pi * sigma_squared, D / 2.0) * omega / (1.0 - omega) * bcg_scalar_t(M) /
-                              bcg_scalar_t(N);
-    P = P * denominator.asDiagonal();
+const MatrixS<-1, -1> &
+coherent_point_drift_affine::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
+    return coherent_point_drift_base::expectation_step(P, Y, X);
 }
 
 void coherent_point_drift_affine::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    P1 = P * VectorS<-1>::Ones(N);
-    PT1 = VectorS<-1>::Ones(M).transpose() * P;
-    N_P = P1.sum();
     mean_x = X.transpose() * PT1 / N_P;
     mean_y = Y.transpose() * P1 / N_P;
-    MatrixS<-1, -1> Xhat = X.rowwise() - mean_x.transpose();
-    MatrixS<-1, -1> Yhat = Y.rowwise() - mean_y.transpose();
-    MatrixS<-1, -1> A(Xhat.transpose() * P.transpose() * Yhat);
-    B = A * (Yhat.transpose() * P1.asDiagonal() * Yhat).inverse();
+    MatrixS<-1, -1> A(PX.transpose() * Y - N_P * mean_x * mean_y.transpose());
+    B = A * (Y.transpose() * P1.asDiagonal() * Y - N_P * mean_y * mean_y.transpose()).inverse();
 
     t = mean_x - B * mean_y;
-    sigma_squared = ((Xhat.transpose() * PT1.asDiagonal() * Xhat).trace() - (A * B.transpose()).trace()) /
+    sigma_squared = ((PT1.array() * X.rowwise().squaredNorm().array()).sum() - N_P * mean_x.squaredNorm() - (A * B.transpose()).trace()) /
                     (N_P * D);
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
 }
 
-void coherent_point_drift_affine::operator()(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X){
-    expectation_step(Y, X);
+void coherent_point_drift_affine::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, size_t parallel_grain_size) {
+    return coherent_point_drift_base::optimized_expectation_step(Y, X, parallel_grain_size);
+}
+
+void coherent_point_drift_affine::optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
     maximization_step(Y, X);
+}
+
+VectorS<-1> coherent_point_drift_affine::transformed(const MatrixS<-1, -1> &Y, long idx) {
+    return B * Y.row(idx).transpose() + t;
 }
 
 }

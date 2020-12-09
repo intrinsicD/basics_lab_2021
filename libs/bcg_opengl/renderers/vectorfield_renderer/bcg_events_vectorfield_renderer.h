@@ -15,6 +15,18 @@ struct enqueue{
 struct setup_for_rendering{
     entt::entity id;
 };
+struct set_vertex_vectorfield{
+    entt::entity id;
+    std::string vectorfield_name;
+};
+struct set_edge_vectorfield{
+    entt::entity id;
+    std::string vectorfield_name;
+};
+struct set_face_vectorfield{
+    entt::entity id;
+    std::string vectorfield_name;
+};
 struct set_position_attribute{
     entt::entity id;
     std::string vectorfield_name;

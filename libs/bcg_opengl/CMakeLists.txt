@@ -65,6 +65,9 @@ if (BCG_OPENGL)
             guis/bcg_gui_mesh_simplification.h guis/bcg_gui_mesh_simplification.cpp
             guis/bcg_gui_mesh_remeshing.h guis/bcg_gui_mesh_remeshing.cpp
             guis/bcg_gui_mesh_statistics.h guis/bcg_gui_mesh_statistics.cpp
+            guis/bcg_gui_correspondences.h guis/bcg_gui_correspondences.cpp
+            guis/bcg_gui_registration.h guis/bcg_gui_registration.cpp
+            guis/bcg_gui_statistics.h guis/bcg_gui_statistics.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp
@@ -82,6 +85,7 @@ if (BCG_OPENGL)
             systems/bcg_hierarchy_system.h systems/bcg_hierarchy_system.cpp
             systems/bcg_spatial_index_system.h systems/bcg_spatial_index_system.cpp
             systems/bcg_correspondence_system.h systems/bcg_correspondence_system.cpp
+            systems/bcg_registration_system.h systems/bcg_registration_system.cpp
             renderers/bcg_renderer.h renderers/bcg_renderer.cpp
             renderers/bcg_render_system.h renderers/bcg_render_system.cpp
             renderers/points_renderer/bcg_material_points.h renderers/points_renderer/bcg_points_renderer.h renderers/points_renderer/bcg_points_renderer.cpp renderers/points_renderer/bcg_events_points_renderer.h

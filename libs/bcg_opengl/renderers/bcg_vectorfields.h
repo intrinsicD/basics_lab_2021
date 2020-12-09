@@ -14,6 +14,9 @@
 namespace bcg{
 
 struct vectorfields{
+    std::string current_vertex_vectorfield_name = "";
+    std::string current_edge_vectorfield_name = "";
+    std::string current_face_vectorfield_name = "";
     std::unordered_map<std::string, material_vectorfield> vertex_vectorfields;
     std::unordered_map<std::string, material_vectorfield> edge_vectorfields;
     std::unordered_map<std::string, material_vectorfield> face_vectorfields;

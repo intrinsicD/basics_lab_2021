@@ -6,13 +6,15 @@
 #include "math/rotations/bcg_rotation_matrix_exponential.h"
 #include "tbb/tbb.h"
 
-namespace bcg{
+namespace bcg {
 
-Transform minimize_point_2_point(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target, const Transform &target_model, size_t parallel_grain_size){
+Transform
+minimize_point_2_point(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target,
+                       const Transform &target_model, size_t parallel_grain_size) {
     size_t N = source.rows();
     MatrixS<-1, 3> S;
     MatrixS<-1, 3> T;
-    if(N > 10 * parallel_grain_size){
+    if (N > 10 * parallel_grain_size) {
         S.resize(N, 3);
         T.resize(N, 3);
         tbb::parallel_for(
@@ -24,18 +26,19 @@ Transform minimize_point_2_point(const MatrixS<-1, 3> &source, const Transform &
                     }
                 }
         );
-    }else{
-        S = (source_model.linear() * source.transpose() + source_model.translation()).transpose();
-        T = (target_model.linear() * target.transpose() + target_model.translation()).transpose();
+    } else {
+        S = ((source_model.linear() * source.transpose()).colwise() + source_model.translation()).transpose();
+        T = ((target_model.linear() * target.transpose()).colwise() + target_model.translation()).transpose();
     }
     VectorS<3> source_mean = S.colwise().mean();
     VectorS<3> target_mean = T.colwise().mean();
-    Rotation R(minimize_point_2_point<-1, 3>(S,T, source_mean, target_mean));
-    return R * Translation(get_translation(R.matrix(),source_mean, target_mean));
+    Rotation R(minimize_point_2_point<-1, 3>(S, T, source_mean, target_mean));
+    return R * Translation(get_translation(R.matrix(), source_mean, target_mean));
 }
 
 
-Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const MatrixS<-1, 3> &target, const MatrixS<-1, 3> &target_normals){
+Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const MatrixS<-1, 3> &target,
+                                 const MatrixS<-1, 3> &target_normals) {
     MatrixS<6, 6> A(MatrixS<6, 6>::Zero());
 
     VectorS<6> b(VectorS<6>::Zero());
@@ -63,12 +66,15 @@ Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const MatrixS<-1,
     return Rotation(matrix_exponential(VectorS<3>(wt[0], wt[1], wt[2]))) * Translation(VectorS<3>(wt[3], wt[4], wt[5]));
 }
 
-Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target, const MatrixS<-1, 3> &target_normals, const Transform &target_model, size_t parallel_grain_size){
+Transform
+minimize_point_2_plane(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target,
+                       const MatrixS<-1, 3> &target_normals, const Transform &target_model,
+                       size_t parallel_grain_size) {
     size_t N = source.rows();
     MatrixS<-1, 3> S;
     MatrixS<-1, 3> T;
     MatrixS<-1, 3> Normals;
-    if(N > 10 * parallel_grain_size){
+    if (N > 10 * parallel_grain_size) {
         S.resize(N, 3);
         T.resize(N, 3);
         Normals.resize(N, 3);
@@ -82,12 +88,12 @@ Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const Transform &
                     }
                 }
         );
-    }else{
-        S = (source_model.linear() * source.transpose() + source_model.translation()).transpose();
-        T = (target_model.linear() * target.transpose() + target_model.translation()).transpose();
+    } else {
+        S = ((source_model.linear() * source.transpose()).colwise() + source_model.translation()).transpose();
+        T = ((target_model.linear() * target.transpose()).colwise() + target_model.translation()).transpose();
         Normals = (target_model.linear() * target_normals.transpose()).transpose();
     }
-    return minimize_point_2_plane(S,T, Normals);
+    return minimize_point_2_plane(S, T, Normals);
 }
 
 

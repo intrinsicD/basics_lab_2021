@@ -58,7 +58,10 @@ void mesh_features_dihedral_angle(halfedge_mesh &mesh, bcg_scalar_t threshold_de
                     auto e = edge_handle(i);
 
                     feature_edges[e] = feature_edges[e]  || (e_dihedral_angle[e] >= threshold_degrees);
-
+                    if(feature_edges[e]){
+                        feature_vertices[mesh.get_vertex(e, 0)] = true;
+                        feature_vertices[mesh.get_vertex(e, 1)] = true;
+                    }
                 }
             }
     );

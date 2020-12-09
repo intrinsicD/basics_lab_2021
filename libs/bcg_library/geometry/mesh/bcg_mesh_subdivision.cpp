@@ -43,7 +43,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // compute face vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
                     std::vector<vertex_handle> V;
@@ -59,7 +59,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // compute edge vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto e = edge_handle(i);
                     if (mesh.is_boundary(e) || (e_feature && e_feature[e])) {
@@ -82,7 +82,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // compute new positions for old vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     // isolated vertex?
@@ -145,7 +145,7 @@ void mesh_subdivision_catmull_clark(halfedge_mesh &mesh, size_t parallel_grain_s
     // assign new positions to old vertices
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     positions[v] = v_point[v];
@@ -221,7 +221,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // compute vertex positions
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
 
@@ -278,7 +278,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // compute edge positions
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto e = edge_handle(i);
                     // boundary or feature edge?
@@ -302,7 +302,7 @@ void mesh_subdivision_loop(halfedge_mesh &mesh, size_t parallel_grain_size) {
     // set new vertex positions
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     positions[v] = v_point[v];
@@ -371,28 +371,32 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
     auto new_pos = mesh.vertices.add<VectorS<3>, 3>("sqrt3:np");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range <uint32_t> &range) {
+            [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
-                    if (!mesh.is_boundary(v)) {
-                        ///Exercise: Please implement the new positions of the old vertices
-                        ///          - you can query for the valence of a vertex using:
-                        ///                  auto valence = mesh.halfedge_graph::get_valence(v);
-                        ///          - you can iterate over the vertices in the one-ring around a vertex v using:
-                        ///                        for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {/*your code here*/}
-                        ///          - the property new_pos can be used to store the new positions of the old vertices
-                        ///          - the formula can be found on Slideset-Surface-RepresentationsI.pdf Slide 53
-                        auto n = mesh.halfedge_graph::get_valence(v);
-                        auto beta = (4.0 - 2.0 * cos(2.0 * pi / n)) / 9.0;
-                        VectorS<3> p(VectorS<3>::Zero());
 
-                        for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {
-                            p += positions[vv];
-                        }
+                    ///Exercise: Please implement the new positions of the old vertices
+                    ///          - you can query for the valence of a vertex using:
+                    ///                  auto valence = mesh.halfedge_graph::get_valence(v);
+                    ///          - you can iterate over the vertices in the one-ring around a vertex v using:
+                    ///                        for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {/*your code here*/}
+                    ///          - the property new_pos can be used to store the new positions of the old vertices
+                    ///          - the formula can be found on Slideset-Surface-RepresentationsI.pdf Slide 53
+                    auto n = mesh.halfedge_graph::get_valence(v);
+                    auto beta = (4.0 - 2.0 * cos(2.0 * pi / n)) / 9.0;
+                    VectorS<3> p(VectorS<3>::Zero());
 
-                        p = (1.0 - beta) * positions[v] + beta / n * p;
-                        new_pos[v] = p;
+                    for (const auto vv : mesh.halfedge_graph::get_vertices(v)) {
+                        p += positions[vv];
                     }
+
+                    p = (1.0 - beta) * positions[v] + beta / n * p;
+                    new_pos[v] = p;
+
+                    if (mesh.is_boundary(v) || (v_feature && v_feature[v])) {
+                        new_pos[v] = positions[v];
+                    }
+
                 }
             }
     );
@@ -415,7 +419,7 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
 
     // set new positions of old vertices
     for (auto vit = mesh.vertices.begin(); vit != vend; ++vit) {
-        if(mesh.is_boundary(*vit) || (v_feature && v_feature[*vit])) continue;
+        if (mesh.is_boundary(*vit) || (v_feature && v_feature[*vit])) continue;
         positions[*vit] = new_pos[*vit];
     }
 
@@ -427,7 +431,7 @@ void mesh_subdivision_sqrt3(halfedge_mesh &mesh, size_t parallel_grain_size) {
         ///Exercise: Please implement the edge flips
         ///          - make sure you check whether a flip is feasable with mesh.is_flip_ok(e)
         ///          - make sure you don't flip an edge which is a feature edge which is stored in e_feature
-        if(!mesh.is_flip_ok(e) || (e_feature && e_feature[e])) continue;
+        if (!mesh.is_flip_ok(e) || (e_feature && e_feature[e])) continue;
         mesh.flip(e);
     }
 

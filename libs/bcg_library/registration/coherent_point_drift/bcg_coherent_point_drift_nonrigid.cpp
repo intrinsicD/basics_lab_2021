@@ -2,64 +2,89 @@
 // Created by alex on 05.12.20.
 //
 
+#include <iostream>
 #include "bcg_coherent_point_drift_nonrigid.h"
+#include "utils/bcg_timer.h"
+#include "Spectra/SymEigsSolver.h"
 
 namespace bcg {
 
 void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega) {
-    assert(Y.cols() == X.cols());
-    assert(omega <= 1 && omega >= 0);
+    coherent_point_drift_base::init(Y, X, omega);
     assert(beta > 0);
     assert(lambda > 0);
-    M = Y.rows();
-    N = X.rows();
-    D = Y.cols();
 
-    sigma_squared = 0;
-    for (long i = 0; i < M; ++i) {
-        for (long j = 0; j < N; ++j) {
-            sigma_squared += (X.row(j) - Y.row(i)).squaredNorm();
-        }
+    if (!optimized) {
+        P = MatrixS<-1, -1>::Zero(M, N);
     }
-    sigma_squared /= bcg_scalar_t(D * M * N);
-    P = MatrixS<-1, -1>::Zero(M, N);
+
     G = MatrixS<-1, -1>::Zero(M, M);
-    for (long i = 0; i < M; ++i) {
-        for (long j = 0; j < M; ++j) {
-            G(i, j) = std::exp(-(Y.row(j) - Y.row(i)).squaredNorm() / (2 * beta * beta));
-        }
+    G = (-(VectorS<-1>::Ones(M) * Y.rowwise().squaredNorm().transpose()
+           - (2 * Y) * Y.transpose() +
+           Y.rowwise().squaredNorm() * VectorS<-1>::Ones(M).transpose()) / (2 * beta * beta)).array().exp();
+
+    int nev = std::min<int>(M, 100);
+    Spectra::DenseSymMatProd<bcg_scalar_t> op(G);
+    Spectra::SymEigsSolver<bcg_scalar_t, /*Spectra::LARGEST_ALGE*/Spectra::LARGEST_MAGN, Spectra::DenseSymMatProd<bcg_scalar_t> > eigs(&op, nev,
+                                                                                                  2 * nev);
+    eigs.init();
+    int nconv = eigs.compute();
+    if (eigs.info() == Spectra::SUCCESSFUL){
+        Evals = eigs.eigenvalues();
+        Evecs = eigs.eigenvectors();
+        std::cout << "#Eigenvalues converged:" << nconv << std::endl;
+        std::cout << "Max Eval :" << Evals[0] << std::endl;
+        std::cout << "Min Eval :" << Evals[99] << std::endl;
+        std::cout << "Prop. #Eval :" << std::cbrt(Evals[0]) << std::endl;
+        std::cout << Evecs.transpose() * Evecs << std::endl;
     }
+
     T = Y;
 }
 
-void coherent_point_drift_nonrigid::expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    for (long i = 0; i < M; ++i) {
-        for (long j = 0; j < N; ++j) {
-            P(i, j) = std::exp(-(X.row(j) - T.row(i)).squaredNorm() / (2 * sigma_squared));
-        }
-    }
-    VectorS<-1> denominator = 1.0 / (VectorS<-1>::Ones(M).transpose() * P).array() +
-                              std::pow(2 * pi * sigma_squared, D / 2.0) * omega / (1.0 - omega) * bcg_scalar_t(M) /
-                              bcg_scalar_t(N);
-    P = P * denominator.asDiagonal();
+const MatrixS<-1, -1> &coherent_point_drift_nonrigid::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y,
+                                                                       const MatrixS<-1, -1> &X) {
+    return coherent_point_drift_base::expectation_step(P, Y, X);
 }
 
 void coherent_point_drift_nonrigid::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    P1 = P * VectorS<-1>::Ones(N);
-    PT1 = VectorS<-1>::Ones(M).transpose() * P;
-    N_P = P1.sum();
-    MatrixS<-1, -1> A = (P1.asDiagonal() * G + lambda * sigma_squared * MatrixS<-1, -1>::Identity(M, M));
-    MatrixS<-1, -1> W = A.colPivHouseholderQr().solve(P * X - P1.asDiagonal() * Y);
-    T = Y + G * W;
+    MatrixS<-1, -1> A_inv = (P1.array() / (lambda * sigma_squared)).matrix().asDiagonal();
+    MatrixS<-1, -1> C_inv = (1.0 / Evals.array()).matrix().asDiagonal();
+    // TODO maybo evaluate inner inverse first, seems to be faster...
+    MatrixS<-1, -1> inv_inner = (C_inv + Evecs.transpose() * A_inv * Evecs).inverse();
+    MatrixS<-1, -1> rhs = A_inv * ((1.0 / P1.array()).matrix().asDiagonal() * PX - Y);
+    MatrixS<-1, -1> W = rhs - A_inv * Evecs * inv_inner * Evecs.transpose() * rhs;
+    //T = Y + G * W;
+    T = Y + (Evecs * (Evals.asDiagonal() * (Evecs.transpose() * W)));
 
-    sigma_squared = ((X.transpose() * PT1.asDiagonal() * X).trace() - 2.0 * ((P * X).transpose() * T).trace() +
+
+/*    MatrixS<-1, -1> A = (P1.asDiagonal() * G + lambda * sigma_squared * MatrixS<-1, -1>::Identity(M, M));
+    bcg_scalar_t lambda = 0.1; //lambda = 0.1 is small enough
+    A += A.diagonal().asDiagonal() * lambda;
+    MatrixS<-1, -1> W = A.colPivHouseholderQr().solve(PX - P1.asDiagonal() * Y);
+    T = Y + G * W;*/
+
+    sigma_squared = ((X.transpose() * PT1.asDiagonal() * X).trace() - 2.0 * ((PX).transpose() * T).trace() +
                      (T.transpose() * P1.asDiagonal() * T).trace()) / (N_P * D);
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
 }
 
-void coherent_point_drift_nonrigid::operator()(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    expectation_step(Y, X);
+void coherent_point_drift_nonrigid::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
+                                                               size_t parallel_grain_size) {
+    coherent_point_drift_base::optimized_expectation_step(Y, X, parallel_grain_size);
+}
+
+void coherent_point_drift_nonrigid::optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
     maximization_step(Y, X);
 }
+
+VectorS<-1> coherent_point_drift_nonrigid::transformed(const MatrixS<-1, -1> &Y, long idx) {
+    return T.row(idx);
+}
+
+MatrixS<-1, -1> coherent_point_drift_nonrigid::transformed(const MatrixS<-1, -1> &Y) {
+    return T;
+}
+
 
 }

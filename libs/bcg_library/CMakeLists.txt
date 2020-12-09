@@ -14,6 +14,7 @@ add_library(bcg_graphics
         utils/bcg_logger.h
         utils/bcg_path.h utils/bcg_path.cpp
         utils/bcg_stl_utils.h
+        utils/bcg_timer.h
         utils/bcg_string_utils.h utils/bcg_string_utils.cpp
         math/bcg_math_common.h math/bcg_linalg.h
         math/bcg_polynomial.h math/bcg_polynomial.cpp
@@ -41,6 +42,7 @@ add_library(bcg_graphics
         math/sparse_matrix/bcg_sparse_check_finite.h math/sparse_matrix/bcg_sparse_check_finite.cpp
         math/sparse_matrix/bcg_sparse_vertical_stack.h math/sparse_matrix/bcg_sparse_vertical_stack.cpp
         math/sparse_matrix/bcg_sparse_horizontal_stack.h math/sparse_matrix/bcg_sparse_horizontal_stack.cpp
+        math/statistics/bcg_statistics_running.h math/statistics/bcg_statistics_running.cpp
         math/laplacian/bcg_laplacian_matrix.h
         math/laplacian/bcg_laplacian_smoothing.h
         math/laplacian/bcg_laplacian_heat_diffusion.h
@@ -118,7 +120,10 @@ add_library(bcg_graphics
         geometry/kdtree/bcg_triangle_kdtree.h geometry/kdtree/bcg_triangle_kdtree.cpp
         geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
+        geometry/correspondences/bcg_correspondences.h geometry/correspondences/bcg_correspondences.cpp
+        registration/bcg_registration.h
         registration/rigid_idp/bcg_rigid_icp.h registration/rigid_idp/bcg_rigid_icp.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_base.h registration/coherent_point_drift/bcg_coherent_point_drift_base.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_rigid.h registration/coherent_point_drift/bcg_coherent_point_drift_rigid.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_affine.h registration/coherent_point_drift/bcg_coherent_point_drift_affine.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.h registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.cpp
@@ -130,7 +135,9 @@ target_compile_features(bcg_graphics PRIVATE cxx_std_17)
 set_target_properties(bcg_graphics PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(bcg_graphics PUBLIC ${EIGEN3_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${RPLY_INCLUDE_DIRS})
+target_include_directories(bcg_graphics PUBLIC ${ENTT_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${NANOFLANN_INCLUDE_DIRS})
+target_include_directories(bcg_graphics PUBLIC ${SPECTRA_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
 
 target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb stdc++fs)

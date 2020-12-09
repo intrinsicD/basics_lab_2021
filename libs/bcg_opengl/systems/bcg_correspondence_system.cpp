@@ -25,10 +25,10 @@ void correspondence_system::on_correspondences_estiamte(const event::corresponde
     if (!state->scene.has<Transform>(event.source_id)) return;
     if (!state->scene.has<Transform>(event.target_id)) return;
 
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.source_id)) {
-        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.source_id);
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.target_id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.target_id);
     }
-    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.source_id);
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.target_id);
 
     auto &src_model = state->scene.get<Transform>(event.source_id);
     auto &target_model = state->scene.get<Transform>(event.target_id);
@@ -53,10 +53,6 @@ void correspondence_system::on_correspondences_estiamte(const event::corresponde
     corrs.maps[size_t(event.target_id)].clear();
     corrs.maps[size_t(event.target_id)].mapping.resize(src->size());
 
-    tbb::atomic<bcg_scalar_t > min_dist = 0;
-    tbb::atomic<bcg_scalar_t> max_dist = 0;
-    tbb::atomic<bcg_scalar_t> mean_dist = 0;
-
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) src->size(), state->config.parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -66,23 +62,18 @@ void correspondence_system::on_correspondences_estiamte(const event::corresponde
 
                     corrs_idx[i] = result.indices[0];
                     corrs_distance[i] = result.distances[0];
-                    corrs_vector[i] = target_2_src_model.linear() * (target_positions[corrs_idx[i]] - query_point);
+                    corrs_vector[i] = target_2_src_model * target_positions[corrs_idx[i]] - src_positions[i];
                     corrs_valid[i] = true;
                     corrs.maps[size_t(event.target_id)].mapping[i] = Eigen::Triplet<bcg_scalar_t>(i, corrs_idx[i], corrs_distance[i]);
 
-                    if (corrs_distance[i] < min_dist) {
-                        min_dist = corrs_distance[i];
-                    }
-                    if (corrs_distance[i] > min_dist) {
-                        max_dist = corrs_distance[i];
-                    }
-                    mean_dist = mean_dist + corrs_distance[i] / src->size();
                 }
             }
     );
-    corrs.maps[size_t(event.target_id)].min_dist = min_dist;
-    corrs.maps[size_t(event.target_id)].max_dist = max_dist;
-    corrs.maps[size_t(event.target_id)].mean_dist = mean_dist;
+
+    corrs.maps[size_t(event.target_id)].stats.clear();
+    for(const auto v : *src){
+        corrs.maps[size_t(event.target_id)].stats.push(corrs_distance[v]);
+    }
 
     corrs_idx.set_dirty();
     corrs_distance.set_dirty();
@@ -112,8 +103,10 @@ void correspondence_system::on_correspondences_filter_distance(const event::corr
                     if (corrs_distance[item.row()] > event.threshold) {
                         corrs_valid[item.row()] = false;
                         corrs_vector[item.row()].setZero();
+                        corrs_distance[item.row()] = event.threshold;
+                    }else{
+                        mapping.push_back(item);
                     }
-                    mapping.push_back(item);
                 }
             }
     );
@@ -122,6 +115,13 @@ void correspondence_system::on_correspondences_filter_distance(const event::corr
     filtered_corrs.mapping.resize(mapping.size());
     std::copy(mapping.begin(), mapping.end(), filtered_corrs.mapping.begin());
     map = filtered_corrs;
+
+    corrs.maps[size_t(event.target_id)].stats.clear();
+    for(const auto v : *src){
+        if(corrs_valid[v]){
+            map.stats.push(corrs_distance[v]);
+        }
+    }
 
     corrs_valid.set_dirty();
     corrs_vector.set_dirty();
@@ -176,6 +176,14 @@ void correspondence_system::on_correspondences_filter_normal_angle(
     filtered_corrs.mapping.resize(mapping.size());
     std::copy(mapping.begin(), mapping.end(), filtered_corrs.mapping.begin());
     map = filtered_corrs;
+
+    auto corrs_distance = src->get<bcg_scalar_t, 1>("v_corrs_distance");
+    corrs.maps[size_t(event.target_id)].stats.clear();
+    for(const auto v : *src){
+        if(corrs_valid[v]){
+            map.stats.push(corrs_distance[v]);
+        }
+    }
 
     corrs_valid.set_dirty();
     corrs_vector.set_dirty();

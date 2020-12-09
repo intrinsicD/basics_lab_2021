@@ -19,5 +19,6 @@
 #include "bcg_events_laplacian.h"
 #include "bcg_events_picker.h"
 #include "bcg_events_correspondences.h"
+#include "bcg_events_registration.h"
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_H

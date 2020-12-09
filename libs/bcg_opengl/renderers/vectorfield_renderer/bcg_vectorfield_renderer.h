@@ -29,6 +29,10 @@ private:
 
     void on_end_frame(const event::internal::end_frame &event) override;
 
+    void on_set_vertex_vectorfield(const event::vectorfield_renderer::set_vertex_vectorfield &event);
+    void on_set_edge_vectorfield(const event::vectorfield_renderer::set_edge_vectorfield &event);
+    void on_set_face_vectorfield(const event::vectorfield_renderer::set_face_vectorfield &event);
+
     void on_set_position_attribute(const event::vectorfield_renderer::set_position_attribute &event);
 
     void on_set_vector_attribute(const event::vectorfield_renderer::set_vector_attribute &event);

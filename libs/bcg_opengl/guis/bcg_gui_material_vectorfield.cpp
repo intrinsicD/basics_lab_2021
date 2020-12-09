@@ -35,6 +35,7 @@ void gui_material_vectorfield(viewer_state *state, material_vectorfield *materia
             if (color.property_name.empty()) {
                 material->use_uniform_color = true;
             } else {
+                color.buffer_name = color.property_name;
                 state->dispatcher.trigger<event::vectorfield_renderer::set_color_attribute>(id, vectorfield_name, color);
             }
         }

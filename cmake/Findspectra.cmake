@@ -20,7 +20,7 @@ if(NOT SPECTRA_FOUND)
 	   set(SPECTRA_SOURCE_DIRS ${SPECTRA_DIRECTORY}/src)
 
 	   message("spectra found in " SPECTRA_DIRECTORY = ${SPECTRA_DIRECTORY})
-	   message("                 " SPECTRA_INCLUDE_DIRS =  ${SPECTRA_INCLUDE_DIRS})
+	   message("                 " SPECTRA_INCLUDE_DIRS = ${SPECTRA_INCLUDE_DIRS})
 	   message("                 " SPECTRA_SOURCE_DIRS =  ${SPECTRA_SOURCE_DIRS})
 	else()
 	   message("+--------------------------------------------+")

@@ -7,13 +7,17 @@
 
 namespace bcg {
 
-running_stats::running_stats() : n(0), M1(0), M2(0), M3(0), M4(0), M5(0) {
+running_stats::running_stats() : n(0), M1(0), M2(0), M3(0), M4(0), M5(0),
+                                 MIN(std::numeric_limits<double>::max()),
+                                 MAX(std::numeric_limits<double>::min()) {
     clear();
 }
 
 void running_stats::clear() {
     n = 0;
     M1 = M2 = M3 = M4 = M5 = 0.0;
+    MIN = std::numeric_limits<double>::max();
+    MAX = std::numeric_limits<double>::min();
 }
 
 void running_stats::push(double x) {
@@ -31,7 +35,9 @@ void running_stats::push(double x) {
     M2 += term1;
     //Jeff McClintock running median approximation
     term1 = x - M5;
-    M5 += copysign( std::max( M1 * 0.01, fabs( term1) ), term1 );
+    M5 += copysign(std::max(M1 * 0.01, fabs(term1)), term1);
+    MIN = fmin(x, MIN);
+    MAX = fmax(x, MAX);
 }
 
 size_t running_stats::size() const {
@@ -60,6 +66,14 @@ double running_stats::kurtosis() const {
 
 double running_stats::median() const {
     return M5;
+}
+
+double running_stats::min() const {
+    return MIN;
+}
+
+double running_stats::max() const {
+    return MAX;
 }
 
 running_stats operator+(const running_stats a, const running_stats b) {

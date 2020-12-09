@@ -15,7 +15,6 @@ struct estimate{
 };
 
 namespace filter{
-
 struct distance{
     entt::entity source_id, target_id;
     bcg_scalar_t threshold;
