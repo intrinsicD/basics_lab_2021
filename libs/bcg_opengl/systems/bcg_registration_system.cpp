@@ -68,12 +68,10 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 source_model.translation()).transpose();
             MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
                                 target_model.translation()).transpose();
-            if (!state->scene.has<coherent_point_drift_rigid>(event.source_id)) {
-                coherent_point_drift_rigid rigid;
+            auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid>(event.source_id);
+            if(reg.errors.empty()){
                 rigid.init(Y, X);
-                state->scene.emplace<coherent_point_drift_rigid>(event.source_id, rigid);
             }
-            auto &rigid = state->scene.get<coherent_point_drift_rigid>(event.source_id);
             rigid(rigid.P, Y, X, state->config.parallel_grain_size);
             delta = Translation(rigid.t) * Rotation(MatrixS<3, 3>(rigid.R)) * Scaling(VectorS<3>::Constant(rigid.s));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
@@ -84,12 +82,10 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 source_model.translation()).transpose();
             MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
                                 target_model.translation()).transpose();
-            if (!state->scene.has<coherent_point_drift_affine>(event.source_id)) {
-                coherent_point_drift_affine affine;
+            auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine>(event.source_id);
+            if(reg.errors.empty()){
                 affine.init(Y, X);
-                state->scene.emplace<coherent_point_drift_affine>(event.source_id, affine);
             }
-            auto &affine = state->scene.get<coherent_point_drift_affine>(event.source_id);
             affine(affine.P, Y, X, state->config.parallel_grain_size);
             delta = Translation(affine.t) * Transform(MatrixS<3, 3>(affine.B));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
@@ -100,12 +96,11 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 source_model.translation()).transpose();
             MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
                                 target_model.translation()).transpose();
-            if (!state->scene.has<coherent_point_drift_nonrigid>(event.source_id)) {
-                coherent_point_drift_nonrigid nonrigid;
+
+            auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid>(event.source_id);
+            if(reg.errors.empty()){
                 nonrigid.init(Y, X);
-                state->scene.emplace<coherent_point_drift_nonrigid>(event.source_id, nonrigid);
             }
-            auto &nonrigid = state->scene.get<coherent_point_drift_nonrigid>(event.source_id);
             nonrigid(nonrigid.P, Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_nonrigid_position");
@@ -121,17 +116,16 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 source_model.translation()).transpose();
             MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
                                 target_model.translation()).transpose();
-            if (!state->scene.has<coherent_point_drift_bayes>(event.source_id)) {
-                coherent_point_drift_bayes bayes;
+
+            auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes>(event.source_id);
+            if(reg.errors.empty()){
                 bayes.init(Y, X);
-                state->scene.emplace<coherent_point_drift_bayes>(event.source_id, bayes);
             }
-            auto &bayes = state->scene.get<coherent_point_drift_bayes>(event.source_id);
             bayes(bayes.P, Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_bayes_position");
-            Map(cpd_vector) = (bayes.U - Y) * source_model.linear();
-            Map(cpd_positions) = Y + Map(cpd_vector);
+            Map(cpd_vector) = (bayes.V) * source_model.linear();
+            Map(cpd_positions) = (source_model.inverse() * bayes.U.transpose().colwise().homogeneous()).transpose();
             delta = Translation(bayes.t) * Rotation(MatrixS<3, 3>(bayes.R)) * Scaling(VectorS<3>::Constant(bayes.s));
             reg.errors.push_back(bayes.sigma_squared);
             cpd_vector.set_dirty();

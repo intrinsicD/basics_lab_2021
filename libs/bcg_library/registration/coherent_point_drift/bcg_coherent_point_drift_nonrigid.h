@@ -14,7 +14,7 @@ struct coherent_point_drift_nonrigid : public coherent_point_drift_base {
     VectorS<-1> Evals;
     bcg_scalar_t beta = 2, lambda = 2;
 
-    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega = 0.5) override;
+    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
     const MatrixS<-1, -1> &
     expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;

@@ -16,7 +16,7 @@ struct coherent_point_drift_affine : public coherent_point_drift_base{
     MatrixS<-1, -1> P;
     VectorS<-1> mean_x, mean_y;
 
-    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega = 0.5) override;
+    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
     const MatrixS<-1, -1> &expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 

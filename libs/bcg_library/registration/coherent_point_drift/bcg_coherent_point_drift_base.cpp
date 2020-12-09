@@ -9,7 +9,7 @@
 
 namespace bcg {
 
-void coherent_point_drift_base::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega) {
+void coherent_point_drift_base::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
     assert(Y.cols() == X.cols());
     assert(omega <= 1 && omega >= 0);
     M = Y.rows();
@@ -19,7 +19,6 @@ void coherent_point_drift_base::init(const MatrixS<-1, -1> &Y, const MatrixS<-1,
     denominator = PT1 = VectorS<-1>::Zero(N);
     P1 = VectorS<-1>::Zero(M);
     sigma_squared = 0;
-    this->omega = omega;
     for (long i = 0; i < M; ++i) {
         for (long j = 0; j < N; ++j) {
             sigma_squared += (X.row(j) - Y.row(i)).squaredNorm();

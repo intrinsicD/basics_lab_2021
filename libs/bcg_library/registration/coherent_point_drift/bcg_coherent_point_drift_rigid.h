@@ -11,14 +11,14 @@
 namespace bcg {
 
 struct coherent_point_drift_rigid : public coherent_point_drift_base{
-    bcg_scalar_t s;
+    bcg_scalar_t s = 1.0;
     MatrixS<-1, -1> R;
     VectorS<-1> t;
 
     MatrixS<-1, -1> P;
     VectorS<-1> mean_x, mean_y;
 
-    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega = 0.5) override;
+    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
     const MatrixS<-1, -1> &expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 

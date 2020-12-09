@@ -11,12 +11,12 @@ namespace bcg{
 
 struct coherent_point_drift_base{
     bool optimized = false;
-    bcg_scalar_t sigma_squared, omega = 0, N_P;
+    bcg_scalar_t sigma_squared, omega = 0.5, N_P;
     size_t M, N, D;
     MatrixS<-1, -1> PX;
     VectorS<-1> P1, PT1, denominator;
 
-    virtual void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega = 0.5);
+    virtual void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X);
 
     virtual const MatrixS<-1, -1> &expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X);
 

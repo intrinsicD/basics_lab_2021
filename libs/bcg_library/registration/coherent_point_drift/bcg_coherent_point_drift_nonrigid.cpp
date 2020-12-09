@@ -9,8 +9,8 @@
 
 namespace bcg {
 
-void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega) {
-    coherent_point_drift_base::init(Y, X, omega);
+void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
+    coherent_point_drift_base::init(Y, X);
     assert(beta > 0);
     assert(lambda > 0);
 

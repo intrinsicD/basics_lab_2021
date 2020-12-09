@@ -10,16 +10,16 @@
 namespace bcg {
 
 struct coherent_point_drift_bayes : public coherent_point_drift_base {
-    bcg_scalar_t s;
+    bcg_scalar_t s = 1.0;
     MatrixS<-1, -1> R;
     VectorS<-1> t;
 
-    MatrixS<-1, -1> P, GInv, T, Sigma, U;
-    VectorS<-1> mean_x, mean_u, alpha, p_out;
+    MatrixS<-1, -1> P, GInv, T, Sigma, U, V;
+    VectorS<-1> mean_x, mean_u, alpha, p_out, nu, nu_prime;
 
     bcg_scalar_t beta = 2, gamma = 2, kappa = -1, lambda = 2;
 
-    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega = 0.5) override;
+    void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
     const MatrixS<-1, -1> & expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
@@ -32,6 +32,8 @@ struct coherent_point_drift_bayes : public coherent_point_drift_base {
     VectorS<-1> transformed(const MatrixS<-1, -1> &Y, long idx) override;
 
     MatrixS<-1, -1> transformed(const MatrixS<-1, -1> &Y) override;
+
+    MatrixS<-1, -1> transformed_inverse(const MatrixS<-1, -1> &X);
 };
 
 }

@@ -8,8 +8,8 @@
 
 namespace bcg {
 
-void coherent_point_drift_rigid::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, bcg_scalar_t omega) {
-    coherent_point_drift_base::init(Y, X, omega);
+void coherent_point_drift_rigid::init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
+    coherent_point_drift_base::init(Y, X);
 
     s = 1.0;
     R = MatrixS<-1, -1>::Identity(D, D);
