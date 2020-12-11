@@ -39,6 +39,7 @@ coherent_point_drift_base::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1
                 }
             }
     );*/
+
     MatrixS<-1, -1> T = transformed(Y);
     P = (-(VectorS<-1>::Ones(M) * X.rowwise().squaredNorm().transpose()
            - (2 * T) * X.transpose() +

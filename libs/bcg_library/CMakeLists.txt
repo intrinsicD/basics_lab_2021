@@ -128,6 +128,7 @@ add_library(bcg_graphics
         registration/coherent_point_drift/bcg_coherent_point_drift_affine.h registration/coherent_point_drift/bcg_coherent_point_drift_affine.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.h registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_bayes.h registration/coherent_point_drift/bcg_coherent_point_drift_bayes.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_test.h registration/coherent_point_drift/bcg_coherent_point_drift_test.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         )
 

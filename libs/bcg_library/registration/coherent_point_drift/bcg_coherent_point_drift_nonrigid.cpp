@@ -44,7 +44,7 @@ void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS
 
 const MatrixS<-1, -1> &coherent_point_drift_nonrigid::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y,
                                                                        const MatrixS<-1, -1> &X) {
-    return coherent_point_drift_base::expectation_step(P, Y, X);
+    return coherent_point_drift_base::expectation_step(P, T, X);
 }
 
 void coherent_point_drift_nonrigid::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {

@@ -15,7 +15,7 @@ struct coherent_point_drift_bayes : public coherent_point_drift_base {
     VectorS<-1> t;
 
     MatrixS<-1, -1> P, GInv, T, Sigma, U, V;
-    VectorS<-1> mean_x, mean_u, alpha, p_out, nu, nu_prime;
+    VectorS<-1> mean_x, mean_u, alpha, p_out;
 
     bcg_scalar_t beta = 2, gamma = 2, kappa = -1, lambda = 2;
 

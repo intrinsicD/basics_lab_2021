@@ -10,6 +10,7 @@
 #include "registration/coherent_point_drift/bcg_coherent_point_drift_affine.h"
 #include "registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.h"
 #include "registration/coherent_point_drift/bcg_coherent_point_drift_bayes.h"
+#include "registration/coherent_point_drift/bcg_coherent_point_drift_test.h"
 
 namespace bcg {
 
@@ -79,6 +80,8 @@ void gui_registration(viewer_state *state) {
             }
             case RegistrationMethod::coherent_point_drift_rigid : {
                 auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid>(source_id);
+                ImGui::LabelText("sigma_squared", "%s", std::to_string(rigid.sigma_squared).c_str());
+                ImGui::LabelText("N_P", "%s", std::to_string(rigid.N_P).c_str());
                 ImGui::InputFloat("omega", &rigid.omega);
                 if(rigid.t.rows() > 0){
                     ImGui::Separator();
@@ -89,6 +92,8 @@ void gui_registration(viewer_state *state) {
             }
             case RegistrationMethod::coherent_point_drift_affine : {
                 auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine>(source_id);
+                ImGui::LabelText("sigma_squared", "%s", std::to_string(affine.sigma_squared).c_str());
+                ImGui::LabelText("N_P", "%s", std::to_string(affine.N_P).c_str());
                 ImGui::InputFloat("omega", &affine.omega);
                 if(affine.t.rows() > 0){
                     ImGui::Separator();
@@ -99,6 +104,8 @@ void gui_registration(viewer_state *state) {
             }
             case RegistrationMethod::coherent_point_drift_nonrigid : {
                 auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid>(source_id);
+                ImGui::LabelText("sigma_squared", "%s", std::to_string(nonrigid.sigma_squared).c_str());
+                ImGui::LabelText("N_P", "%s", std::to_string(nonrigid.N_P).c_str());
                 ImGui::InputFloat("omega", &nonrigid.omega);
                 ImGui::InputFloat("beta", &nonrigid.beta);
                 ImGui::InputFloat("lambda", &nonrigid.lambda);
@@ -106,6 +113,8 @@ void gui_registration(viewer_state *state) {
             }
             case RegistrationMethod::coherent_point_drift_bayes : {
                 auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes>(source_id);
+                ImGui::LabelText("sigma_squared", "%s", std::to_string(bayes.sigma_squared).c_str());
+                ImGui::LabelText("N_P", "%s", std::to_string(bayes.N_P).c_str());
                 ImGui::InputFloat("omega", &bayes.omega);
                 ImGui::InputFloat("beta", &bayes.beta);
                 ImGui::InputFloat("gamma", &bayes.gamma);
@@ -114,6 +123,22 @@ void gui_registration(viewer_state *state) {
                 if(bayes.t.rows() > 0){
                     ImGui::Separator();
                     Transform model =  Translation(bayes.t) * Rotation(MatrixS<3, 3>(bayes.R)) * Scaling(VectorS<3>::Constant(bayes.s));
+                    gui_transform(state, &model);
+                }
+                break;
+            }
+            case RegistrationMethod::coherent_point_drift_test : {
+                auto &nonrigid_test = state->scene.get_or_emplace<coherent_point_drift_test>(source_id);
+                ImGui::LabelText("sigma_squared", "%s", std::to_string(nonrigid_test.sigma_squared).c_str());
+                ImGui::LabelText("N_P", "%s", std::to_string(nonrigid_test.N_P).c_str());
+                ImGui::InputFloat("omega", &nonrigid_test.omega);
+                ImGui::InputFloat("beta", &nonrigid_test.beta);
+/*                ImGui::InputFloat("gamma", &bayes.gamma);
+                ImGui::InputFloat("kappa", &bayes.kappa);*/
+                ImGui::InputFloat("lambda", &nonrigid_test.lambda);
+                if(nonrigid_test.t.rows() > 0){
+                    ImGui::Separator();
+                    Transform model =  Translation(nonrigid_test.t) * Rotation(MatrixS<3, 3>(nonrigid_test.R)) * Scaling(VectorS<3>::Constant(nonrigid_test.s));
                     gui_transform(state, &model);
                 }
                 break;
