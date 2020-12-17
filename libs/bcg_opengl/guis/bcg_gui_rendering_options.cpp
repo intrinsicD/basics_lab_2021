@@ -10,6 +10,7 @@
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
 #include "renderers/curve_renderer/bcg_events_curve_renderer.h"
+#include "renderers/deferred_renderer/bcg_events_deferred_renderer.h"
 
 namespace bcg{
 
@@ -19,6 +20,7 @@ void gui_rendering_options(viewer_state *state, entt::entity id){
     bool show_mesh = state->scene.has<event::mesh_renderer::enqueue>(id);
     bool show_vectors = state->scene.has<event::vectorfield_renderer::enqueue>(id);
     bool show_curves = state->scene.has<event::curve_renderer::enqueue>(id);
+    bool render_deferred = state->scene.has<event::deferred_renderer::enqueue>(id);
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {
@@ -53,6 +55,13 @@ void gui_rendering_options(viewer_state *state, entt::entity id){
                 state->scene.emplace_or_replace<event::curve_renderer::enqueue>(id);
             } else {
                 state->scene.remove_if_exists<event::curve_renderer::enqueue>(id);
+            }
+        }
+        if(ImGui::Checkbox("render deferred", &render_deferred)){
+            if (render_deferred) {
+                state->scene.emplace_or_replace<event::deferred_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::deferred_renderer::enqueue>(id);
             }
         }
         ImGui::Separator();

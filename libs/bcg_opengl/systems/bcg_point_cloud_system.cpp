@@ -15,6 +15,7 @@
 #include "point_cloud/bcg_point_cloud_vertex_outlier_probability.h"
 #include "point_cloud/bcg_point_cloud_kernel_density_estimation.h"
 #include "point_cloud/bcg_point_cloud_vertex_quadric.h"
+#include "point_cloud/bcg_point_cloud_bilateral_filter.h"
 
 namespace bcg {
 
@@ -59,6 +60,10 @@ point_cloud_system::point_cloud_system(viewer_state *state) : system("point_clou
     state->dispatcher.sink<event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_radius>().connect<&point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_radius>(
             this);
     state->dispatcher.sink<event::point_cloud::vertex::quadric::collect>().connect<&point_cloud_system::on_vertex_quadric_collect>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::filter::bilateral_knn>().connect<&point_cloud_system::on_vertex_bilateral_filter_knn>(
+            this);
+    state->dispatcher.sink<event::point_cloud::vertex::filter::bilateral_radius>().connect<&point_cloud_system::on_vertex_bilateral_filter_radius>(
             this);
 }
 
@@ -388,5 +393,30 @@ void point_cloud_system::on_vertex_quadric_collect(const event::point_cloud::ver
     point_cloud_vertex_quadric_collect_neighbors(vertices, state->config.parallel_grain_size);
 }
 
+void
+point_cloud_system::on_vertex_bilateral_filter_knn(const event::point_cloud::vertex::filter::bilateral_knn &event) {
+    if (!state->scene.valid(event.id)) return;
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    point_cloud_bilateral_filter_knn(vertices, index, {event.points_sigma, event.normals_sigma}, event.num_closest, state->config.parallel_grain_size);
+}
+
+void point_cloud_system::on_vertex_bilateral_filter_radius(
+        const event::point_cloud::vertex::filter::bilateral_radius &event) {
+    if (!state->scene.valid(event.id)) return;
+    auto *vertices = state->get_vertices(event.id);
+    if (!vertices) return;
+    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+        state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
+    }
+    auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
+
+    point_cloud_bilateral_filter_radius(vertices, index, {event.points_sigma, event.normals_sigma}, event.radius, state->config.parallel_grain_size);
+}
 
 }

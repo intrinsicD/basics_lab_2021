@@ -7,9 +7,9 @@
 
 #include "bcg_systems.h"
 
-namespace bcg{
+namespace bcg {
 
-struct point_cloud_system : public system{
+struct point_cloud_system : public system {
     explicit point_cloud_system(viewer_state *state);
 
     void on_setup(const event::point_cloud::setup &event);
@@ -57,6 +57,10 @@ struct point_cloud_system : public system{
             const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_radius &event);
 
     void on_vertex_quadric_collect(const event::point_cloud::vertex::quadric::collect &event);
+
+    void on_vertex_bilateral_filter_knn(const event::point_cloud::vertex::filter::bilateral_knn &event);
+
+    void on_vertex_bilateral_filter_radius(const event::point_cloud::vertex::filter::bilateral_radius &event);
 };
 
 }

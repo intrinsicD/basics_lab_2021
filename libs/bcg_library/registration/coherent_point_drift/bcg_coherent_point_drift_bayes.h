@@ -34,6 +34,8 @@ struct coherent_point_drift_bayes : public coherent_point_drift_base {
     MatrixS<-1, -1> transformed(const MatrixS<-1, -1> &Y) override;
 
     MatrixS<-1, -1> transformed_inverse(const MatrixS<-1, -1> &X);
+
+
 };
 
 }

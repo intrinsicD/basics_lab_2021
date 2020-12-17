@@ -31,13 +31,13 @@ void curve_renderer::on_startup(const event::internal::startup &) {
     std::string tess_eval = state->config.renderers_path + "curve_renderer/curve_tess_eval_shader.glsl";
 
     programs["curve_renderer_program"] = state->shaders.load("curve_renderer_program",
-                                                                    state->config.renderers_path +
-                                                                    "curve_renderer/curve_vertex_shader.glsl",
-                                                                    state->config.renderers_path +
-                                                                    "curve_renderer/curve_fragment_shader.glsl",
-                                                                    nullptr,
-                                                                    &tess_control,
-                                                                    &tess_eval);
+                                                             state->config.renderers_path +
+                                                             "curve_renderer/curve_vertex_shader.glsl",
+                                                             state->config.renderers_path +
+                                                             "curve_renderer/curve_fragment_shader.glsl",
+                                                             nullptr,
+                                                             &tess_control,
+                                                             &tess_eval);
 }
 
 void curve_renderer::on_shutdown(const event::internal::shutdown &event) {
@@ -57,15 +57,15 @@ void curve_renderer::on_enqueue(const event::curve_renderer::enqueue &event) {
     if (!state->scene.has<material_curve>(event.id)) {
         auto &material = state->scene.emplace<material_curve>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-        auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
+        auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
         state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(event.id);
-    }else{
-        auto &material = state->scene.emplace<material_curve>(event.id);
+    } else {
+        auto &material = state->scene.get<material_curve>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-        auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
+        auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
-        for(auto &attribute : material.attributes){
+        for (auto &attribute : material.attributes) {
             attribute.update = false;
         }
     }
@@ -133,24 +133,29 @@ void curve_renderer::on_render(const event::internal::render &) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
+        material.upload(program);
+/*
         Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
         program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
         float alpha = material.uniform_alpha;
         program.set_uniform_f("material.alpha", alpha);
-        program.set_uniform_i("tesselation_level", material.tesselation_level);
+        program.set_uniform_i("tesselation_level", material.tesselation_level);*/
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-        for(size_t offset = 0; offset < shape.num_vertices - 3; offset += 3){
-            if(material.show_hermite){
-                program.set_uniform_i("show_hermite", material.show_hermite);
-                program.set_uniform_i("show_bezier", !material.show_hermite);
+        for (size_t offset = 0; offset < shape.num_vertices - 3; offset += 3) {
+
+            if (material.show_hermite) {
+/*                program.set_uniform_i("show_hermite", material.show_hermite);
+                program.set_uniform_i("show_bezier", !material.show_hermite);*/
+                material.use_hermite(program);
                 glPatchParameteri(GL_PATCH_VERTICES, 4);
                 glDrawArrays(GL_PATCHES, offset, 4);
             }
-            if(material.show_bezier){
-                program.set_uniform_i("show_bezier", material.show_bezier);
-                program.set_uniform_i("show_hermite", !material.show_bezier);
+            if (material.show_bezier) {
+/*                program.set_uniform_i("show_bezier", material.show_bezier);
+                program.set_uniform_i("show_hermite", !material.show_bezier);*/
+                material.use_bezier(program);
                 glPatchParameteri(GL_PATCH_VERTICES, 4);
                 glDrawArrays(GL_PATCHES, offset, 4);
             }

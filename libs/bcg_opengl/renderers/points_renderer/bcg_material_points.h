@@ -5,9 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_MATERIAL_POINTS_H
 #define BCG_GRAPHICS_BCG_MATERIAL_POINTS_H
 
-#include "bcg_library/color/bcg_colors.h"
-#include "renderers/bcg_attribute.h"
-#include "bcg_opengl.h"
+#include "color/bcg_colors.h"
 #include "renderers/bcg_material.h"
 
 namespace bcg{

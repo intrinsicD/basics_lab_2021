@@ -9,6 +9,7 @@
 #include "graph_renderer/bcg_graph_renderer.h"
 #include "vectorfield_renderer/bcg_vectorfield_renderer.h"
 #include "curve_renderer/bcg_curve_renderer.h"
+#include "deferred_renderer/bcg_deferred_renderer.h"
 
 namespace bcg {
 
@@ -19,6 +20,7 @@ render_system::render_system(viewer_state *state) : system("render_system", stat
     renderers["mesh_renderer"] = std::make_unique<mesh_renderer>(state);
     renderers["picking_renderer"] = std::make_unique<picking_renderer>(state);
     renderers["curve_renderer"] = std::make_unique<curve_renderer>(state);
+    renderers["deferred_renderer"] = std::make_unique<deferred_renderer>(state);
 }
 
 }

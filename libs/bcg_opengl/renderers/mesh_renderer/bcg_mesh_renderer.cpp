@@ -126,23 +126,8 @@ void mesh_renderer::on_render(const event::internal::render &) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
-        program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
-        Vector<float, 3> ambient = material.ambient.cast<float>();
-        program.set_uniform_3f("material.ambient", 1, ambient.data());
-        Vector<float, 3> diffuse = material.diffuse.cast<float>();
-        program.set_uniform_3f("material.diffuse", 1, diffuse.data());
-        Vector<float, 3> specular = material.specular.cast<float>();
-        program.set_uniform_3f("material.specular", 1, specular.data());
-        float shininess = material.shininess;
-        program.set_uniform_f("material.shininess", shininess);
-        float alpha = material.uniform_alpha;
-        program.set_uniform_f("material.alpha", alpha);
-        program.set_uniform_i("material.use_face_color", material.use_face_color);
-        program.set_uniform_i("width", material.width);
+        material.upload(program);
 
-        if(material.face_colors.is_valid()){
-            material.face_colors.activate();
-        }
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
         shape.triangle_buffer.bind();
@@ -217,10 +202,10 @@ void mesh_renderer::on_set_face_color_attribute(const event::mesh_renderer::set_
     int height = colors.size() % material.width;
     colors.resize(material.width * (height + 1));
 
-    if(material.face_colors){
-        material.face_colors.update_data(colors[0].data(),  material.width, height + 1);
+    if(material.face_colors()){
+        material.face_colors().update_data(colors[0].data(),  material.width, height + 1);
     }else {
-        auto &texture = material.face_colors;
+        auto &texture = material.face_colors();
         texture = ogl_texture(GL_TEXTURE_2D, "face_color");
         int unit = 0;
         if (!texture.is_valid()) {
@@ -241,9 +226,9 @@ void mesh_renderer::on_set_face_color_attribute(const event::mesh_renderer::set_
 
             auto program = programs["mesh_renderer_program"];
             program.bind();
-            if (program.get_uniform_location(material.face_colors.name.c_str()) !=
+            if (program.get_uniform_location(material.face_colors().name.c_str()) !=
                 static_cast<int>(BCG_GL_INVALID_ID)) {
-                program.set_uniform_i(material.face_colors.name.c_str(), unit);
+                program.set_uniform_i(material.face_colors().name.c_str(), unit);
             }
         }
         texture.release();

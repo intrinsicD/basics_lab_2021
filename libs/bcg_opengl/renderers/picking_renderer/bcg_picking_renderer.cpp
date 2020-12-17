@@ -117,9 +117,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
-        Vector<float, 3> picking_color = material.picking_color.cast<float>();
-        program.set_uniform_3f("material.picking_color", 1, picking_color.data());
-        program.set_uniform_f("uniform_point_size", 20.0f);
+        material.upload(program);
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();

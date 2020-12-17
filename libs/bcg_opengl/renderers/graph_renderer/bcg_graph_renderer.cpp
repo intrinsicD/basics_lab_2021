@@ -123,17 +123,8 @@ void graph_renderer::on_render(const event::internal::render &) {
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
+        material.upload(program);
 
-        program.set_uniform_i("material.use_uniform_color", material.use_uniform_color);
-        Vector<float, 3> uniform_color = material.uniform_color.cast<float>();
-        program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
-        float alpha = material.uniform_alpha;
-        program.set_uniform_f("material.alpha", alpha);
-        program.set_uniform_i("width", material.width);
-
-        if(material.edge_colors.is_valid()){
-            material.edge_colors.activate();
-        }
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
         shape.edge_buffer.bind();
@@ -183,10 +174,10 @@ void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color
     int height = colors.size() % material.width;
     colors.resize(material.width * (height + 1));
 
-    if(material.edge_colors){
-        material.edge_colors.update_data(colors[0].data(),  material.width, height + 1);
+    if(material.edge_colors()){
+        material.edge_colors().update_data(colors[0].data(),  material.width, height + 1);
     }else{
-        auto &texture = material.edge_colors;
+        auto &texture = material.edge_colors();
         texture = ogl_texture(GL_TEXTURE_2D, "edge_color");
         int unit = 0;
         if (!texture.is_valid()) {
@@ -207,14 +198,14 @@ void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color
 
             auto program = programs["graph_renderer_program"];
             program.bind();
-            if (program.get_uniform_location(material.edge_colors.name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
-                program.set_uniform_i(material.edge_colors.name.c_str(), unit);
+            if (program.get_uniform_location(material.edge_colors().name.c_str()) != static_cast<int>(BCG_GL_INVALID_ID)) {
+                program.set_uniform_i(material.edge_colors().name.c_str(), unit);
             }
         }
         texture.release();
 
         std::vector<VectorS<3>> test_data(material.width * (height + 1));
-        material.edge_colors.download_data(test_data.data());
+        material.edge_colors().download_data(test_data.data());
         std::cout << MapConst<3>(test_data).block<3, 3>(0, 0) << "\n";
     }
 

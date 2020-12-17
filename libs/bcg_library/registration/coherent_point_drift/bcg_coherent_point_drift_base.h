@@ -23,7 +23,7 @@ struct coherent_point_drift_base{
     virtual void maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X);
 
     virtual void optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
-                                            size_t parallel_grain_size = 1024);
+                                            size_t parallel_grain_size);
 
     virtual void optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X);
 

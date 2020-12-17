@@ -7,7 +7,6 @@
 #include "bcg_gui_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
-#include "renderers/mesh_renderer/bcg_material_mesh.h"
 #include "bcg_property_map_eigen.h"
 #include "bcg_viewer_state.h"
 

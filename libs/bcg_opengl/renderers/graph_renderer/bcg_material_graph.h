@@ -5,17 +5,19 @@
 #ifndef BCG_GRAPHICS_BCG_MATERIAL_GRAPH_H
 #define BCG_GRAPHICS_BCG_MATERIAL_GRAPH_H
 
-#include "bcg_opengl.h"
 #include "color/bcg_colors.h"
-#include "renderers/bcg_attribute.h"
+#include "renderers/bcg_material.h"
 
 namespace bcg{
 
-struct material_graph{
-    std::vector<attribute> attributes = {
-            {"position", "v_position", "v_position", 0, true},
-            {"edge_color", "", "", -1, true}
-    };
+struct material_graph : public material{
+    material_graph() {
+        attributes = {
+                {"position", "v_position", "v_position", 0, true},
+                {"edge_color", "", "", -1, true}
+        };
+        textures.emplace_back("edge_color");
+    }
 
     ogl_vertex_array vao;
 
@@ -24,8 +26,19 @@ struct material_graph{
 
     VectorS<3> uniform_color = color::red;
     bcg_scalar_t uniform_alpha = 1;
-    ogl_texture edge_colors = ogl_texture("edge_color");
     colormap::base_colormap color_map;
+
+    ogl_texture &edge_colors(){
+        return textures[0];
+    }
+
+    void upload(const glsl_program &program) override {
+        program.set_uniform_i("material.use_uniform_color", use_uniform_color);
+        program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
+        program.set_uniform_f("material.alpha", uniform_alpha);
+        program.set_uniform_i("width", width);
+        material::upload(program);
+    }
 };
 
 }

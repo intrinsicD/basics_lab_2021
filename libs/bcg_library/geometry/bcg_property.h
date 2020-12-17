@@ -561,6 +561,11 @@ struct property_container {
         for(const auto &item : other.container){
             container[item.first] = item.second;
         }
+
+        if(has("v_connectivity")){
+            remove("v_connectivity");
+        }
+
     }
 
     struct Iterator : public property_iterator<Iterator, base_handle, property_container> {

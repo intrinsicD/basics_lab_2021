@@ -20,7 +20,9 @@ struct material{
 
     virtual void upload(const glsl_program &program){
         for(auto &texture : textures){
-            texture.activate();
+            if(texture.is_valid()){
+                texture.activate();
+            }
         }
     }
 };

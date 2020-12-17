@@ -31,7 +31,7 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
                                     state->keyboard.shift_pressed ||
                                     state->keyboard.ctrl_pressed ||
                                     state->keyboard.command_pressed);
-
+    if(state->keyboard.is_captured_by_gui) return;
     if (state->keyboard.keys[GLFW_KEY_A]) {}
     if (state->keyboard.keys[GLFW_KEY_B]) {}
     if (state->keyboard.keys[GLFW_KEY_C]) {}

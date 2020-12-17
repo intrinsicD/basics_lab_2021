@@ -1593,7 +1593,7 @@ void ogl_framebuffer::destroy() {
 }
 
 void ogl_framebuffer::bind() {
-    glBindBuffer(GL_FRAMEBUFFER, handle);
+    glBindFramebuffer(GL_FRAMEBUFFER, handle);
     assert_ogl_error();
 }
 
@@ -1602,7 +1602,19 @@ void ogl_framebuffer::release() const {
     assert_ogl_error();
 }
 
+void ogl_framebuffer::activate_textures(){
+    for (size_t i = 0; i < textures.size(); ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, textures[i]);
+    }
+}
+
 void ogl_framebuffer::attach_texture(const ogl_texture &texture, unsigned int attachment) {
+    size_t index = attachment - GL_COLOR_ATTACHMENT0;
+    while(textures.size() <= index){
+        textures.push_back({});
+    }
+    textures[index] = texture;
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target, texture.handle, 0);
     assert_ogl_error();
 }

@@ -38,6 +38,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_point_cloud_vertex_outlier_probability.h guis/bcg_gui_point_cloud_vertex_outlier_probability.cpp
             guis/bcg_gui_point_cloud_kernel_density_estimation.h guis/bcg_gui_point_cloud_kernel_density_estimation.cpp
             guis/bcg_gui_point_cloud_quadric.h guis/bcg_gui_point_cloud_quadric.cpp
+            guis/bcg_gui_point_cloud_bilateral_filter.h guis/bcg_gui_point_cloud_bilateral_filter.cpp
             guis/bcg_gui_graph_vertex_pca.h guis/bcg_gui_graph_vertex_pca.cpp
             guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp
@@ -94,6 +95,7 @@ if (BCG_OPENGL)
             renderers/graph_renderer/bcg_material_graph.h renderers/graph_renderer/bcg_graph_renderer.h renderers/graph_renderer/bcg_graph_renderer.cpp renderers/graph_renderer/bcg_events_graph_renderer.h
             renderers/vectorfield_renderer/bcg_material_vectorfield.h renderers/vectorfield_renderer/bcg_vectorfield_renderer.h renderers/vectorfield_renderer/bcg_vectorfield_renderer.cpp renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h
             renderers/curve_renderer/bcg_material_curve.h renderers/curve_renderer/bcg_curve_renderer.h renderers/curve_renderer/bcg_curve_renderer.cpp renderers/curve_renderer/bcg_events_curve_renderer.h
+            renderers/deferred_renderer/bcg_material_deferred.h renderers/deferred_renderer/bcg_deferred_renderer.h renderers/deferred_renderer/bcg_deferred_renderer.cpp renderers/deferred_renderer/bcg_events_deferred_renderer.h
             ${GLAD_SOURCE_DIRS}/glad.c
             ${IMGUI_SOURCES}
             )

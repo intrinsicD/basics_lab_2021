@@ -4,6 +4,7 @@
 
 #include "bcg_gui_point_cloud_vertex_pca.h"
 #include "bcg_gui_material_points.h"
+#include "bcg_gui_kdtree_selector.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "bcg_viewer_state.h"
 
@@ -29,40 +30,40 @@ static std::vector<std::string> pca_type_names() {
 void gui_point_cloud_vertex_pca(viewer_state *state) {
     static auto names = pca_type_names();
     static int idx = 0;
-    static int num_closest = 12;
-    static float radius = 0.001;
     static bool compute_mean = true;
+    kdtree_parameters params = gui_kd_tree_selector(state);
+    ImGui::Separator();
     ImGui::PushID("vertex_pca");
     draw_combobox(&state->window, "pca_type", idx, names);
     ImGui::Checkbox("compute mean", &compute_mean);
-    if (ImGui::InputInt("num closest", &num_closest)) {
-        radius = 0;
-    }
-    if (ImGui::InputFloat("radius", &radius)) {
-        num_closest = 0;
-    }
     if (ImGui::Button("Compute")) {
         switch (static_cast<PcaType >(idx)) {
             case PcaType::svd : {
-                state->dispatcher.trigger<event::point_cloud::vertex::pca::svd>(state->picker.entity_id, compute_mean,
-                                                                                num_closest, bcg_scalar_t(radius));
+                state->dispatcher.trigger<event::point_cloud::vertex::pca::svd>(state->picker.entity_id,
+                                                                                compute_mean,
+                                                                                params.num_closest,
+                                                                                params.radius);
                 break;
             }
             case PcaType::weighted_svd : {
                 state->dispatcher.trigger<event::point_cloud::vertex::pca::weighted_svd>(state->picker.entity_id,
-                                                                                         compute_mean, num_closest,
-                                                                                         bcg_scalar_t(radius));
+                                                                                         compute_mean,
+                                                                                         params.num_closest,
+                                                                                         params.radius);
                 break;
             }
             case PcaType::eig : {
-                state->dispatcher.trigger<event::point_cloud::vertex::pca::eig>(state->picker.entity_id, compute_mean,
-                                                                                num_closest, bcg_scalar_t(radius));
+                state->dispatcher.trigger<event::point_cloud::vertex::pca::eig>(state->picker.entity_id,
+                                                                                compute_mean,
+                                                                                params.num_closest,
+                                                                                params.radius);
                 break;
             }
             case PcaType::weighted_eig : {
                 state->dispatcher.trigger<event::point_cloud::vertex::pca::weighted_eig>(state->picker.entity_id,
-                                                                                         compute_mean, num_closest,
-                                                                                         bcg_scalar_t(radius));
+                                                                                         compute_mean,
+                                                                                         params.num_closest,
+                                                                                         params.radius);
                 break;
             }
             case PcaType::__last__ : {

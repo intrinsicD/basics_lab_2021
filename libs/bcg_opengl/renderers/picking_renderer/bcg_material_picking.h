@@ -5,24 +5,30 @@
 #ifndef BCG_GRAPHICS_BCG_MATERIAL_PICKING_H
 #define BCG_GRAPHICS_BCG_MATERIAL_PICKING_H
 
-#include "color/bcg_colors.h"
 #include "entt/entt.hpp"
-#include "renderers/bcg_attribute.h"
+#include "color/bcg_colors.h"
+#include "renderers/bcg_material.h"
 
 namespace bcg{
 
-struct material_picking{
+struct material_picking : public material{
     material_picking() = default;
 
-    explicit material_picking(entt::entity id) : picking_color(color::packed_int(static_cast<std::uint32_t>(id))){}
-
-    std::vector<attribute> attributes = {
-            {"position", "v_position", "v_position", 0, true}
-    };
+    explicit material_picking(entt::entity id) : picking_color(color::packed_int(static_cast<std::uint32_t>(id))){
+        attributes = {
+                {"position", "v_position", "v_position", 0, true}
+        };
+    }
 
     ogl_vertex_array vao;
 
     VectorS<3> picking_color;
+
+    void upload(const glsl_program &program) override {
+        program.set_uniform_3f("material.picking_color", 1, picking_color.data());
+        program.set_uniform_f("uniform_point_size", 20.0f);
+        material::upload(program);
+    }
 };
 
 }

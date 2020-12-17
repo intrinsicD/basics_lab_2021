@@ -24,32 +24,17 @@ void coherent_point_drift_base::init(const MatrixS<-1, -1> &Y, const MatrixS<-1,
             sigma_squared += (X.row(j) - Y.row(i)).squaredNorm();
         }
     }
+
     sigma_squared /= bcg_scalar_t(D * M * N);
 }
 
 const MatrixS<-1, -1> &
 coherent_point_drift_base::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-/*    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) N, 1024),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    for (long j = 0; j < M; ++j) {
-                        P(j, i) = std::exp(-(X.row(i).transpose() - transformed(Y, j)).squaredNorm() / (2 * sigma_squared));
-                    }
-                }
-            }
-    );*/
-
     MatrixS<-1, -1> T = transformed(Y);
     P = (-(VectorS<-1>::Ones(M) * X.rowwise().squaredNorm().transpose()
            - (2 * T) * X.transpose() +
            T.rowwise().squaredNorm() * VectorS<-1>::Ones(N).transpose())  / (2 * sigma_squared)).array().exp();
 
-/*    for (long i = 0; i < M; ++i) {
-        for (long j = 0; j < N; ++j) {
-            P(i, j) = std::exp(-(X.row(j).transpose() - transformed(Y, i)).squaredNorm() / (2 * sigma_squared));
-        }
-    }*/
     denominator = 1.0 / ((VectorS<-1>::Ones(M).transpose() * P).array() +
                               std::pow(2 * pi * sigma_squared, D / 2.0) * omega / (1.0 - omega) * bcg_scalar_t(M) /
                               bcg_scalar_t(N));
@@ -58,6 +43,8 @@ coherent_point_drift_base::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1
     P1 = P * VectorS<-1>::Ones(N);
     PT1 = VectorS<-1>::Ones(M).transpose() * P;
     N_P = P1.sum();
+
+    optimized_expectation_step(Y, X, 1024);
     return P;
 }
 
@@ -84,7 +71,7 @@ void coherent_point_drift_base::optimized_expectation_step(const MatrixS<-1, -1>
             }
     );
 
-    tbb::atomic<size_t> sum = 0;
+    tbb::atomic<bcg_scalar_t> sum = 0;
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) M, parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -98,7 +85,7 @@ void coherent_point_drift_base::optimized_expectation_step(const MatrixS<-1, -1>
                         P1(m) += k_mn;
                         PX.row(m) += k_mn * X.row(n);
                     }
-                    sum += P1(m);
+                    sum = sum + P1(m);
                 }
             }
     );

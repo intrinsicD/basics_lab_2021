@@ -175,7 +175,7 @@ void coherent_point_drift_bayes::optimized_expectation_step(const MatrixS<-1, -1
             }
     );
 
-    tbb::atomic<size_t> sum = 0;
+    tbb::atomic<bcg_scalar_t> sum = 0;
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) M, parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -190,7 +190,7 @@ void coherent_point_drift_bayes::optimized_expectation_step(const MatrixS<-1, -1
                         P1(m) += k_mn;
                         PX.row(m) += k_mn * X.row(n);
                     }
-                    sum += P1(m);
+                    sum = sum + P1(m);
                 }
             }
     );

@@ -568,6 +568,8 @@ struct ogl_framebuffer : public ogl_handle {
 
     void release() const;
 
+    void activate_textures();
+
     void attach_texture(const ogl_texture &texture, unsigned int attachment);
 
     void attach_renderbuffer(const ogl_renderbuffer &renderbuffer, unsigned int attachment);

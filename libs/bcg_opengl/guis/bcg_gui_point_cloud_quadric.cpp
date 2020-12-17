@@ -15,8 +15,7 @@ void gui_point_cloud_quadric(viewer_state *state){
     static std::vector<std::string> names = quadric_names();
     static int e = 0;
     draw_combobox(&state->window, "quadric type", e, names);
-    static kdtree_parameters parameters;
-    parameters = gui_kd_tree_selector(state);
+    kdtree_parameters parameters = gui_kd_tree_selector(state);
     static bool can_collect = false;
 
     if(ImGui::Button("Compute Quadric")){

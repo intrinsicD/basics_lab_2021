@@ -11,8 +11,9 @@ halfedge_graph point_cloud_build_knn_graph(vertex_container &vertices, const kdt
     graph.vertices.link(vertices);
     graph.positions = graph.vertices.get<VectorS<3>, 3>("v_position");
     graph.vertices_deleted = graph.vertices.get<bool, 1>("v_deleted");
-    graph.vconn = graph.vertices.get<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
+    graph.vconn = graph.vertices.get_or_add<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
     graph.vertices.resize(vertices.size());
+
     halfedge_handle h;
     for(const auto v : graph.vertices){
         auto result = kdtree.query_knn(graph.positions[v], num_closest);
@@ -33,7 +34,7 @@ halfedge_graph point_cloud_build_radius_graph(vertex_container &vertices, const 
     graph.vertices.link(vertices);
     graph.positions = graph.vertices.get<VectorS<3>, 3>("v_position");
     graph.vertices_deleted = graph.vertices.get<bool, 1>("v_deleted");
-    graph.vconn = graph.vertices.get<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
+    graph.vconn = graph.vertices.get_or_add<halfedge_graph::vertex_connectivity, 1>("v_connectivity");
     graph.vertices.resize(vertices.size());
 
     halfedge_handle h;

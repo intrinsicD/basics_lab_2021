@@ -17,6 +17,8 @@ halfedge_graph::halfedge_graph() : point_cloud(),
                                    size_halfedges_deleted(0),
                                    size_edges_deleted(0) {
 
+    assert(vconn);
+    assert(hconn);
 }
 
 void halfedge_graph::assign(const halfedge_graph &other) {
@@ -306,6 +308,8 @@ point_cloud::position_t halfedge_graph::get_vector(edge_handle e) const {
 }
 
 halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
+    assert(hconn);
+    assert(vconn);
     auto h = find_halfedge(v0, v1);
     if(h.is_valid()){
         return h;

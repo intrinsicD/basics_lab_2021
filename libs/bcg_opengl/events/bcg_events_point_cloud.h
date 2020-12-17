@@ -27,6 +27,18 @@ struct graph_radius {
 }
 
 namespace vertex {
+namespace filter{
+struct bilateral_knn{
+    entt::entity id;
+    bcg_scalar_t points_sigma, normals_sigma;
+    int num_closest = 12;
+};
+struct bilateral_radius{
+    entt::entity id;
+    bcg_scalar_t points_sigma, normals_sigma;
+    bcg_scalar_t radius = 0.01;
+};
+}
 namespace curvature {
 struct taubin_knn {
     entt::entity id;

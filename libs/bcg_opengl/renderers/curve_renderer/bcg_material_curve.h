@@ -5,24 +5,38 @@
 #ifndef BCG_GRAPHICS_BCG_MATERIAL_CURVE_H
 #define BCG_GRAPHICS_BCG_MATERIAL_CURVE_H
 
-#include "bcg_opengl.h"
 #include "color/bcg_colors.h"
-#include "renderers/bcg_attribute.h"
+#include "renderers/bcg_material.h"
 
 namespace bcg{
 
-struct material_curve{
-    std::vector<attribute> attributes = {
-            {"position", "v_position", "v_position", 0, true},
-    };
-
-    ogl_vertex_array vao;
+struct material_curve : public material{
+    material_curve() {
+        attributes = {
+                {"position",   "v_position", "v_position", 0, true},
+        };
+    }
 
     bool show_bezier = false, show_hermite = true;
 
     VectorS<3> uniform_color = color::random();
     bcg_scalar_t uniform_alpha = 1;
     int tesselation_level = 16;
+
+    void use_hermite(const glsl_program &program){
+        program.set_uniform_i("show_hermite", show_hermite);
+        program.set_uniform_i("show_bezier", !show_hermite);
+    }
+    void use_bezier(const glsl_program &program){
+        program.set_uniform_i("show_bezier", show_bezier);
+        program.set_uniform_i("show_hermite", !show_bezier);
+    }
+    void upload(const glsl_program &program) override {
+        program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
+        program.set_uniform_f("material.alpha", uniform_alpha);
+        program.set_uniform_i("tesselation_level", tesselation_level);
+        material::upload(program);
+    }
 };
 
 }
