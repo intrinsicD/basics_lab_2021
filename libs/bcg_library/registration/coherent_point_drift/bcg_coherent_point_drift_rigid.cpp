@@ -14,14 +14,6 @@ void coherent_point_drift_rigid::init(const MatrixS<-1, -1> &Y, const MatrixS<-1
     s = 1.0;
     R = MatrixS<-1, -1>::Identity(D, D);
     t = VectorS<-1>::Zero(D);
-
-    if(!optimized){
-        P = MatrixS<-1, -1>::Zero(M, N);
-    }
-}
-
-const MatrixS<-1, -1> &coherent_point_drift_rigid::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    return coherent_point_drift_base::expectation_step(P, Y, X);
 }
 
 void coherent_point_drift_rigid::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
@@ -34,10 +26,6 @@ void coherent_point_drift_rigid::maximization_step(const MatrixS<-1, -1> &Y, con
     t = mean_x - s * R * mean_y;
     sigma_squared = ((PT1.array() * X.rowwise().squaredNorm().array()).sum() - N_P * mean_x.squaredNorm() - s * ARtrace) / (N_P * D);
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
-}
-
-void coherent_point_drift_rigid::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, size_t parallel_grain_size){
-    coherent_point_drift_base::optimized_expectation_step(Y, X, parallel_grain_size);
 }
 
 void coherent_point_drift_rigid::optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X){

@@ -42,11 +42,6 @@ void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS
     T = Y;
 }
 
-const MatrixS<-1, -1> &coherent_point_drift_nonrigid::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y,
-                                                                       const MatrixS<-1, -1> &X) {
-    return coherent_point_drift_base::expectation_step(P, T, X);
-}
-
 void coherent_point_drift_nonrigid::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
     MatrixS<-1, -1> A_inv = (P1.array() / (lambda * sigma_squared)).matrix().asDiagonal();
     MatrixS<-1, -1> C_inv = (1.0 / Evals.array()).matrix().asDiagonal();
@@ -67,11 +62,6 @@ void coherent_point_drift_nonrigid::maximization_step(const MatrixS<-1, -1> &Y, 
     sigma_squared = ((X.transpose() * PT1.asDiagonal() * X).trace() - 2.0 * ((PX).transpose() * T).trace() +
                      (T.transpose() * P1.asDiagonal() * T).trace()) / (N_P * D);
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
-}
-
-void coherent_point_drift_nonrigid::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
-                                                               size_t parallel_grain_size) {
-    coherent_point_drift_base::optimized_expectation_step(Y, X, parallel_grain_size);
 }
 
 void coherent_point_drift_nonrigid::optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {

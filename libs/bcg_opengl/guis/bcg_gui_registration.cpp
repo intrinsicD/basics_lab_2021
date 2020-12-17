@@ -69,13 +69,9 @@ void gui_registration(viewer_state *state) {
     if(state->scene.valid(source_id) && ImGui::CollapsingHeader("Info")){
         switch (static_cast<RegistrationMethod>(e)) {
             case RegistrationMethod::rigid_icp_point2point : {
-                auto &model = state->scene.get<Transform>(source_id);
-                gui_transform(state, &model);
                 break;
             }
             case RegistrationMethod::rigid_icp_point2plane : {
-                auto &model = state->scene.get<Transform>(source_id);
-                gui_transform(state, &model);
                 break;
             }
             case RegistrationMethod::coherent_point_drift_rigid : {
@@ -83,11 +79,6 @@ void gui_registration(viewer_state *state) {
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(rigid.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(rigid.N_P).c_str());
                 ImGui::InputFloat("omega", &rigid.omega);
-                if(rigid.t.rows() > 0){
-                    ImGui::Separator();
-                    auto model = Translation(rigid.t) * Rotation(MatrixS<3, 3>(rigid.R)) * Scaling(VectorS<3>::Constant(rigid.s));
-                    gui_transform(state, &model);
-                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_affine : {
@@ -95,11 +86,6 @@ void gui_registration(viewer_state *state) {
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(affine.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(affine.N_P).c_str());
                 ImGui::InputFloat("omega", &affine.omega);
-                if(affine.t.rows() > 0){
-                    ImGui::Separator();
-                    auto model = Translation(affine.t) * Transform(MatrixS<3, 3>(affine.B));
-                    gui_transform(state, &model);
-                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_nonrigid : {
@@ -120,11 +106,6 @@ void gui_registration(viewer_state *state) {
                 ImGui::InputFloat("gamma", &bayes.gamma);
                 ImGui::InputFloat("kappa", &bayes.kappa);
                 ImGui::InputFloat("lambda", &bayes.lambda);
-                if(bayes.t.rows() > 0){
-                    ImGui::Separator();
-                    Transform model =  Translation(bayes.t) * Rotation(MatrixS<3, 3>(bayes.R)) * Scaling(VectorS<3>::Constant(bayes.s));
-                    gui_transform(state, &model);
-                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_test : {
@@ -136,11 +117,6 @@ void gui_registration(viewer_state *state) {
 /*                ImGui::InputFloat("gamma", &bayes.gamma);
                 ImGui::InputFloat("kappa", &bayes.kappa);*/
                 ImGui::InputFloat("lambda", &nonrigid_test.lambda);
-                if(nonrigid_test.t.rows() > 0){
-                    ImGui::Separator();
-                    Transform model =  Translation(nonrigid_test.t) * Rotation(MatrixS<3, 3>(nonrigid_test.R)) * Scaling(VectorS<3>::Constant(nonrigid_test.s));
-                    gui_transform(state, &model);
-                }
                 break;
             }
             case RegistrationMethod::__last__: {
@@ -150,6 +126,8 @@ void gui_registration(viewer_state *state) {
                 break;
             }
         }
+        ImGui::Separator();
+        gui_transform(state,state->scene.try_get<Transform>(source_id));
     }
 }
 

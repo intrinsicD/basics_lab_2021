@@ -70,10 +70,10 @@ void registration_system::on_align_step(const event::registration::align_step &e
             MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
                                 target_model.translation()).transpose();
             auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid>(event.source_id);
-            if(reg.errors.empty()){
+            if(reg.errors.empty() || !rigid.initialized){
                 rigid.init(Y, X);
             }
-            rigid(rigid.P, Y, X, state->config.parallel_grain_size);
+            rigid(Y, X, state->config.parallel_grain_size);
             delta = Translation(rigid.t) * Rotation(MatrixS<3, 3>(rigid.R)) * Scaling(VectorS<3>::Constant(rigid.s));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
             break;
@@ -84,10 +84,10 @@ void registration_system::on_align_step(const event::registration::align_step &e
             MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
                                 target_model.translation()).transpose();
             auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine>(event.source_id);
-            if(reg.errors.empty()){
+            if(reg.errors.empty() || !affine.initialized){
                 affine.init(Y, X);
             }
-            affine(affine.P, Y, X, state->config.parallel_grain_size);
+            affine(Y, X, state->config.parallel_grain_size);
             delta = Translation(affine.t) * Transform(MatrixS<3, 3>(affine.B));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
             break;
@@ -99,10 +99,10 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 target_model.translation()).transpose();
 
             auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid>(event.source_id);
-            if(reg.errors.empty()){
+            if(reg.errors.empty() || !nonrigid.initialized){
                 nonrigid.init(Y, X);
             }
-            nonrigid(nonrigid.P, Y, X, state->config.parallel_grain_size);
+            nonrigid(Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_nonrigid_position");
             Map(cpd_vector) = (nonrigid.T - Y) * source_model.linear();
@@ -119,14 +119,14 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 target_model.translation()).transpose();
 
             auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes>(event.source_id);
-            if(reg.errors.empty()){
+            if(reg.errors.empty() || !bayes.initialized){
                 bayes.init(Y, X);
             }
-            bayes(bayes.P, Y, X, state->config.parallel_grain_size);
+            bayes(Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_bayes_position");
-            Map(cpd_vector) = (bayes.V) * source_model.linear();
             Map(cpd_positions) = (source_model.inverse() * bayes.U.transpose().colwise().homogeneous()).transpose();
+            Map(cpd_vector) = Map(cpd_positions) - MapConst(source_positions);
             delta = Translation(bayes.t) * Rotation(MatrixS<3, 3>(bayes.R)) * Scaling(VectorS<3>::Constant(bayes.s));
             reg.errors.push_back(bayes.sigma_squared);
             cpd_vector.set_dirty();
@@ -140,10 +140,10 @@ void registration_system::on_align_step(const event::registration::align_step &e
                                 target_model.translation()).transpose();
 
             auto &nonrigid_test = state->scene.get_or_emplace<coherent_point_drift_test>(event.source_id);
-            if(reg.errors.empty()){
+            if(reg.errors.empty()|| !nonrigid_test.initialized){
                 nonrigid_test.init(Y, X);
             }
-            nonrigid_test(nonrigid_test.P, Y, X, state->config.parallel_grain_size);
+            nonrigid_test(Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_test_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_test_position");
             Map(cpd_vector) = (nonrigid_test.V) * source_model.linear();

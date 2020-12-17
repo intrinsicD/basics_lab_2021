@@ -26,26 +26,7 @@ void coherent_point_drift_base::init(const MatrixS<-1, -1> &Y, const MatrixS<-1,
     }
 
     sigma_squared /= bcg_scalar_t(D * M * N);
-}
-
-const MatrixS<-1, -1> &
-coherent_point_drift_base::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    MatrixS<-1, -1> T = transformed(Y);
-    P = (-(VectorS<-1>::Ones(M) * X.rowwise().squaredNorm().transpose()
-           - (2 * T) * X.transpose() +
-           T.rowwise().squaredNorm() * VectorS<-1>::Ones(N).transpose())  / (2 * sigma_squared)).array().exp();
-
-    denominator = 1.0 / ((VectorS<-1>::Ones(M).transpose() * P).array() +
-                              std::pow(2 * pi * sigma_squared, D / 2.0) * omega / (1.0 - omega) * bcg_scalar_t(M) /
-                              bcg_scalar_t(N));
-    P = P * denominator.asDiagonal();
-    PX = P * X;
-    P1 = P * VectorS<-1>::Ones(N);
-    PT1 = VectorS<-1>::Ones(M).transpose() * P;
-    N_P = P1.sum();
-
-    optimized_expectation_step(Y, X, 1024);
-    return P;
+    initialized = true;
 }
 
 void coherent_point_drift_base::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {}
@@ -102,14 +83,13 @@ MatrixS<-1, -1> coherent_point_drift_base::transformed(const MatrixS<-1, -1> &Y)
     return Y;
 }
 
-void coherent_point_drift_base::operator()(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
+void coherent_point_drift_base::operator()(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
                                            size_t parallel_grain_size) {
 
+    optimized_expectation_step(Y, X, parallel_grain_size);
     if (optimized) {
-        optimized_expectation_step(Y, X, parallel_grain_size);
         optimized_maximization_step(Y, X);
     } else {
-        expectation_step(P, Y, X);
         maximization_step(Y, X);
     }
 }

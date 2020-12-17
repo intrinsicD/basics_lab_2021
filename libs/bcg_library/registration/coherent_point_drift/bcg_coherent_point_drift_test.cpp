@@ -45,11 +45,6 @@ void coherent_point_drift_test::init(const MatrixS<-1, -1> &Y, const MatrixS<-1,
     T = Y;
 }
 
-const MatrixS<-1, -1> &
-coherent_point_drift_test::expectation_step(MatrixS<-1, -1> &P, const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-    return coherent_point_drift_base::expectation_step(P, T, X);
-}
-
 void coherent_point_drift_test::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
     mean_x = X.transpose() * PT1 / N_P;
     mean_y = Y.transpose() * P1 / N_P;
@@ -143,13 +138,9 @@ void coherent_point_drift_test::maximization_step(const MatrixS<-1, -1> &Y, cons
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
 }
 
-void coherent_point_drift_test::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
-                                                           size_t parallel_grain_size) {
-
-}
 
 void coherent_point_drift_test::optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
-
+    maximization_step(Y, X);
 }
 
 VectorS<-1> coherent_point_drift_test::transformed(const MatrixS<-1, -1> &Y, long idx) {
