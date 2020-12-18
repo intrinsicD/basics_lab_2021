@@ -32,9 +32,7 @@ private:
 
     void on_resize(const event::internal::resize &event);
 
-    unsigned int gBuffer = BCG_GL_INVALID_ID;
-    unsigned int gPosition = BCG_GL_INVALID_ID, gNormal= BCG_GL_INVALID_ID, gAlbedoSpec= BCG_GL_INVALID_ID;
-    unsigned int rboDepth = BCG_GL_INVALID_ID;
+    ogl_framebuffer gBuffer;
     ogl_vertex_array quad_vao;
     ogl_vertex_buffer quad_vbo;
 

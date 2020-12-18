@@ -530,6 +530,8 @@ struct ogl_shape{
 };
 
 struct ogl_renderbuffer : public ogl_handle {
+    unsigned int internal_format;
+
     ogl_renderbuffer();
 
     explicit ogl_renderbuffer(std::string name);
@@ -544,7 +546,9 @@ struct ogl_renderbuffer : public ogl_handle {
 
     void release() const;
 
-    void storage(unsigned int internal_format, int width, int height) const;
+    void storage(unsigned int internal_format, int width, int height);
+
+    void resize(int width, int height) const;
 };
 
 struct ogl_framebuffer : public ogl_handle {
@@ -553,6 +557,7 @@ struct ogl_framebuffer : public ogl_handle {
 
     std::vector<ogl_texture> textures;
     std::vector<unsigned int> attachments;
+    ogl_renderbuffer rbo;
     bool has_depth_buffer;
 
     ogl_framebuffer();
@@ -580,6 +585,8 @@ struct ogl_framebuffer : public ogl_handle {
     void oepngl_draw_buffers();
 
     void copy_to_default_framebuffer();
+
+    void resize(int width, int height);
 };
 
 struct ogl_state {

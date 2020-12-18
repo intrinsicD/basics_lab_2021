@@ -14,13 +14,13 @@
 namespace bcg {
 
 render_system::render_system(viewer_state *state) : system("render_system", state) {
+    renderers["deferred_renderer"] = std::make_unique<deferred_renderer>(state);
     renderers["point_renderer"] = std::make_unique<points_renderer>(state);
     renderers["graph_renderer"] = std::make_unique<graph_renderer>(state);
     renderers["vectorfield_renderer"] = std::make_unique<vectorfield_renderer>(state);
     renderers["mesh_renderer"] = std::make_unique<mesh_renderer>(state);
     renderers["picking_renderer"] = std::make_unique<picking_renderer>(state);
     renderers["curve_renderer"] = std::make_unique<curve_renderer>(state);
-    renderers["deferred_renderer"] = std::make_unique<deferred_renderer>(state);
 }
 
 }

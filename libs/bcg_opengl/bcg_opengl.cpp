@@ -1230,7 +1230,6 @@ void ogl_texture::update_data(void *data, int w, int h) {
         }
     }
     assert_ogl_error();
-    release();
 }
 
 void ogl_texture::download_data(void *data) {
@@ -1533,7 +1532,7 @@ ogl_renderbuffer::ogl_renderbuffer(std::string name) : ogl_renderbuffer(BCG_GL_I
 
 }
 
-ogl_renderbuffer::ogl_renderbuffer(unsigned int handle, std::string name) : ogl_handle(handle, name) {
+ogl_renderbuffer::ogl_renderbuffer(unsigned int handle, std::string name) : ogl_handle(handle, name), internal_format(GL_DEPTH_COMPONENT) {
 
 }
 
@@ -1561,7 +1560,12 @@ void ogl_renderbuffer::release() const {
     assert_ogl_error();
 }
 
-void ogl_renderbuffer::storage(GLenum internal_format, int width, int height) const {
+void ogl_renderbuffer::storage(GLenum internal_format_, int width, int height) {
+    internal_format = internal_format_;
+    resize(width, height);
+}
+
+void ogl_renderbuffer::resize(int width, int height) const{
     glRenderbufferStorage(GL_RENDERBUFFER, internal_format, width, height);
     assert_ogl_error();
 }
@@ -1605,7 +1609,6 @@ void ogl_framebuffer::release() const {
 void ogl_framebuffer::activate_textures(){
     for (size_t i = 0; i < textures.size(); ++i) {
         textures[i].activate(i);
-        textures[i].bind();
     }
 }
 
@@ -1619,12 +1622,14 @@ void ogl_framebuffer::attach_texture(const ogl_texture &texture, unsigned int at
     attachments[index] = attachment;
     width = texture.width;
     height = texture.height;
+    texture.bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target, texture.handle, 0);
     assert_ogl_error();
 }
 
 void ogl_framebuffer::attach_renderbuffer(const ogl_renderbuffer &renderbuffer, unsigned int attachment) {
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer.handle);
+    rbo = renderbuffer;
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbo.handle);
     assert_ogl_error();
     has_depth_buffer = true;
 }
@@ -1657,6 +1662,15 @@ void ogl_framebuffer::copy_to_default_framebuffer() {
     assert_ogl_error();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     assert_ogl_error();
+}
+
+void ogl_framebuffer::resize(int width_, int height_){
+    width = width_;
+    height = height_;
+    for(auto &texture : textures){
+        texture.resize(width, height);
+    }
+    rbo.resize(width, height);
 }
 
 

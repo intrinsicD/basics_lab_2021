@@ -178,7 +178,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
             auto iter = state->picker.selected_entities.find((size_t)id);
             if(iter != state->picker.selected_entities.end()){
                 state->picker.selected_entities[(size_t)id] = id;
-            }else{
+            }else if(!state->picker.selected_entities.empty()){
                 state->picker.selected_entities.erase(iter);
             }
         }
