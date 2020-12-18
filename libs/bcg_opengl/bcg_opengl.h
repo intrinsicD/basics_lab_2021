@@ -552,6 +552,7 @@ struct ogl_framebuffer : public ogl_handle {
     static inline unsigned int bound_framebuffer_id = 0;
 
     std::vector<ogl_texture> textures;
+    std::vector<unsigned int> attachments;
     bool has_depth_buffer;
 
     ogl_framebuffer();

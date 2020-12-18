@@ -8,7 +8,6 @@ uniform mat4 view;
 uniform mat4 proj;
 
 out vec3 FragPos;
-out vec3 FinalPos;
 out vec3 Normal;
 out vec3 Color;
 
@@ -16,7 +15,6 @@ void main(){
     vec4 worldPos = model * vec4(position, 1.0);
 
     FragPos = worldPos.xyz;
-    FinalPos = (proj * view * worldPos).xyz;
     Normal = transpose(inverse(mat3(model))) * normal;
     Color = color;
 

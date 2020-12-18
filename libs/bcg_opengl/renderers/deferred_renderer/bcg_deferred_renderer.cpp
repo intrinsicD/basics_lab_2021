@@ -18,6 +18,7 @@ deferred_renderer::deferred_renderer(viewer_state *state) : renderer("deferred_r
     state->dispatcher.sink<event::internal::begin_frame>().connect<&deferred_renderer::on_begin_frame>(this);
     state->dispatcher.sink<event::internal::render>().connect<&deferred_renderer::on_render>(this);
     state->dispatcher.sink<event::internal::end_frame>().connect<&deferred_renderer::on_end_frame>(this);
+    state->dispatcher.sink<event::internal::resize>().connect<&deferred_renderer::on_resize>(this);
 }
 
 void deferred_renderer::on_startup(const event::internal::startup &event) {
@@ -39,40 +40,60 @@ void deferred_renderer::on_startup(const event::internal::startup &event) {
     shaderLightingPass.set_uniform_i("gAlbedoSpec", 2);
 
     const unsigned int NR_LIGHTS = 32;
+    srand(13);
+    for (unsigned int i = 0; i < NR_LIGHTS; i++){
+        // calculate slightly random offsets
+        float xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        float yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
+        float zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        lightPositions.emplace_back(xPos, yPos, zPos);
+        // also calculate random color
+        float rColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
+        float gColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
+        float bColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
+        lightColors.emplace_back(rColor, gColor, bColor);
+    }
 
-    int width = state->window.framebuffer_viewport[2];
-    int height = state->window.framebuffer_viewport[3];
+    int SCR_WIDTH = state->window.framebuffer_viewport[2];
+    int SCR_HEIGHT = state->window.framebuffer_viewport[3];
 
-    ogl_texture gPosition(GL_TEXTURE_2D, "gPosition"), gNormal(GL_TEXTURE_2D, "gNormal"), gAlbedoSpec(GL_TEXTURE_2D, "gAlbedoSpec");
-    gBuffer.create();
-    gBuffer.bind();
-    gPosition.create();
-    gPosition.bind();
-    gPosition.set_image_data(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, NULL);
-    gPosition.set_filter_nearest();
-    gBuffer.attach_texture(gPosition, GL_COLOR_ATTACHMENT0);
+    glGenFramebuffers(1, &gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 
-    gNormal.create();
-    gNormal.bind();
-    gNormal.set_image_data(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, NULL);
-    gNormal.set_filter_nearest();
-    gBuffer.attach_texture(gNormal, GL_COLOR_ATTACHMENT1);
-
-    gAlbedoSpec.create();
-    gAlbedoSpec.bind();
-    gAlbedoSpec.set_image_data(GL_TEXTURE_2D, 0, GL_RGBA, width, height, GL_RGBA, GL_FLOAT, NULL);
-    gAlbedoSpec.set_filter_nearest();
-    gBuffer.attach_texture(gAlbedoSpec, GL_COLOR_ATTACHMENT2);
-
-    unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    // position color buffer
+    glGenTextures(1, &gPosition);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+    // normal color buffer
+    glGenTextures(1, &gNormal);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+    // color + specular color buffer
+    glGenTextures(1, &gAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
     glDrawBuffers(3, attachments);
+    // create and attach depth buffer (renderbuffer)
 
-    rboDepth.create();
-    rboDepth.bind();
-    rboDepth.storage(GL_DEPTH_COMPONENT, width, height);
-    gBuffer.attach_renderbuffer(rboDepth, GL_DEPTH_ATTACHMENT);
-    gBuffer.check();
-    gBuffer.release();
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    // finally check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void deferred_renderer::on_shutdown(const event::internal::shutdown &event) {
@@ -137,6 +158,9 @@ void deferred_renderer::on_setup_for_rendering(const event::deferred_renderer::s
     if (shape.edge_buffer.is_valid()) {
         shape.edge_buffer.bind();
     }
+    if(shape.triangle_buffer.is_valid()){
+        shape.triangle_buffer.bind();
+    }
     material.vao.release();
 }
 
@@ -154,8 +178,6 @@ void deferred_renderer::on_render(const event::internal::render &event) {
     gl_state.set_depth_mask(true);
     gl_state.set_depth_func(GL_LESS);
     gl_state.set_line_smooth(true);
-    gl_state.set_blend(true);
-    gl_state.set_blend_func_factors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     auto program = programs["g_buffer_program"];
     program.bind();
@@ -164,7 +186,7 @@ void deferred_renderer::on_render(const event::internal::render &event) {
     Matrix<float, 4, 4> view = state->cam.view_matrix().cast<float>();
     program.set_uniform_matrix_4f("view", view.data());
 
-    gBuffer.bind();
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto id : entities_to_draw) {
@@ -182,6 +204,7 @@ void deferred_renderer::on_render(const event::internal::render &event) {
         if (state->scene.has<halfedge_graph>(id)) {
             shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
+            assert_ogl_error();
             glDrawArrays(GL_POINTS, 0, shape.num_vertices);
         } else if(state->scene.has<halfedge_mesh>(id)){
             shape.triangle_buffer.bind();
@@ -193,14 +216,28 @@ void deferred_renderer::on_render(const event::internal::render &event) {
         assert_ogl_error();
     }
 
-    gBuffer.release();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     program = programs["deferred_shading_program"];
-    glClearColor(1.0, 1.0,1.0,1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     program.bind();
-    gBuffer.activate_textures();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 
+    for (unsigned int i = 0; i < lightPositions.size(); i++){
+        program.set_uniform_3f(("lights[" + std::to_string(i) + "].Position").c_str(), 1, lightPositions[i].data());
+        program.set_uniform_3f(("lights[" + std::to_string(i) + "].Color").c_str(), 1, lightColors[i].data());
+        // update attenuation parameters and calculate radius
+        const float linear = 0.7;
+        const float quadratic = 1.8;
+        program.set_uniform_f(("lights[" + std::to_string(i) + "].Linear").c_str(), linear);
+        program.set_uniform_f(("lights[" + std::to_string(i) + "].Quadratic").c_str(), quadratic);
+    }
     program.set_uniform_3f("viewPos", 1, state->cam.position().data());
 
     if (!quad_vao.is_valid()) {
@@ -226,7 +263,15 @@ void deferred_renderer::on_render(const event::internal::render &event) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     quad_vao.release();
 
-    gBuffer.copy_to_default_framebuffer();
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+    // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+    // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
+    // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+    int SCR_WIDTH = state->window.framebuffer_viewport[2];
+    int SCR_HEIGHT = state->window.framebuffer_viewport[3];
+    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //render rest forward stuff;
     entities_to_draw.clear();
@@ -236,4 +281,16 @@ void deferred_renderer::on_end_frame(const event::internal::end_frame &event) {
 
 }
 
+void deferred_renderer::on_resize(const event::internal::resize &event){
+    if(rboDepth == BCG_GL_INVALID_ID) return;
+    int SCR_WIDTH = state->window.framebuffer_viewport[2];
+    int SCR_HEIGHT = state->window.framebuffer_viewport[3];
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+}
 }

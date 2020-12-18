@@ -1604,8 +1604,8 @@ void ogl_framebuffer::release() const {
 
 void ogl_framebuffer::activate_textures(){
     for (size_t i = 0; i < textures.size(); ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i]);
+        textures[i].activate(i);
+        textures[i].bind();
     }
 }
 
@@ -1613,8 +1613,12 @@ void ogl_framebuffer::attach_texture(const ogl_texture &texture, unsigned int at
     size_t index = attachment - GL_COLOR_ATTACHMENT0;
     while(textures.size() <= index){
         textures.push_back({});
+        attachments.push_back({});
     }
     textures[index] = texture;
+    attachments[index] = attachment;
+    width = texture.width;
+    height = texture.height;
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target, texture.handle, 0);
     assert_ogl_error();
 }
@@ -1635,12 +1639,7 @@ bool ogl_framebuffer::check() const {
 }
 
 void ogl_framebuffer::oepngl_draw_buffers() {
-    std::vector<unsigned int> attachments;
-    attachments.reserve(textures.size());
-    for (size_t i = 0; i < textures.size(); ++i) {
-        attachments.push_back(GL_COLOR_ATTACHMENT0 + (int) i);
-    }
-    glDrawBuffers((int) attachments.size(), attachments.data());
+    glDrawBuffers((GLsizei)attachments.size(), attachments.data());
     assert_ogl_error();
 }
 
@@ -1652,6 +1651,8 @@ void ogl_framebuffer::copy_to_default_framebuffer() {
     // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
     // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
     // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+    assert(width > 0);
+    assert(height > 0);
     glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     assert_ogl_error();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
