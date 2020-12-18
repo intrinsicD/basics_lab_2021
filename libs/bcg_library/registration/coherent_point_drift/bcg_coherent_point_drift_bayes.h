@@ -5,6 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BAYES_H
 #define BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BAYES_H
 
+#include <memory>
 #include "bcg_coherent_point_drift_base.h"
 
 namespace bcg {
