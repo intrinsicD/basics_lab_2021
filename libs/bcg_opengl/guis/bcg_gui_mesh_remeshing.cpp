@@ -6,6 +6,7 @@
 #include "bcg_viewer_state.h"
 #include "bcg_gui_mesh_statistics.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
+#include "mesh/bcg_mesh_statistics.h"
 
 namespace bcg {
 
@@ -33,14 +34,26 @@ void gui_mesh_remeshing(viewer_state *state) {
     }
     ImGui::InputInt("iterations", &iterations);
     ImGui::Checkbox("use projection", &use_projection);
-    if (ImGui::Button("Compute")) {
+
+    if (ImGui::Button("Compute") && state->scene.valid(state->picker.entity_id)) {
+        if(!state->scene.has<mesh_stats>(state->picker.entity_id)){
+            state->dispatcher.trigger<event::mesh::statistics>(state->picker.entity_id);
+        }
+        auto &stats = state->scene.get<mesh_stats>(state->picker.entity_id);
         if (e == 0) {
+            if(edge_length == 0){
+                edge_length = stats.edges.avg_length;
+            }
             state->dispatcher.trigger<event::mesh::remeshing::uniform>(state->picker.entity_id,
                                                                        edge_length,
                                                                        (unsigned int) iterations,
                                                                        use_projection);
         }
         if (e == 1) {
+            if(min_edge_length == 0 || max_edge_length == 0){
+                min_edge_length = stats.edges.avg_length * 0.9;
+                max_edge_length = stats.edges.avg_length * 1.1;
+            }
             state->dispatcher.trigger<event::mesh::remeshing::adaptive>(state->picker.entity_id, min_edge_length,
                                                                         max_edge_length, approx_error,
                                                                         (unsigned int) iterations, use_projection);

@@ -15,7 +15,8 @@ triangle_kdtree::triangle_kdtree(const halfedge_mesh &mesh, unsigned int max_fac
 
     // collect triangles
     tri t;
-    root->faces->reserve(mesh.num_faces());
+    num_faces = mesh.num_faces();
+    root->faces->reserve(num_faces);
     for (const auto f : mesh.faces) {
         auto vfit = mesh.get_vertices(f);
 
@@ -155,6 +156,7 @@ triangle_kdtree::NearestNeighbor triangle_kdtree::nearest(const VectorS<3> &p) c
     data.result.distance = std::numeric_limits<bcg_scalar_t>::max();
     data.tests = 0;
     nearest_recurse(root, p, data);
+    assert(size_t(data.face) < num_faces);
     return data;
 }
 
@@ -165,15 +167,16 @@ void triangle_kdtree::nearest_recurse(Node *node, const VectorS<3> &point,
     // terminal node?
     if (!node->left_child) {
         distance_point3_triangle3 distance;
-
+        assert(node->faces);
         for (const auto &t : *node->faces) {
             auto result = distance(point, t);
             ++data.tests;
-            if (result.distance< data.result.distance) {
+            if (result.distance < data.result.distance) {
                 data.result = result;
                 data.face = t.f;
             }
         }
+        assert(size_t(data.face) < num_faces);
     }
 
         // non-terminal node
@@ -192,5 +195,6 @@ void triangle_kdtree::nearest_recurse(Node *node, const VectorS<3> &point,
             }
         }
     }
+    assert(size_t(data.face) < num_faces);
 }
 }

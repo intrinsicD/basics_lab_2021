@@ -8,6 +8,7 @@
 #include "bcg_mesh_edge_cotan.h"
 #include "bcg_mesh_triangle_area_from_metric.h"
 #include "kdtree/bcg_triangle_kdtree.h"
+#include "tbb/tbb.h"
 
 namespace bcg {
 
@@ -21,6 +22,8 @@ struct remeshing {
 
     halfedge_mesh &mesh;
     halfedge_mesh *refmesh;
+
+    size_t parallel_grain_size = 1024;
 
     bool use_projection;
     triangle_kdtree *kd_tree;
@@ -92,20 +95,51 @@ void remeshing::preprocessing() {
         }
 
         if (has_selection) {
-            for (const auto v : mesh.vertices) {
-                vlocked[v] = !vselected[v];
-            }
-
+            tbb::parallel_for(
+                    tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+                    [&](const tbb::blocked_range<uint32_t> &range) {
+                        for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                            auto v = vertex_handle(i);
+                            vlocked[v] = !vselected[v];
+                        }
+                    }
+            );
             // lock an edge if one of its vertices is locked
-            for (const auto e : mesh.edges) {
-                elocked[e] = (vlocked[mesh.get_vertex(e, 0)] || vlocked[mesh.get_vertex(e, 1)]);
-            }
+            tbb::parallel_for(
+                    tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.edges.size(), parallel_grain_size),
+                    [&](const tbb::blocked_range<uint32_t> &range) {
+                        for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                            auto e = edge_handle(i);
+                            elocked[e] = (vlocked[mesh.get_vertex(e, 0)] || vlocked[mesh.get_vertex(e, 1)]);
+                        }
+                    }
+            );
         }
     }
 
     // lock feature corners
+    tbb::parallel_for(
+            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+            [&](const tbb::blocked_range<uint32_t> &range) {
+                for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                    auto v = vertex_handle(i);
+                    if (vfeature[v]) {
+                        int c = 0;
+                        for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
+                            if (efeature[mesh.get_edge(h)]) {
+                                ++c;
+                            }
+                        }
 
-    for (const auto v : mesh.vertices) {
+                        if (c != 2) {
+                            vlocked[v] = true;
+                        }
+                    }
+                }
+            }
+    );
+
+/*    for (const auto v : mesh.vertices) {
         if (vfeature[v]) {
             int c = 0;
             for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
@@ -118,21 +152,82 @@ void remeshing::preprocessing() {
                 vlocked[v] = true;
             }
         }
-    }
+    }*/
 
 
     // compute sizing field
     if (uniform) {
-        for (const auto v : mesh.vertices) {
+        tbb::parallel_for(
+                tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+                [&](const tbb::blocked_range<uint32_t> &range) {
+                    for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                        auto v = vertex_handle(i);
+                        vsizing[v] = target_edge_length;
+                    }
+                }
+        );
+/*        for (const auto v : mesh.vertices) {
             vsizing[v] = target_edge_length;
-        }
+        }*/
     } else {
         // compute curvature for all mesh vertices, using cotan or Cohen-Steiner
         // do 2 post-smoothing steps to get a smoother sizing field
         mesh_curvature_taubin(mesh, 1, true);
-        auto min_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_min");
-        auto max_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_curv_max");
-        for (const auto v : mesh.vertices) {
+        auto min_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_mesh_curv_min");
+        auto max_curvature = mesh.vertices.get<bcg_scalar_t, 1>("v_mesh_curv_max");
+        tbb::parallel_for(
+                tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+                [&](const tbb::blocked_range<uint32_t> &range) {
+                    for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                        auto v = vertex_handle(i);
+// maximum absolute curvature
+                        bcg_scalar_t c = std::max(std::abs(min_curvature[v]), std::abs(max_curvature[v]));
+
+                        // curvature of feature vertices: average of non-feature neighbors
+                        if (vfeature[v]) {
+                            vertex_handle vv;
+                            bcg_scalar_t w, ww = 0.0;
+                            c = 0.0;
+
+                            for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
+                                vv = mesh.get_to_vertex(h);
+                                if (!vfeature[vv]) {
+                                    w = std::max(0.0f, edge_cotan(mesh, mesh.get_edge(h)));
+                                    ww += w;
+                                    c += w * std::max(std::abs(min_curvature[vv]), std::abs(max_curvature[vv]));
+                                }
+                            }
+
+                            c /= ww;
+                        }
+
+                        assert(c != 0);
+                        // get edge length from curvature
+                        const auto r = 1.0 / c;
+                        const auto e = approx_error;
+                        bcg_scalar_t h;
+                        if (e < r) {
+                            // see mathworld: "circle segment" and "equilateral triangle"
+                            //h = sqrt(2.0*r*e-e*e) * 3.0 / sqrt(3.0);
+                            h = sqrt(6.0 * e * r - 3.0 * e * e); // simplified...
+                        } else {
+                            // this does not really make sense
+                            h = e * 3.0 / sqrt(3.0);
+                        }
+
+                        // clamp to min. and max. edge length
+                        if (h < min_edge_length) {
+                            h = min_edge_length;
+                        } else if (h > max_edge_length) {
+                            h = max_edge_length;
+                        }
+
+                        // store target edge length
+                        vsizing[v] = h;
+                    }
+                }
+        );
+        /*for (const auto v : mesh.vertices) {
             // maximum absolute curvature
             bcg_scalar_t c = std::max(std::abs(min_curvature[v]), std::abs(max_curvature[v]));
 
@@ -154,6 +249,7 @@ void remeshing::preprocessing() {
                 c /= ww;
             }
 
+            assert(c != 0);
             // get edge length from curvature
             const auto r = 1.0 / c;
             const auto e = approx_error;
@@ -176,7 +272,7 @@ void remeshing::preprocessing() {
 
             // store target edge length
             vsizing[v] = h;
-        }
+        }*/
     }
 
     if (use_projection) {
@@ -191,9 +287,18 @@ void remeshing::preprocessing() {
         assert(refnormals);
         // copy sizing field from mesh
         refsizing = refmesh->vertices.get_or_add<bcg_scalar_t, 1>("v_sizing");
-        for (const auto v : refmesh->vertices) {
+        tbb::parallel_for(
+                tbb::blocked_range<uint32_t>(0u, (uint32_t) refmesh->vertices.size(), parallel_grain_size),
+                [&](const tbb::blocked_range<uint32_t> &range) {
+                    for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                        auto v = vertex_handle(i);
+                        refsizing[v] = vsizing[v];
+                    }
+                }
+        );
+/*        for (const auto v : refmesh->vertices) {
             refsizing[v] = vsizing[v];
-        }
+        }*/
 
         // build kd-tree
         kd_tree = new triangle_kdtree(*refmesh, 10);
@@ -407,9 +512,18 @@ void remeshing::flip_edges() {
 
     // precompute valences
     auto valence = mesh.vertices.get_or_add<int, 1>("valence");
-    for (const auto v : mesh.vertices) {
+    tbb::parallel_for(
+            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+            [&](const tbb::blocked_range<uint32_t> &range) {
+                for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                    auto v = vertex_handle(i);
+                    valence[v] = mesh.halfedge_graph::get_valence(v);
+                }
+            }
+    );
+/*    for (const auto v : mesh.vertices) {
         valence[v] = mesh.halfedge_graph::get_valence(v);
-    }
+    }*/
 
     for (ok = false, i = 0; !ok && i < 10; ++i) {
         ok = true;
@@ -500,6 +614,83 @@ void remeshing::tangential_smoothing(unsigned int iterations) {
     }
 
     for (unsigned int iters = 0; iters < iterations; ++iters) {
+        /*tbb::parallel_for(
+                tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+                [&](const tbb::blocked_range<uint32_t> &range) {
+                    for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                        auto v = vertex_handle(i);
+                        if (!mesh.is_boundary(v) && !vlocked[v]) {
+                            if (vfeature[v]) {
+                                u = VectorS<3>::Zero();
+                                t = VectorS<3>::Zero();
+                                ww = 0;
+                                int c = 0;
+
+                                for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
+                                    if (efeature[mesh.get_edge(h)]) {
+                                        vv = mesh.get_to_vertex(h);
+
+                                        b = points[v];
+                                        b += points[vv];
+                                        b *= 0.5;
+
+                                        w = (points[v] - points[vv]).norm() / (0.5 * (vsizing[v] + vsizing[vv]));
+                                        ww += w;
+                                        u += w * b;
+
+                                        if (c == 0) {
+                                            t += (points[vv] - points[v]).normalized();
+                                            ++c;
+                                        } else {
+                                            ++c;
+                                            t -= (points[vv] - points[v]).normalized();
+                                        }
+                                    }
+                                }
+
+                                //assert(c == 2);
+
+                                u *= (1.0 / ww);
+                                u -= points[v];
+                                t = t.normalized();
+                                u = t * u.dot(t);
+
+                                update[v] = u;
+                            } else {
+                                u = VectorS<3>::Zero();
+                                t = VectorS<3>::Zero();
+                                ww = 0;
+
+                                for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
+                                    v1 = v;
+                                    v2 = mesh.get_to_vertex(h);
+                                    v3 = mesh.get_to_vertex(mesh.get_next(h));
+
+                                    b = points[v1];
+                                    b += points[v2];
+                                    b += points[v3];
+                                    b *= (1.0 / 3.0);
+
+                                    area = triangle_area_from_metric((points[v2] - points[v1]).norm(),
+                                                                     (points[v3] - points[v1]).norm(),
+                                                                     (points[v3] - points[v2]).norm());
+                                    w = area / pow((vsizing[v1] + vsizing[v2] + vsizing[v3]) / 3.0, 2.0);
+
+                                    u += w * b;
+                                    ww += w;
+                                }
+
+                                u /= ww;
+                                u -= points[v];
+                                n = vnormal[v];
+                                u -= n * u.dot(n);
+
+                                update[v] = u;
+                            }
+                        }
+                    }
+                }
+        );*/
         for (const auto v : mesh.vertices) {
             if (!mesh.is_boundary(v) && !vlocked[v]) {
                 if (vfeature[v]) {
@@ -573,6 +764,7 @@ void remeshing::tangential_smoothing(unsigned int iterations) {
         }
 
         // update vertex positions
+
         for (const auto v : mesh.vertices) {
             if (!mesh.is_boundary(v) && !vlocked[v]) {
                 points[v] += update[v];

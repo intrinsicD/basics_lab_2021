@@ -8,10 +8,19 @@
 
 namespace bcg {
 
-point_cloud::point_cloud() : positions(vertices.add<position_t, 3>("v_position")),
-                             vertices_deleted(vertices.add<bool, 1>("v_deleted")),
-                             size_vertices_deleted(0) {
+point_cloud::point_cloud() : size_vertices_deleted(0) {
+    positions = vertices.add<position_t, 3>("v_position");
+    vertices_deleted = vertices.add<bool, 1>("v_deleted");
 
+    if(!positions){
+        std::cerr << "positions not valid\n";
+    }
+
+    if(!vertices_deleted){
+        std::cerr << "vertices_deleted not valid\n";
+    }
+    assert(positions);
+    assert(vertices_deleted);
 }
 
 void point_cloud::assign(const point_cloud &other) {

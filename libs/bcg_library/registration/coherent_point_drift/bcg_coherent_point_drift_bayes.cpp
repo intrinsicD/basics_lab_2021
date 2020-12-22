@@ -49,7 +49,7 @@ void coherent_point_drift_bayes::init(const MatrixS<-1, -1> &Y, const MatrixS<-1
            - (2 * Y) * Y.transpose() +
            Y.rowwise().squaredNorm() * VectorS<-1>::Ones(M).transpose()) / (2 * beta * beta)).array().exp();
 
-    int nev = std::min<int>(M, 100);
+    int nev = std::min<int>(M, 700);
     Spectra::DenseSymMatProd<bcg_scalar_t> op(G);
     Spectra::SymEigsSolver<bcg_scalar_t, /*Spectra::LARGEST_ALGE*/Spectra::LARGEST_MAGN, Spectra::DenseSymMatProd<bcg_scalar_t> > eigs(
             &op, nev,

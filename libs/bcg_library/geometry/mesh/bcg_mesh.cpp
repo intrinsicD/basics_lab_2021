@@ -11,10 +11,19 @@
 namespace bcg {
 
 halfedge_mesh::halfedge_mesh() : halfedge_graph(),
-                                 fconn(faces.add<face_connectivity, 1>("f_connectivity")),
-                                 faces_deleted(faces.add<bool, 1>("f_deleted", false)),
                                  size_faces_deleted(0) {
+    fconn = faces.add<face_connectivity, 1>("f_connectivity");
+    faces_deleted = faces.add<bool, 1>("f_deleted", false);
 
+    if(!fconn){
+        std::cerr << "fconn not valid\n";
+    }
+    if(!faces_deleted){
+        std::cerr << "faces_deleted not valid\n";
+    }
+
+    assert(fconn);
+    assert(faces_deleted);
 }
 
 void halfedge_mesh::assign(const halfedge_mesh &other) {

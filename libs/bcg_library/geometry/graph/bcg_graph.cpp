@@ -10,15 +10,30 @@
 namespace bcg {
 
 halfedge_graph::halfedge_graph() : point_cloud(),
-                                   vconn(vertices.add<vertex_connectivity, 1>("v_connectivity")),
-                                   hconn(halfedges.add<halfedge_connectivity, 4>("h_connectivity")),
-                                   halfedges_deleted(halfedges.add<bool, 1>("h_deleted")),
-                                   edges_deleted(edges.add<bool, 1>("e_deleted")),
                                    size_halfedges_deleted(0),
                                    size_edges_deleted(0) {
+    vconn = vertices.add<vertex_connectivity, 1>("v_connectivity");
+    hconn = halfedges.add<halfedge_connectivity, 4>("h_connectivity");
+    halfedges_deleted = halfedges.add<bool, 1>("h_deleted");
+    edges_deleted = edges.add<bool, 1>("e_deleted");
+
+    if(!vconn){
+        std::cerr << "vconn not valid\n";
+    }
+    if(!hconn){
+        std::cerr << "hconn not valid\n";
+    }
+    if(!halfedges_deleted){
+        std::cerr << "halfedges_deleted not valid\n";
+    }
+    if(!edges_deleted){
+        std::cerr << "edges_deleted not valid\n";
+    }
 
     assert(vconn);
     assert(hconn);
+    assert(halfedges_deleted);
+    assert(edges_deleted);
 }
 
 void halfedge_graph::assign(const halfedge_graph &other) {
@@ -76,11 +91,11 @@ size_t halfedge_graph::num_halfedges() const {
     return halfedges.size() - size_halfedges_deleted;
 }
 
-bool halfedge_graph::is_valid(halfedge_handle h) const{
+bool halfedge_graph::is_valid(halfedge_handle h) const {
     return h.idx < halfedges.size();
 }
 
-bool halfedge_graph::is_valid(edge_handle e) const{
+bool halfedge_graph::is_valid(edge_handle e) const {
     return e.idx < edges.size();
 }
 
@@ -311,12 +326,12 @@ halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
     assert(hconn);
     assert(vconn);
     auto h = find_halfedge(v0, v1);
-    if(h.is_valid()){
+    if (h.is_valid()) {
         return h;
     }
 
     h = get_halfedge(v0);
-    if(!h.is_valid()){
+    if (!h.is_valid()) {
         auto new_h = new_edge(v0, v1);
 
         auto new_o = get_opposite(new_h);
@@ -621,7 +636,7 @@ edge_handle halfedge_graph::find_closest_edge_in_neighborhood(vertex_handle v,
     return closest_yet;
 }
 
-std::string halfedge_graph::to_string() const{
+std::string halfedge_graph::to_string() const {
     std::stringstream stream;
     stream << point_cloud::to_string();
     stream << "graph\n";
@@ -638,7 +653,7 @@ std::string halfedge_graph::to_string() const{
     return stream.str();
 }
 
-std::ostream &operator<<(std::ostream &stream, const halfedge_graph &graph){
+std::ostream &operator<<(std::ostream &stream, const halfedge_graph &graph) {
     stream << graph.to_string();
     return stream;
 }

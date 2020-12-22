@@ -15,7 +15,9 @@ struct triangle_kdtree {
                              unsigned int max_depth = 30);
 
     //! destructur
-    ~triangle_kdtree() { delete root; }
+    ~triangle_kdtree() {
+        delete root;
+    }
 
     //! nearest neighbor information
     struct NearestNeighbor {
@@ -67,6 +69,7 @@ private:
                          NearestNeighbor &data) const;
 
 private:
+    size_t num_faces;
     Node *root;
 };
 
