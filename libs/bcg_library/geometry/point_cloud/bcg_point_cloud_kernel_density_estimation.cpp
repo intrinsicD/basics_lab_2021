@@ -5,7 +5,7 @@
 #include "bcg_point_cloud_kernel_density_estimation.h"
 #include "sphere/bcg_sphere.h"
 #include "math/vector/bcg_vector_map_eigen.h"
-#include "math/bcg_gaussian.h"
+#include "math/statistics/bcg_gaussian.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
