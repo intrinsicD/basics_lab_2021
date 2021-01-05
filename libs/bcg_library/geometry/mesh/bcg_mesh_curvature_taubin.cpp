@@ -4,7 +4,7 @@
 
 #include "bcg_mesh_curvature_taubin.h"
 #include "bcg_mesh_face_normals.h"
-#include "bcg_mesh_vertex_voronoi_areas.h"
+#include "bcg_mesh_vertex_area_voronoi.h"
 #include "bcg_mesh_edge_cotan.h"
 #include "math/bcg_vertex_classify_curvature.h"
 #include "Eigen/Eigenvalues"

@@ -37,6 +37,8 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
         }
 
         ImGui::Checkbox("use_face_color", &material->use_face_color);
+        static float min = 0;
+        static float max = 0;
         if(material->use_face_color){
             auto &color = material->attributes[2];
             auto *faces = state->get_faces(id);
@@ -57,12 +59,25 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
                     material->use_uniform_color = true;
                 } else {
                     state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(id, color);
+                    auto ptr = vertices->get_base_ptr(color.property_name);
+                    if(ptr->dims() == 1){
+
+                    }
                 }
                 material->use_face_color = false;
             }
             if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
                 color.property_name = "";
                 material->use_face_color = false;
+            }
+        }
+
+        if(!material->use_uniform_color){
+            auto &color = material->attributes[2];
+            if(!material->use_face_color){
+
+            }else{
+
             }
         }
 

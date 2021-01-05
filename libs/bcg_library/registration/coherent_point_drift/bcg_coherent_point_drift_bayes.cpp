@@ -67,7 +67,7 @@ void coherent_point_drift_bayes::init(const MatrixS<-1, -1> &Y, const MatrixS<-1
     T = Y;
     U = Y;
     V = MatrixS<-1, -1>::Zero(M, D);
-    std::cout << "Init: " << timer.report<MILLISECONDS>() << "\n";
+    std::cout << "Init: " << timer.pretty_report() << "\n";
 }
 
 void coherent_point_drift_bayes::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
@@ -104,7 +104,7 @@ void coherent_point_drift_bayes::maximization_step(const MatrixS<-1, -1> &Y, con
     sigma_squared = ((X.transpose() * PT1.asDiagonal() * X).trace() - 2 * (PX.transpose() * T).trace() +
                      (T.transpose() * P1.asDiagonal() * T).trace()) / (N_P * D) + s * s * sigma_squared_bar;
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
-    std::cout << "M-step: " << timer.report<MILLISECONDS>() << "\n";
+    std::cout << "M-step: " << timer.pretty_report() << "\n";
 }
 
 void coherent_point_drift_bayes::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
@@ -152,7 +152,7 @@ void coherent_point_drift_bayes::optimized_expectation_step(const MatrixS<-1, -1
     );
     N_P = sum;
 
-    std::cout << "E-step: " << timer.report<MILLISECONDS>() << "\n";
+    std::cout << "E-step: " << timer.pretty_report() << "\n";
 }
 
 void coherent_point_drift_bayes::optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {

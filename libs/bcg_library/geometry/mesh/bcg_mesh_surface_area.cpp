@@ -3,7 +3,7 @@
 //
 
 #include "bcg_mesh_surface_area.h"
-#include "bcg_mesh_vertex_barycentric_areas.h"
+#include "bcg_mesh_vertex_area_barycentric.h"
 
 namespace bcg{
 

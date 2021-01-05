@@ -60,6 +60,8 @@ struct halfedge_mesh : public halfedge_graph {
 
     bool is_triangle_mesh() const;
 
+    bool is_delaunay_mesh() const;
+
     bool is_quad_mesh() const;
 
     bool is_removal_ok(edge_handle e) const;

@@ -5,14 +5,14 @@
 #include "bcg_mesh_laplacian.h"
 #include "bcg_mesh_edge_cotan.h"
 #include "bcg_mesh_edge_fujiwara.h"
-#include "bcg_mesh_vertex_voronoi_areas.h"
-#include "bcg_mesh_vertex_barycentric_areas.h"
+#include "bcg_mesh_vertex_area_voronoi.h"
+#include "bcg_mesh_vertex_area_barycentric.h"
 #include "math/sparse_matrix/bcg_sparse_check_symmetric.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
 
-std::vector<std::string> mesh_laplacian_stiffness() {
+std::vector<std::string> mesh_laplacian_stiffness_type() {
     std::vector<std::string> names(static_cast<unsigned int>(MeshLaplacianStiffness::__last__));
     names[static_cast<unsigned int>(MeshLaplacianStiffness::uniform)] = "uniform";
     names[static_cast<unsigned int>(MeshLaplacianStiffness::cotan)] = "cotan";
@@ -20,7 +20,7 @@ std::vector<std::string> mesh_laplacian_stiffness() {
     return names;
 }
 
-std::vector<std::string> mesh_laplacian_mass() {
+std::vector<std::string> mesh_laplacian_mass_type() {
     std::vector<std::string> names(static_cast<unsigned int>(MeshLaplacianMass::__last__));
     names[static_cast<unsigned int>(MeshLaplacianMass::uniform)] = "uniform";
     names[static_cast<unsigned int>(MeshLaplacianMass::cotan)] = "cotan";

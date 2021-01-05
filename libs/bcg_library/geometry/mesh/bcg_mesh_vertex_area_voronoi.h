@@ -2,8 +2,8 @@
 // Created by alex on 23.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_MESH_VERTEX_VORONOI_AREAS_H
-#define BCG_GRAPHICS_BCG_MESH_VERTEX_VORONOI_AREAS_H
+#ifndef BCG_GRAPHICS_BCG_MESH_VERTEX_AREA_VORONOI_H
+#define BCG_GRAPHICS_BCG_MESH_VERTEX_AREA_VORONOI_H
 
 #include "bcg_mesh.h"
 
@@ -15,4 +15,4 @@ void vertex_voronoi_areas(halfedge_mesh &mesh, size_t parallel_grain_size = 1024
 
 }
 
-#endif //BCG_GRAPHICS_BCG_MESH_VERTEX_VORONOI_AREAS_H
+#endif //BCG_GRAPHICS_BCG_MESH_VERTEX_AREA_VORONOI_H

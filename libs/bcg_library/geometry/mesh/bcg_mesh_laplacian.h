@@ -31,9 +31,9 @@ struct mesh_laplacian : public laplacian_matrix{
     MeshLaplacianMass m_type;
 };
 
-std::vector<std::string> mesh_laplacian_stiffness();
+std::vector<std::string> mesh_laplacian_stiffness_type();
 
-std::vector<std::string> mesh_laplacian_mass();
+std::vector<std::string> mesh_laplacian_mass_type();
 
 mesh_laplacian
 build_laplacian(halfedge_mesh &mesh, MeshLaplacianStiffness s_type, MeshLaplacianMass m_type,

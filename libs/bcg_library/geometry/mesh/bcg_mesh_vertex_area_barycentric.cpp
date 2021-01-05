@@ -2,7 +2,7 @@
 // Created by alex on 23.11.20.
 //
 
-#include "bcg_mesh_vertex_barycentric_areas.h"
+#include "bcg_mesh_vertex_area_barycentric.h"
 #include "bcg_mesh_triangle_area_from_metric.h"
 #include "tbb/tbb.h"
 

@@ -2,7 +2,7 @@
 // Created by alex on 23.11.20.
 //
 
-#include "bcg_mesh_vertex_voronoi_areas.h"
+#include "bcg_mesh_vertex_area_voronoi.h"
 #include "bcg_mesh_triangle_area_from_metric.h"
 #include "bcg_mesh_triangle_cotan_weight.h"
 #include "tbb/tbb.h"

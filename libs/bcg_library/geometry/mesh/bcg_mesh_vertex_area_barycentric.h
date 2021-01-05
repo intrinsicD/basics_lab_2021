@@ -2,8 +2,8 @@
 // Created by alex on 23.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_MESH_VERTEX_BARYCENTRIC_AREAS_H
-#define BCG_GRAPHICS_BCG_MESH_VERTEX_BARYCENTRIC_AREAS_H
+#ifndef BCG_GRAPHICS_BCG_MESH_VERTEX_AREA_BARYCENTRIC_H
+#define BCG_GRAPHICS_BCG_MESH_VERTEX_AREA_BARYCENTRIC_H
 
 #include "bcg_mesh.h"
 
@@ -15,4 +15,4 @@ void vertex_barycentric_areas(halfedge_mesh &mesh, size_t parallel_grain_size = 
 
 }
 
-#endif //BCG_GRAPHICS_BCG_MESH_VERTEX_BARYCENTRIC_AREAS_H
+#endif //BCG_GRAPHICS_BCG_MESH_VERTEX_AREA_BARYCENTRIC_H

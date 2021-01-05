@@ -15,10 +15,10 @@ halfedge_mesh::halfedge_mesh() : halfedge_graph(),
     fconn = faces.add<face_connectivity, 1>("f_connectivity");
     faces_deleted = faces.add<bool, 1>("f_deleted", false);
 
-    if(!fconn){
+    if (!fconn) {
         std::cerr << "fconn not valid\n";
     }
-    if(!faces_deleted){
+    if (!faces_deleted) {
         std::cerr << "faces_deleted not valid\n";
     }
 
@@ -294,6 +294,30 @@ bool halfedge_mesh::is_triangle_mesh() const {
     for (const auto f : faces) {
         if (get_valence(f) != 3) return false;
     }
+    return true;
+}
+
+bool halfedge_mesh::is_delaunay_mesh() const {
+    for (const auto f : faces) {
+        auto v = get_vertices(f);
+        vertex_handle v0 = (unsigned int) (*v).idx;
+        vertex_handle v1 = (unsigned int) (*(++v)).idx;
+        vertex_handle v2 = (unsigned int) (*(++v)).idx;
+
+        triangle3 t(positions[v0], positions[v1], positions[v2]);
+
+        //barycentric coords of circumcenter
+        auto abc = t.edge_lengths();
+        auto aa = abc[0] * abc[0];
+        auto bb = abc[1] * abc[1];
+        auto cc = abc[2] * abc[2];
+
+        VectorS<3> bc(aa * (bb + cc - aa),
+                      bb * (cc + aa - bb),
+                      cc * (aa + bb - cc));
+        if(bc[0] < 0 || bc[1]< 0 || bc[2] < 0) return false;
+    }
+
     return true;
 }
 

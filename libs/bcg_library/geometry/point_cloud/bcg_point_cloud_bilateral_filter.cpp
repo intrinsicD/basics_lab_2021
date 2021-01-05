@@ -19,14 +19,13 @@ void point_cloud_bilateral_filter_knn(vertex_container *vertices, const kdtree_p
     auto new_positions = vertices->get_or_add<VectorS<3>, 3>("v_bilateral_smoothed_position");
     auto difference_vectors = vertices->get_or_add<VectorS<3>, 3>("v_bilateral_vector");
 
-    if (!vertices->has("v_pca_normal")) {
-        std::cout << "please compute vertex pca first!\n";
-        return;
-    }
-
     auto delta = vertices->get_or_add<bcg_scalar_t, 1>("v_bilateral_delta");
     auto normals = vertices->get<VectorS<3>, 3>("v_normal");
     if (!normals || MapConst(normals).sum() == 0) {
+        if (!vertices->has("v_pca_normal")) {
+            std::cout << "please compute vertex pca first!\n";
+            return;
+        }
         normals = vertices->get<VectorS<3>, 3>("v_pca_normal");
     }
 
@@ -44,7 +43,7 @@ void point_cloud_bilateral_filter_knn(vertex_container *vertices, const kdtree_p
                         bcg_scalar_t d_n = diff.dot(normals[v]);
                         bcg_scalar_t w =
                                 std::exp(-d_d / (2 * params.points_sigma * params.points_sigma)) *
-                                std::exp(-d_n * d_n / (2 * params.normals_sigma * params.normals_sigma));
+                                std::exp(-d_n * d_n  / (2 * params.normals_sigma * params.normals_sigma));
                         delta[v] += w * d_n;
                         sum += w;
                     }
@@ -67,14 +66,13 @@ void point_cloud_bilateral_filter_radius(vertex_container *vertices, const kdtre
     auto new_positions = vertices->get_or_add<VectorS<3>, 3>("v_bilateral_smoothed_position");
     auto difference_vectors = vertices->get_or_add<VectorS<3>, 3>("v_bilateral_vector");
 
-    if (!vertices->has("v_pca_normal")) {
-        std::cout << "please compute vertex pca first!\n";
-        return;
-    }
-
     auto delta = vertices->get_or_add<bcg_scalar_t, 1>("v_bilateral_delta");
     auto normals = vertices->get<VectorS<3>, 3>("v_normal");
     if (!normals || MapConst(normals).sum() == 0) {
+        if (!vertices->has("v_pca_normal")) {
+            std::cout << "please compute vertex pca first!\n";
+            return;
+        }
         normals = vertices->get<VectorS<3>, 3>("v_pca_normal");
     }
 

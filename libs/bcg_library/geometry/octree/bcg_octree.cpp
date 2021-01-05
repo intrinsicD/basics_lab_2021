@@ -7,6 +7,7 @@
 #include "bcg_octree.h"
 #include "aligned_box/bcg_aligned_child_hierarchy.h"
 #include "sphere/bcg_sphere.h"
+#include "sphere/bcg_sphere_contains_aabb.h"
 #include "utils/bcg_stl_utils.h"
 
 namespace bcg {
@@ -123,10 +124,10 @@ bool overlaps(const sphere3 &sphere, const aligned_box3 &aabb) {
 }
 
 //test if sphere contains aabb
-bool contains(const sphere3 &sphere, const aligned_box3 &aabb) {
+/*bool contains(const sphere3 &sphere, const aligned_box3 &aabb) {
     return ((sphere.center - aabb.center()).cwiseAbs() + aabb.halfextent()).squaredNorm() <
            sphere.radius * sphere.radius;
-}
+}*/
 
 //test if sphere is completely inside aabb
 bool inside(const sphere3 &sphere, const aligned_box3 &aabb) {
@@ -152,7 +153,7 @@ neighbors_query octree::query_knn(const VectorS<3> &query_point, int num_closest
 void
 octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set) const {
     if (index >= storage.size()) return;
-    if (contains(sphere, aabb)) {
+    if (contains<3>(sphere, aabb)) {
         for (size_t j = storage[index].v_start; j <= storage[index].v_end; ++j) {
             result_set.indices.push_back(indices[j]);
         }

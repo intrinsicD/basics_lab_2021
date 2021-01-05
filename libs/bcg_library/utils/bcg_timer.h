@@ -37,6 +37,51 @@ public:
         return message;
     }
 
+    std::string pretty_report() {
+        auto elapsed_time = measure<NANOSECONDS>();
+        std::string message = "elapsed time: ";
+        if(elapsed_time > H){
+            size_t hours = elapsed_time / H;
+            elapsed_time -= hours * H;
+            size_t minutes = elapsed_time / MIN;
+            elapsed_time -= minutes * MIN;
+            double seconds = elapsed_time / (double)SEC;
+            message += std::to_string(hours) + " h " + std::to_string(minutes) + " min " + std::to_string(seconds) + " s";
+            value = clock_t::now();
+            return message;
+        }
+        if(elapsed_time > MIN){
+            size_t minutes = elapsed_time / MIN;
+            elapsed_time -= minutes * MIN;
+            double seconds = elapsed_time / (double)SEC;
+            message += std::to_string(minutes) + " min " + std::to_string(seconds) + " s";
+            value = clock_t::now();
+            return message;
+        }
+        if(elapsed_time > SEC){
+            double seconds = elapsed_time / (double)SEC;
+            message += std::to_string(seconds) + " s";
+            value = clock_t::now();
+            return message;
+        }
+        if(elapsed_time > MILLIS){
+            double millis = elapsed_time / (double)MILLIS;
+            message += std::to_string(millis) + " milli s";
+            value = clock_t::now();
+            return message;
+        }
+        if(elapsed_time > MICROS){
+            double micros = elapsed_time / (double)MICROS;
+            message += std::to_string(micros) + " micro s";
+            value = clock_t::now();
+            return message;
+        }else{
+            message += std::to_string(elapsed_time) + " nano s";
+            value = clock_t::now();
+            return message;
+        }
+    }
+
 private:
     template<typename Duration>
     static std::string unit() {
@@ -60,6 +105,13 @@ private:
         }
         return " ";
     }
+
+    size_t NANOS = 1;
+    size_t MICROS = 1000 * NANOS;
+    size_t MILLIS = 1000 * MICROS;
+    size_t SEC = 1000 * MILLIS;
+    size_t MIN = 60 * SEC;
+    size_t H = 60 * MIN;
 };
 
 }

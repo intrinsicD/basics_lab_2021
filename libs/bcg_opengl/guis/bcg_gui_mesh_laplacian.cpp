@@ -10,8 +10,8 @@
 namespace bcg {
 
 void gui_mesh_laplacian(viewer_state *state) {
-    static std::vector<std::string> stiffness = mesh_laplacian_stiffness();
-    static std::vector<std::string> mass = mesh_laplacian_mass();
+    static std::vector<std::string> stiffness = mesh_laplacian_stiffness_type();
+    static std::vector<std::string> mass = mesh_laplacian_mass_type();
     static int current_stiffness = 0;
     static int current_mass = 0;
     draw_combobox(&state->window, "stiffness", current_stiffness, stiffness);

@@ -26,6 +26,14 @@ void gui_point_cloud_bilateral_filter(viewer_state *state){
         }
         state->scene.emplace_or_replace<event::points_renderer::enqueue>(state->picker.entity_id);
     }
+    if(ImGui::Button("Use smooth version")){
+        auto positions = state->get_vertices(state->picker.entity_id)->get<VectorS<3>, 3>("v_position");
+        auto new_positions = state->get_vertices(state->picker.entity_id)->get<VectorS<3>, 3>("v_bilateral_smoothed_position");
+        if(new_positions){
+            positions.vector() = new_positions.vector();
+            positions.set_dirty();
+        }
+    }
 
     gui_material_points(state, state->scene.try_get<material_points>(state->picker.entity_id), state->picker.entity_id);
 }
