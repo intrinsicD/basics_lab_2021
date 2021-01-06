@@ -7,18 +7,19 @@
 
 #include "point_cloud/bcg_point_cloud.h"
 #include "aligned_box/bcg_aligned_box.h"
+#include "sphere/bcg_sphere.h"
 
-namespace bcg{
+namespace bcg {
 
-struct sampling_node{
+struct sampling_node {
     size_t v_start, v_end;
     size_t size;
     size_t sampled_index;
     uint64_t first_child_index, parent_index;
-    uint8_t config, depth;
+    uint8_t config, depth, octant;
 };
 
-struct sampling_octree{
+struct sampling_octree {
     enum SamplingType {
         first,
         last,
@@ -30,11 +31,13 @@ struct sampling_octree{
 
     sampling_octree() = default;
 
-    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, property<VectorS<3, 3>> sample_points, int leaf_size, int max_depth = 20);
+    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
+                    property<VectorS<3, 3>> sample_points, int leaf_size, int max_depth = 20);
 
     void clear();
 
-    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, property<VectorS<3, 3>> sample_points, int leaf_size, int max_depth = 20);
+    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, property<VectorS<3, 3>> sample_points,
+               int leaf_size, int max_depth = 20);
 
     void rebuild();
 
@@ -52,13 +55,17 @@ struct sampling_octree{
     int leaf_size;
     SamplingType sampling_type;
 private:
-    void query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set, uint8_t search_depth) const;
+    void query_radius(size_t counter, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set,
+                      uint8_t search_depth) const;
 
-    void query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest, neighbors_query &result_set, uint8_t search_depth) const;
+    void query_knn(size_t counter, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest,
+                   neighbors_query &result_set, uint8_t search_depth) const;
 
-    bool reject(size_t counter, const aligned_box3 &aabb, const VectorS<3> &point, bcg_scalar_t poisson_radius) const;
-    bool reject_down(size_t counter, const aligned_box3 &aabb, const VectorS<3> &point, bcg_scalar_t poisson_radius) const;
-    bool reject_up(size_t counter, const aligned_box3 &aabb, const VectorS<3> &point, bcg_scalar_t poisson_radius) const;
+    bool reject(size_t counter, const aligned_box3 &aabb, const sphere3 &sphere) const;
+
+    bool reject_down(size_t counter, const aligned_box3 &aabb, const sphere3 &sphere) const;
+
+    bool reject_up(size_t counter, const aligned_box3 &aabb, const sphere3 &sphere) const;
 
 };
 

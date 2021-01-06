@@ -8,6 +8,7 @@
 #include "aligned_box/bcg_aligned_child_hierarchy.h"
 #include "sphere/bcg_sphere.h"
 #include "sphere/bcg_sphere_contains_aabb.h"
+#include "intersect/bcg_intersect_sphere_aabb.h"
 #include "utils/bcg_stl_utils.h"
 
 namespace bcg {
@@ -114,29 +115,14 @@ void octree::build(property<VectorS<3>, 3> positions, int leaf_size, int max_dep
 }
 
 //test if sphere overlaps with aabb
-bool overlaps(const sphere3 &sphere, const aligned_box3 &aabb) {
+/*bool overlaps(const sphere3 &sphere, const aligned_box3 &aabb) {
     VectorS<3> xyz = (sphere.center - aabb.center()).cwiseAbs() - aabb.halfextent();
     if (xyz[0] > sphere.radius || xyz[1] > sphere.radius || xyz[2] > sphere.radius) return false;
     int num_less_extent = (xyz[0] < 0) + (xyz[1] < 0) + (xyz[2] < 0);
     if (num_less_extent > 1) return true;
     xyz.cwiseMax(0);
     return xyz.squaredNorm() < sphere.radius * sphere.radius;
-}
-
-//test if sphere contains aabb
-/*bool contains(const sphere3 &sphere, const aligned_box3 &aabb) {
-    return ((sphere.center - aabb.center()).cwiseAbs() + aabb.halfextent()).squaredNorm() <
-           sphere.radius * sphere.radius;
 }*/
-
-//test if sphere is completely inside aabb
-bool inside(const sphere3 &sphere, const aligned_box3 &aabb) {
-    VectorS<3> xyz = ((sphere.center - aabb.center()).cwiseAbs().array() + sphere.radius).matrix() - aabb.halfextent();
-    if (xyz[0] > 0) return false;
-    if (xyz[1] > 0) return false;
-    if (xyz[2] > 0) return false;
-    return true;
-}
 
 neighbors_query octree::query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) const {
     neighbors_query result_set;
@@ -177,7 +163,7 @@ octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphe
             continue;
         }
         aligned_box3 cbox = child_box(aabb, octant);
-        if (overlaps(sphere, cbox)) {
+        if (intersect<3>(sphere, cbox)) {
             query_radius(storage[index].first_child_index + offset, cbox, sphere, result_set);
         }
         ++offset;
@@ -223,7 +209,7 @@ void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> 
         aligned_box3 cbox = child_box(aabb, octant);
 
         if (result_set.indices.size() < num_closest ||
-            overlaps(sphere3(query_point, result_set.distances.back()), cbox)) {
+            intersect<3>(sphere3(query_point, result_set.distances.back()), cbox)) {
             query_knn(storage[index].first_child_index + offset, cbox, query_point, num_closest, result_set);
         }
         ++offset;

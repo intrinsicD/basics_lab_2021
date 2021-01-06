@@ -5,6 +5,9 @@
 #include <queue>
 #include "bcg_sampling_octree.h"
 #include "utils/bcg_dynamic_bitset.h"
+#include "sphere/bcg_sphere_contains_aabb.h"
+#include "sphere/bcg_sphere_contains_point.h"
+#include "aligned_box/bcg_aligned_child_hierarchy.h"
 
 namespace bcg {
 
@@ -18,6 +21,29 @@ sampling_octree::sampling_octree(SamplingType sampling_type, property<VectorS<3>
 void sampling_octree::clear() {
     storage.clear();
     indices.clear();
+}
+
+
+inline uint8_t MortonCode(const VectorS<3> &center, const VectorS<3> &other) {
+    uint8_t mortonCode = 0;
+    if (other[0] > center[0]) {
+        SET_BIT(mortonCode, 0);
+    }
+    if (other[1] > center[1]) {
+        SET_BIT(mortonCode, 1);
+    }
+    if (other[2] > center[2]) {
+        SET_BIT(mortonCode, 2);
+    }
+    return mortonCode;
+}
+
+inline bool child_exists(uint8_t config, uint8_t i) {
+    return CHECK_BIT(config, i);
+}
+
+inline void SetChildExists(uint8_t &config, uint8_t i) {
+    SET_BIT(config, i);
 }
 
 void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
@@ -55,7 +81,7 @@ void sampling_octree::rebuild() {
     queue.emplace(aabb, 0);
     const auto &node = queue.front();
     storage.push_back(
-            {0, positions.size() - 1, positions.size(), BCG_INVALID_ID, BCG_INVALID_ID, BCG_INVALID_ID, 0, 0});
+            {0, positions.size() - 1, positions.size(), BCG_INVALID_ID, BCG_INVALID_ID, BCG_INVALID_ID, 0, 0, 0});
     size_t counter = 0;
     int max_depth_ = std::min<int>(max_depth, 21);
     while (!queue.empty()) {
@@ -92,7 +118,9 @@ void sampling_octree::rebuild() {
                         break;
                     }
                     case SamplingType::poisson : {
-                        if(storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(indices[j]) && !reject(counter, aabb, ref_positions[indices[j]], poisson_radius)){
+                        auto sphere = sphere3(ref_positions[indices[j]], poisson_radius);
+                        if (storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(indices[j]) &&
+                            !reject(counter, aabb, sphere)) {
                             storage[counter].sampled_index = indices[j];
                             bitset.set(indices[j]);
                         }
@@ -137,7 +165,7 @@ void sampling_octree::rebuild() {
 
                 storage.push_back(
                         {child_start, child_end, child_size, BCG_INVALID_ID, BCG_INVALID_ID,
-                         counter, 0, static_cast<uint8_t>(node.depth + 1)});
+                         counter, 0, static_cast<uint8_t>(node.depth + 1), octant});
                 for (size_t l = 0; l < child_size; ++l) {
                     indices[child_start + l] = buckets[octant][l];
                 }
@@ -157,45 +185,161 @@ void sampling_octree::rebuild() {
 
 neighbors_query
 sampling_octree::query_radius(const VectorS<3> &query_point, bcg_scalar_t radius, uint8_t search_depth) const {
-
+    QueryResultSet result;
+    query_radius(0, aabb, sphere3(query_point, radius), result, search_depth);
+    return result;
 }
 
 neighbors_query sampling_octree::query_knn(const VectorS<3> &query_point, int num_closest, uint8_t search_depth) const {
-
+    QueryResultSet result;
+    query_knn(0, aabb, query_point, num_closest, result, search_depth);
+    return result;
 }
 
-void sampling_octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere,
+void sampling_octree::query_radius(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere,
                                    neighbors_query &result_set, uint8_t search_depth) const {
+    assert(counter < storage.size());
 
-}
-
-void sampling_octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest,
-                                neighbors_query &result_set, uint8_t search_depth) const {}
-
-bool sampling_octree::reject(size_t counter, const aligned_box3 &aabb, const VectorS<3> &point, bcg_scalar_t poisson_radius) const{
-    TCSphere3AlignedBox3<Real> contains;
-    if (contains(sphere, aabb)) {
-        return reject_up(index, aabb, sphere);
+    if (storage[counter].sampled_index != BCG_INVALID_ID &&
+        (storage[counter].config == 0 || storage[counter].depth <= search_depth)) {
+        if (sampling_type == SamplingType::mean) {
+            if (contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
+                auto dist = (sample_points[storage[counter].sampled_index] - sphere.center).norm();
+                result.add(dist, storage[counter].sampled_index);
+            }
+        } else {
+            if (contains<3>(sphere, ref_positions[storage[counter].sampled_index])) {
+                auto dist = (ref_positions[storage[counter].sampled_index] - sphere.center).norm();
+                result.add(dist, storage[counter].sampled_index);
+            }
+        }
     }
 
-    if (index != 0) {
-        auto loc_code = Base::m_internal_nodes[index].loc_code;
-        if (reject_down(Base::m_internal_nodes[index].parent_index,
-                        ParentBox(aabb, MortonCode3(loc_code, TreeDepth3(loc_code))),
+    size_t offset = 0;
+    for (uint8_t octant = 0; octant < 8; ++octant) {
+        if (!child_exists(storage[counter].config, octant)) {
+            continue;
+        }
+        auto childBox = child_box(current_aabb, octant);
+        if (!intersect<3>(sphere, childBox)) {
+            ++offset;
+            continue;
+        }
+        query_radius(storage[counter].first_child_index + offset, child_box, sphere, result, search_depth);
+        ++offset;
+    }
+}
+
+void
+sampling_octree::query_knn(size_t counter, const aligned_box3 &current_aabb, const VectorS<3> &query_point,
+                           int num_closest,
+                           neighbors_query &result_set, uint8_t search_depth) const {
+    //descend to leaf
+    //first order children by distance to query point
+
+    //collect up to k points
+    if (storage[counter].sampled_index != BCG_INVALID_ID &&
+        (storage[counter].config == 0 || storage[counter].depth <= search_depth)) {
+        if (sampling_type == SamplingType::mean) {
+            auto dist = (sample_points[storage[counter].sampled_index] - query_point).norm();
+            result.add(dist, storage[counter].sampled_index);
+        } else {
+            auto dist = (ref_positions[storage[counter].sampled_index] - query_point).norm();
+            result.add(dist, storage[counter].sampled_index);
+        }
+
+        if (result.size() >= num_closest) {
+            result.sort();
+            result.resize(num_closest);
+        }
+        if (storage[counter].config == 0) return;
+    }
+
+    uint8_t morton_code = MortonCode(current_aabb.center(), query_point);
+    uint8_t offset = 0;
+    for (uint8_t octant = 0; octant < 8; ++octant) {
+        if (morton_code == octant) break;
+        if (!child_exists(storage[counter].config, octant)) continue;
+        ++offset;
+    }
+
+    if (child_exists(storage[counter].config, morton_code)) {
+        query_knn(storage[counter].first_child_index + offset, child_box(current_aabb, morton_code), query_point,
+                  num_closest, result, search_depth);
+    }
+
+    offset = 0;
+    for (uint8_t octant = 0; octant < 8; ++octant) {
+        if (!child_exists(storage[counter].config, octant)) continue;
+        if (morton_code == octant) {
+            ++offset;
+            continue;
+        }
+        auto childBox = child_box(current_aabb, octant);
+        if (result.size() < num_closest ||
+            intersect<3>(sphere3(query_point, result.neighbors.back().distance), childBox)) {
+            query_knn(storage[counter].first_child_index + offset, childBox, query_point, num_closest, result,
+                      search_depth);
+        }
+        ++offset;
+    }
+}
+
+bool sampling_octree::reject(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
+    if (contains<3>(sphere, current_aabb)) {
+        return reject_up(counter, current_aabb, sphere);
+    }
+
+    if (counter != 0) {
+        if (reject_down(storage[counter].parent_index, parent_box(current_aabb, storage[counter].octant),
                         sphere)) {
             return true;
         }
     }
 
-    return reject_down(0, Base::m_root_bounds, sphere);
+    return reject_down(0, aabb, sphere);
 }
 
-bool sampling_octree::reject_down(size_t counter, const aligned_box3 &aabb, const VectorS<3> &point, bcg_scalar_t poisson_radius) const{
+bool sampling_octree::reject_down(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
+    if (sampling_type == SamplingType::mean) {
+        if (contains<3>(sphere, sample_points[storage[counter].sample_index]))){
+            return true;
+        }
+    } else {
+        if (storage[counter].sampled_index != BCG_INVALID_ID &&
+            contains<3>(sphere, ref_positions[storage[counter].sample_index]))) {
+            return true;
+        }
+    }
 
+
+    uint8_t offset = 0;
+    for (uint8_t octant = 0; octant < 8; ++octant) {
+        if (!child_exists(storage[counter].config, octant)) continue;
+        auto childBox = child_box(current_aabb, octant);
+        size_t child_index = storage[counter].first_child_index + offset;
+        if (!intersect<3>(sphere, childBox)) {
+            ++offset;
+            continue;
+        }
+        if (child_index > storage.size()) break;
+        if (reject_down(child_index, childBox, sphere)) return true;
+        ++offset;
+    }
+    return false;
 }
 
-bool sampling_octree::reject_up(size_t counter, const aligned_box3 &aabb, const VectorS<3> &point, bcg_scalar_t poisson_radius) const{
+bool sampling_octree::reject_up(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
+    if (sampling_type == SamplingType::mean && contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
+        return true;
+    } else if (contains<3>(sphere, ref_positions[storage[counter].sampled_index])) {
+        return true;
+    }
 
+    if (counter != 0) {
+        return reject_up(storage[counter].parent_index, parent_box(current_aabb, storage[counter].octant), sphere);
+    }
+    return false;
 }
 
 }

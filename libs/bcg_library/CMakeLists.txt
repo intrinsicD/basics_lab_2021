@@ -59,7 +59,8 @@ add_library(bcg_graphics
         math/rotations/bcg_rotation_optimal.h
         math/rotations/bcg_rotation_project_on_so.h
         math/rotations/bcg_rotation_random.h
-        geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h
+        geometry/intersect/bcg_intersect_sphere_aabb.h
+        geometry/aligned_box/bcg_aligned_box.h geometry/aligned_box/bcg_aligned_child_hierarchy.h geometry/aligned_box/bcg_aligned_box_contains_sphere.h
         geometry/plane/bcg_plane.h
         geometry/bcg_property.h
         geometry/bcg_property_map_eigen.h
