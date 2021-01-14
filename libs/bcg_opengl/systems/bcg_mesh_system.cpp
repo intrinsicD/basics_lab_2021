@@ -22,6 +22,7 @@
 #include "geometry/mesh/bcg_mesh_simplification.h"
 #include "geometry/mesh/bcg_mesh_remeshing.h"
 #include "geometry/mesh/bcg_mesh_statistics.h"
+#include "geometry/mesh/bcg_mesh_smoothing.h"
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -51,6 +52,12 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::remeshing::uniform>().connect<&mesh_system::on_remeshing_uniform>(this);
     state->dispatcher.sink<event::mesh::remeshing::adaptive>().connect<&mesh_system::on_remeshing_adaptive>(this);
     state->dispatcher.sink<event::mesh::statistics>().connect<&mesh_system::on_statistics>(this);
+    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing>().connect<&mesh_system::on_smoothing_explicit>(this);
+    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing_1D>().connect<&mesh_system::on_smoothing_explicit_1D>(this);
+    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing_3D>().connect<&mesh_system::on_smoothing_explicit_3D>(this);
+    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing>().connect<&mesh_system::on_smoothing_implicit>(this);
+    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_1D>().connect<&mesh_system::on_smoothing_implicit_1D>(this);
+    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_3D>().connect<&mesh_system::on_smoothing_implicit_3D>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -266,6 +273,64 @@ void mesh_system::on_statistics(const event::mesh::statistics &event){
     auto stats = mesh_statistics(mesh, state->config.parallel_grain_size);
     state->scene.emplace_or_replace<mesh_stats>(event.id, stats);
 }
+
+void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_smoothing &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.has<mesh_laplacian>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    explicit_smoothing(mesh, laplacian, event.smoothing_steps, state->config.parallel_grain_size);
+}
+
+void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_smoothing &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    implicit_smoothing(mesh, laplacian, event.timestep);
+}
+
+void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explicit_smoothing_1D &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    explicit_smoothing(mesh, laplacian, event.property, event.smoothing_steps);
+}
+
+void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    auto p = event.property;
+    implicit_smoothing<bcg_scalar_t , 1>(mesh, laplacian, p, event.timestep);
+}
+
+void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explicit_smoothing_3D &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    explicit_smoothing(mesh, laplacian, event.property, event.smoothing_steps);
+}
+
+void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    auto p = event.property;
+    implicit_smoothing(mesh, laplacian, p, event.timestep);
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 

@@ -54,6 +54,13 @@ struct mesh_system : public system {
 
     void on_statistics(const event::mesh::statistics &event);
 
+    void on_smoothing_explicit(const event::mesh::smoothing::explicit_smoothing &event);
+    void on_smoothing_implicit(const event::mesh::smoothing::implicit_smoothing &event);
+    void on_smoothing_explicit_1D(const event::mesh::smoothing::explicit_smoothing_1D &event);
+    void on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event);
+    void on_smoothing_explicit_3D(const event::mesh::smoothing::explicit_smoothing_3D &event);
+    void on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event);

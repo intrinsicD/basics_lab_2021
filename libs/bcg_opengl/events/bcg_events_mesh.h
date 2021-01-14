@@ -33,6 +33,37 @@ struct simplification{
     bcg_scalar_t hausdorff_error = 0.0;
 };
 
+namespace smoothing{
+struct explicit_smoothing{
+    entt::entity id;
+    int smoothing_steps;
+};
+struct implicit_smoothing{
+    entt::entity id;
+    bcg_scalar_t timestep;
+};
+struct explicit_smoothing_1D{
+    entt::entity id;
+    int smoothing_steps;
+    property<bcg_scalar_t, 1> property;
+};
+struct implicit_smoothing_1D{
+    entt::entity id;
+    bcg_scalar_t timestep;
+    property<bcg_scalar_t, 1> property;
+};
+struct explicit_smoothing_3D{
+    entt::entity id;
+    int smoothing_steps;
+    property<VectorS<3>, 3> property;
+};
+struct implicit_smoothing_3D{
+    entt::entity id;
+    bcg_scalar_t timestep;
+    property<VectorS<3>, 3> property;
+};
+}
+
 struct statistics{
     entt::entity id;
 };

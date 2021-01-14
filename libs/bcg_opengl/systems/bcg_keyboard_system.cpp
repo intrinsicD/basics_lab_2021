@@ -31,7 +31,7 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
                                     state->keyboard.shift_pressed ||
                                     state->keyboard.ctrl_pressed ||
                                     state->keyboard.command_pressed);
-    if(state->keyboard.is_captured_by_gui) return;
+    if (state->keyboard.is_captured_by_gui) return;
     if (state->keyboard.keys[GLFW_KEY_A]) {}
     if (state->keyboard.keys[GLFW_KEY_B]) {}
     if (state->keyboard.keys[GLFW_KEY_C]) {}
@@ -84,8 +84,10 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_SPACE]) {}
     if (state->keyboard.keys[GLFW_KEY_BACKSPACE]) {}
     if (state->keyboard.keys[GLFW_KEY_DELETE]) {
-        if(state->picker.valid && state->scene.valid(state->picker.entity_id)){
+        if (state->picker.valid && state->scene.valid(state->picker.entity_id)) {
+            state->dispatcher.trigger<event::internal::destroy>(state->picker.entity_id);
             state->scene.destroy(state->picker.entity_id);
+            state->picker.entity_id = entt::null;
         }
     }
     if (state->keyboard.keys[GLFW_KEY_F1]) {}

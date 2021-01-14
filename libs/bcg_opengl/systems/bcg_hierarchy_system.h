@@ -20,6 +20,8 @@ struct hierarchy_system : public system {
 
     void on_update(const event::internal::update &event);
 
+    void on_destroy(const event::internal::destroy &event);
+
     void update_accumulated_model(entt::entity id);
 };
 

@@ -8,6 +8,7 @@
 #include "point_cloud/bcg_point_cloud.h"
 #include "aligned_box/bcg_aligned_box.h"
 #include "sphere/bcg_sphere.h"
+#include "bcg_neighbors_query.h"
 
 namespace bcg {
 
@@ -29,15 +30,16 @@ struct sampling_octree {
         __last__
     };
 
+    static std::vector<std::string> type_names();
+
     sampling_octree() = default;
 
-    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
-                    property<VectorS<3, 3>> sample_points, int leaf_size, int max_depth = 20);
+    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size,
+                    int max_depth = 20);
 
     void clear();
 
-    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, property<VectorS<3, 3>> sample_points,
-               int leaf_size, int max_depth = 20);
+    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size, int max_depth = 20);
 
     void rebuild();
 
@@ -45,13 +47,15 @@ struct sampling_octree {
 
     neighbors_query query_knn(const VectorS<3> &query_point, int num_closest, uint8_t search_depth) const;
 
+    std::vector<VectorS<3>> get_samples(uint8_t depth) const;
+
     property<VectorS<3>, 3> ref_positions;
     property_container sampling_container;
     property<VectorS<3>, 3> sample_points;
     aligned_box3 aabb;
     std::vector<sampling_node> storage;
     std::vector<size_t> indices;
-    int max_depth;
+    int max_depth, current_depth;
     int leaf_size;
     SamplingType sampling_type;
 private:

@@ -11,7 +11,7 @@
 
 namespace bcg{
 
-VectorS<3> child_center(const aligned_box3 &aabb, uint8_t i) {
+inline VectorS<3> child_center(const aligned_box3 &aabb, uint8_t i) {
     VectorS<3> childCenter, center, halfExtent;
     aabb.get_centered_form(center, halfExtent);
     for (unsigned int j = 0, mask = 1; j < 3; ++j, mask <<= (unsigned int) 1) {
@@ -21,7 +21,7 @@ VectorS<3> child_center(const aligned_box3 &aabb, uint8_t i) {
     return childCenter;
 }
 
-aligned_box3 child_box(const aligned_box3 &aabb, uint8_t i) {
+inline aligned_box3 child_box(const aligned_box3 &aabb, uint8_t i) {
     VectorS<3> center, halfExtent;
     aabb.get_centered_form(center, halfExtent);
     aligned_box3 child;
@@ -29,7 +29,7 @@ aligned_box3 child_box(const aligned_box3 &aabb, uint8_t i) {
     return child;
 }
 
-VectorS<3> parent_center(const aligned_box3 &aabb, uint8_t i) {
+inline VectorS<3> parent_center(const aligned_box3 &aabb, uint8_t i) {
     VectorS<3> parentCenter, center, halfExtent;
     aabb.get_centered_form(center, halfExtent);
     for (unsigned int j = 0, mask = 1; j < 3; ++j, mask <<= (unsigned int) 1) {
@@ -39,7 +39,7 @@ VectorS<3> parent_center(const aligned_box3 &aabb, uint8_t i) {
     return parentCenter;
 }
 
-aligned_box3 parent_box(const aligned_box3 &alignedBox, uint8_t i) {
+inline aligned_box3 parent_box(const aligned_box3 &alignedBox, uint8_t i) {
     aligned_box3 parent;
     parent.set_centered_form(parent_center(alignedBox, i), alignedBox.halfextent() * 2);
     return parent;

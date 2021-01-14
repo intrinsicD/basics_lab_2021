@@ -27,6 +27,7 @@
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
+#include "bcg_opengl/guis/bcg_gui_octree_sampling.h"
 
 int main() {
     using namespace bcg;
@@ -60,6 +61,9 @@ int main() {
             }
             if (ImGui::MenuItem("Bilateral Filter")) {
                 state->gui.left = gui_point_cloud_bilateral_filter;
+            }
+            if(ImGui::MenuItem("Octree Sampling")){
+                state->gui.left = gui_octree_sampling;
             }
             ImGui::EndMenu();
         }

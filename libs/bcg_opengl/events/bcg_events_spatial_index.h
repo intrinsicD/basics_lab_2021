@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_EVENTS_SPATIAL_INDEX_H
 
 #include "entt/entt.hpp"
+#include "sampling/bcg_sampling_octree.h"
 
 namespace bcg::event::spatial_index{
 
@@ -21,6 +22,9 @@ struct setup_octree{
 
 struct setup_sampling_octree{
     entt::entity id;
+    sampling_octree::SamplingType type;
+    int leaf_size = 10;
+    int max_depth = 21;
 };
 
 struct update_indices{

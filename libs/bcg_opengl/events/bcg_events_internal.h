@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include "entt/entt.hpp"
 
 namespace bcg::event::internal{
 struct startup {
@@ -41,6 +42,9 @@ struct uniform_point_size{
 };
 struct set_uniform_point_size{
     double value;
+};
+struct destroy{
+    entt::entity id;
 };
 }
 
