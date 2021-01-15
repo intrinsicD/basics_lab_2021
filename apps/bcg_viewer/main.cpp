@@ -24,6 +24,7 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_simplification.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_remeshing.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_statistics.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_smoothing.h"
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
@@ -106,6 +107,9 @@ int main() {
             }
             if (ImGui::MenuItem("Remeshing")) {
                 state->gui.left = gui_mesh_remeshing;
+            }
+            if (ImGui::MenuItem("Smoothing")) {
+                state->gui.left = gui_mesh_smoothing;
             }
             if (ImGui::MenuItem("Statistics")) {
                 state->gui.left = gui_mesh_statistics;

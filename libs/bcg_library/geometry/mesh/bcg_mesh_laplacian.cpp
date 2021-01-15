@@ -80,7 +80,7 @@ compute_edge_weights(halfedge_mesh &mesh, MeshLaplacianStiffness s_type, propert
 
 void vertex_from_edges(halfedge_mesh &mesh, property<bcg_scalar_t, 1> e_weight, property<bcg_scalar_t, 1> e_scaling,
                        size_t parallel_grain_size) {
-    property<bcg_scalar_t, 1> vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_uniform");
+    property<bcg_scalar_t, 1> vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -131,6 +131,7 @@ compute_vertex_weights(halfedge_mesh &mesh, MeshLaplacianMass m_type, property<b
             auto e_uniform = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_laplacian_uniform", 1.0);
             vertex_from_edges(mesh, e_uniform, e_scaling, parallel_grain_size);
             vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_uniform");
+            vweight.vector() = mesh.vertices.get<bcg_scalar_t, 1>("v_laplacian_weight").vector();
             break;
         }
         case MeshLaplacianMass::cotan : {
@@ -138,23 +139,27 @@ compute_vertex_weights(halfedge_mesh &mesh, MeshLaplacianMass m_type, property<b
             auto e_cotan = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_cotan");
             vertex_from_edges(mesh, e_cotan, e_scaling, parallel_grain_size);
             vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_cotan");
+            vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight").vector();
             break;
         }
         case MeshLaplacianMass::fujiwara : {
             edge_fujiwaras(mesh, parallel_grain_size);
             auto e_fujiwara = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_fujiwara");
             vertex_fujuwara(mesh, e_fujiwara, e_scaling, parallel_grain_size);
-            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_fujiwara");
+            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
+            vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_fujiwara").vector();
             break;
         }
         case MeshLaplacianMass::voronoi : {
             vertex_voronoi_areas(mesh, parallel_grain_size);
-            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_voronoi_area");
+            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
+            vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_voronoi_area").vector();
             break;
         }
         case MeshLaplacianMass::barycentric : {
             vertex_barycentric_areas(mesh, parallel_grain_size);
-            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_barycentric_area");
+            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
+            vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_barycentric_area").vector();
             break;
         }
         case MeshLaplacianMass::__last__ : {

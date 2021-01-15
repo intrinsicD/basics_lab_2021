@@ -37,6 +37,7 @@ namespace smoothing{
 struct explicit_smoothing{
     entt::entity id;
     int smoothing_steps;
+    bcg_scalar_t timestep;
 };
 struct implicit_smoothing{
     entt::entity id;
@@ -45,6 +46,7 @@ struct implicit_smoothing{
 struct explicit_smoothing_1D{
     entt::entity id;
     int smoothing_steps;
+    bcg_scalar_t timestep;
     property<bcg_scalar_t, 1> property;
 };
 struct implicit_smoothing_1D{
@@ -55,12 +57,18 @@ struct implicit_smoothing_1D{
 struct explicit_smoothing_3D{
     entt::entity id;
     int smoothing_steps;
+    bcg_scalar_t timestep;
     property<VectorS<3>, 3> property;
 };
 struct implicit_smoothing_3D{
     entt::entity id;
     bcg_scalar_t timestep;
     property<VectorS<3>, 3> property;
+};
+struct taubin_smoothing{
+    entt::entity id;
+    bcg_scalar_t lambda, mu;
+    int smoothing_steps;
 };
 }
 

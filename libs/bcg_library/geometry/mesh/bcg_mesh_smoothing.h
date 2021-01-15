@@ -7,26 +7,29 @@
 
 #include "bcg_mesh.h"
 #include "bcg_mesh_laplacian.h"
+#include "bcg_property_map_eigen.h"
 #include "Eigen/SparseCholesky"
 
 namespace bcg {
 
 void rescale(halfedge_mesh &mesh, const VectorS<3> &center_before, bcg_scalar_t area_before);
 
-void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, int smoothing_steps = 1,
+void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, int smoothing_steps = 1,bcg_scalar_t timestep = 0.5,
                         size_t parallel_grain_size = 1024);
 
 void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property<bcg_scalar_t, 1> &property,
-                        int smoothing_steps = 1, size_t parallel_grain_size = 1024);
+                        int smoothing_steps = 1, bcg_scalar_t timestep = 0.5, size_t parallel_grain_size = 1024);
 
 void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property<VectorS<3>, 3> &property,
-                        int smoothing_steps = 1, size_t parallel_grain_size = 1024);
+                        int smoothing_steps = 1, bcg_scalar_t timestep = 0.5, size_t parallel_grain_size = 1024);
 
 void implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, bcg_scalar_t timestep);
 
+void taubin_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, bcg_scalar_t lambda, bcg_scalar_t mu, int smoothing_steps);
+
 template<typename T, int N>
 void
-implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property <T, N> &p, bcg_scalar_t timestep) {
+implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property<T, N> &p, bcg_scalar_t timestep) {
     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
     auto e_weight = mesh.edges.get<bcg_scalar_t, 1>("e_laplacian_weight");
     auto v_weight = mesh.vertices.get<bcg_scalar_t, 1>("v_laplacian_weight");
@@ -51,6 +54,7 @@ implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, propert
     // A*X = B
     SparseMatrix<bcg_scalar_t> A(n, n);
     MatrixS<-1, N> B(n, p.dims());
+    auto P = Map(p);
 
     // nonzero elements of A as triplets: (row, column, value)
     std::vector<Eigen::Triplet<bcg_scalar_t>> triplets;
@@ -64,7 +68,7 @@ implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, propert
         v = free_vertices[i];
 
         // rhs row
-        T b = (p[v] / v_weight[v]);
+        B.row(i) = (P.row(v) / 4 * v_weight[v]);
 
         // lhs row
         ww = 0.0;
@@ -75,18 +79,16 @@ implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, propert
 
             // fixed boundary vertex -> right hand side
             if (mesh.is_boundary(vv)) {
-                b -= -timestep * e_weight[e] * p[vv];
+                B.row(i) -= -timestep * e_weight[e] * P.row(vv);
             }
                 // free interior vertex -> matrix
             else {
                 triplets.emplace_back(i, idx[vv], -timestep * e_weight[e]);
             }
-
-            B.row(i) = b;
         }
 
         // center vertex -> matrix
-        triplets.emplace_back(i, i, 1.0 / v_weight[v] + timestep * ww);
+        triplets.emplace_back(i, i, 1.0 / 4 * v_weight[v] + timestep * ww);
     }
 
     // build sparse matrix from triplets
@@ -100,10 +102,11 @@ implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, propert
     } else {
         // copy solution
         for (unsigned int i = 0; i < n; ++i) {
-            p[free_vertices[i]] = X.row(i);
+            Map(p).row(free_vertices[i]) = X.row(i);
         }
     }
     mesh.vertices.remove(idx);
+    p.set_dirty();
 }
 
 }

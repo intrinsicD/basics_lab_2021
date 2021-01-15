@@ -58,6 +58,7 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing>().connect<&mesh_system::on_smoothing_implicit>(this);
     state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_1D>().connect<&mesh_system::on_smoothing_implicit_1D>(this);
     state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_3D>().connect<&mesh_system::on_smoothing_implicit_3D>(this);
+    state->dispatcher.sink<event::mesh::smoothing::taubin_smoothing>().connect<&mesh_system::on_smoothing_taubin>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
     state->dispatcher.sink<event::mesh::vertex_normals::area>().connect<&mesh_system::on_vertex_normal_area>(this);
@@ -281,7 +282,8 @@ void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_s
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    explicit_smoothing(mesh, laplacian, event.smoothing_steps, state->config.parallel_grain_size);
+    explicit_smoothing(mesh, laplacian, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
 void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_smoothing &event){
@@ -291,6 +293,7 @@ void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_s
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
     implicit_smoothing(mesh, laplacian, event.timestep);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
 void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explicit_smoothing_1D &event){
@@ -299,7 +302,8 @@ void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explici
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    explicit_smoothing(mesh, laplacian, event.property, event.smoothing_steps);
+    auto p = event.property;
+    explicit_smoothing(mesh, laplacian, p, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
 }
 
 void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event){
@@ -318,7 +322,8 @@ void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explici
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    explicit_smoothing(mesh, laplacian, event.property, event.smoothing_steps);
+    auto p = event.property;
+    explicit_smoothing(mesh, laplacian, p, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
 }
 
 void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event){
@@ -329,6 +334,16 @@ void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implici
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
     auto p = event.property;
     implicit_smoothing(mesh, laplacian, p, event.timestep);
+}
+
+void mesh_system::on_smoothing_taubin(const event::mesh::smoothing::taubin_smoothing &event){
+    if (!state->scene.valid(event.id)) return;
+    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+
+    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
+    taubin_smoothing(mesh, laplacian, event.lambda, event.mu, event.smoothing_steps);
+    state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
 

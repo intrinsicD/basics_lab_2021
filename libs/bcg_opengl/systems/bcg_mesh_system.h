@@ -60,6 +60,7 @@ struct mesh_system : public system {
     void on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event);
     void on_smoothing_explicit_3D(const event::mesh::smoothing::explicit_smoothing_3D &event);
     void on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event);
+    void on_smoothing_taubin(const event::mesh::smoothing::taubin_smoothing &event);
 
     //------------------------------------------------------------------------------------------------------------------
 
