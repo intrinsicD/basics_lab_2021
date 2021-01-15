@@ -141,6 +141,9 @@ int main() {
             if (ImGui::MenuItem("Subdivision Surfaces")) {
                 state->gui.left = gui_mesh_subdivision;
             }
+            if (ImGui::MenuItem("Smoothing")) {
+                state->gui.left = gui_mesh_smoothing;
+            }
             ImGui::EndMenu();
         }
 
