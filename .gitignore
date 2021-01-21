@@ -5,5 +5,5 @@ libs/*/exts/*/
 cmake-build-*
 libs/bcg_opengl/.DS_Store
 libs/bcg_library/.DS_Store
-*/.DS_Store
+*.DS_Store
 .idea
