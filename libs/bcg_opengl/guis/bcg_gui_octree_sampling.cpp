@@ -6,8 +6,12 @@
 #include "bcg_viewer_state.h"
 #include "geometry/sampling/bcg_sampling_octree.h"
 #include "bcg_entity_hierarchy.h"
+#include "entt/entt.hpp"
+#include <string>
 
 namespace bcg {
+
+using namespace entt::literals;
 
 void gui_octree_sampling(viewer_state *state) {
     static int idx = 4;

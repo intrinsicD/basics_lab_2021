@@ -26,7 +26,7 @@ void gui_correspondences(viewer_state *state) {
     if (source_id != entt::null) {
         ImGui::LabelText("source_id", "%s", std::to_string(size_t(source_id)).c_str());
     }
-    if (corrs != nullptr && corrs->target_id != entt::null) {
+    if (corrs != nullptr && corrs->target_id != BCG_INVALID_ID) {
         ImGui::LabelText("target_id", "%s", std::to_string(size_t(corrs->target_id)).c_str());
     }
     if (ImGui::Button("set source")) {

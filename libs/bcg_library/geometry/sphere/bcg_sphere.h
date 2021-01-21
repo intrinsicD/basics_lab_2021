@@ -28,7 +28,7 @@ struct sphere {
     }
 
     bcg_scalar_t volume() const {
-        return std::sqrt(std::pow(pi, N)) * std::pow(radius, N) / gamma(N / 2.0 + 1);
+        return std::sqrt(std::pow(pi, N)) * std::pow(radius, N) / tgamma(N / 2.0 + 1);
     }
 
     bool operator==(sphere const &other) const {

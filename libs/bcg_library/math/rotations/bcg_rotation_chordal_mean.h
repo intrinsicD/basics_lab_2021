@@ -6,6 +6,7 @@
 #define BCG_CHRODALMEAN_H
 
 #include "math/bcg_linalg.h"
+#include <vector>
 
 namespace bcg {
 

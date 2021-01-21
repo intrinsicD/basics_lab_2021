@@ -6,6 +6,7 @@
 #define BCG_GEODESICMEAN_H
 
 #include <utility>
+#include <vector>
 #include "bcg_rotation_matrix_exponential.h"
 #include "bcg_rotation_matrix_logarithm.h"
 #include "bcg_rotation_robust_elementwise_median.h"

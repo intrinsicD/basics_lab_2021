@@ -6,7 +6,6 @@
 
 namespace bcg{
 
-
 MatrixS<3, 3> cross_product_squared_transpose(const VectorS<3> &v) {
     bcg_scalar_t a = v[0];
     bcg_scalar_t b = v[1];
@@ -60,9 +59,9 @@ MatrixS<3, 3> first_order_tri_quad(const VectorS<3> &a, const MatrixS<3, 3> &sig
 MatrixS<3, 3> cross_interference_matrix(const MatrixS<3, 3> &A, const MatrixS<3, 3> &B) {
     MatrixS<3, 3> m;
 
-    bcg_scalar_t constexpr x = 0;
-    bcg_scalar_t constexpr y = 1;
-    bcg_scalar_t constexpr z = 2;
+    int constexpr x = 0;
+    int constexpr y = 1;
+    int constexpr z = 2;
 
     bcg_scalar_t cxx = A(y, z) * B(y, z);
     bcg_scalar_t cyy = A(x, z) * B(x, z);

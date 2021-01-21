@@ -3,6 +3,7 @@
 //
 
 #include <cmath>
+#include <algorithm>
 #include "bcg_statistics_running.h"
 
 namespace bcg {
@@ -35,7 +36,7 @@ void running_stats::push(double x) {
     M2 += term1;
     //Jeff McClintock running median approximation
     term1 = x - M5;
-    M5 += copysign(std::max(M1 * 0.01, fabs(term1)), term1);
+    M5 += copysign(std::max(M1 * 0.01, std::abs(term1)), term1);
     MIN = fmin(x, MIN);
     MAX = fmax(x, MAX);
 }

@@ -114,10 +114,10 @@ if (BCG_OPENGL)
     set_target_properties(bcg_opengl PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
     target_compile_features(bcg_opengl PRIVATE cxx_std_17)
 
-    target_link_libraries(bcg_opengl glfw ${OPENGL_gl_LIBRARY} bcg_graphics tbb stdc++fs)
+    target_link_libraries(bcg_opengl glfw ${OPENGL_gl_LIBRARY} bcg_graphics tbb)
 
     if (UNIX AND NOT APPLE)
-        target_link_libraries(bcg_opengl dl)
+        target_link_libraries(bcg_opengl dl stdc++fs)
         #target_compile_options(bcg_opengl PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)
         target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
         target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")

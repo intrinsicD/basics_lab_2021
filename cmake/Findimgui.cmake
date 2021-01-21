@@ -17,12 +17,13 @@ if(NOT IMGUI_FOUND)
 	   set(IMGUI_FOUND TRUE)
 	   set(IMGUI_DIRECTORY ${CMAKE_SOURCE_DIR}/external/imgui)
 	   set(IMGUI_INCLUDE_DIRS ${IMGUI_DIRECTORY} ${IMGUI_DIRECTORY}/examples)
-	   set(IMGUI_SOURCE_DIRS ${IMGUI_INCLUDE_DIRS})
+	   set(IMGUI_SOURCE_DIRS ${IMGUI_INCLUDE_DIRS} ${IMGUI_SOURCES})
 	   set(IMGUI_SOURCES
 			   ${IMGUI_DIRECTORY}/imgui.cpp
 			   ${IMGUI_DIRECTORY}/imgui_demo.cpp
 			   ${IMGUI_DIRECTORY}/imgui_draw.cpp
 			   ${IMGUI_DIRECTORY}/imgui_widgets.cpp
+			   ${IMGUI_DIRECTORY}/imgui_tables.cpp
 			   ${IMGUI_DIRECTORY}/backends/imgui_impl_glfw.cpp
 			   ${IMGUI_DIRECTORY}/backends/imgui_impl_opengl3.cpp
 			   )

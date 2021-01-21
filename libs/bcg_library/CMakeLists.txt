@@ -144,7 +144,7 @@ target_include_directories(bcg_graphics PUBLIC ${NANOFLANN_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${SPECTRA_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
 
-target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb stdc++fs)
+target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)
@@ -152,7 +152,7 @@ if (UNIX AND NOT APPLE)
     #target_compile_options(bcg_graphics PUBLIC -Wall -Wpedantic -Wextra -Wno-missing-field-initializers -g -ggdb -fprofile-instr-generate -fcoverage-mapping -fstandalone-debug -O0)
     target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
     target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")
-    target_link_libraries(bcg_graphics Threads::Threads)
+    target_link_libraries(bcg_graphics Threads::Threads stdc++fs)
 endif (UNIX AND NOT APPLE)
 
 # warning flags

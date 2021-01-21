@@ -6,9 +6,9 @@
 #define BCG_GRAPHICS_BCG_ROTATION_GEODESIC_MEDIAN_H
 
 #include "math/bcg_linalg.h"
+#include <vector>
 
 namespace bcg {
-
 
 struct geodesic_median_so3 {
     geodesic_median_so3(bool robust, bool outlier_reject);

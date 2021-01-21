@@ -36,11 +36,11 @@ void mouse_system::on_button(const event::internal::mouse::button &event) {
 
 void mouse_system::on_motion(const event::internal::mouse::motion &event) {
     state->mouse.last_cursor_position = state->mouse.cursor_position;
-    state->mouse.cursor_position[0] = event.x * state->window.high_dpi_scaling;
-    state->mouse.cursor_position[1] = event.y * state->window.high_dpi_scaling;
+    state->mouse.cursor_position[0] = event.x;
+    state->mouse.cursor_position[1] = event.y;
     const auto &vp = state->window.framebuffer_viewport;
-    state->mouse.window_coordinates[0] = state->mouse.cursor_position[0];
-    state->mouse.window_coordinates[1] = vp[3] - state->mouse.cursor_position[1];
+    state->mouse.window_coordinates[0] = state->mouse.cursor_position[0] * state->window.high_dpi_scaling;
+    state->mouse.window_coordinates[1] = vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling;
 
     state->mouse.normalized_device_coordinates[0] =
             (state->mouse.window_coordinates[0] - vp[0]) / bcg_scalar_t(vp[2]) * 2.0 - 1.0;
@@ -66,7 +66,7 @@ void mouse_system::on_scroll(const event::internal::mouse::scroll &event) {
     state->dispatcher.trigger<event::mouse::scroll>(event.value);
 }
 
-void mouse_system::on_end_frame(const event::internal::end_frame &event){
+void mouse_system::on_end_frame(const event::internal::end_frame &event) {
     state->mouse.cursor_delta.setZero();
 }
 

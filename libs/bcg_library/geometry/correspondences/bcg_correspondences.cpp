@@ -7,7 +7,7 @@
 
 namespace bcg {
 
-correspondences::correspondences() : mapping(), stats(), target_id(entt::null){}
+correspondences::correspondences() : mapping(), stats(), target_id(BCG_INVALID_ID){}
 
 correspondences::correspondences(size_t target_id) : target_id(target_id) {}
 

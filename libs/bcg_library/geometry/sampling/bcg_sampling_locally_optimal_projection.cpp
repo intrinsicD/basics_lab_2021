@@ -17,35 +17,35 @@ std::vector<std::string> method_names(){
 }
 
 
-bcg_scalar_t compute_attraction_weight_point(bcg_scalar_t distance, bcg_scalar_t support_radius) const{
+bcg_scalar_t compute_attraction_weight_point(bcg_scalar_t distance, bcg_scalar_t support_radius){
     return std::exp(-distance * distance / (support_radius * support_radius / 16));
 }
 
-bcg_scalar_t compute_attraction_weight_plane(bcg_scalar_t distance, bcg_scalar_t support_radius) const{
+bcg_scalar_t compute_attraction_weight_plane(bcg_scalar_t distance, bcg_scalar_t support_radius){
     return std::exp(-distance * distance / (2 * support_radius * support_radius));
 }
 
-bcg_scalar_t compute_attraction_weight_density(bcg_scalar_t distance, bcg_scalar_t support_radius) const{
+bcg_scalar_t compute_attraction_weight_density(bcg_scalar_t distance, bcg_scalar_t support_radius){
     reutrn compute_attraction_weight_point(distance, support_radius);
 }
 
-bcg_scalar_t compute_repulsion_weight_lop(bcg_scalar_t distance) const{
+bcg_scalar_t compute_repulsion_weight_lop(bcg_scalar_t distance){
     return 1.0 / (3 * distance * distance * distance);
 }
 
-bcg_scalar_t compute_repulsion_weight_wlop(bcg_scalar_t distance) const{
+bcg_scalar_t compute_repulsion_weight_wlop(bcg_scalar_t distance){
     return -r;
 }
 
-bcg_scalar_t compute_repulsion_weight_lop_derivative(bcg_scalar_t distance) const{
+bcg_scalar_t compute_repulsion_weight_lop_derivative(bcg_scalar_t distance){
     return -1.0 / (distance * distance * distance * distance);
 }
 
-bcg_scalar_t compute_repulsion_weight_wlop_derivative(bcg_scalar_t distance) const{
+bcg_scalar_t compute_repulsion_weight_wlop_derivative(bcg_scalar_t distance){
     return -1.0;
 }
 
-void local_density_estimation(Vertices &ref_vertices, bcg_scalar_t attraction_radius, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
+void local_density_estimation(vertex_container &ref_vertices, bcg_scalar_t attraction_radius, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
     auto ref_positions = ref_vertices.get<VectorS<3>, 3>("v_position");
     auto ref_density = ref_vertices.get_or_add<bcg_scalar_t, 1>("v_lop_density");
 
@@ -64,7 +64,7 @@ void local_density_estimation(Vertices &ref_vertices, bcg_scalar_t attraction_ra
     );
 }
 
-void locally_optimal_projection_step(Vertices &sample_vertices, const Vertices &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
+void locally_optimal_projection_step(vertex_container &sample_vertices, const vertex_container &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
     auto ref_positions = ref_vertices.get<VectorS<3>, 3>("v_position");
     auto ref_density = ref_vertices.get<bcg_scalar_t, 1>("v_lop_density");
     if(!ref_density){
@@ -82,15 +82,15 @@ void locally_optimal_projection_step(Vertices &sample_vertices, const Vertices &
 
 }
 
-void locally_weighted_optimal_projection_step(Vertices &sample_vertices, const Vertices &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
+void locally_weighted_optimal_projection_step(vertex_container &sample_vertices, const vertex_container &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
 
 }
 
-void locally_feature_preserving_optimal_projection_step(Vertices &sample_vertices, const Vertices &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
+void locally_feature_preserving_optimal_projection_step(vertex_container &sample_vertices, const vertex_container &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
 
 }
 
-void locally_continuous_optimal_projection_step(Vertices &sample_vertices, const Vertices &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
+void locally_continuous_optimal_projection_step(vertex_container &sample_vertices, const vertex_container &ref_vertices, bcg_scalar_t attraction_radius, bcg_scalar_t repulsion_weight, const kdtree_property<bcg_scalar_t> &ref_index, size_t parallel_grain_size){
 
 }
 
