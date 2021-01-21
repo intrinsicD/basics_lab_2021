@@ -63,7 +63,7 @@ struct Gaussian {
     void construct_from_points(const MatrixS <N, N> &points, const VectorS <N> &mean_) {
         MatrixS<N, N> centered(points.rowwise() - mean_.transpose());
         mean = mean_;
-        cov = points.transpose() * points / (points.rows() - 1);
+        cov = centered.transpose() * centered / (points.rows() - 1);
         cov_inv = cov.inverse();
         denominator = normalizer();
     }

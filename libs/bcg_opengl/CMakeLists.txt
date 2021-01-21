@@ -39,6 +39,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_point_cloud_kernel_density_estimation.h guis/bcg_gui_point_cloud_kernel_density_estimation.cpp
             guis/bcg_gui_point_cloud_quadric.h guis/bcg_gui_point_cloud_quadric.cpp
             guis/bcg_gui_point_cloud_bilateral_filter.h guis/bcg_gui_point_cloud_bilateral_filter.cpp
+            guis/bcg_gui_locally_optimal_projection.h guis/bcg_gui_locally_optimal_projection.cpp
             guis/bcg_gui_graph_vertex_pca.h guis/bcg_gui_graph_vertex_pca.cpp
             guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp
@@ -132,4 +133,5 @@ endif (APPLE)
 if (MSVC)
     target_compile_options(bcg_opengl PUBLIC /D_CRT_SECURE_NO_WARNINGS /wd4018 /wd4244 /wd4305 /wd4800 /wd4267 /wd4838)
     target_compile_options(bcg_opengl PUBLIC /EHsc)
+    target_compile_definitions(bcg_opengl PUBLIC NOMINMAX)
 endif (MSVC)
