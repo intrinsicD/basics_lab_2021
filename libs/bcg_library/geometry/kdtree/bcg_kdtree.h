@@ -121,7 +121,7 @@ struct kdtree_property {
     }
 
     void build(const property<VectorS<D>, D> &positions, int leaf_max_size = 10) {
-        dataset->positions = positions;
+        dataset = std::make_shared<DatasetAdaptor>(positions);
         index = std::make_shared<index_t>(static_cast<int>(D), *dataset,
                                           nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
         index->buildIndex();

@@ -22,21 +22,24 @@ enum class LopType {
 std::vector<std::string> lop_method_names();
 
 struct projection_operator {
-    property<VectorS<3>, 3> ref_positions, ref_normals, ref_density, sampling_positions, old_positions, sampling_normals;
+    property<VectorS<3>, 3> ref_positions, ref_normals, sampling_positions, old_positions, sampling_normals;
+    property<bcg_scalar_t, 1> ref_density;
 
     bcg_scalar_t attraction_radius = 1.0f;
     bcg_scalar_t feature_radius = 1.0f;
     bcg_scalar_t repulsion_weight = 0.49f;
 
+    kdtree_property<bcg_scalar_t> ref_index;
+
     projection_operator() = default;
 
-    virtual void init(vertex_container &ref_vertices, vertex_container &sampling_vertices, bool use_density_weight);
+    virtual void init(vertex_container &ref_vertices, vertex_container &sampling_vertices, bool use_density_weight, size_t parallel_grain_size = 1024);
 
     virtual bcg_scalar_t compute_attraction_alpha(size_t i, size_t j) = 0;
 
     virtual bcg_scalar_t compute_repulsion_beta(size_t i, size_t ii) = 0;
 
-    void compute_step();
+    void compute_step(size_t parallel_grain_size = 1024);
 };
 
 struct lop : public projection_operator {

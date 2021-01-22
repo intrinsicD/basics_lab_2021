@@ -29,6 +29,7 @@
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
 #include "bcg_opengl/guis/bcg_gui_octree_sampling.h"
+#include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
 
 int main() {
     using namespace bcg;
@@ -65,6 +66,9 @@ int main() {
             }
             if(ImGui::MenuItem("Octree Sampling")){
                 state->gui.left = gui_octree_sampling;
+            }
+            if(ImGui::MenuItem("Lop Sampling")){
+                state->gui.left = gui_locally_optimal_projection;
             }
             ImGui::EndMenu();
         }

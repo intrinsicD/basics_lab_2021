@@ -122,6 +122,7 @@ add_library(bcg_graphics
         geometry/kdtree/bcg_triangle_kdtree.h geometry/kdtree/bcg_triangle_kdtree.cpp
         geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/sampling/bcg_sampling_octree.h geometry/sampling/bcg_sampling_octree.cpp
+        geometry/sampling/bcg_sampling_locally_optimal_projection.h geometry/sampling/bcg_sampling_locally_optimal_projection.cpp
         geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
         geometry/correspondences/bcg_correspondences.h geometry/correspondences/bcg_correspondences.cpp
         registration/bcg_registration.h
