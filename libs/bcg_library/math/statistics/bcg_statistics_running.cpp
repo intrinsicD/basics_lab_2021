@@ -66,6 +66,7 @@ double running_stats::kurtosis() const {
 }
 
 double running_stats::median() const {
+    //Jeff McClintock running median approximation
     return M5;
 }
 
