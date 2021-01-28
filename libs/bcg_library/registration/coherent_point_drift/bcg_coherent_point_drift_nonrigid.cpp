@@ -26,7 +26,7 @@ void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS
     int nev = std::min<int>(M, 700);
     Spectra::DenseSymMatProd<bcg_scalar_t> op(G);
     Spectra::SymEigsSolver<bcg_scalar_t, /*Spectra::LARGEST_ALGE*/Spectra::LARGEST_MAGN, Spectra::DenseSymMatProd<bcg_scalar_t> > eigs(&op, nev,
-                                                                                                  2 * nev);
+                                                                                                  M);
     eigs.init();
     int nconv = eigs.compute();
     if (eigs.info() == Spectra::SUCCESSFUL){
