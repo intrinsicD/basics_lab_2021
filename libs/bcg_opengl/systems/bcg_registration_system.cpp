@@ -73,6 +73,9 @@ void registration_system::on_align_step(const event::registration::align_step &e
             if(reg.errors.empty() || !rigid.initialized){
                 rigid.init(Y, X);
             }
+            rigid.R.setIdentity();
+            rigid.t.setZero();
+            rigid.s = 1.0;
             rigid(Y, X, state->config.parallel_grain_size);
             delta = Translation(rigid.t) * Rotation(MatrixS<3, 3>(rigid.R)) * Scaling(VectorS<3>::Constant(rigid.s));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
@@ -87,6 +90,8 @@ void registration_system::on_align_step(const event::registration::align_step &e
             if(reg.errors.empty() || !affine.initialized){
                 affine.init(Y, X);
             }
+            affine.B.setIdentity();
+            affine.t.setZero();
             affine(Y, X, state->config.parallel_grain_size);
             delta = Translation(affine.t) * Transform(MatrixS<3, 3>(affine.B));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
@@ -122,6 +127,9 @@ void registration_system::on_align_step(const event::registration::align_step &e
             if(reg.errors.empty() || !bayes.initialized){
                 bayes.init(Y, X);
             }
+            bayes.R.setIdentity();
+            bayes.t.setZero();
+            bayes.s = 1.0;
             bayes(Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_bayes_position");
@@ -143,6 +151,9 @@ void registration_system::on_align_step(const event::registration::align_step &e
             if(reg.errors.empty()|| !nonrigid_test.initialized){
                 nonrigid_test.init(Y, X);
             }
+            nonrigid_test.R.setIdentity();
+            nonrigid_test.t.setZero();
+            nonrigid_test.s = 1.0;
             nonrigid_test(Y, X, state->config.parallel_grain_size);
             auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_test_vectors");
             auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_test_position");

@@ -14,10 +14,6 @@ void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS
     assert(beta > 0);
     assert(lambda > 0);
 
-    if (!optimized) {
-        P = MatrixS<-1, -1>::Zero(M, N);
-    }
-
     G = MatrixS<-1, -1>::Zero(M, M);
     G = (-(VectorS<-1>::Ones(M) * Y.rowwise().squaredNorm().transpose()
            - (2 * Y) * Y.transpose() +
@@ -33,10 +29,6 @@ void coherent_point_drift_nonrigid::init(const MatrixS<-1, -1> &Y, const MatrixS
         Evals = eigs.eigenvalues();
         Evecs = eigs.eigenvectors();
         std::cout << "#Eigenvalues converged:" << nconv << std::endl;
-        std::cout << "Max Eval :" << Evals[0] << std::endl;
-        std::cout << "Min Eval :" << Evals[99] << std::endl;
-        std::cout << "Prop. #Eval :" << std::cbrt(Evals[0]) << std::endl;
-        std::cout << Evecs.transpose() * Evecs << std::endl;
     }
 
     T = Y;

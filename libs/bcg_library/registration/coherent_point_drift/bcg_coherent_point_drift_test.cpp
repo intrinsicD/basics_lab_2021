@@ -14,9 +14,6 @@ void coherent_point_drift_test::init(const MatrixS<-1, -1> &Y, const MatrixS<-1,
     assert(beta > 0);
     assert(lambda > 0);
 
-    if (!optimized) {
-        P = MatrixS<-1, -1>::Zero(M, N);
-    }
     R = MatrixS<-1, -1>::Identity(D, D);
     t = VectorS<-1>::Zero(D);
     s = 1.0;
@@ -24,21 +21,17 @@ void coherent_point_drift_test::init(const MatrixS<-1, -1> &Y, const MatrixS<-1,
            - (2 * Y) * Y.transpose() +
            Y.rowwise().squaredNorm() * VectorS<-1>::Ones(M).transpose()) / (2 * beta * beta)).array().exp();
 
-    int nev = std::min<int>(M, 100);
+    int nev = std::min<int>(M, M / 2);
     Spectra::DenseSymMatProd<bcg_scalar_t> op(G);
     Spectra::SymEigsSolver<bcg_scalar_t, /*Spectra::LARGEST_ALGE*/Spectra::LARGEST_MAGN, Spectra::DenseSymMatProd<bcg_scalar_t> > eigs(
             &op, nev,
-            2 * nev);
+            M);
     eigs.init();
     int nconv = eigs.compute();
     if (eigs.info() == Spectra::SUCCESSFUL) {
         Evals = eigs.eigenvalues();
         Evecs = eigs.eigenvectors();
         std::cout << "#Eigenvalues converged:" << nconv << std::endl;
-        std::cout << "Max Eval :" << Evals[0] << std::endl;
-        std::cout << "Min Eval :" << Evals[99] << std::endl;
-        std::cout << "Prop. #Eval :" << std::cbrt(Evals[0]) << std::endl;
-        std::cout << Evecs.transpose() * Evecs << std::endl;
     }
     V = MatrixS<-1, -1>::Zero(M, D);
     U = Y;

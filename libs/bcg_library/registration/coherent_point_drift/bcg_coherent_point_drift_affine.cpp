@@ -11,10 +11,6 @@ void coherent_point_drift_affine::init(const MatrixS<-1, -1> &Y, const MatrixS<-
 
     B = MatrixS<-1, -1>::Identity(D, D);
     t = VectorS<-1>::Zero(D);
-
-    if (!optimized) {
-        P = MatrixS<-1, -1>::Zero(M, N);
-    }
 }
 
 void coherent_point_drift_affine::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {

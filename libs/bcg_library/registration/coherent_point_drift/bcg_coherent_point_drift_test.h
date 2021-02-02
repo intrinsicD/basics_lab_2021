@@ -15,7 +15,7 @@ struct coherent_point_drift_test : public coherent_point_drift_base {
     MatrixS<-1, -1> R;
     VectorS<-1> t;
 
-    MatrixS<-1, -1> P, G, T, U, V, Evecs;
+    MatrixS<-1, -1> G, T, U, V, Evecs;
     VectorS<-1> mean_x, mean_y, Evals;
 
     bcg_scalar_t beta = 2, lambda = 2;

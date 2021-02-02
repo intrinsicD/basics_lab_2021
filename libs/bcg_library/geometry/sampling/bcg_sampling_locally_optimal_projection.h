@@ -22,7 +22,7 @@ enum class LopType {
 std::vector<std::string> lop_method_names();
 
 struct projection_operator {
-    property<VectorS<3>, 3> ref_positions, ref_normals, sampling_positions, old_positions, sampling_normals;
+    property<VectorS<3>, 3> ref_positions, ref_normals, sampling_positions, old_positions, sampling_normals, projection_forces, repulsion_forces;
     property<bcg_scalar_t, 1> ref_density;
 
     bcg_scalar_t attraction_radius = 1.0f;

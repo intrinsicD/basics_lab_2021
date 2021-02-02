@@ -74,12 +74,9 @@ void coherent_point_drift_bayes::init(const MatrixS<-1, -1> &Y, const MatrixS<-1
 void coherent_point_drift_bayes::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
     Timer timer;
     MatrixS<-1, -1> S = Evecs.transpose() * P1.asDiagonal() * Evecs;
-    Sigma = (Evecs * Evals.asDiagonal() *
-             (MatrixS<-1, -1>::Identity(Evals.size(), Evals.size())
-              - S *
-                (lambda * sigma_squared * (1.0 / Evals.array()).matrix().asDiagonal().toDenseMatrix() + S).inverse()) *
-             Evecs.transpose()) / lambda;
-    //Sigma = (lambda * GInv + s * s / sigma_squared * P1.asDiagonal().toDenseMatrix()).inverse();
+    MatrixS<-1, -1> ID = MatrixS<-1, -1>::Identity(Evals.size(), Evals.size());
+    Sigma = (Evecs * Evals.asDiagonal() * (ID - S * (ID * (lambda * sigma_squared / Evals.array()).matrix().asDiagonal() + S).inverse()) * Evecs.transpose()) / lambda;
+    //Sigma = (lambda * GInv + s * s / sigma_squared * ID * P1.asDiagonal()).inverse();
 
     MatrixS<-1, -1> residual = (1.0 / P1.array()).matrix().asDiagonal() * PX;
     V = s * s / sigma_squared * Sigma * P1.asDiagonal() * (transformed_inverse(residual) - Y);

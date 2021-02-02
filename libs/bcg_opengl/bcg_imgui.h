@@ -28,7 +28,6 @@ struct gui_element {
 
 struct gui_menu {
     std::function<bool(viewer_state *state, gui_menu *self)> show;
-    bool show_app_main_menu_bar = false, show_app_console = false, show_app_metrics = true;
 
     void render(viewer_state *state);
 };

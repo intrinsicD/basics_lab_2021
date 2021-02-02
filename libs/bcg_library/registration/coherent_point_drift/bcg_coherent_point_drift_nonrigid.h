@@ -10,7 +10,7 @@
 namespace bcg {
 
 struct coherent_point_drift_nonrigid : public coherent_point_drift_base {
-    MatrixS<-1, -1> P, G, T, Evecs;
+    MatrixS<-1, -1> G, T, Evecs;
     VectorS<-1> Evals;
     bcg_scalar_t beta = 2, lambda = 2;
 

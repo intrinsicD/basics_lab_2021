@@ -61,7 +61,7 @@ void coherent_point_drift_base::optimized_expectation_step(const MatrixS<-1, -1>
                     PX.row(m) = VectorS<-1>::Zero(D);
                     for (long n = 0; n < N; ++n) {
                         bcg_scalar_t k_mn = std::exp(
-                                -(X.row(n).transpose() - (transformed(Y, m))).squaredNorm() / (2 * sigma_squared)) /
+                                -(X.row(n).transpose() - transformed(Y, m)).squaredNorm() / (2 * sigma_squared)) /
                                             denominator(n);
                         P1(m) += k_mn;
                         PX.row(m) += k_mn * X.row(n);
@@ -85,7 +85,6 @@ MatrixS<-1, -1> coherent_point_drift_base::transformed(const MatrixS<-1, -1> &Y)
 
 void coherent_point_drift_base::operator()(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
                                            size_t parallel_grain_size) {
-
     optimized_expectation_step(Y, X, parallel_grain_size);
     if (optimized) {
         optimized_maximization_step(Y, X);

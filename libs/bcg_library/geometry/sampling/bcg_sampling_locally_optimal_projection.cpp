@@ -25,7 +25,8 @@ void projection_operator::init(vertex_container &ref_vertices, vertex_container 
     sampling_positions = sampling_vertices.get<VectorS<3>, 3>("v_position");
     old_positions = sampling_vertices.get_or_add<VectorS<3>, 3>("v_old_position");
     sampling_normals = sampling_vertices.get<VectorS<3>, 3>("v_normal");
-
+    projection_forces = sampling_vertices.get_or_add<VectorS<3>, 3>("v_projection_force");
+    repulsion_forces = sampling_vertices.get_or_add<VectorS<3>, 3>("v_repulsion_force");
     ref_index.build(ref_positions);
 
     if (use_density_weight) {
@@ -66,9 +67,11 @@ void projection_operator::compute_step(size_t parallel_grain_size) {
                         //if(result.distances[j] == 0) continue;
                         auto idx = result.indices[j];
                         bcg_scalar_t weight = compute_attraction_alpha(i, idx) / ref_density[idx];
-                        projection += ref_positions[idx] * weight;
+                        projection += (ref_positions[idx] - sampling_positions[v]) * weight;
                         sum_alpha += weight;
                     }
+
+                    projection_forces[v] = projection / sum_alpha;
 
                     VectorS<3> rejection = VectorS<3>::Zero();
                     bcg_scalar_t sum_beta = 0;
@@ -79,16 +82,20 @@ void projection_operator::compute_step(size_t parallel_grain_size) {
                         sum_beta += weight;
                     }
 
+                    repulsion_forces[v] = repulsion_weight * rejection / sum_beta;
+
                     if(!std::isnan(sum_alpha) && !std::isinf(sum_alpha) && sum_alpha > scalar_eps){
-                        sampling_positions[v] = projection / sum_alpha;
+                        sampling_positions[v] += projection_forces[v];
                     }
                     if(!std::isnan(sum_beta) && !std::isinf(sum_beta) && sum_beta > scalar_eps) {
-                        sampling_positions[v] += repulsion_weight * rejection / sum_beta;
+                        sampling_positions[v] += repulsion_forces[v];
                     }
                 }
             }
     );
     sampling_positions.set_dirty();
+    projection_forces.set_dirty();
+    repulsion_forces.set_dirty();
 }
 
 
