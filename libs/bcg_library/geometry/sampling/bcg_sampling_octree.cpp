@@ -25,14 +25,18 @@ std::vector<std::string> sampling_octree::type_names() {
 
 sampling_octree::sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size,
                                  int max_depth) : sampling_type(
-        sampling_type), ref_positions(ref_positions), leaf_size(leaf_size), max_depth(
-        max_depth) {
+        sampling_type), ref_positions(ref_positions), leaf_size(leaf_size), max_depth(max_depth) {
     build(sampling_type, ref_positions, leaf_size, max_depth);
+}
+
+sampling_octree::sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
+                                 const std::vector<size_t> &ordering, int leaf_size, int max_depth) : sampling_type(
+        sampling_type), ref_positions(ref_positions), leaf_size(leaf_size), max_depth(max_depth) {
+    build(sampling_type, ref_positions, ordering, leaf_size, max_depth);
 }
 
 void sampling_octree::clear() {
     storage.clear();
-    indices.clear();
     current_depth = 0;
 }
 
@@ -65,17 +69,40 @@ void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> 
     this->ref_positions = ref_positions;
     this->leaf_size = leaf_size;
     this->max_depth = max_depth;
+    this->indices.clear();
+    rebuild();
+}
+
+void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
+                            const std::vector<size_t> &ordering,
+                            int leaf_size, int max_depth) {
+    this->sampling_type = sampling_type;
+    this->ref_positions = ref_positions;
+    this->leaf_size = leaf_size;
+    this->max_depth = max_depth;
+    this->indices = ordering;
     rebuild();
 }
 
 void sampling_octree::rebuild() {
     clear();
     aabb = aligned_box3();
-    indices.resize(ref_positions.size());
-    for (size_t i = 0; i < ref_positions.size(); ++i) {
-        aabb.grow(ref_positions[i]);
-        indices[i] = i;
+    if(indices.empty()){
+        indices.resize(ref_positions.size());
+        for (size_t i = 0; i < ref_positions.size(); ++i) {
+            aabb.grow(ref_positions[i]);
+            indices[i] = i;
+        }
+    }else{
+        if(indices.size() != ref_positions.size()){
+            std::cout << "indices.size() does not match ref_positions.size()!\n";
+            return;
+        }
+        for (size_t i = 0; i < ref_positions.size(); ++i) {
+            aabb.grow(ref_positions[i]);
+        }
     }
+
     if (sampling_type == SamplingType::mean) {
         sampling_container.clear();
         sample_points = sampling_container.get_or_add<VectorS<3>, 3>("samples");
@@ -113,14 +140,15 @@ void sampling_octree::rebuild() {
             size_t count_sampled = 0;
             size_t child_end = storage[counter].v_end;
             for (size_t j = storage[counter].v_start; j <= storage[counter].v_end; ++j) {
-                size_t morton_code = MortonCode(node_center, ref_positions[indices[j]]);
-                buckets[morton_code].push_back(indices[j]);
+                size_t point_index = indices[j];
+                size_t morton_code = MortonCode(node_center, ref_positions[point_index]);
+                buckets[morton_code].push_back(point_index);
 
                 switch (sampling_type) {
                     case SamplingType::first : {
-                        if (storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(indices[j])) {
-                            storage[counter].sampled_index = indices[j];
-                            bitset.set(indices[j]);
+                        if (storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(point_index)) {
+                            storage[counter].sampled_index = point_index;
+                            bitset.set(point_index);
                         }
                         break;
                     }
@@ -128,45 +156,45 @@ void sampling_octree::rebuild() {
                         if (storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(indices[child_end])) {
                             storage[counter].sampled_index = indices[child_end];
                             bitset.set(indices[child_end]);
-                        }else{
+                        } else {
                             --child_end;
                         }
 
                         break;
                     }
                     case SamplingType::mean : {
-                        sample_points.back() += ref_positions[indices[j]] / storage[counter].size;
+                        sample_points.back() += ref_positions[point_index] / storage[counter].size;
                         break;
                     }
                     case SamplingType::closest : {
                         if (storage[counter].sampled_index == BCG_INVALID_ID) {
-                            if (!bitset.test(indices[j])) {
-                                storage[counter].sampled_index = indices[j];
-                                bitset.set(indices[j]);
+                            if (!bitset.test(point_index)) {
+                                storage[counter].sampled_index = point_index;
+                                bitset.set(point_index);
                             }
-                        } else if ((node_center - ref_positions[indices[j]]).squaredNorm() <
+                        } else if ((node_center - ref_positions[point_index]).squaredNorm() <
                                    (node_center - ref_positions[storage[counter].sampled_index]).squaredNorm()) {
                             if (bitset.test(storage[counter].sampled_index)) {
                                 bitset.reset(storage[counter].sampled_index);
                             }
-                            storage[counter].sampled_index = indices[j];
-                            bitset.set(indices[j]);
+                            storage[counter].sampled_index = point_index;
+                            bitset.set(point_index);
                         }
                         break;
                     }
                     case SamplingType::poisson : {
-                        auto sphere = sphere3(ref_positions[indices[j]], poisson_radius);
-                        if (storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(indices[j]) &&
+                        auto sphere = sphere3(ref_positions[point_index], poisson_radius);
+                        if (storage[counter].sampled_index == BCG_INVALID_ID && !bitset.test(point_index) &&
                             !reject(counter, node.aabb, sphere)) {
-                            storage[counter].sampled_index = indices[j];
-                            bitset.set(indices[j]);
+                            storage[counter].sampled_index = point_index;
+                            bitset.set(point_index);
                         }
                         break;
                     }
                     case __last__:
                         break;
                 }
-                count_sampled += bitset.test(indices[j]);
+                count_sampled += bitset.test(point_index);
             }
 
             if (count_sampled < storage[counter].size) {
@@ -346,7 +374,7 @@ bool sampling_octree::reject(size_t counter, const aligned_box3 &current_aabb, c
 
 bool sampling_octree::reject_down(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
     if (sampling_type == SamplingType::mean) {
-        if (contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
+        if (storage[counter].sampled_index != BCG_INVALID_ID && contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
             return true;
         }
     } else {
@@ -374,9 +402,9 @@ bool sampling_octree::reject_down(size_t counter, const aligned_box3 &current_aa
 }
 
 bool sampling_octree::reject_up(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
-    if (sampling_type == SamplingType::mean && contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
+    if (sampling_type == SamplingType::mean && storage[counter].sampled_index != BCG_INVALID_ID && contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
         return true;
-    } else if (contains<3>(sphere, ref_positions[storage[counter].sampled_index])) {
+    } else if (storage[counter].sampled_index != BCG_INVALID_ID && contains<3>(sphere, ref_positions[storage[counter].sampled_index])) {
         return true;
     }
 

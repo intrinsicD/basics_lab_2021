@@ -457,6 +457,7 @@ bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<4> &value) {
 
 bool draw_combobox(viewer_window *win, const char *lbl, int &value,
                    const std::vector<std::string> &labels) {
+    if(value >= labels.size()) return false;
     if (!ImGui::BeginCombo(lbl, labels[value].c_str())) return false;
     auto old_val = value;
     for (auto i = 0; i < labels.size(); i++) {

@@ -37,9 +37,15 @@ struct sampling_octree {
     sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size,
                     int max_depth = 20);
 
+    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
+                    const std::vector<size_t> &ordering, int leaf_size, int max_depth = 20);
+
     void clear();
 
     void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size, int max_depth = 20);
+
+    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, const std::vector<size_t> &ordering,
+               int leaf_size, int max_depth = 20);
 
     void rebuild();
 
@@ -54,7 +60,7 @@ struct sampling_octree {
     property<VectorS<3>, 3> sample_points;
     aligned_box3 aabb;
     std::vector<sampling_node> storage;
-    std::vector<size_t> indices;
+    std::vector<size_t> indices, ordering;
     int max_depth, current_depth;
     int leaf_size;
     SamplingType sampling_type;

@@ -40,12 +40,12 @@ void spatial_index_system::on_setup_sampling_octree(const event::spatial_index::
     if (!state->scene.has<sampling_octree>(event.id)) {
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &index = state->scene.get_or_emplace<sampling_octree>(event.id, event.type, positions, event.leaf_size, event.max_depth);
+        auto &index = state->scene.get_or_emplace<sampling_octree>(event.id, event.type, positions, event.indices, event.leaf_size, event.max_depth);
     }else{
         auto &index = state->scene.get<sampling_octree>(event.id);
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        index.build(event.type, positions, event.leaf_size, event.max_depth);
+        index.build(event.type, positions, event.indices, event.leaf_size, event.max_depth);
     }
 }
 

@@ -23,6 +23,7 @@ struct setup_octree{
 struct setup_sampling_octree{
     entt::entity id;
     sampling_octree::SamplingType type;
+    std::vector<size_t> indices;
     int leaf_size = 10;
     int max_depth = 21;
 };
