@@ -76,6 +76,7 @@ void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> 
 void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
                             const std::vector<size_t> &ordering,
                             int leaf_size, int max_depth) {
+
     this->sampling_type = sampling_type;
     this->ref_positions = ref_positions;
     this->leaf_size = leaf_size;

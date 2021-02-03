@@ -5,6 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_SAMPLING_OCTREE_H
 #define BCG_GRAPHICS_BCG_SAMPLING_OCTREE_H
 
+#include <vector>
 #include "point_cloud/bcg_point_cloud.h"
 #include "aligned_box/bcg_aligned_box.h"
 #include "sphere/bcg_sphere.h"
@@ -60,7 +61,7 @@ struct sampling_octree {
     property<VectorS<3>, 3> sample_points;
     aligned_box3 aabb;
     std::vector<sampling_node> storage;
-    std::vector<size_t> indices, ordering;
+    std::vector<size_t> indices;
     int max_depth, current_depth;
     int leaf_size;
     SamplingType sampling_type;

@@ -20,14 +20,24 @@ enum class LopType {
 };
 
 std::vector<std::string> lop_method_names();
+std::vector<std::string> repulsion_type_names();
 
 struct projection_operator {
-    property<VectorS<3>, 3> ref_positions, ref_normals, sampling_positions, old_positions, sampling_normals, projection_forces, repulsion_forces;
-    property<bcg_scalar_t, 1> ref_density;
+    property<VectorS<3>, 3> ref_positions, ref_normals, sampling_positions, old_positions, sampling_normals, projection_forces, projection_forces_tangential, repulsion_forces, repulsion_forces_i, repulsion_forces_ii;
+    property<bcg_scalar_t, 1> ref_density, sampling_projection_weights, sampling_repulsion_weights;
 
     bcg_scalar_t attraction_radius = 1.0f;
     bcg_scalar_t feature_radius = 1.0f;
     bcg_scalar_t repulsion_weight = 0.49f;
+
+    bool tangential_projection_force = false;
+
+    enum RepulsionType{
+        standard,
+        normal,
+        normal_average,
+        __last__
+    }repulsion_type;
 
     kdtree_property<bcg_scalar_t> ref_index;
 

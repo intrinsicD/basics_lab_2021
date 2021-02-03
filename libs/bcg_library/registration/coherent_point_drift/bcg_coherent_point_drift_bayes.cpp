@@ -3,8 +3,12 @@
 //
 
 #include <iostream>
+#include <random>
+#include <algorithm>
+#include <numeric>
 #include "bcg_coherent_point_drift_bayes.h"
 #include "math/rotations/bcg_rotation_project_on_so.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 #include "tbb/tbb.h"
 #include "utils/bcg_timer.h"
 #include "Spectra/SymEigsSolver.h"
@@ -68,7 +72,19 @@ void coherent_point_drift_bayes::init(const MatrixS<-1, -1> &Y, const MatrixS<-1
     T = Y;
     U = Y;
     V = MatrixS<-1, -1>::Zero(M, D);
+
+    K_XV = MatrixS<-1, -1>::Zero(N, J);
+    K_YV = MatrixS<-1, -1>::Zero(M, J);
+    K_VV = MatrixS<-1, -1>::Zero(J, J);
+
     std::cout << "Init: " << timer.pretty_report() << "\n";
+}
+
+template<typename T>
+void check(const T &val, const std::string &name){
+    if(val.array().hasNaN()){
+        std::cout << name << " has NaN\n";
+    }
 }
 
 void coherent_point_drift_bayes::maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) {
@@ -101,11 +117,73 @@ void coherent_point_drift_bayes::maximization_step(const MatrixS<-1, -1> &Y, con
     T = (s * U * R.transpose()).rowwise() + t.transpose();
     sigma_squared = ((X.transpose() * PT1.asDiagonal() * X).trace() - 2 * (PX.transpose() * T).trace() +
                      (T.transpose() * P1.asDiagonal() * T).trace()) / (N_P * D) + s * s * sigma_squared_bar;
+
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
     std::cout << "M-step: " << timer.pretty_report() << "\n";
 }
 
 void coherent_point_drift_bayes::optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
+                                                            size_t parallel_grain_size) {
+    Timer timer;
+    std::vector<int> sampled_union;   // or reserve space for N elements up front
+    std::vector<int> indices_union(M + N);
+    std::iota(indices_union.begin(), indices_union.end(), 0);   // or reserve space for N elements up front
+
+    std::sample(indices_union.begin(), indices_union.end(), std::back_inserter(sampled_union),
+                J, std::mt19937{std::random_device{}()});
+
+    MatrixS<-1, 3> VV(J, D);
+
+    for(size_t i = 0; i < J; ++i){
+        if(sampled_union[i] < M){
+            VV.row(i) = T.row(sampled_union[i]);
+        }else{
+            VV.row(i) = X.row(sampled_union[i] - M);
+        }
+    }
+    std::cout << "sampled union: " << Map(sampled_union).transpose() << std::endl;
+    K_VV = (-(VectorS<-1>::Ones(J) * VV.rowwise().squaredNorm().transpose()
+           - (2 * VV) * VV.transpose() +
+            VV.rowwise().squaredNorm() * VectorS<-1>::Ones(J).transpose()) / (2 * sigma_squared * sigma_squared)).array().exp();
+
+    K_XV = (-(VectorS<-1>::Ones(N) * VV.rowwise().squaredNorm().transpose()
+           - (2 * X) * VV.transpose() +
+           X.rowwise().squaredNorm() * VectorS<-1>::Ones(J).transpose()) / (2 * sigma_squared * sigma_squared)).array().exp();
+
+    K_YV = (-(VectorS<-1>::Ones(M) * VV.rowwise().squaredNorm().transpose()
+           - (2 * T) * VV.transpose() +
+           T.rowwise().squaredNorm() * VectorS<-1>::Ones(J).transpose()) / (2 * sigma_squared * sigma_squared)).array().exp();
+
+    std::cout << "K_YV:\n" << K_YV << std::endl;
+    std::cout << "K_VV:\n" << K_VV << std::endl;
+    std::cout << "K_XV:\n" << K_XV << std::endl;
+
+    MatrixS<-1, -1> K_VV_Inv = K_VV.cast<double>().inverse().cast<bcg_scalar_t>();
+    std::cout << "K_VV_Inv:\n" << K_VV_Inv << std::endl;
+
+    VectorS<-1> c_0_prime = omega / (1-omega) * p_out * std::pow(2 * pi * sigma_squared, D / 2.0);
+    VectorS<-1> b = alpha.array() * (-s * s * Sigma.diagonal().array() * D / (2 * sigma_squared)).exp();
+    VectorS<-1> q = VectorS<-1>::Ones(N).array() / (K_XV * (K_VV_Inv * (K_YV.transpose() * b)) + c_0_prime).array();
+
+    std::cout << "c_0_prime: " << c_0_prime.transpose() << std::endl;
+    std::cout << "b:         " << b.transpose() << std::endl;
+    std::cout << "q:         " << q.transpose() << std::endl;
+
+    PT1 = VectorS<-1>::Ones(N) - c_0_prime.cwiseProduct(q);
+    P1 = b.cwiseProduct(K_YV * (K_VV_Inv * (K_XV.transpose() * q)));
+    PX = (K_YV * (K_VV_Inv * (K_XV.transpose() * (X.array().colwise() * q.array()).matrix()))).array().colwise() * b.array();
+
+    N_P = P1.sum();
+
+    std::cout << "PT1: " << PT1.transpose() << std::endl;
+    std::cout << "P1:  " << P1.transpose() << std::endl;
+    std::cout << "PX:\n" << PX.transpose() << std::endl;
+
+    std::cout << "E-step: " << timer.pretty_report() << "\n";
+}
+
+
+void coherent_point_drift_bayes::optimized_expectation_step_old(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X,
                                                             size_t parallel_grain_size) {
     Timer timer;
     bcg_scalar_t normalizer = std::pow(2 * pi * sigma_squared, D / 2.0);

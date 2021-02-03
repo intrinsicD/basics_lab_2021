@@ -20,10 +20,15 @@ void gui_locally_optimal_projection(viewer_state *state){
         repulsion_weight = std::max(0.0f, std::min(repulsion_weight, 0.5f));
     }
     static std::vector<std::string> names = lop_method_names();
+    static std::vector<std::string> repulsion_type = repulsion_type_names();
     static int method_idx = 0;
+    static int repulsion_idx = 0;
     static bool use_density_weight = false;
+    static bool use_projection_tangential = false;
     ImGui::Checkbox("density weight", &use_density_weight);
-    draw_combobox(&state->window, "method", method_idx, names);
+    ImGui::Checkbox("projection_tangential", &use_projection_tangential);
+    draw_combobox(&state->window, "method lop", method_idx, names);
+    draw_combobox(&state->window, "repulsion type", repulsion_idx, repulsion_type);
 
     static float feature_radius = 0;
     if(static_cast<LopType>(method_idx) == LopType::flop){
@@ -56,6 +61,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         break;
                     }
                     case LopType::wlop : {
@@ -64,6 +71,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         break;
                     }
                     case LopType::flop : {
@@ -72,6 +81,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         break;
                     }
                     case LopType::clop : {
@@ -80,6 +91,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         break;
                     }
                     case LopType::__last__:
@@ -101,6 +114,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         projection.compute_step();
                     }
                     break;
@@ -111,6 +126,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         projection.compute_step();
                     }
                     break;
@@ -121,6 +138,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         projection.compute_step();
                     }
                     break;
@@ -131,6 +150,8 @@ void gui_locally_optimal_projection(viewer_state *state){
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
                         projection.feature_radius = feature_radius;
+                        projection.tangential_projection_force = use_projection_tangential;
+                        projection.repulsion_type = static_cast<projection_operator::RepulsionType>(repulsion_idx);
                         projection.compute_step();
                     }
                     break;

@@ -15,7 +15,8 @@ struct coherent_point_drift_bayes : public coherent_point_drift_base {
     MatrixS<-1, -1> R;
     VectorS<-1> t;
 
-    MatrixS<-1, -1> GInv, T, Sigma, U, V, Evecs;
+    int J = 200;
+    MatrixS<-1, -1> GInv, T, Sigma, U, V, Evecs, K_XV, K_VV, K_YV;
     VectorS<-1> mean_x, mean_u, alpha, p_out, Evals;
 
     bcg_scalar_t beta = 2, gamma = 2, kappa = 1, lambda = 2;
@@ -25,6 +26,8 @@ struct coherent_point_drift_bayes : public coherent_point_drift_base {
     void maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
     void optimized_expectation_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, size_t parallel_grain_size) override;
+
+    void optimized_expectation_step_old(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X, size_t parallel_grain_size);
 
     void optimized_maximization_step(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 
