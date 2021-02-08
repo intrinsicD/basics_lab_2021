@@ -14,45 +14,45 @@ void voxel_grid::build(property<VectorS<3>, 3> positions, const VectorI<3> &dims
         successor[i] = i + 1;
     }
     for(size_t i = 0; i < positions.size(); ++i){
-        insert(positions[i], vertex_handle(i));
+        insert_point(positions[i], vertex_handle(i));
     }
 }
 
-bool voxel_grid::is_occupied(const VectorS<3> &point) const{
-    return occupancy_grid::is_occupied(point);
+bool voxel_grid::is_occupied_point(const VectorS<3> &point) const {
+    return occupancy_grid::is_occupied_point(point);
 }
 
-bool voxel_grid::is_occupied(const VectorI<3> &coord) const{
-    return occupancy_grid::is_occupied(coord);
+bool voxel_grid::is_occupied_coord(const VectorI<3> &coord) const{
+    return occupancy_grid::is_occupied_coord(coord);
 }
 
-bool voxel_grid::is_occupied(size_t idx) const{
-    return occupancy_grid::is_occupied(idx);
+bool voxel_grid::is_occupied_idx(size_t idx) const{
+    return occupancy_grid::is_occupied_idx(idx);
 }
 
-bool voxel_grid::is_inside_bounds(const VectorS<3> &point) const{
-    return occupancy_grid::is_inside_bounds(point);
+bool voxel_grid::is_inside_bounds_point(const VectorS<3> &point) const{
+    return occupancy_grid::is_inside_bounds_point(point);
 }
 
-bool voxel_grid::is_inside_bounds(const VectorI<3> &coord) const{
-    return occupancy_grid::is_inside_bounds(coord);
+bool voxel_grid::is_inside_bounds_coord(const VectorI<3> &coord) const{
+    return occupancy_grid::is_inside_bounds_coord(coord);
 }
 
-bool voxel_grid::is_inside_bounds(size_t idx) const{
-    return occupancy_grid::is_inside_bounds(idx);
+bool voxel_grid::is_inside_bounds_idx(size_t idx) const{
+    return occupancy_grid::is_inside_bounds_idx(idx);
 }
 
-void voxel_grid::insert(const VectorS<3> &point, vertex_handle v){
-    insert(to_idx(point), v);
+void voxel_grid::insert_point(const VectorS<3> &point, vertex_handle v){
+    insert_idx(to_idx(point), v);
 }
 
-void voxel_grid::insert(const VectorI<3> &coord, vertex_handle v){
-    insert(coord_to_idx(coord), v);
+void voxel_grid::insert_coord(const VectorI<3> &coord, vertex_handle v){
+    insert_idx(coord_to_idx(coord), v);
 }
 
-void voxel_grid::insert(size_t idx, vertex_handle v){
-    if(!is_inside_bounds(idx)) return;
-    if(!is_occupied(idx)){
+void voxel_grid::insert_idx(size_t idx, vertex_handle v){
+    if(!is_inside_bounds_idx(idx)) return;
+    if(!is_occupied_idx(idx)){
         storage[idx] = {v, v, 1};
     }else{
         successor[storage[idx].v_end] = v;

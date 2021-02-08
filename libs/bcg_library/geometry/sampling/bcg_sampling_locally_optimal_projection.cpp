@@ -238,6 +238,14 @@ bcg_scalar_t flop::compute_repulsion_beta(size_t i, size_t ii) {
     return std::exp(-distance * distance / (attraction_radius * attraction_radius / 16)) / (normalizer);
 }
 
+void clop::init(vertex_container &ref_vertices, vertex_container &sampling_vertices, bool use_density_weight, size_t parallel_grain_size) {
+
+}
+
+void clop::compute_step(size_t parallel_grain_size){
+
+}
+
 bcg_scalar_t clop::compute_attraction_alpha(size_t i, size_t j) {
 
 }

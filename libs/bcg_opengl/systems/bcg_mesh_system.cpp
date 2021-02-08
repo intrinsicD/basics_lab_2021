@@ -302,7 +302,7 @@ void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explici
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    auto p = event.property;
+    auto p = event.prop;
     explicit_smoothing(mesh, laplacian, p, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
 }
 
@@ -312,7 +312,7 @@ void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implici
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    auto p = event.property;
+    auto p = event.prop;
     implicit_smoothing<bcg_scalar_t , 1>(mesh, laplacian, p, event.timestep);
 }
 
@@ -322,7 +322,7 @@ void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explici
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    auto p = event.property;
+    auto p = event.prop;
     explicit_smoothing(mesh, laplacian, p, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
 }
 
@@ -332,7 +332,7 @@ void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implici
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
-    auto p = event.property;
+    auto p = event.prop;
     implicit_smoothing(mesh, laplacian, p, event.timestep);
 }
 

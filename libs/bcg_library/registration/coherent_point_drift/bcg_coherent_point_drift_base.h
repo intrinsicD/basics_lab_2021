@@ -6,16 +6,30 @@
 #define BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE_H
 
 #include "math/bcg_linalg.h"
+#include "math/matrix/bcg_matrix_kernel.h"
 
 namespace bcg{
+
+std::vector<std::string> names_type_p();
 
 struct coherent_point_drift_base{
     bool optimized = false;
     bool initialized = false;
+    bool use_parallel = true;
+    enum class TypeP{
+        full,
+        parallel,
+        nyström,
+        __last__
+    }p_type;
+
+    int num_samples;
     bcg_scalar_t sigma_squared, omega = 0.5, N_P;
     size_t M, N, D;
     MatrixS<-1, -1> PX;
     VectorS<-1> P1, PT1, denominator;
+    using kernel_precision = double;
+    kernel_matrix<kernel_precision> kernel;
 
     virtual void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X);
 

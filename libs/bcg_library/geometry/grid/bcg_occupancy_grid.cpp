@@ -16,23 +16,23 @@ void occupancy_grid::build(property<VectorS<3>, 3> positions, const VectorI<3> &
     build_aabb(positions);
     this->dims = dims;
     for(size_t i = 0; i < positions.size(); ++i){
-        mark_occupied(positions[i]);
+        mark_occupied_point(positions[i]);
     }
 }
 
-bool occupancy_grid::is_occupied(const VectorS<3> &point) const {
+bool occupancy_grid::is_occupied_point(const VectorS<3> &point) const {
     return occupied.test(to_idx(point));
 }
 
-bool occupancy_grid::is_occupied(const VectorI<3> &coord) const {
+bool occupancy_grid::is_occupied_coord(const VectorI<3> &coord) const {
     return occupied.test(coord_to_idx(coord));
 }
 
-bool occupancy_grid::is_occupied(size_t idx) const {
+bool occupancy_grid::is_occupied_idx(size_t idx) const {
     return occupied.test(idx);
 }
 
-bool occupancy_grid::is_inside_bounds(const VectorS<3> &point) const {
+bool occupancy_grid::is_inside_bounds_point(const VectorS<3> &point) const {
     for (size_t i = 0; i < 3; ++i) {
         if (point[i] < aabb.min[i] || point[i] > aabb.max[i]) {
             return false;
@@ -41,7 +41,7 @@ bool occupancy_grid::is_inside_bounds(const VectorS<3> &point) const {
     return true;
 }
 
-bool occupancy_grid::is_inside_bounds(const VectorI<3> &coord) const {
+bool occupancy_grid::is_inside_bounds_coord(const VectorI<3> &coord) const {
     for (size_t i = 0; i < 3; ++i) {
         if (coord[i] < 0 || coord[i] > dims[i]) {
             return false;
@@ -50,46 +50,46 @@ bool occupancy_grid::is_inside_bounds(const VectorI<3> &coord) const {
     return true;
 }
 
-bool occupancy_grid::is_inside_bounds(size_t idx) const {
+bool occupancy_grid::is_inside_bounds_idx(size_t idx) const {
     return idx < capacity();
 }
 
-void occupancy_grid::mark_occupied(const VectorS<3> &point) {
+void occupancy_grid::mark_occupied_point(const VectorS<3> &point) {
     auto idx = to_idx(point);
-    if(is_inside_bounds(idx)){
+    if(is_inside_bounds_idx(idx)){
         occupied.set(idx);
     }
 }
 
-void occupancy_grid::mark_occupied(const VectorI<3> &coord) {
+void occupancy_grid::mark_occupied_coord(const VectorI<3> &coord) {
     auto idx = coord_to_idx(coord);
-    if(is_inside_bounds(idx)){
+    if(is_inside_bounds_idx(idx)){
         occupied.set(idx);
     }
 }
 
-void occupancy_grid::mark_occupied(size_t idx) {
-    if(is_inside_bounds(idx)){
+void occupancy_grid::mark_occupied_idx(size_t idx) {
+    if(is_inside_bounds_idx(idx)){
         occupied.set(idx);
     }
 }
 
-void occupancy_grid::mark_free(const VectorS<3> &point) {
+void occupancy_grid::mark_free_point(const VectorS<3> &point) {
     auto idx = to_idx(point);
-    if(is_inside_bounds(idx)){
+    if(is_inside_bounds_idx(idx)){
         occupied.reset(idx);
     }
 }
 
-void occupancy_grid::mark_free(const VectorI<3> &coord) {
+void occupancy_grid::mark_free_coord(const VectorI<3> &coord) {
     auto idx = coord_to_idx(coord);
-    if(is_inside_bounds(idx)){
+    if(is_inside_bounds_idx(idx)){
         occupied.reset(idx);
     }
 }
 
-void occupancy_grid::mark_free(size_t idx) {
-    if(is_inside_bounds(idx)){
+void occupancy_grid::mark_free_idx(size_t idx) {
+    if(is_inside_bounds_idx(idx)){
         occupied.reset(idx);
     }
 }
@@ -134,7 +134,7 @@ neighbors_query query_kring(const occupancy_grid &grid, const VectorS<3> &query_
     traverse(moore, [&query_point, &query_coord, &center_coord, &grid, &result](size_t idx,
                                                                                          const occupancy_grid &moore) {
         VectorI<3> current_coords = query_coord + moore.idx_to_coord(idx) - center_coord;
-        if (grid.is_inside_bounds(current_coords) && grid.is_occupied(current_coords)) {
+        if (grid.is_inside_bounds_coord(current_coords) && grid.is_occupied_coord(current_coords)) {
             auto distance = (query_point - grid.coord_to_voxel_center(current_coords)).norm();
             result.indices.push_back(grid.coord_to_idx(current_coords));
             result.distances.push_back(distance);
@@ -157,7 +157,7 @@ neighbors_query query_knn(const occupancy_grid &grid, const VectorS<3> &query_po
         boundary.dims = VectorI<3>::Constant(2 * kring + 1);
         for (const VectorI<3> &offset : boundary.boundary_coords()) {
             VectorI<3> current_coords = query_coord + offset - center_coord;
-            if (grid.is_inside_bounds(current_coords) && grid.is_occupied(current_coords)) {
+            if (grid.is_inside_bounds_coord(current_coords) && grid.is_occupied_coord(current_coords)) {
                 auto distance = (query_point - grid.coord_to_voxel_center(current_coords)).norm();
                 result_set.indices.push_back(grid.coord_to_idx(current_coords));
                 result_set.distances.push_back(distance);
@@ -182,7 +182,7 @@ neighbors_query query_radius(const occupancy_grid &grid, const VectorS<3> &query
     traverse(moore, [&query_point, &query_coord, &center_coord, &grid, &result_set, &radius](size_t idx,
                                                                                                   const occupancy_grid &moore) {
         VectorI<3> current_coords = query_coord + moore.idx_to_coord(idx) - center_coord;
-        if (grid.is_inside_bounds(current_coords) && grid.is_occupied(current_coords)) {
+        if (grid.is_inside_bounds_coord(current_coords) && grid.is_occupied_coord(current_coords)) {
             auto distance = (query_point - grid.coord_to_voxel_center(current_coords)).norm();
             if (distance <= radius) {
                 result_set.indices.push_back(grid.coord_to_idx(current_coords));

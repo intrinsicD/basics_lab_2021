@@ -18,23 +18,23 @@ struct voxel {
 struct voxel_grid : private occupancy_grid {
     void build(property<VectorS<3>, 3> positions, const VectorI<3> &dims);
 
-    bool is_occupied(const VectorS<3> &point) const;
+    bool is_occupied_point(const VectorS<3> &point) const;
 
-    bool is_occupied(const VectorI<3> &coord) const;
+    bool is_occupied_coord(const VectorI<3> &coord) const;
 
-    bool is_occupied(size_t idx) const;
+    bool is_occupied_idx(size_t idx) const;
 
-    bool is_inside_bounds(const VectorS<3> &point) const;
+    bool is_inside_bounds_point(const VectorS<3> &point) const;
 
-    bool is_inside_bounds(const VectorI<3> &coord) const;
+    bool is_inside_bounds_coord(const VectorI<3> &coord) const;
 
-    bool is_inside_bounds(size_t idx) const;
+    bool is_inside_bounds_idx(size_t idx) const;
 
-    void insert(const VectorS<3> &point, vertex_handle v);
+    void insert_point(const VectorS<3> &point, vertex_handle v);
 
-    void insert(const VectorI<3> &coord, vertex_handle v);
+    void insert_coord(const VectorI<3> &coord, vertex_handle v);
 
-    void insert(size_t idx, vertex_handle v);
+    void insert_idx(size_t idx, vertex_handle v);
 
     size_t num_free_voxel() const;
 

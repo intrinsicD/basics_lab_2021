@@ -38,7 +38,7 @@ void gui_registration(viewer_state *state) {
     ImGui::InputInt("max_iters", &max_iters);
     ImGui::Separator();
     if (ImGui::Button("align step")) {
-        if(source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)){
+        if (source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)) {
             state->dispatcher.trigger<event::registration::align_step>(source_id, target_id,
                                                                        static_cast<RegistrationMethod>(e));
         }
@@ -48,7 +48,7 @@ void gui_registration(viewer_state *state) {
     static bool converge = false;
     ImGui::Checkbox("converge", &converge);
     if (ImGui::Button("align converge") || converge) {
-        if(source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)) {
+        if (source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)) {
             state->dispatcher.trigger<event::registration::align_converge>(source_id, target_id,
                                                                            static_cast<RegistrationMethod>(e),
                                                                            max_iters);
@@ -56,17 +56,20 @@ void gui_registration(viewer_state *state) {
         }
     }
     if (ImGui::Button("reset")) {
-        state->dispatcher.trigger<event::registration::reset>(source_id, target_id,
-                                                              static_cast<RegistrationMethod>(e));
+        state->dispatcher.trigger<event::registration::reset>(source_id, target_id, static_cast<RegistrationMethod>(e));
     }
 
 
-    if(state->scene.valid(source_id) && state->scene.has<registration>(source_id)){
+    if (state->scene.valid(source_id) && state->scene.has<registration>(source_id)) {
         ImGui::Separator();
         auto &reg = state->scene.get<registration>(source_id);
         draw_histogram(&state->window, "errors", reg.errors);
     }
-    if(state->scene.valid(source_id) && ImGui::CollapsingHeader("Info")){
+
+    static auto names_p = names_type_p();
+    static int ptype = 0;
+    static int num_samples = 10;
+    if (state->scene.valid(source_id) && ImGui::CollapsingHeader("Info")) {
         switch (static_cast<RegistrationMethod>(e)) {
             case RegistrationMethod::rigid_icp_point2point : {
                 break;
@@ -79,6 +82,12 @@ void gui_registration(viewer_state *state) {
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(rigid.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(rigid.N_P).c_str());
                 ImGui::InputFloat("omega", &rigid.omega);
+                draw_combobox(&state->window, "type P", ptype, names_p);
+                rigid.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
+                if (rigid.p_type == coherent_point_drift_base::TypeP::nyström) {
+                    ImGui::InputInt("num_samples", &num_samples);
+                    rigid.num_samples = num_samples;
+                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_affine : {
@@ -86,6 +95,12 @@ void gui_registration(viewer_state *state) {
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(affine.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(affine.N_P).c_str());
                 ImGui::InputFloat("omega", &affine.omega);
+                draw_combobox(&state->window, "type P", ptype, names_p);
+                affine.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
+                if (affine.p_type == coherent_point_drift_base::TypeP::nyström) {
+                    ImGui::InputInt("num_samples", &num_samples);
+                    affine.num_samples = num_samples;
+                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_nonrigid : {
@@ -95,6 +110,12 @@ void gui_registration(viewer_state *state) {
                 ImGui::InputFloat("omega", &nonrigid.omega);
                 ImGui::InputFloat("beta", &nonrigid.beta);
                 ImGui::InputFloat("lambda", &nonrigid.lambda);
+                draw_combobox(&state->window, "type P", ptype, names_p);
+                nonrigid.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
+                if (nonrigid.p_type == coherent_point_drift_base::TypeP::nyström) {
+                    ImGui::InputInt("num_samples", &num_samples);
+                    nonrigid.num_samples = num_samples;
+                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_bayes : {
@@ -117,6 +138,12 @@ void gui_registration(viewer_state *state) {
 /*                ImGui::InputFloat("gamma", &bayes.gamma);
                 ImGui::InputFloat("kappa", &bayes.kappa);*/
                 ImGui::InputFloat("lambda", &nonrigid_test.lambda);
+                draw_combobox(&state->window, "type P", ptype, names_p);
+                nonrigid_test.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
+                if (nonrigid_test.p_type == coherent_point_drift_base::TypeP::nyström) {
+                    ImGui::InputInt("num_samples", &num_samples);
+                    nonrigid_test.num_samples = num_samples;
+                }
                 break;
             }
             case RegistrationMethod::__last__: {
@@ -127,7 +154,7 @@ void gui_registration(viewer_state *state) {
             }
         }
         ImGui::Separator();
-        gui_transform(state,state->scene.try_get<Transform>(source_id));
+        gui_transform(state, state->scene.try_get<Transform>(source_id));
     }
 }
 

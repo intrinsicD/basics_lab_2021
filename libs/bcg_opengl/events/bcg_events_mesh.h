@@ -47,23 +47,23 @@ struct explicit_smoothing_1D{
     entt::entity id;
     int smoothing_steps;
     bcg_scalar_t timestep;
-    property<bcg_scalar_t, 1> property;
+    property<bcg_scalar_t, 1> prop;
 };
 struct implicit_smoothing_1D{
     entt::entity id;
     bcg_scalar_t timestep;
-    property<bcg_scalar_t, 1> property;
+    property<bcg_scalar_t, 1> prop;
 };
 struct explicit_smoothing_3D{
     entt::entity id;
     int smoothing_steps;
     bcg_scalar_t timestep;
-    property<VectorS<3>, 3> property;
+    property<VectorS<3>, 3> prop;
 };
 struct implicit_smoothing_3D{
     entt::entity id;
     bcg_scalar_t timestep;
-    property<VectorS<3>, 3> property;
+    property<VectorS<3>, 3> prop;
 };
 struct taubin_smoothing{
     entt::entity id;

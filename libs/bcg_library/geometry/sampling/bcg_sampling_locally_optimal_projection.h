@@ -49,7 +49,7 @@ struct projection_operator {
 
     virtual bcg_scalar_t compute_repulsion_beta(size_t i, size_t ii) = 0;
 
-    void compute_step(size_t parallel_grain_size = 1024);
+    virtual void compute_step(size_t parallel_grain_size = 1024);
 };
 
 struct lop : public projection_operator {
@@ -71,9 +71,14 @@ struct flop : public projection_operator {
 };
 
 struct clop : public projection_operator {
-    property<MatrixS<3, 3>, 1> covs;
+    property<MatrixS<3, 3>, 1> Sigma_S;
+    property<bcg_scalar_t , 1> w_s;
     VectorS<3> sigma_k = {0.11772, 0.03287, 0.01010};
     VectorS<3> w_k = {11.453, 29.886, 97.761};
+
+    void init(vertex_container &ref_vertices, vertex_container &sampling_vertices, bool use_density_weight, size_t parallel_grain_size = 1024) override;
+
+    void compute_step(size_t parallel_grain_size = 1024) override;
 
     bcg_scalar_t compute_attraction_alpha(size_t i, size_t j) override;
 

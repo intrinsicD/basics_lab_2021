@@ -35,6 +35,8 @@ add_library(bcg_graphics
         math/matrix/bcg_matrix_vertical_stack.h
         math/matrix/bcg_matrix_anti_symmetric_part.h
         math/matrix/bcg_matrix_covariance.h
+        math/matrix/bcg_matrix_kernel.h
+        math/matrix/bcg_matrix_pairwise_distances.h
         math/vector/bcg_math_vector_angle.h math/vector/bcg_math_vector_cos.h math/vector/bcg_math_vector_sin.h
         math/sparse_matrix/bcg_sparse_matrix.h
         math/sparse_matrix/bcg_sparse_check_symmetric.h math/sparse_matrix/bcg_sparse_check_symmetric.cpp
