@@ -6,7 +6,7 @@
 #include "bcg_viewer_state.h"
 #include "sampling/bcg_sampling_locally_optimal_projection.h"
 #include "bcg_entity_hierarchy.h"
-#include "bcg_gui_octree_sampling.h"
+#include "bcg_gui_sampling_octree.h"
 
 namespace bcg{
 
@@ -36,7 +36,7 @@ void gui_locally_optimal_projection(viewer_state *state){
     }
 
     if(ImGui::CollapsingHeader("Generate Sampling")){
-        gui_octree_sampling(state);
+        gui_sampling_octree(state);
     }
 
     auto id = state->picker.entity_id;

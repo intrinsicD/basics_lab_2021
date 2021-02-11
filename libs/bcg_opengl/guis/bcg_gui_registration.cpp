@@ -69,6 +69,10 @@ void gui_registration(viewer_state *state) {
     static auto names_p = names_type_p();
     static int ptype = 0;
     static int num_samples = 10;
+    static auto names_kt = kernel_type_names();
+    static int ktype = 0;
+    static auto names_st = sampling_type_names();
+    static int stype = 0;
     if (state->scene.valid(source_id) && ImGui::CollapsingHeader("Info")) {
         switch (static_cast<RegistrationMethod>(e)) {
             case RegistrationMethod::rigid_icp_point2point : {
@@ -83,9 +87,12 @@ void gui_registration(viewer_state *state) {
                 ImGui::LabelText("N_P", "%s", std::to_string(rigid.N_P).c_str());
                 ImGui::InputFloat("omega", &rigid.omega);
                 draw_combobox(&state->window, "type P", ptype, names_p);
+                rigid.kernel_P.kernel_type = KernelType::gaussian;
                 rigid.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
                 if (rigid.p_type == coherent_point_drift_base::TypeP::nyström) {
                     ImGui::InputInt("num_samples", &num_samples);
+                    draw_combobox(&state->window, "sampling", stype, names_st);
+                    rigid.kernel_P.sampling_type = static_cast<SamplingType>(stype);
                     rigid.num_samples = num_samples;
                 }
                 break;
@@ -96,9 +103,12 @@ void gui_registration(viewer_state *state) {
                 ImGui::LabelText("N_P", "%s", std::to_string(affine.N_P).c_str());
                 ImGui::InputFloat("omega", &affine.omega);
                 draw_combobox(&state->window, "type P", ptype, names_p);
+                affine.kernel_P.kernel_type = KernelType::gaussian;
                 affine.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
                 if (affine.p_type == coherent_point_drift_base::TypeP::nyström) {
                     ImGui::InputInt("num_samples", &num_samples);
+                    draw_combobox(&state->window, "sampling", stype, names_st);
+                    affine.kernel_P.sampling_type = static_cast<SamplingType>(stype);
                     affine.num_samples = num_samples;
                 }
                 break;
@@ -111,9 +121,13 @@ void gui_registration(viewer_state *state) {
                 ImGui::InputFloat("beta", &nonrigid.beta);
                 ImGui::InputFloat("lambda", &nonrigid.lambda);
                 draw_combobox(&state->window, "type P", ptype, names_p);
+                draw_combobox(&state->window, "kernel", ktype, names_kt);
+                nonrigid.kernel_G.kernel_type = static_cast<KernelType>(ktype);
                 nonrigid.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
                 if (nonrigid.p_type == coherent_point_drift_base::TypeP::nyström) {
                     ImGui::InputInt("num_samples", &num_samples);
+                    draw_combobox(&state->window, "sampling", stype, names_st);
+                    nonrigid.kernel_P.sampling_type = static_cast<SamplingType>(stype);
                     nonrigid.num_samples = num_samples;
                 }
                 break;
@@ -139,9 +153,13 @@ void gui_registration(viewer_state *state) {
                 ImGui::InputFloat("kappa", &bayes.kappa);*/
                 ImGui::InputFloat("lambda", &nonrigid_test.lambda);
                 draw_combobox(&state->window, "type P", ptype, names_p);
+                draw_combobox(&state->window, "kernel", ktype, names_kt);
+                nonrigid_test.kernel_P.kernel_type = static_cast<KernelType>(ktype);
                 nonrigid_test.p_type = static_cast<coherent_point_drift_base::TypeP>(ptype);
                 if (nonrigid_test.p_type == coherent_point_drift_base::TypeP::nyström) {
                     ImGui::InputInt("num_samples", &num_samples);
+                    draw_combobox(&state->window, "sampling", stype, names_st);
+                    nonrigid_test.kernel_P.sampling_type = static_cast<SamplingType>(stype);
                     nonrigid_test.num_samples = num_samples;
                 }
                 break;

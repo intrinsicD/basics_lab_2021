@@ -49,15 +49,15 @@ void coherent_point_drift_base::optimized_expectation_step(const MatrixS<-1, -1>
 
     switch (p_type) {
         case TypeP::full: {
-            kernel.normalizer = 2 * sigma_squared;
+            kernel_P.two_sigma_squared = 2 * sigma_squared;
 
-            Matrix<kernel_precision, -1, -1> K = kernel.compute_kernel(Y.cast<kernel_precision>(),
-                                                                       X.cast<kernel_precision>());
-/*            PT1 = K * Vector<kernel_precision, -1>::Ones(N);
-            K = K * (PT1.array() + c).matrix().asDiagonal();
-            PT1 = K * Vector<kernel_precision, -1>::Ones(N);
-            P1 = K.transpose() * Vector<kernel_precision, -1>::Ones(M);
-            PX = K * X;
+            Matrix<kernel_precision, -1, -1> K = kernel_P.compute_kernel(Y.cast<kernel_precision>(),
+                                                                         X.cast<kernel_precision>());
+/*            PT1 = (K * Vector<kernel_precision, -1>::Ones(N)).cast<bcg_scalar_t>();
+            K = K * (PT1.array().cast<kernel_precision>() + c).matrix().asDiagonal();
+            PT1 = (K * Vector<kernel_precision, -1>::Ones(N)).cast<bcg_scalar_t>();
+            P1 = (K.transpose() * Vector<kernel_precision, -1>::Ones(M)).cast<bcg_scalar_t>();
+            PX = (K * X.cast<kernel_precision>()).cast<bcg_scalar_t>();
             N_P = P1.sum();*/
 
             Vector<kernel_precision, -1> a = 1.0 / ((K.transpose() * Vector<kernel_precision, -1>::Ones(M)) +
@@ -111,22 +111,22 @@ void coherent_point_drift_base::optimized_expectation_step(const MatrixS<-1, -1>
             break;
         }
         case TypeP::nyström: {
-            kernel.normalizer = 2 * sigma_squared;
+            kernel_P.two_sigma_squared = 2 * sigma_squared;
 
             num_samples = std::min<int>(num_samples, Y.rows() + X.rows());
 
-            kernel.compute_nyström_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
+            kernel_P.compute_nyström_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
 
-            std::cout << "error: " << kernel.approximation_error(Y.cast<kernel_precision>(), X.cast<kernel_precision>())
+            std::cout << "error: " << kernel_P.approximation_error(Y.cast<kernel_precision>(), X.cast<kernel_precision>())
                       << "\n";
-            Vector<kernel_precision, -1> a = 1.0 / (kernel.K_BV * (kernel.K_VV_INV * (kernel.K_AV.transpose() *
-                                                                                      Vector<kernel_precision, -1>::Ones(
+            Vector<kernel_precision, -1> a = 1.0 / (kernel_P.K_BV * (kernel_P.K_VV_INV * (kernel_P.K_AV.transpose() *
+                                                                                          Vector<kernel_precision, -1>::Ones(
                                                                                               M))) +
                                                     c * Vector<kernel_precision, -1>::Ones(N)).array();
             PT1 = (Vector<kernel_precision, -1>::Ones(N) - c * a).cast<bcg_scalar_t>();
-            P1 = (kernel.K_AV * (kernel.K_VV_INV * (kernel.K_BV.transpose() * a))).cast<bcg_scalar_t>();
-            PX = (kernel.K_AV * (kernel.K_VV_INV * (kernel.K_BV.transpose() *
-                                                   (X.cast<kernel_precision>().array().colwise() *
+            P1 = (kernel_P.K_AV * (kernel_P.K_VV_INV * (kernel_P.K_BV.transpose() * a))).cast<bcg_scalar_t>();
+            PX = (kernel_P.K_AV * (kernel_P.K_VV_INV * (kernel_P.K_BV.transpose() *
+                                                        (X.cast<kernel_precision>().array().colwise() *
                                                     a.array()).matrix()))).cast<bcg_scalar_t>();
             N_P = P1.sum();
             std::cout << "P_nyström: " << timer.pretty_report() << "\n";

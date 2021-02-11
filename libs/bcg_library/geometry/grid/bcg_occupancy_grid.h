@@ -48,7 +48,7 @@ struct occupancy_grid : public base_grid {
 
     size_t capacity() const;
 
-    void clear();
+    virtual void clear();
 
     DynamicBitset occupied;
 };

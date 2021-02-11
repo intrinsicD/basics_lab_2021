@@ -2,7 +2,7 @@
 // Created by alex on 09.01.21.
 //
 
-#include "bcg_gui_octree_sampling.h"
+#include "bcg_gui_sampling_octree.h"
 #include "bcg_viewer_state.h"
 #include "bcg_gui_property_selector.h"
 #include "geometry/sampling/bcg_sampling_octree.h"
@@ -17,7 +17,7 @@ namespace bcg {
 
 using namespace entt::literals;
 
-void gui_octree_sampling(viewer_state *state) {
+void gui_sampling_octree(viewer_state *state) {
     static int idx = 4;
     static int leaf_size = 1;
     static int max_depth = 20;

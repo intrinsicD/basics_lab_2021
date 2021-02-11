@@ -125,10 +125,12 @@ add_library(bcg_graphics
         geometry/octree/bcg_octree.h geometry/octree/bcg_octree.cpp
         geometry/sampling/bcg_sampling_octree.h geometry/sampling/bcg_sampling_octree.cpp
         geometry/sampling/bcg_sampling_locally_optimal_projection.h geometry/sampling/bcg_sampling_locally_optimal_projection.cpp
+        geometry/sampling/bcg_sampling_grid.h geometry/sampling/bcg_sampling_grid.cpp
         geometry/marching_cubes/bcg_marching_cubes.h geometry/marching_cubes/bcg_marching_cubes.cpp
         geometry/correspondences/bcg_correspondences.h geometry/correspondences/bcg_correspondences.cpp
         registration/bcg_registration.h
         registration/rigid_idp/bcg_rigid_icp.h registration/rigid_idp/bcg_rigid_icp.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_base2.h registration/coherent_point_drift/bcg_coherent_point_drift_base2.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_base.h registration/coherent_point_drift/bcg_coherent_point_drift_base.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_rigid.h registration/coherent_point_drift/bcg_coherent_point_drift_rigid.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_affine.h registration/coherent_point_drift/bcg_coherent_point_drift_affine.cpp

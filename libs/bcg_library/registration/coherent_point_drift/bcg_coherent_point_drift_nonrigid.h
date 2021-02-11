@@ -13,6 +13,7 @@ struct coherent_point_drift_nonrigid : public coherent_point_drift_base {
     MatrixS<-1, -1> G, T, Evecs;
     VectorS<-1> Evals;
     bcg_scalar_t beta = 2, lambda = 2;
+    kernel_matrix<kernel_precision> kernel_G;
 
     void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X) override;
 

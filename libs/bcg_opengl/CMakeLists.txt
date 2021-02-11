@@ -71,7 +71,8 @@ if (BCG_OPENGL)
             guis/bcg_gui_correspondences.h guis/bcg_gui_correspondences.cpp
             guis/bcg_gui_registration.h guis/bcg_gui_registration.cpp
             guis/bcg_gui_statistics.h guis/bcg_gui_statistics.cpp
-            guis/bcg_gui_octree_sampling.h guis/bcg_gui_octree_sampling.cpp
+            guis/bcg_gui_sampling_octree.h guis/bcg_gui_sampling_octree.cpp
+            guis/bcg_gui_sampling_grid.h guis/bcg_gui_sampling_grid.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

@@ -28,7 +28,8 @@
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
-#include "bcg_opengl/guis/bcg_gui_octree_sampling.h"
+#include "bcg_opengl/guis/bcg_gui_sampling_octree.h"
+#include "bcg_opengl/guis/bcg_gui_sampling_grid.h"
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
 
 int main() {
@@ -64,12 +65,19 @@ int main() {
             if (ImGui::MenuItem("Bilateral Filter")) {
                 state->gui.left = gui_point_cloud_bilateral_filter;
             }
-            if(ImGui::MenuItem("Octree Sampling")){
-                state->gui.left = gui_octree_sampling;
+            if(ImGui::BeginMenu("Sampling")){
+                if(ImGui::MenuItem("Octree Sampling")){
+                    state->gui.left = gui_sampling_octree;
+                }
+                if(ImGui::MenuItem("Grid Sampling")){
+                    state->gui.left = gui_sampling_grid;
+                }
+                if(ImGui::MenuItem("Lop Sampling")){
+                    state->gui.left = gui_locally_optimal_projection;
+                }
+                ImGui::EndMenu();
             }
-            if(ImGui::MenuItem("Lop Sampling")){
-                state->gui.left = gui_locally_optimal_projection;
-            }
+
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Graph")) {

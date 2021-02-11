@@ -29,7 +29,7 @@ struct coherent_point_drift_base{
     MatrixS<-1, -1> PX;
     VectorS<-1> P1, PT1, denominator;
     using kernel_precision = double;
-    kernel_matrix<kernel_precision> kernel;
+    kernel_matrix<kernel_precision> kernel_P;
 
     virtual void init(const MatrixS<-1, -1> &Y, const MatrixS<-1, -1> &X);
 
