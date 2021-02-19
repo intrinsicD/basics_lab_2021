@@ -166,7 +166,7 @@ private:
     bool is_collapse_legal(const collapse_data &cd);
 
     // what is the priority of collapsing the halfedge h
-    float priority(const collapse_data &cd);
+    bcg_scalar_t priority(const collapse_data &cd);
 
     // postprocess halfedge collapse
     void postprocess_collapse(const collapse_data &cd);
@@ -569,7 +569,7 @@ bool simplification::is_collapse_legal(const collapse_data &cd) {
 }
 
 // what is the priority of collapsing the halfedge h
-float simplification::priority(const collapse_data &cd) {
+bcg_scalar_t simplification::priority(const collapse_data &cd) {
     // computer quadric error metric
     quadric Q = vquadric[cd.v0];
     Q += vquadric[cd.v1];

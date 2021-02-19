@@ -167,7 +167,7 @@ void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color
     auto *edges = state->get_edges(event.id);
     if(!edges) return;
 
-    std::vector<VectorS<3>> colors = map_to_colors(edges, event.color.property_name, material.color_map);
+    std::vector<Vector<float, 3>> colors = map_to_colors(edges, event.color.property_name, material.color_map);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
     material.width = std::min((int)colors.size(), material.width);

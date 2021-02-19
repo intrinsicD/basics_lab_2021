@@ -26,11 +26,11 @@ void gui_mesh_remeshing(viewer_state *state) {
     static bcg_scalar_t max_edge_length = 0;
     static bcg_scalar_t approx_error = 0;
     if (e == 0) {
-        ImGui::InputFloat("edge_length", &edge_length);
+        draw_input(&state->window,"edge_length", edge_length);
     } else if (e == 1) {
-        ImGui::InputFloat("min_edge_length", &min_edge_length);
-        ImGui::InputFloat("max_edge_length", &max_edge_length);
-        ImGui::InputFloat("approx_error", &approx_error);
+        draw_input(&state->window, "min_edge_length", min_edge_length);
+        draw_input(&state->window, "max_edge_length", max_edge_length);
+        draw_input(&state->window, "approx_error", approx_error);
     }
     ImGui::InputInt("iterations", &iterations);
     ImGui::Checkbox("use projection", &use_projection);

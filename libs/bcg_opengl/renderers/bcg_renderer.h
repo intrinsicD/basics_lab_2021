@@ -24,7 +24,7 @@ struct renderer : public system {
 
     ~renderer() override = default;
 
-    static std::vector<VectorS<3>>
+    static std::vector<Vector<float, 3>>
     map_to_colors(property_container *container, const std::string &property_name, colormap::base_colormap color_map = colormap::jet());
 
 protected:

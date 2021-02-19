@@ -73,6 +73,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_statistics.h guis/bcg_gui_statistics.cpp
             guis/bcg_gui_sampling_octree.h guis/bcg_gui_sampling_octree.cpp
             guis/bcg_gui_sampling_grid.h guis/bcg_gui_sampling_grid.cpp
+            guis/bcg_gui_kernel_matrix.h guis/bcg_gui_kernel_matrix.cpp
             events/bcg_events.h
             systems/bcg_systems.h
             systems/bcg_camera_system.h systems/bcg_camera_system.cpp

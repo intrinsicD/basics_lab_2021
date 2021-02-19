@@ -22,9 +22,9 @@ struct material_points : public material{
     bool use_uniform_color = true;
     bool use_uniform_size = true;
 
-    VectorS<3> uniform_color = color::random();
-    bcg_scalar_t uniform_size = 1.0;
-    bcg_scalar_t alpha = 1.0;
+    Vector<float, 3> uniform_color = color<float>::random();
+    float uniform_size = 1.0;
+    float alpha = 1.0;
 
     void upload(const glsl_program &program) override {
         program.set_uniform_i("material.use_uniform_point_size", use_uniform_size);

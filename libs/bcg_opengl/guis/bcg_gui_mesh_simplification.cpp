@@ -16,14 +16,16 @@ void gui_mesh_simplification(viewer_state *state) {
     static bcg_scalar_t normal_deviation = 0.0;
     static bcg_scalar_t hausdorff_error = 0.0;
     ImGui::InputInt("num vertices", &n_vertices);
-    ImGui::InputFloat("aspect ratio", &aspect_ratio);
-    ImGui::InputFloat("edge length", &edge_length);
+    draw_input(&state->window, "aspect ratio", aspect_ratio);
+    draw_input(&state->window, "edge length", edge_length);
     ImGui::InputInt("max valence", &max_valence);
-    ImGui::InputFloat("normal deviation", &normal_deviation);
-    ImGui::InputFloat("hausdorff error", &hausdorff_error);
+    draw_input(&state->window, "normal deviation", normal_deviation);
+    draw_input(&state->window, "hausdorff error", hausdorff_error);
     if (ImGui::Button("Compute")) {
-        state->dispatcher.trigger<event::mesh::simplification>(state->picker.entity_id, (unsigned int)n_vertices, aspect_ratio,
-                                                               edge_length, (unsigned int)max_valence, normal_deviation,
+        state->dispatcher.trigger<event::mesh::simplification>(state->picker.entity_id, (unsigned int) n_vertices,
+                                                               aspect_ratio,
+                                                               edge_length, (unsigned int) max_valence,
+                                                               normal_deviation,
                                                                hausdorff_error);
 
         auto &material = state->scene.get<material_mesh>(state->picker.entity_id);

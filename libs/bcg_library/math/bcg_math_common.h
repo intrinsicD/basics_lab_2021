@@ -11,7 +11,7 @@
 namespace bcg {
 using byte = unsigned int;
 using bcg_index_t = unsigned int;
-using bcg_scalar_t = float;
+using bcg_scalar_t = double;
 
 [[maybe_unused]] inline constexpr bcg_scalar_t pi = 3.14159265358979323846;
 

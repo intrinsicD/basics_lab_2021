@@ -29,36 +29,36 @@ void renderer::on_end_frame(const event::internal::end_frame &){
 
 }
 
-std::vector<VectorS<3>>
+std::vector<Vector<float, 3>>
 renderer::map_to_colors(property_container *container, const std::string &property_name, colormap::base_colormap color_map){
-    std::vector<VectorS<3>> colors;
+    std::vector<Vector<float, 3>> colors;
     auto *base_ptr = container->get_base_ptr(property_name);
     if(base_ptr->dims() == 1){
         if(base_ptr->void_ptr() == nullptr){
-            VectorS<-1> values = MapConst(container->get<bool, 1>(base_ptr->name())).cast<float>();
-            colors = color_map(values, values.minCoeff(), values.maxCoeff());
+            VectorS<-1> values = MapConst(container->get<bool, 1>(base_ptr->name())).cast<bcg_scalar_t>();
+            Map(colors) = MapConst(color_map(values, values.minCoeff(), values.maxCoeff())).cast<float>();
         }else{
             if(contains(property_name, "v_connectivity")){
                 VectorS<-1> values = MapConst(container->get<halfedge_graph::vertex_connectivity , 1>(base_ptr->name())).cast<bcg_scalar_t>();
-                colors = color_map(values, values.minCoeff(), values.maxCoeff());
+                Map(colors) = MapConst(color_map(values, values.minCoeff(), values.maxCoeff())).cast<float>();
             }else if(contains(property_name, "f_connectivity")){
                 VectorS<-1> values = MapConst(container->get<halfedge_mesh::face_connectivity , 1>(base_ptr->name())).cast<bcg_scalar_t>();
-                colors = color_map(values, values.minCoeff(), values.maxCoeff());
+                Map(colors) = MapConst(color_map(values, values.minCoeff(), values.maxCoeff())).cast<float>();
             }else{
                 VectorS<-1> values = MapConst(container->get<bcg_scalar_t , 1>(base_ptr->name()));
-                colors = color_map(values, values.minCoeff(), values.maxCoeff());
+                Map(colors) = MapConst(color_map(values, values.minCoeff(), values.maxCoeff())).cast<float>();
             }
         }
     }else if(base_ptr->dims() == 3){
-        std::vector<VectorS<3>> colors1;
+        std::vector<Vector<float, 3>> colors1;
         auto values = container->get<VectorS<3>, 3>(base_ptr->name());
         if(!values){
             auto values1 = container->get<VectorI<3>, 3>(base_ptr->name());
             colors1.resize(values1.size());
-            Map<3>(colors1) = MapConst(values1).cast<bcg_scalar_t>();
+            Map<3>(colors1) = MapConst(values1).cast<float>();
         }else{
             colors1.resize(values.size());
-            Map<3>(colors1) = MapConst(values);
+            Map<3>(colors1) = MapConst(values).cast<float>();
         }
         auto min = MapConst<3>(colors1).minCoeff();
         auto max = MapConst<3>(colors1).maxCoeff();

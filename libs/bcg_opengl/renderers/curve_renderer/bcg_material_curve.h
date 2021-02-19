@@ -19,8 +19,8 @@ struct material_curve : public material{
 
     bool show_bezier = false, show_hermite = true;
 
-    VectorS<3> uniform_color = color::random();
-    bcg_scalar_t uniform_alpha = 1;
+    Vector<float, 3> uniform_color = color<float>::random();
+    float uniform_alpha = 1;
     int tesselation_level = 16;
 
     void use_hermite(const glsl_program &program){

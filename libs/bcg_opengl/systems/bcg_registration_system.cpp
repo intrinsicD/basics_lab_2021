@@ -7,11 +7,7 @@
 #include "correspondences/bcg_correspondences.h"
 #include "registration/bcg_registration.h"
 #include "registration/rigid_idp/bcg_rigid_icp.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_rigid.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_affine.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_bayes.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_test.h"
+#include "registration/coherent_point_drift/bcg_coherent_point_drift_base2.h"
 #include "bcg_property_map_eigen.h"
 
 namespace bcg {
@@ -40,7 +36,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
     auto target_positions = target_vertices->get<VectorS<3>, 3>("v_position");
 
     auto &source_model = state->scene.get<Transform>(event.source_id);
-    const auto &target_model = state->scene.get<Transform>(event.target_id);
+    auto &target_model = state->scene.get<Transform>(event.target_id);
 
     Transform delta = Transform::Identity();
     switch (event.method) {
@@ -65,104 +61,68 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
         case RegistrationMethod::coherent_point_drift_rigid : {
-            MatrixS<-1, 3> Y = ((source_model.linear() * MapConst(source_positions).transpose()).colwise() +
-                                source_model.translation()).transpose();
-            MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
-                                target_model.translation()).transpose();
-            auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid>(event.source_id);
+            auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid2>(event.source_id);
             if(reg.errors.empty() || !rigid.initialized){
-                rigid.init(Y, X);
+                rigid.init(source_vertices, source_model, target_vertices, target_model);
+                rigid.initialized = true;
             }
-            rigid.R.setIdentity();
-            rigid.t.setZero();
-            rigid.s = 1.0;
-            rigid(Y, X, state->config.parallel_grain_size);
-            delta = Translation(rigid.t) * Rotation(MatrixS<3, 3>(rigid.R)) * Scaling(VectorS<3>::Constant(rigid.s));
+            rigid.parallel_grain_size = state->config.parallel_grain_size;
+            rigid.compute_step();
+            delta = Translation(rigid.t) * Rotation(rigid.R) * Scaling(VectorS<3>::Constant(rigid.s));
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
+            rigid.likelihood.push_back(MapConst(rigid.P1).prod());
             break;
         }
         case RegistrationMethod::coherent_point_drift_affine : {
-            MatrixS<-1, 3> Y = ((source_model.linear() * MapConst(source_positions).transpose()).colwise() +
-                                source_model.translation()).transpose();
-            MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
-                                target_model.translation()).transpose();
-            auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine>(event.source_id);
+            auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine2>(event.source_id);
             if(reg.errors.empty() || !affine.initialized){
-                affine.init(Y, X);
+                affine.init(source_vertices, source_model, target_vertices, target_model);
+                affine.initialized = true;
             }
-            affine.B.setIdentity();
-            affine.t.setZero();
-            affine(Y, X, state->config.parallel_grain_size);
-            delta = Translation(affine.t) * Transform(MatrixS<3, 3>(affine.B));
+            affine.parallel_grain_size = state->config.parallel_grain_size;
+            affine.compute_step();
+            delta = Translation(affine.t) * Transform(affine.B);
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
+            affine.likelihood.push_back(MapConst(affine.P1).prod());
             break;
         }
         case RegistrationMethod::coherent_point_drift_nonrigid : {
-            MatrixS<-1, 3> Y = ((source_model.linear() * MapConst(source_positions).transpose()).colwise() +
-                                source_model.translation()).transpose();
-            MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
-                                target_model.translation()).transpose();
-
-            auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid>(event.source_id);
+            auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid2>(event.source_id);
             if(reg.errors.empty() || !nonrigid.initialized){
-                nonrigid.init(Y, X);
+                nonrigid.init(source_vertices, source_model, target_vertices, target_model);
+                nonrigid.initialized = true;
             }
-            nonrigid(Y, X, state->config.parallel_grain_size);
-            auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
-            auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_nonrigid_position");
-            Map(cpd_vector) = (nonrigid.T - Y) * source_model.linear();
-            Map(cpd_positions) = (source_model.inverse() * nonrigid.T.transpose().colwise().homogeneous()).transpose();
-            reg.errors.push_back(nonrigid.sigma_squared);
-            cpd_vector.set_dirty();
-            cpd_positions.set_dirty();
+            nonrigid.parallel_grain_size = state->config.parallel_grain_size;
+            nonrigid.compute_step();
+            reg.errors.push_back((MapConst(nonrigid.PX) - MapConst(nonrigid.P1).asDiagonal() * nonrigid.Y).rowwise().squaredNorm().sum());
+            nonrigid.likelihood.push_back(MapConst(nonrigid.P1).prod());
+            break;
+        }
+        case RegistrationMethod::coherent_point_drift_nonrigid2 : {
+            auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid3>(event.source_id);
+            if(reg.errors.empty() || !nonrigid.initialized){
+                nonrigid.init(source_vertices, source_model, target_vertices, target_model);
+                nonrigid.initialized = true;
+            }
+            nonrigid.parallel_grain_size = state->config.parallel_grain_size;
+            nonrigid.compute_step();
+            delta = Translation(nonrigid.t) * Rotation(nonrigid.R) * Scaling(VectorS<3>::Constant(nonrigid.s));
+            reg.errors.push_back((MapConst(nonrigid.PX) - MapConst(nonrigid.P1).asDiagonal() * nonrigid.Y).rowwise().squaredNorm().sum());
+            nonrigid.likelihood.push_back(MapConst(nonrigid.P1).prod());
             break;
         }
         case RegistrationMethod::coherent_point_drift_bayes : {
-            MatrixS<-1, 3> Y = ((source_model.linear() * MapConst(source_positions).transpose()).colwise() +
-                                source_model.translation()).transpose();
-            MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
-                                target_model.translation()).transpose();
-
-            auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes>(event.source_id);
+            auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes2>(event.source_id);
             if(reg.errors.empty() || !bayes.initialized){
-                bayes.init(Y, X);
+                bayes.init(source_vertices, source_model, target_vertices, target_model);
+                bayes.initialized = true;
             }
-            bayes.R.setIdentity();
-            bayes.t.setZero();
-            bayes.s = 1.0;
-            bayes(Y, X, state->config.parallel_grain_size);
-            auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_vectors");
-            auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_bayes_position");
-            Map(cpd_positions) = (source_model.inverse() * bayes.U.transpose().colwise().homogeneous()).transpose();
-            Map(cpd_vector) = Map(cpd_positions) - MapConst(source_positions);
-            delta = Translation(bayes.t) * Rotation(MatrixS<3, 3>(bayes.R)) * Scaling(VectorS<3>::Constant(bayes.s));
-            reg.errors.push_back(bayes.sigma_squared);
-            cpd_vector.set_dirty();
-            cpd_positions.set_dirty();
-            break;
-        }
-        case RegistrationMethod::coherent_point_drift_test : {
-            MatrixS<-1, 3> Y = ((source_model.linear() * MapConst(source_positions).transpose()).colwise() +
-                                source_model.translation()).transpose();
-            MatrixS<-1, 3> X = ((target_model.linear() * MapConst(target_positions).transpose()).colwise() +
-                                target_model.translation()).transpose();
-
-            auto &nonrigid_test = state->scene.get_or_emplace<coherent_point_drift_test>(event.source_id);
-            if(reg.errors.empty()|| !nonrigid_test.initialized){
-                nonrigid_test.init(Y, X);
-            }
-            nonrigid_test.R.setIdentity();
-            nonrigid_test.t.setZero();
-            nonrigid_test.s = 1.0;
-            nonrigid_test(Y, X, state->config.parallel_grain_size);
-            auto cpd_vector = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_test_vectors");
-            auto cpd_positions = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_test_position");
-            Map(cpd_vector) = (nonrigid_test.V) * source_model.linear();
-            Map(cpd_positions) = (source_model.inverse() * nonrigid_test.U.transpose().colwise().homogeneous()).transpose();
-            delta = Translation(nonrigid_test.t) * Rotation(MatrixS<3, 3>(nonrigid_test.R)) * Scaling(VectorS<3>::Constant(nonrigid_test.s));
-            reg.errors.push_back(nonrigid_test.sigma_squared);
-            cpd_vector.set_dirty();
-            cpd_positions.set_dirty();
+            bayes.parallel_grain_size = state->config.parallel_grain_size;
+            bayes.compute_step();
+            reg.errors.push_back((MapConst(bayes.PX) - MapConst(bayes.P1).asDiagonal() * bayes.Y).rowwise().squaredNorm().sum());
+            bayes.likelihood.push_back(MapConst(bayes.P1).prod());
+            delta = Translation(bayes.t) * Rotation(bayes.R) * Scaling(VectorS<3>::Constant(bayes.s));
+            source_model = bayes.backup_source_model;
             break;
         }
         case RegistrationMethod::__last__: {
@@ -172,7 +132,6 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
     }
-
     source_model = delta * source_model;
 }
 
@@ -197,11 +156,26 @@ void registration_system::on_reset(const event::registration::reset &event) {
     auto &reg = state->scene.get<registration>(event.source_id);
     reg.errors.clear();
 
-    state->scene.remove_if_exists<coherent_point_drift_rigid>(event.source_id);
-    state->scene.remove_if_exists<coherent_point_drift_affine>(event.source_id);
-    state->scene.remove_if_exists<coherent_point_drift_nonrigid>(event.source_id);
-    state->scene.remove_if_exists<coherent_point_drift_bayes>(event.source_id);
-    state->scene.remove_if_exists<coherent_point_drift_test>(event.source_id);
+    if(state->scene.has<coherent_point_drift_rigid2>(event.source_id)){
+        auto &cpd = state->scene.get<coherent_point_drift_rigid2>(event.source_id);
+        cpd.reset();
+        state->scene.remove_if_exists<coherent_point_drift_rigid2>(event.source_id);
+    }
+    if(state->scene.has<coherent_point_drift_affine2>(event.source_id)){
+        auto &cpd = state->scene.get<coherent_point_drift_affine2>(event.source_id);
+        cpd.reset();
+        state->scene.remove_if_exists<coherent_point_drift_affine2>(event.source_id);
+    }
+    if(state->scene.has<coherent_point_drift_nonrigid2>(event.source_id)){
+        auto &cpd = state->scene.get<coherent_point_drift_nonrigid2>(event.source_id);
+        cpd.reset();
+        state->scene.remove_if_exists<coherent_point_drift_nonrigid2>(event.source_id);
+    }
+    if(state->scene.has<coherent_point_drift_bayes2>(event.source_id)){
+        auto &cpd = state->scene.get<coherent_point_drift_bayes2>(event.source_id);
+        cpd.reset();
+        state->scene.remove_if_exists<coherent_point_drift_bayes2>(event.source_id);
+    }
 }
 
 }

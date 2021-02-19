@@ -11,7 +11,6 @@
 namespace bcg {
 
 struct camera {
-    //TODO Fix camera like in learnopengl
     projection proj;
     Transform model_matrix;
     VectorS<3> target_point;

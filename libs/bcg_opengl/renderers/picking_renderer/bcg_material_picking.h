@@ -14,7 +14,7 @@ namespace bcg{
 struct material_picking : public material{
     material_picking() = default;
 
-    explicit material_picking(entt::entity id) : picking_color(color::packed_int(static_cast<std::uint32_t>(id))){
+    explicit material_picking(entt::entity id) : picking_color(color<float>::packed_int(static_cast<std::uint32_t>(id))){
         attributes = {
                 {"position", "v_position", "v_position", 0, true}
         };
@@ -22,7 +22,7 @@ struct material_picking : public material{
 
     ogl_vertex_array vao;
 
-    VectorS<3> picking_color;
+    Vector<float, 3> picking_color;
 
     void upload(const glsl_program &program) override {
         program.set_uniform_3f("material.picking_color", 1, picking_color.data());

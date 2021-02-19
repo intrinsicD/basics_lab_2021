@@ -228,7 +228,8 @@ void deferred_renderer::on_render(const event::internal::render &event) {
         program.set_uniform_f(("lights[" + std::to_string(i) + "].Linear").c_str(), linear);
         program.set_uniform_f(("lights[" + std::to_string(i) + "].Quadratic").c_str(), quadratic);
     }
-    program.set_uniform_3f("viewPos", 1, state->cam.position().data());
+    Vector<float, 3> pos = state->cam.position().cast<float>();
+    program.set_uniform_3f("viewPos", 1, pos.data());
 
     if (!quad_vao.is_valid()) {
         float quadVertices[] = {

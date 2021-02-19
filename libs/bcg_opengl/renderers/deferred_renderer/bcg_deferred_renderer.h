@@ -36,8 +36,8 @@ private:
     ogl_vertex_array quad_vao;
     ogl_vertex_buffer quad_vbo;
 
-    std::vector<VectorS<3>> lightPositions;
-    std::vector<VectorS<3>> lightColors;
+    std::vector<Vector<float, 3>> lightPositions;
+    std::vector<Vector<float, 3>> lightColors;
 };
 
 }

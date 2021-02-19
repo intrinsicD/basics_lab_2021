@@ -29,8 +29,8 @@ void correspondences::add_correspondence(size_t i, size_t j, bcg_scalar_t weight
     stats.push(weight);
 }
 
-std::vector<float> correspondences::weights() const {
-    std::vector<float> values(mapping.size());
+std::vector<bcg_scalar_t> correspondences::weights() const {
+    std::vector<bcg_scalar_t> values(mapping.size());
     for (size_t i = 0; i < mapping.size(); ++i) {
         values[i] = mapping[i].value();
     }

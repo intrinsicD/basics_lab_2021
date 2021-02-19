@@ -301,17 +301,17 @@ bool draw_slider(
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorS<2> &value, float min, float max) {
+        viewer_window *win, const char *lbl, Vector<float, 2> &value, float min, float max) {
     return ImGui::SliderFloat2(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorS<3> &value, float min, float max) {
+        viewer_window *win, const char *lbl, Vector<float,3> &value, float min, float max) {
     return ImGui::SliderFloat3(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorS<4> &value, float min, float max) {
+        viewer_window *win, const char *lbl, Vector<float,4> &value, float min, float max) {
     return ImGui::SliderFloat4(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
@@ -340,17 +340,17 @@ bool draw_dragger(viewer_window *win, const char *lbl, float &value, float speed
     return ImGui::DragFloat(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorS<2> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, Vector<float,2> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat2(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorS<3> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, Vector<float,3> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat3(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorS<4> &value, float speed,
+bool draw_dragger(viewer_window *win, const char *lbl, Vector<float,4> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat4(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
@@ -390,29 +390,29 @@ bool draw_checkbox(viewer_window *win, const char *lbl, bool &value, bool invert
     }
 }
 
-bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<3> &value) {
+bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float,3> &value) {
     auto flags = ImGuiColorEditFlags_Float;
     Vector<float, 3> color = value.cast<float>();
     auto edit = ImGui::ColorEdit3(lbl, color.data(), flags);
     if (edit) {
-        value = color.cast<bcg_scalar_t>();
+        value = color.cast<float>();
         return true;
     }
     return false;
 }
 
-bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<4> &value) {
+bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float,4> &value) {
     auto flags = ImGuiColorEditFlags_Float;
     Vector<float, 4> color = value.cast<float>();
     auto edit = ImGui::ColorEdit4(lbl, color.data(), flags);
     if (edit) {
-        value = color.cast<bcg_scalar_t>();
+        value = color.cast<float>();
         return true;
     }
     return false;
 }
 
-bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<3> &value) {
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, Vector<float,3> &value) {
     auto color = value;
     auto exposure = 0.0f;
     auto scale = color.maxCoeff();
@@ -431,7 +431,7 @@ bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<3> &value) {
     }
 }
 
-bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<4> &value) {
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, Vector<float,4> &value) {
     auto color = value;
     auto exposure = 0.0f;
     auto scale = color.head<3>().maxCoeff();
@@ -538,33 +538,33 @@ void draw_histogram(
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS<2>> &values) {
+        viewer_window *win, const char *lbl, const std::vector<Vector<float,2>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<2>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,2>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<2>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,2>));
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS<3>> &values) {
+        viewer_window *win, const char *lbl, const std::vector<Vector<float,3>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,3>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,3>));
     ImGui::PlotHistogram((lbl + " z"s).c_str(), (const float *) values.data() + 2,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<3>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,3>));
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS<4>> &values) {
+        viewer_window *win, const char *lbl, const std::vector<Vector<float,4>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,4>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,4>));
     ImGui::PlotHistogram((lbl + " z"s).c_str(), (const float *) values.data() + 2,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,4>));
     ImGui::PlotHistogram((lbl + " w"s).c_str(), (const float *) values.data() + 3,
-                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(VectorS<4>));
+                         (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,4>));
 }
 
 // https://github.com/ocornut/imgui/issues/300

@@ -15,6 +15,7 @@ struct vec;
 
 template<typename T>
 T *value_ptr(const T &obj);
+
 }
 
 template<int L, typename T, /*qualifier*/int Q>
@@ -28,18 +29,6 @@ constexpr bool is_glm_type_f(const void *) {
 
 template<typename T>
 constexpr bool is_glm_type = is_glm_type_f((T *) (nullptr));
-
-template<typename Derived>
-constexpr bool is_eigen_type_f(const Eigen::EigenBase<Derived> *) {
-    return true;
-}
-
-constexpr bool is_eigen_type_f(const void *) {
-    return false;
-}
-
-template<typename T>
-constexpr bool is_eigen_type = is_eigen_type_f((T *) (nullptr));
 
 template<typename T>
 constexpr bool is_fundamental_type = !is_eigen_type<T> && !is_glm_type<T>;
@@ -109,18 +98,18 @@ MapConst(property<T, N> p) {
                                                                               Eigen::Stride<-1, N>(1, N));
 }
 
-inline Eigen::Matrix<bool, -1, 1> Map(property<bool, 1> p) {
-    Eigen::Matrix<bool, -1, 1> m(p.size(), 1);
+inline Vector<bool, -1> Map(property<bool, 1> p) {
+    Vector<bool, -1> m(p.size());
     for (size_t i = 0; i < p.size(); ++i) {
-        m(i, 0) = p[i];
+        m(i) = p[i];
     }
     return m;
 }
 
-inline Eigen::Matrix<bool, -1, 1> MapConst(property<bool, 1> p) {
-    Eigen::Matrix<bool, -1, 1> m(p.size(), 1);
+inline Vector<bool, -1> MapConst(property<bool, 1> p) {
+    Vector<bool, -1> m(p.size());
     for (size_t i = 0; i < p.size(); ++i) {
-        m(i, 0) = p[i];
+        m(i) = p[i];
     }
     return m;
 }

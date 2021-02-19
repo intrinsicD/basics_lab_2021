@@ -25,11 +25,11 @@ struct material_mesh : public material{
     bool use_uniform_color = true;
     bool use_face_color = false;
 
-    VectorS<3> ambient = color::random();
-    VectorS<3> diffuse = color::white;
-    VectorS<3> specular = color::grey;
-    bcg_scalar_t shininess = 32;
-    bcg_scalar_t uniform_alpha = 1;
+    Vector<float, 3> ambient = color<float>::random();
+    Vector<float, 3> diffuse = color<float>::white;
+    Vector<float, 3> specular = color<float>::grey;
+    float shininess = 32;
+    float uniform_alpha = 1;
 
     colormap::base_colormap color_map = colormap::jet();
     int width;

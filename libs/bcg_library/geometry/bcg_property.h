@@ -15,6 +15,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include "bcg_property_eigen_trait.h"
+
 namespace bcg {
 
 constexpr size_t BCG_INVALID_ID = std::numeric_limits<size_t>::max();
@@ -104,6 +106,103 @@ struct face_handle : public base_handle {
 
 struct property_container;
 
+namespace property_types {
+    enum class Type {
+        BOOL,
+        FLOAT,
+        DOUBLE,
+        INT,
+        UNSIGNED_INT,
+        LONG,
+        UNSIGNED_LONG,
+        UNKNOWN
+    };
+    //TODO figure this out! with eigen matrices! function templates ...
+/*
+    template<typename T>
+    inline std::enable_if<is_eigen_type<T>, Type> get_property_type(const T *data) {
+        return get_property_type(data->data());
+    }
+
+    template<typename T>
+    inline Type get_property_type(const T * data) {
+        return Type::UNKNOWN;
+    }
+
+    template<>
+    inline Type get_property_type<bool>(const bool *) {
+        return Type::BOOL;
+    }
+
+    template<>
+    inline Type get_property_type<float>(const float *) {
+        return Type::FLOAT;
+    }
+
+    template<>
+    inline Type get_property_type<double>(const double *) {
+        return Type::DOUBLE;
+    }
+
+    template<>
+    inline Type get_property_type<int>(const int *) {
+        return Type::INT;
+    }
+
+    template<>
+    inline Type get_property_type<unsigned int>(const unsigned int *) {
+        return Type::UNSIGNED_INT;
+    }
+
+    template<>
+    inline Type get_property_type<long>(const long *) {
+        return Type::LONG;
+    }
+
+    template<>
+    inline Type get_property_type<unsigned long>(const unsigned long *) {
+        return Type::UNSIGNED_LONG;
+    }*/
+
+    constexpr Type get_property_type(const bool *) {
+        return Type::BOOL;
+    }
+
+    constexpr Type get_property_type(const float *) {
+        return Type::FLOAT;
+    }
+
+    constexpr Type get_property_type(const double *) {
+        return Type::DOUBLE;
+    }
+
+    constexpr Type get_property_type(const int *) {
+        return Type::INT;
+    }
+
+    constexpr Type get_property_type(const unsigned int *) {
+        return Type::UNSIGNED_INT;
+    }
+
+    constexpr Type get_property_type(const long *) {
+        return Type::LONG;
+    }
+
+    constexpr Type get_property_type(const unsigned long *) {
+        return Type::UNSIGNED_LONG;
+    }
+
+    template<typename Derived>
+    constexpr Type get_property_type(const Eigen::EigenBase<Derived> *) {
+        return get_property_type((typename Derived::Scalar *) (nullptr));
+    }
+
+    constexpr Type get_property_type(const void *) {
+        return Type::UNKNOWN;
+    }
+};
+
+
 struct base_property {
     base_property() = default;
 
@@ -117,6 +216,8 @@ struct base_property {
 
     [[nodiscard]] virtual size_t size_bytes() const = 0;
 
+    [[nodiscard]] virtual size_t element_size_bytes() const = 0;
+
     [[nodiscard]] virtual size_t capacity() const = 0;
 
     [[nodiscard]] virtual bool empty() const = 0;
@@ -124,6 +225,8 @@ struct base_property {
     [[nodiscard]] virtual const void *void_ptr() const = 0;
 
     [[nodiscard]] virtual bool is_dirty() const = 0;
+
+    [[nodiscard]] virtual property_types::Type type() const = 0;
 
     virtual void set_name(const std::string &name) = 0;
 
@@ -171,7 +274,7 @@ struct property_vector : public base_property {
         return property_name;
     }
 
-    void set_name(const std::string &name) override{
+    void set_name(const std::string &name) override {
         property_name = name;
     }
 
@@ -217,7 +320,9 @@ struct property_vector : public base_property {
 
     [[nodiscard]] inline size_t size() const override { return container.size(); }
 
-    [[nodiscard]] inline size_t size_bytes() const override { return size() * sizeof(decltype(*data())); }
+    [[nodiscard]] inline size_t size_bytes() const override { return size() * element_size_bytes(); }
+
+    [[nodiscard]] inline size_t element_size_bytes() const override { return sizeof(decltype(*data())); }
 
     [[nodiscard]] inline size_t capacity() const override { return container.capacity(); }
 
@@ -226,6 +331,10 @@ struct property_vector : public base_property {
     [[nodiscard]] inline const void *void_ptr() const override { return (const void *) data(); }
 
     [[nodiscard]] inline bool is_dirty() const override { return dirty; }
+
+    [[nodiscard]] inline property_types::Type type() const override {
+        return property_types::get_property_type(data());
+    }
 
     [[nodiscard]] inline T *data() { return container.data(); }
 
@@ -557,12 +666,12 @@ struct property_container {
 
     explicit property_container(std::string name) : name(std::move(name)) {}
 
-    void link(property_container &other){
-        for(const auto &item : other.container){
+    void link(property_container &other) {
+        for (const auto &item : other.container) {
             container[item.first] = item.second;
         }
 
-        if(has("v_connectivity")){
+        if (has("v_connectivity")) {
             remove("v_connectivity");
         }
 

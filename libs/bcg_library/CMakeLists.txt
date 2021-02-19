@@ -37,7 +37,7 @@ add_library(bcg_graphics
         math/matrix/bcg_matrix_covariance.h
         math/matrix/bcg_matrix_kernel.h
         math/matrix/bcg_matrix_pairwise_distances.h
-        math/vector/bcg_math_vector_angle.h math/vector/bcg_math_vector_cos.h math/vector/bcg_math_vector_sin.h
+        math/vector/bcg_math_vector_angle.h math/vector/bcg_math_vector_cos.h math/vector/bcg_math_vector_sin.h math/vector/bcg_vector_median_filter.h math/vector/bcg_vector_median_filter_directional.h math/vector/bcg_vector_median_filter_fuzzy.h
         math/sparse_matrix/bcg_sparse_matrix.h
         math/sparse_matrix/bcg_sparse_check_symmetric.h math/sparse_matrix/bcg_sparse_check_symmetric.cpp
         math/sparse_matrix/bcg_sparse_check_hermetian.h math/sparse_matrix/bcg_sparse_check_hermetian.cpp
@@ -158,6 +158,7 @@ if (UNIX AND NOT APPLE)
     target_compile_options(bcg_graphics PUBLIC "-Wno-#pragma-messages")
     target_compile_options(bcg_graphics PUBLIC "-Wno-shorten-64-to-32")
     target_link_libraries(bcg_graphics Threads::Threads stdc++fs)
+    #target_include_directories(bcg_graphics PUBLIC /usr/local/cuda-10.1/targets/x86_64-linux/include) // cuda support
 endif (UNIX AND NOT APPLE)
 
 # warning flags

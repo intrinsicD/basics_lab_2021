@@ -10,29 +10,41 @@
 
 namespace bcg {
 
+template<typename T = bcg_scalar_t>
 struct color {
-    [[maybe_unused]] inline static const VectorS<3> white = one3s;
-    [[maybe_unused]] inline static const VectorS<3> yellow = {1.0f, 1.0f, 0.0f};
-    [[maybe_unused]] inline static const VectorS<3> magenta = {1.0f, 0.0f, 1.0f};
-    [[maybe_unused]] inline static const VectorS<3> red = {1.0f, 0.0f, 0.0f};
-    [[maybe_unused]] inline static const VectorS<3> cyan = {0.0f, 1.0f, 1.0f};
-    [[maybe_unused]] inline static const VectorS<3> green = {0.0f, 1.0f, 0.0f};
-    [[maybe_unused]] inline static const VectorS<3> blue = {0.0f, 0.0f, 1.0f};
-    [[maybe_unused]] inline static const VectorS<3> black = zero3s;
-    [[maybe_unused]] inline static const VectorS<3> orange = {1.0f, 0.5f, 0.0f};
-    [[maybe_unused]] inline static const VectorS<3> violet = {0.5f, 0.0f, 1.0f};
-    [[maybe_unused]] inline static const VectorS<3> grey = {0.5f, 0.5f, 0.5f};
-    [[maybe_unused]] inline static const VectorS<4> default_background = {0.2f, 0.4f, 0.8f, 1.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> white = {1.0, 1.0, 1.0};
+    [[maybe_unused]] inline static const Vector<T, 3> yellow = {1.0f, 1.0f, 0.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> magenta = {1.0f, 0.0f, 1.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> red = {1.0f, 0.0f, 0.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> cyan = {0.0f, 1.0f, 1.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> green = {0.0f, 1.0f, 0.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> blue = {0.0f, 0.0f, 1.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> black = {0, 0, 0};
+    [[maybe_unused]] inline static const Vector<T, 3> orange = {1.0f, 0.5f, 0.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> violet = {0.5f, 0.0f, 1.0f};
+    [[maybe_unused]] inline static const Vector<T, 3> grey = {0.5f, 0.5f, 0.5f};
+    [[maybe_unused]] inline static const Vector<T, 4> default_background = {0.2f, 0.4f, 0.8f, 1.0f};
 
-    static VectorS<3> random();
+    static Vector<T, 3> random() {
+        return Vector<T, 3>::Random().cwiseAbs();
+    }
 
-    static VectorS<3> constant(bcg_scalar_t value);
+    static Vector<T, 3> constant(bcg_scalar_t value) {
+        auto clamped = std::max<bcg_scalar_t>(std::min<bcg_scalar_t>(value, 1.0), 0.0);
+        return {clamped, clamped, clamped};
+    }
 
-    static VectorS<3> rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b);
+    static Vector<T, 3> rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
+        return {r / 255.0, g / 255.0, b / 255.0};
+    }
 
-    static VectorS<4> rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
+    static Vector<T, 3> rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a) {
+        return {r / 255.0, g / 255.0, b / 255.0, a / 255.0};
+    }
 
-    static VectorS<3> packed_int(unsigned int id);
+    static Vector<T, 3> packed_int(unsigned int id) {
+        return rgb((id & 0x000000FF) >> 0, (id & 0x0000FF00) >> 8, (id & 0x00FF0000) >> 16);
+    }
 };
 
 namespace colormap {
@@ -40,10 +52,9 @@ namespace colormap {
 struct base_colormap {
     base_colormap() = default;
 
-    base_colormap(std::vector<VectorS < 3>>
+    base_colormap(const std::vector<VectorS < 3>> &colorpath) : colorpath(colorpath){
 
-    colorpath) :
-    colorpath(colorpath){}
+    }
 
     std::vector<VectorS < 3>> colorpath;
 
@@ -53,12 +64,7 @@ struct base_colormap {
     bcg_scalar_t maxClamp
     ) const;
 
-    std::vector<VectorS < 3>> operator()(
-    const VectorS<-1> &scalarfield,
-            bcg_scalar_t
-    minClamp,
-    bcg_scalar_t maxClamp
-    ) const;
+    std::vector<VectorS < 3>> operator()(const VectorS<-1> &scalarfield,bcg_scalar_t minClamp,bcg_scalar_t maxClamp) const;
 
     VectorS<3> interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) const;
 
@@ -68,83 +74,83 @@ struct base_colormap {
 };
 
 struct grey : public base_colormap {
-    grey() : base_colormap({color::black,
-                            color::white}) {
+    grey() : base_colormap({color<>::black,
+                            color<>::white}) {
 
     }
 };
 
 struct hot : public base_colormap {
-    hot() : base_colormap({color::black,
-                           color::red,
-                           color::yellow,
-                           color::white}) {
+    hot() : base_colormap({color<>::black,
+                           color<>::red,
+                           color<>::yellow,
+                           color<>::white}) {
 
     }
 };
 
 
 struct temperature : public base_colormap {
-    temperature() : base_colormap({color::black,
-                                   color::blue,
-                                   color::green,
-                                   color::red,
-                                   color::yellow,
-                                   color::white}) {
+    temperature() : base_colormap({color<>::black,
+                                   color<>::blue,
+                                   color<>::green,
+                                   color<>::red,
+                                   color<>::yellow,
+                                   color<>::white}) {
 
     }
 };
 
 struct rainbow : public base_colormap {
-    rainbow() : base_colormap({color::red,
-                               color::orange,
-                               color::yellow,
-                               color::green,
-                               color::cyan,
-                               color::blue,
-                               color::violet}) {
+    rainbow() : base_colormap({color<>::red,
+                               color<>::orange,
+                               color<>::yellow,
+                               color<>::green,
+                               color<>::cyan,
+                               color<>::blue,
+                               color<>::violet}) {
 
     }
 };
 
 struct jet : public base_colormap {
-    jet() : base_colormap({color::blue,
-                           color::cyan,
-                           color::green,
-                           color::yellow,
-                           color::orange,
-                           color::red}) {
+    jet() : base_colormap({color<>::blue,
+                           color<>::cyan,
+                           color<>::green,
+                           color<>::yellow,
+                           color<>::orange,
+                           color<>::red}) {
 
     }
 };
 
 struct vidris : public base_colormap {
-    vidris() : base_colormap({color::violet,
-                              color::blue,
-                              color::green,
-                              color::yellow}) {
+    vidris() : base_colormap({color<>::violet,
+                              color<>::blue,
+                              color<>::green,
+                              color<>::yellow}) {
 
     }
 };
 
 struct hsv : public base_colormap {
-    hsv() : base_colormap({color::red,
-                           color::orange,
-                           color::yellow,
-                           color::green,
-                           color::cyan,
-                           color::blue,
-                           color::violet,
-                           color::magenta,
-                           color::red}) {
+    hsv() : base_colormap({color<>::red,
+                           color<>::orange,
+                           color<>::yellow,
+                           color<>::green,
+                           color<>::cyan,
+                           color<>::blue,
+                           color<>::violet,
+                           color<>::magenta,
+                           color<>::red}) {
 
     }
 };
 
 struct coolwarm : public base_colormap {
-    coolwarm() : base_colormap({color::blue,
-                                color::white,
-                                color::red}) {
+    coolwarm() : base_colormap({color<>::blue,
+                                color<>::white,
+                                color<>::red}) {
 
     }
 };

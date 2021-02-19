@@ -16,8 +16,8 @@ enum class RegistrationMethod{
     coherent_point_drift_rigid,
     coherent_point_drift_affine,
     coherent_point_drift_nonrigid,
+    coherent_point_drift_nonrigid2,
     coherent_point_drift_bayes,
-    coherent_point_drift_test,
     __last__
 };
 
@@ -28,13 +28,14 @@ inline std::vector<std::string> registration_names() {
     names[static_cast<int>(RegistrationMethod::coherent_point_drift_rigid)] = "coherent_point_drift_rigid";
     names[static_cast<int>(RegistrationMethod::coherent_point_drift_affine)] = "coherent_point_drift_affine";
     names[static_cast<int>(RegistrationMethod::coherent_point_drift_nonrigid)] = "coherent_point_drift_nonrigid";
+    names[static_cast<int>(RegistrationMethod::coherent_point_drift_nonrigid2)] = "coherent_point_drift_nonrigid2";
     names[static_cast<int>(RegistrationMethod::coherent_point_drift_bayes)] = "coherent_point_drift_bayes";
-    names[static_cast<int>(RegistrationMethod::coherent_point_drift_test)] = "coherent_point_drift_test";
     return names;
 }
 struct registration{
     RegistrationMethod method;
     std::vector<float> errors;
+
     int max_iterations;
     int current_iteration;
 };

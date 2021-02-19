@@ -24,14 +24,14 @@ struct GLFWwindow;
 namespace bcg {
 
 struct viewer_colors {
-    VectorS<4> background = color::default_background;
-    VectorS<3> overlay;
-    VectorS<3> entity_selection;
-    VectorS<3> vertex_selection;
-    VectorS<3> edge_selection;
-    VectorS<3> face_selection;
-    VectorS<3> boundary;
-    VectorS<3> wireframe;
+    Vector<float, 4> background = color<float>::default_background;
+    Vector<float, 3> overlay;
+    Vector<float, 3> entity_selection;
+    Vector<float, 3> vertex_selection;
+    Vector<float, 3> edge_selection;
+    Vector<float, 3> face_selection;
+    Vector<float, 3> boundary;
+    Vector<float, 3> wireframe;
 };
 
 struct viewer_mouse {

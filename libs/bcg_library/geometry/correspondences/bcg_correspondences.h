@@ -38,7 +38,7 @@ struct correspondences {
 
     void add_correspondence(size_t i, size_t j, bcg_scalar_t weight);
 
-    std::vector<float> weights() const;
+    std::vector<bcg_scalar_t> weights() const;
 
     SparseMatrix<bcg_scalar_t> sparse_matrix(size_t M, size_t N) const;
 

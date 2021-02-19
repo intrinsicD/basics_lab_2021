@@ -54,17 +54,49 @@ bool draw_button(viewer_window *win, const char *lbl, bool enabled = true);
 
 bool draw_textinput(viewer_window *win, const char *lbl, std::string &value);
 
+template<typename T>
+bool draw_input(viewer_window *win, const char *lbl, T &value){
+    float vf = value;
+    auto edited = ImGui::InputFloat(lbl, &vf);
+    value = vf;
+    return edited;
+}
+
+template<typename T>
+bool draw_input_vec2(viewer_window *win, const char *lbl, Vector<T, 2> &value){
+    Vector<float, 2> vf = value.template cast<float>();
+    bool edited = ImGui::InputFloat2(lbl, vf.data());
+    value = vf.cast<T>();
+    return edited;
+}
+
+template<typename T>
+bool draw_input_vec3(viewer_window *win, const char *lbl, Vector<T, 3> &value){
+    Vector<float, 3> vf = value.template cast<float>();
+    bool edited = ImGui::InputFloat3(lbl, vf.data());
+    value = vf.cast<T>();
+    return edited;
+}
+
+template<typename T>
+bool draw_input_vec4(viewer_window *win, const char *lbl, Vector<T, 4> &value){
+    Vector<float, 4> vf = value.template cast<float>();
+    bool edited = ImGui::InputFloat4(lbl, vf.data());
+    value = vf.cast<T>();
+    return edited;
+}
+
 bool draw_slider(
         viewer_window *win, const char *lbl, float &value, float min, float max);
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorS<2> &value, float min, float max);
+        viewer_window *win, const char *lbl, Vector<float, 2> &value, float min, float max);
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorS<3> &value, float min, float max);
+        viewer_window *win, const char *lbl, Vector<float, 3> &value, float min, float max);
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorS<4> &value, float min, float max);
+        viewer_window *win, const char *lbl, Vector<float, 4> &value, float min, float max);
 
 bool draw_slider(
         viewer_window *win, const char *lbl, int &value, int min, int max);
@@ -81,13 +113,13 @@ bool draw_slider(
 bool draw_dragger(viewer_window *win, const char *lbl, float &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorS<2> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, Vector<float, 2> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorS<3> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, Vector<float, 3> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorS<4> &value,
+bool draw_dragger(viewer_window *win, const char *lbl, Vector<float, 4> &value,
                   float speed = 1.0f, float min = 0.0f, float max = 0.0f);
 
 bool draw_dragger(viewer_window *win, const char *lbl, int &value, float speed = 1,
@@ -106,13 +138,13 @@ bool draw_checkbox(viewer_window *win, const char *lbl, bool &value);
 
 bool draw_checkbox(viewer_window *win, const char *lbl, bool &value, bool invert);
 
-bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<3> &value);
+bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float, 3> &value);
 
-bool draw_coloredit(viewer_window *win, const char *lbl, VectorS<4> &value);
+bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float, 4> &value);
 
-bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<3> &value);
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, Vector<float, 3> &value);
 
-bool draw_hdrcoloredit(viewer_window *win, const char *lbl, VectorS<4> &value);
+bool draw_hdrcoloredit(viewer_window *win, const char *lbl, Vector<float, 4> &value);
 
 bool draw_combobox(viewer_window *win, const char *lbl, int &idx, const std::vector<std::string> &labels);
 
@@ -161,17 +193,17 @@ void draw_histogram(
         viewer_window *win, const char *lbl, const std::vector<float> &values);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS < 2>>
+        viewer_window *win, const char *lbl, const std::vector<Vector<float, 2>>
 
 &values);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS < 3>>
+        viewer_window *win, const char *lbl, const std::vector<Vector<float, 3>>
 
 &values);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<VectorS < 4>>
+        viewer_window *win, const char *lbl, const std::vector<Vector<float, 4>>
 
 &values);
 

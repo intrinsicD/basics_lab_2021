@@ -8,6 +8,7 @@
 #include "bcg_gui_statistics.h"
 #include "bcg_gui_vectorfields.h"
 #include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 
 namespace bcg {
 
@@ -49,7 +50,7 @@ void gui_correspondences(viewer_state *state) {
             state->dispatcher.trigger<event::correspondences::estimate>(source_id, entt::entity(corrs->target_id));
             distance_threshold = corrs->stats.mean();
             state->dispatcher.trigger<event::vectorfield_renderer::set_vertex_vectorfield>(source_id, "v_corrs_vector");
-            values = corrs->weights();
+            Map(values) = MapConst(corrs->weights()).cast<float>();
         }
     }
     if(corrs != nullptr && !corrs->mapping.empty()){
@@ -64,7 +65,7 @@ void gui_correspondences(viewer_state *state) {
         if (ImGui::Button("filter distance")) {
             if(corrs != nullptr) {
                 state->dispatcher.trigger<event::correspondences::filter::distance>(source_id, entt::entity(corrs->target_id), distance_threshold);
-                values = corrs->weights();
+                Map(values) = MapConst(corrs->weights()).cast<float>();
             }
         }
         ImGui::InputFloat("threshold angle", &angle_threshold);
@@ -72,7 +73,7 @@ void gui_correspondences(viewer_state *state) {
         if (ImGui::Button("filter angle")) {
             if(corrs != nullptr) {
                 state->dispatcher.trigger<event::correspondences::filter::normal_angle>(source_id, entt::entity(corrs->target_id), angle_threshold);
-                values = corrs->weights();
+                Map(values) = MapConst(corrs->weights()).cast<float>();
             }
         }
         auto *vfs = state->scene.try_get<vectorfields>(source_id);

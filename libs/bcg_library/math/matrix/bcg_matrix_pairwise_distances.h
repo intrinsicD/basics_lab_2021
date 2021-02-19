@@ -9,12 +9,20 @@
 
 namespace bcg {
 
-template<typename T>
+template<typename Derived>
+inline  Derived pairwise_distance_squared(const Eigen::EigenBase<Derived> &A, const Eigen::EigenBase<Derived>  &B) {
+    typedef typename Derived::Scalar Scalar;
+    return Vector<typename Derived::Scalar, -1>::Ones(A.rows()) * B.derived().rowwise().squaredNorm().transpose()
+           - (Scalar(2.0) * A.derived()) * B.derived().transpose() +
+           A.derived().rowwise().squaredNorm() * Vector<typename Derived::Scalar, -1>::Ones(B.rows()).transpose();
+}
+
+/*template<typename T>
 inline Matrix<T, -1, -1> pairwise_distance_squared(const Matrix<T, -1, -1> &A, const Matrix<T, -1, -1> &B) {
     return Vector<T, -1>::Ones(A.rows()) * B.rowwise().squaredNorm().transpose()
            - (2 * A) * B.transpose() +
            A.rowwise().squaredNorm() * Vector<T, -1>::Ones(B.rows()).transpose();
-}
+}*/
 
 template<typename T>
 inline Matrix<T, -1, -1> pairwise_distance(const Matrix<T, -1, -1> &A, const Matrix<T, -1, -1> &B) {

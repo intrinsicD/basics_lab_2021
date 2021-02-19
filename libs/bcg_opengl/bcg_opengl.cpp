@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include "bcg_opengl.h"
+#include "math/matrix/bcg_matrix_map_eigen.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 
 #ifdef _WIN32
 #undef near
@@ -1337,19 +1339,23 @@ ogl_vertex_buffer::ogl_vertex_buffer(unsigned int handle, std::string name) : og
 }
 
 void ogl_vertex_buffer::upload(const std::vector<bcg_scalar_t> &data, size_t offset, bool dynamic) {
-    upload(data.data(), data.size(), 1, offset, dynamic);
+    Vector<float, -1> DATA = MapConst(data).cast<float>();
+    upload(DATA.data(), data.size(), 1, offset, dynamic);
 }
 
 void ogl_vertex_buffer::upload(const std::vector<VectorS<2>> &data, size_t offset, bool dynamic) {
-    upload(data.data(), data.size(), 2, offset, dynamic);
+    Matrix<float, -1, 2> DATA = MapConst(data).cast<float>();
+    upload(DATA.data(), data.size(), 2, offset, dynamic);
 }
 
 void ogl_vertex_buffer::upload(const std::vector<VectorS<3>> &data, size_t offset, bool dynamic) {
-    upload(data.data(), data.size(), 3, offset, dynamic);
+    Matrix<float, -1, 3> DATA = MapConst(data).cast<float>();
+    upload(DATA.data(), data.size(), 3, offset, dynamic);
 }
 
 void ogl_vertex_buffer::upload(const std::vector<VectorS<4>> &data, size_t offset, bool dynamic) {
-    upload(data.data(), data.size(), 4, offset, dynamic);
+    Matrix<float, -1, 4> DATA = MapConst(data).cast<float>();
+    upload(DATA.data(), data.size(), 4, offset, dynamic);
 }
 
 void ogl_vertex_buffer::upload(const void *data, size_t size, size_t dims, size_t offset, bool dynamic) {
@@ -1364,7 +1370,7 @@ void ogl_vertex_buffer::upload(const void *data, size_t size, size_t dims, size_
         this->dynamic = dynamic;
     } else {
         // we have enough space
-        glBufferSubData(target, offset * dims * sizeof(bcg_scalar_t), size * dims * sizeof(bcg_scalar_t), data);
+        glBufferSubData(target, offset * dims * sizeof(float), size * dims * sizeof(float), data);
         assert_ogl_error();
     }
 }

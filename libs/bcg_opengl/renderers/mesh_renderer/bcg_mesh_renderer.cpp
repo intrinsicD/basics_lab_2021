@@ -195,7 +195,7 @@ void mesh_renderer::on_set_face_color_attribute(const event::mesh_renderer::set_
     auto &material = state->scene.get<material_mesh>(event.id);
 
     auto *faces = state->get_faces(event.id);
-    std::vector<VectorS<3>> colors = map_to_colors(faces, event.color.property_name, material.color_map);
+    std::vector<Vector<float, 3>> colors = map_to_colors(faces, event.color.property_name, material.color_map);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
     material.width = std::min((int)colors.size(), material.width);

@@ -77,46 +77,72 @@ inline std::vector<std::string> sampling_type_names() {
     return names;
 }
 
+enum class KernelMethodType {
+    full,
+    nystroem,
+    nystroem_eigen,
+    eigen,
+    __last__
+};
+
+inline std::vector<std::string> kernel_method_type_names() {
+    std::vector<std::string> names(static_cast<int>(SamplingType::__last__));
+    names[static_cast<int>(KernelMethodType::full)] = "full";
+    names[static_cast<int>(KernelMethodType::nystroem)] = "nystroem";
+    names[static_cast<int>(KernelMethodType::nystroem_eigen)] = "nystroem_eigen";
+    names[static_cast<int>(KernelMethodType::eigen)] = "eigen";
+    return names;
+}
+
 template<typename T>
 struct kernel_matrix {
     KernelType kernel_type;
 
     SamplingType sampling_type;
 
+    KernelMethodType kernel_method_type;
+
     bool use_eigen_decomposition = false;
     bool use_nyström_approximation = false;
     T two_sigma_squared;
     Matrix<T, -1, -1> K_AV, K_VV_INV, K_BV, VV, Evecs;
     Vector<T, -1> Evals;
-    std::vector<size_t> sampled_indices;
+    std::vector<size_t> sampled_indices, indices_union;
 
     Matrix<T, -1, -1> compute_kernel(const Matrix<T, -1, -1> &A, const Matrix<T, -1, -1> &B) {
+        Matrix<T, -1, -1> K;
         switch (kernel_type) {
             case KernelType::gaussian: {
-                return compute_gaussian_kernel(A, B, two_sigma_squared);
+                K = compute_gaussian_kernel(A, B, two_sigma_squared);
+                break;
             }
             case KernelType::laplace: {
-                return compute_laplace_kernel(A, B, std::sqrt(two_sigma_squared / 2));
+                K = compute_laplace_kernel(A, B, std::sqrt(two_sigma_squared / 2));
+                break;
             }
             case KernelType::rational_quadric: {
-                return compute_rational_quadric_kernel(A, B, two_sigma_squared / 2);
+                K = compute_rational_quadric_kernel(A, B, two_sigma_squared / 2);
+                break;
             }
             case KernelType::inverse_multiquadric: {
-                return compute_inverse_multiquadric_kernel(A, B, two_sigma_squared / 2);
+                K = compute_inverse_multiquadric_kernel(A, B, two_sigma_squared / 2);
+                break;
             }
             case KernelType::__last__: {
-                return Matrix<T, -1, -1>();
+                break;
             }
         }
+        return K;
     }
 
     void sample(size_t num_samples, const Matrix<T, -1, -1> &A) {
         switch (sampling_type) {
             case SamplingType::uniform: {
                 num_samples = std::min<size_t>(num_samples, A.rows());
-
-                std::vector<size_t> indices_union(A.rows());
-                std::iota(indices_union.begin(), indices_union.end(), 0);
+                if(indices_union.empty()){
+                    indices_union.resize(A.rows());
+                    std::iota(indices_union.begin(), indices_union.end(), 0);
+                }
 
                 std::sample(indices_union.begin(), indices_union.end(), std::back_inserter(sampled_indices),
                             num_samples, std::mt19937{std::random_device{}()});
@@ -126,6 +152,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < num_samples; ++i) {
                     VV.row(i) = A.row(sampled_indices[i]);
                 }
+                std::cout << "Sampling: uniform\n";
+                break;
             }
             case SamplingType::grid_first: {
                 aligned_box3 aabb;
@@ -134,7 +162,7 @@ struct kernel_matrix {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_first_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_first_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -143,6 +171,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_first\n";
+                break;
             }
             case SamplingType::grid_last: {
                 aligned_box3 aabb;
@@ -151,7 +181,7 @@ struct kernel_matrix {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_last_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_last_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -160,6 +190,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_last\n";
+                break;
             }
             case SamplingType::grid_closest: {
                 aligned_box3 aabb;
@@ -168,7 +200,7 @@ struct kernel_matrix {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_closest_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_closest_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -177,6 +209,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_closest\n";
+                break;
             }
             case SamplingType::grid_mean: {
                 aligned_box3 aabb;
@@ -185,7 +219,7 @@ struct kernel_matrix {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_mean_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_mean_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -193,6 +227,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_mean\n";
+                break;
             }
             case SamplingType::__last__: {
                 break;
@@ -204,8 +240,10 @@ struct kernel_matrix {
         switch (sampling_type) {
             case SamplingType::uniform: {
                 num_samples = std::min<size_t>(num_samples, A.rows());
-                std::vector<size_t> indices_union(A.rows() + B.rows());
-                std::iota(indices_union.begin(), indices_union.end(), 0);
+                if(indices_union.empty()){
+                    indices_union.resize(A.rows() + B.rows());
+                    std::iota(indices_union.begin(), indices_union.end(), 0);
+                }
 
                 std::sample(indices_union.begin(), indices_union.end(), std::back_inserter(sampled_indices),
                             num_samples, std::mt19937{std::random_device{}()});
@@ -219,6 +257,8 @@ struct kernel_matrix {
                         VV.row(i) = B.row(sampled_indices[i] - A.rows());
                     }
                 }
+                std::cout << "Sampling: uniform\n";
+                break;
             }
             case SamplingType::grid_first: {
                 aligned_box3 aabb;
@@ -231,7 +271,7 @@ struct kernel_matrix {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_first_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_first_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -239,6 +279,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_first\n";
+                break;
             }
             case SamplingType::grid_last: {
                 aligned_box3 aabb;
@@ -251,7 +293,7 @@ struct kernel_matrix {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_last_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_last_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -259,6 +301,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_last\n";
+                break;
             }
             case SamplingType::grid_closest: {
                 aligned_box3 aabb;
@@ -271,7 +315,7 @@ struct kernel_matrix {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_closest_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_closest_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -279,6 +323,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_closest\n";
+                break;
             }
             case SamplingType::grid_mean: {
                 aligned_box3 aabb;
@@ -291,7 +337,7 @@ struct kernel_matrix {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_mean_grid grid({num_samples, num_samples, num_samples}, aabb);
+                sample_mean_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_occupied_sample_points();
@@ -299,6 +345,8 @@ struct kernel_matrix {
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
                 }
+                std::cout << "Sampling: grid_mean\n";
+                break;
             }
             case SamplingType::__last__ : {
                 break;
@@ -369,8 +417,6 @@ struct kernel_matrix {
             std::cout << "#Eigenvalues not converged:" << nconv << std::endl;
         }
     }
-
-
 };
 
 }

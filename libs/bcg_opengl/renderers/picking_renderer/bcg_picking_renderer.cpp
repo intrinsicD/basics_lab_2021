@@ -156,12 +156,12 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
 /*    float xf = float(x - vp[0]) / ((float) vp[2]) * 2.0f - 1.0f;
     float yf = float(y - vp[1]) / ((float) vp[3]) * 2.0f - 1.0f;*/
-    bcg_scalar_t xf = state->mouse.normalized_device_coordinates[0];
-    bcg_scalar_t yf = state->mouse.normalized_device_coordinates[1];
-    VectorS<4> p = (state->cam.projection_matrix() * state->cam.view_matrix()).inverse() *
-                   VectorS<4>(xf, yf, zf * 2.0f - 1.0f, 1.0);
+    float xf = state->mouse.normalized_device_coordinates[0];
+    float yf = state->mouse.normalized_device_coordinates[1];
+    Vector<float, 4> p = ((state->cam.projection_matrix() * state->cam.view_matrix()).inverse() *
+                   VectorS<4>(xf, yf, zf * 2.0f - 1.0f, 1.0)).cast<float>();
     p /= p[3];
-    state->picker.world_space_point = p.head<3>();
+    state->picker.world_space_point = p.head<3>().cast<bcg_scalar_t>();
 
     //auto id = entt::entity(data[0] + data[1] * 255 + data[2] * 255 * 255 + data[3] * 255 * 255 * 255);
     auto id = entt::entity(data[0] + data[1] * 256 + data[2] * 256 * 256);

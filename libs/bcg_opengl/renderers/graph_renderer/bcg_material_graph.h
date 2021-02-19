@@ -24,8 +24,8 @@ struct material_graph : public material{
     bool use_uniform_color = true;
     int width;
 
-    VectorS<3> uniform_color = color::red;
-    bcg_scalar_t uniform_alpha = 1;
+    Vector<float, 3> uniform_color = color<float>::red;
+    float uniform_alpha = 1;
     colormap::base_colormap color_map;
 
     ogl_texture &edge_colors(){

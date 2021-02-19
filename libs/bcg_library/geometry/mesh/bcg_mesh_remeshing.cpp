@@ -192,9 +192,9 @@ void remeshing::preprocessing() {
                             for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
                                 vv = mesh.get_to_vertex(h);
                                 if (!vfeature[vv]) {
-                                    w = std::max(0.0f, edge_cotan(mesh, mesh.get_edge(h)));
+                                    w = std::max<bcg_scalar_t >(0.0, edge_cotan(mesh, mesh.get_edge(h)));
                                     ww += w;
-                                    c += w * std::max(std::abs(min_curvature[vv]), std::abs(max_curvature[vv]));
+                                    c += w * std::max<bcg_scalar_t>(std::abs(min_curvature[vv]), std::abs(max_curvature[vv]));
                                 }
                             }
 

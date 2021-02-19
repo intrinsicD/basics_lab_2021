@@ -29,7 +29,7 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
     if (!state->scene.valid(event.id)) return;
     if (!event.container->has(event.attrib.property_name)) return;
 
-    if(!event.container->get_base_ptr(event.attrib.property_name)->is_dirty() && !event.attrib.update) return;
+    if (!event.container->get_base_ptr(event.attrib.property_name)->is_dirty() && !event.attrib.update) return;
     auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
     ogl_buffer_object *buffer = nullptr;
     if (event.attrib.property_name == "edges") {
@@ -55,7 +55,12 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
         buffer->upload(colors[0].data(), base_ptr->size(), 3, 0, true);
     } else {
         if (base_ptr->void_ptr() != nullptr) {
-            buffer->upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+            if(base_ptr->type() == property_types::Type::DOUBLE || base_ptr->type() == property_types::Type::FLOAT){
+                Matrix<float, -1, -1> DATAF = Map<bcg_scalar_t>(base_ptr).transpose().cast<float>();
+                buffer->upload((const void *) DATAF.data(), base_ptr->size(), base_ptr->dims(), 0, true);
+            }else{
+                buffer->upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
+            }
         } else {
             std::cerr << "vector of bools?\n";
         }
@@ -76,7 +81,7 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
         colormap::jet color_map;
 
         for (auto &attribute : attributes) {
-            if(attribute.index < 0) continue;
+            if (attribute.index < 0) continue;
             state->dispatcher.trigger<event::gpu::update_property>(event.id, vertices, attribute, color_map);
         }
     }
@@ -103,7 +108,7 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
                     auto &graph = state->scene.get<halfedge_graph>(event.id);
                     property = graph.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = graph.get_connectivity();
-                }else if (state->scene.has<curve_bezier>(event.id)) {
+                } else if (state->scene.has<curve_bezier>(event.id)) {
                     auto &curve = state->scene.get<curve_bezier>(event.id);
                     property = curve.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = curve.get_connectivity();
