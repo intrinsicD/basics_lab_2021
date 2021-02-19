@@ -52,7 +52,10 @@ namespace colormap {
 struct base_colormap {
     base_colormap() = default;
 
-    base_colormap(const std::vector<VectorS < 3>> &colorpath) : colorpath(colorpath){
+    base_colormap(const std::vector<VectorS < 3>>
+
+    &colorpath) :
+    colorpath(colorpath){
 
     }
 
@@ -64,7 +67,11 @@ struct base_colormap {
     bcg_scalar_t maxClamp
     ) const;
 
-    std::vector<VectorS < 3>> operator()(const VectorS<-1> &scalarfield,bcg_scalar_t minClamp,bcg_scalar_t maxClamp) const;
+    std::vector<VectorS < 3>> operator()(
+    const VectorS<-1> &scalarfield, bcg_scalar_t
+    minClamp,
+    bcg_scalar_t maxClamp
+    ) const;
 
     VectorS<3> interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) const;
 

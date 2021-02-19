@@ -33,7 +33,7 @@ inline std::vector<std::string> softmatching_type_names(){
     return names;
 }
 
-struct coherent_point_drift_base2 {
+struct coherent_point_drift_base {
     property<bcg_scalar_t, 1> P1, PT1;
     property<VectorS<3>, 3> source_positions, target_positions, PX;
     bcg_scalar_t N_P, sigma_squared, kdtree_sigma_threshold = 0.02, omega = 0.5;
@@ -86,7 +86,7 @@ protected:
     virtual VectorS<3> transform_target(size_t idx);
 };
 
-struct coherent_point_drift_rigid2 : public coherent_point_drift_base2 {
+struct coherent_point_drift_rigid : public coherent_point_drift_base {
     bcg_scalar_t s;
     VectorS<3> t;
     MatrixS<3, 3> R;
@@ -97,7 +97,7 @@ struct coherent_point_drift_rigid2 : public coherent_point_drift_base2 {
     void compute_step() override;
 };
 
-struct coherent_point_drift_affine2 : public coherent_point_drift_base2 {
+struct coherent_point_drift_affine : public coherent_point_drift_base {
     VectorS<3> t;
     MatrixS<3, 3> B;
 
@@ -120,7 +120,7 @@ inline std::vector<std::string> coherence_type_names(){
     return names;
 }
 
-struct coherent_point_drift_nonrigid2 : public coherent_point_drift_base2 {
+struct coherent_point_drift_nonrigid : public coherent_point_drift_base {
     CoherenceType coherence_type;
     int num_evals;
     Matrix<kernel_precision, -1, -1> G;
@@ -141,7 +141,7 @@ struct coherent_point_drift_nonrigid2 : public coherent_point_drift_base2 {
     VectorS<3> transform_source(size_t idx) override;
 };
 
-struct coherent_point_drift_nonrigid3 : public coherent_point_drift_base2 {
+struct coherent_point_drift_nonrigid2 : public coherent_point_drift_base {
     CoherenceType coherence_type;
     int num_evals;
     Matrix<kernel_precision, -1, -1> G;
@@ -165,7 +165,7 @@ struct coherent_point_drift_nonrigid3 : public coherent_point_drift_base2 {
     VectorS<3> transform_source(size_t idx) override;
 };
 
-struct coherent_point_drift_bayes2 : public coherent_point_drift_base2 {
+struct coherent_point_drift_bayes : public coherent_point_drift_base {
     CoherenceType coherence_type;
     bcg_scalar_t s;
     VectorS<3> t;

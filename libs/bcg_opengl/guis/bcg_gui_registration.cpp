@@ -84,7 +84,7 @@ void gui_registration(viewer_state *state) {
                 break;
             }
             case RegistrationMethod::coherent_point_drift_rigid : {
-                auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid2>(source_id);
+                auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid>(source_id);
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(rigid.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(rigid.N_P).c_str());
                 draw_input(&state->window, "omega", rigid.omega);
@@ -104,7 +104,7 @@ void gui_registration(viewer_state *state) {
                 break;
             }
             case RegistrationMethod::coherent_point_drift_affine : {
-                auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine2>(source_id);
+                auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine>(source_id);
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(affine.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(affine.N_P).c_str());
                 draw_input(&state->window,"omega", affine.omega);
@@ -124,7 +124,7 @@ void gui_registration(viewer_state *state) {
                 break;
             }
             case RegistrationMethod::coherent_point_drift_nonrigid : {
-                auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid2>(source_id);
+                auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid>(source_id);
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(nonrigid.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(nonrigid.N_P).c_str());
                 draw_input(&state->window,"omega", nonrigid.omega);
@@ -151,7 +151,7 @@ void gui_registration(viewer_state *state) {
                 break;
             }
             case RegistrationMethod::coherent_point_drift_nonrigid2 : {
-                auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid3>(source_id);
+                auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid2>(source_id);
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(nonrigid.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(nonrigid.N_P).c_str());
                 draw_input(&state->window,"omega", nonrigid.omega);
@@ -178,7 +178,7 @@ void gui_registration(viewer_state *state) {
                 break;
             }
             case RegistrationMethod::coherent_point_drift_bayes : {
-                auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes2>(source_id);
+                auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes>(source_id);
                 ImGui::LabelText("sigma_squared", "%s", std::to_string(bayes.sigma_squared).c_str());
                 ImGui::LabelText("N_P", "%s", std::to_string(bayes.N_P).c_str());
                 ImGui::LabelText("scale", "%s", std::to_string(bayes.s).c_str());

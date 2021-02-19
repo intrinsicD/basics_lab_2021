@@ -131,12 +131,6 @@ add_library(bcg_graphics
         registration/bcg_registration.h
         registration/rigid_idp/bcg_rigid_icp.h registration/rigid_idp/bcg_rigid_icp.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_base2.h registration/coherent_point_drift/bcg_coherent_point_drift_base2.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_base.h registration/coherent_point_drift/bcg_coherent_point_drift_base.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_rigid.h registration/coherent_point_drift/bcg_coherent_point_drift_rigid.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_affine.h registration/coherent_point_drift/bcg_coherent_point_drift_affine.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.h registration/coherent_point_drift/bcg_coherent_point_drift_nonrigid.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_bayes.h registration/coherent_point_drift/bcg_coherent_point_drift_bayes.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_test.h registration/coherent_point_drift/bcg_coherent_point_drift_test.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         )
 

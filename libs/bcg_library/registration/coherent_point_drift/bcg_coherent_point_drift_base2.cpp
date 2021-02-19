@@ -12,8 +12,8 @@
 namespace bcg {
 
 
-void coherent_point_drift_base2::init(vertex_container *source_vertices, Transform &source_model,
-                                      vertex_container *target_vertices, Transform &target_model) {
+void coherent_point_drift_base::init(vertex_container *source_vertices, Transform &source_model,
+                                     vertex_container *target_vertices, Transform &target_model) {
     this->source_model = &source_model;
     this->target_model = &target_model;
     backup_source_model = source_model;
@@ -32,7 +32,7 @@ void coherent_point_drift_base2::init(vertex_container *source_vertices, Transfo
     sigma_squared = pairwise_distance_squared(X, Y).sum() / kernel_precision(M * N * D);
 }
 
-void coherent_point_drift_base2::reset() {
+void coherent_point_drift_base::reset() {
     if (source_model != nullptr) {
         *source_model = backup_source_model;
         X = transform_target();
@@ -43,7 +43,7 @@ void coherent_point_drift_base2::reset() {
     }
 }
 
-void coherent_point_drift_base2::update_P() {
+void coherent_point_drift_base::update_P() {
     Timer timer;
     if (std::sqrt(sigma_squared) < kdtree_sigma_threshold) {
         softmatching_type = SoftmatchingType::kdtree;
@@ -90,7 +90,7 @@ void coherent_point_drift_base2::update_P() {
     std::cout << timer.pretty_report() << "\n";
 }
 
-void coherent_point_drift_base2::update_P_full() {
+void coherent_point_drift_base::update_P_full() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     Matrix<kernel_precision, -1, -1> K = kernel_P.compute_kernel(Y.cast<kernel_precision>(),
@@ -105,7 +105,7 @@ void coherent_point_drift_base2::update_P_full() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_base2::update_P_FGT() {
+void coherent_point_drift_base::update_P_FGT() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     Matrix<kernel_precision, -1, -1> K = kernel_P.compute_kernel(Y.cast<kernel_precision>(),
@@ -119,7 +119,7 @@ void coherent_point_drift_base2::update_P_FGT() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_base2::update_P_parallel(size_t parallel_grain_size) {
+void coherent_point_drift_base::update_P_parallel(size_t parallel_grain_size) {
     VectorS<-1> denominator(N);
     kernel_precision two_sigma_squared = 2 * sigma_squared;
     kernel_precision c = std::pow(pi * two_sigma_squared, D / 2.0) * omega / (1.0 - omega) * kernel_precision(M) /
@@ -159,7 +159,7 @@ void coherent_point_drift_base2::update_P_parallel(size_t parallel_grain_size) {
     N_P = sum;
 }
 
-void coherent_point_drift_base2::update_P_nystroem() {
+void coherent_point_drift_base::update_P_nystroem() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
@@ -182,7 +182,7 @@ void coherent_point_drift_base2::update_P_nystroem() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_base2::update_P_nystroem_FGT() {
+void coherent_point_drift_base::update_P_nystroem_FGT() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
@@ -206,7 +206,7 @@ void coherent_point_drift_base2::update_P_nystroem_FGT() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_base2::update_P_kdtree(size_t parallel_grain_size) {
+void coherent_point_drift_base::update_P_kdtree(size_t parallel_grain_size) {
     Matrix<kernel_precision, -1, -1> K = Matrix<kernel_precision, -1, -1>::Zero(M, N);
     Transform target_model_inverse = target_model->inverse();
     bcg_scalar_t radius = std::min<bcg_scalar_t>(0.15, 7 * std::sqrt(sigma_squared));
@@ -238,34 +238,34 @@ void coherent_point_drift_base2::update_P_kdtree(size_t parallel_grain_size) {
     N_P = Map(P1).sum();
 }
 
-MatrixS<-1, 3> coherent_point_drift_base2::transform_source() {
+MatrixS<-1, 3> coherent_point_drift_base::transform_source() {
     return ((source_model->linear() * MapConst(source_positions).transpose()).colwise() +
             source_model->translation()).transpose();
 }
 
-VectorS<3> coherent_point_drift_base2::transform_source(size_t idx) {
+VectorS<3> coherent_point_drift_base::transform_source(size_t idx) {
     return source_model->linear() * source_positions[idx] + source_model->translation();
 }
 
-MatrixS<-1, 3> coherent_point_drift_base2::transform_target() {
+MatrixS<-1, 3> coherent_point_drift_base::transform_target() {
     return ((target_model->linear() * MapConst(target_positions).transpose()).colwise() +
             target_model->translation()).transpose();
 }
 
-VectorS<3> coherent_point_drift_base2::transform_target(size_t idx) {
+VectorS<3> coherent_point_drift_base::transform_target(size_t idx) {
     return target_model->linear() * target_positions[idx] + target_model->translation();
 }
 
-void coherent_point_drift_rigid2::init(vertex_container *source_vertices, Transform &source_model,
-                                       vertex_container *target_vertices,
-                                       Transform &target_model) {
+void coherent_point_drift_rigid::init(vertex_container *source_vertices, Transform &source_model,
+                                      vertex_container *target_vertices,
+                                      Transform &target_model) {
     s = 1.0;
     t.setZero();
     R.setIdentity();
-    coherent_point_drift_base2::init(source_vertices, source_model, target_vertices, target_model);
+    coherent_point_drift_base::init(source_vertices, source_model, target_vertices, target_model);
 }
 
-void coherent_point_drift_rigid2::compute_step() {
+void coherent_point_drift_rigid::compute_step() {
     update_P();
     VectorS<3> mean_x = X.transpose() * MapConst(PT1) / N_P;
     VectorS<3> mean_y = Y.transpose() * MapConst(P1) / N_P;
@@ -281,15 +281,15 @@ void coherent_point_drift_rigid2::compute_step() {
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
 }
 
-void coherent_point_drift_affine2::init(vertex_container *source_vertices, Transform &source_model,
-                                        vertex_container *target_vertices,
-                                        Transform &target_model) {
+void coherent_point_drift_affine::init(vertex_container *source_vertices, Transform &source_model,
+                                       vertex_container *target_vertices,
+                                       Transform &target_model) {
     t.setZero();
     B.setIdentity();
-    coherent_point_drift_base2::init(source_vertices, source_model, target_vertices, target_model);
+    coherent_point_drift_base::init(source_vertices, source_model, target_vertices, target_model);
 }
 
-void coherent_point_drift_affine2::compute_step() {
+void coherent_point_drift_affine::compute_step() {
     update_P();
     VectorS<3> mean_x = X.transpose() * MapConst(PT1) / N_P;
     VectorS<3> mean_y = Y.transpose() * MapConst(P1) / N_P;
@@ -303,14 +303,14 @@ void coherent_point_drift_affine2::compute_step() {
     sigma_squared = std::max<bcg_scalar_t>(sigma_squared, scalar_eps);
 }
 
-void coherent_point_drift_nonrigid2::init(vertex_container *source_vertices, Transform &source_model,
-                                          vertex_container *target_vertices,
-                                          Transform &target_model) {
+void coherent_point_drift_nonrigid::init(vertex_container *source_vertices, Transform &source_model,
+                                         vertex_container *target_vertices,
+                                         Transform &target_model) {
 
     deformation = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_deformation_vector", VectorS<3>::Zero());
     deformed = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_deformed", VectorS<3>::Zero());
     Map(deformation).setZero();
-    coherent_point_drift_base2::init(source_vertices, source_model, target_vertices, target_model);
+    coherent_point_drift_base::init(source_vertices, source_model, target_vertices, target_model);
     Map(deformed) = Y;
     kernel_G.two_sigma_squared = 2 * beta * beta;
     switch (coherence_type) {
@@ -330,7 +330,7 @@ void coherent_point_drift_nonrigid2::init(vertex_container *source_vertices, Tra
     }
 }
 
-void coherent_point_drift_nonrigid2::compute_step() {
+void coherent_point_drift_nonrigid::compute_step() {
     update_P();
     MatrixS<-1, -1> Y_undeformed = (*source_model *
                                     MapConst(source_positions).transpose().colwise().homogeneous()).transpose();
@@ -374,16 +374,16 @@ void coherent_point_drift_nonrigid2::compute_step() {
     deformed.set_dirty();
 }
 
-MatrixS<-1, 3> coherent_point_drift_nonrigid2::transform_source() {
+MatrixS<-1, 3> coherent_point_drift_nonrigid::transform_source() {
     return ((MapConst(source_positions) + MapConst(deformation)) * source_model->linear().transpose()).rowwise() +
            source_model->translation().transpose();
 }
 
-VectorS<3> coherent_point_drift_nonrigid2::transform_source(size_t idx) {
+VectorS<3> coherent_point_drift_nonrigid::transform_source(size_t idx) {
     return source_model->linear() * (source_positions[idx] + deformation[idx]) + source_model->translation();
 }
 
-void coherent_point_drift_nonrigid2::accept_deformation() {
+void coherent_point_drift_nonrigid::accept_deformation() {
     Map(source_positions) += MapConst(deformation);
     source_positions.set_dirty();
     Map(deformation).setZero();
@@ -392,12 +392,12 @@ void coherent_point_drift_nonrigid2::accept_deformation() {
     deformed.set_dirty();
 }
 
-void coherent_point_drift_nonrigid3::init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
-          Transform &target_model){
+void coherent_point_drift_nonrigid2::init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
+                                          Transform &target_model){
     deformation = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_deformation_vector", VectorS<3>::Zero());
     deformed = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_deformed", VectorS<3>::Zero());
     Map(deformation).setZero();
-    coherent_point_drift_base2::init(source_vertices, source_model, target_vertices, target_model);
+    coherent_point_drift_base::init(source_vertices, source_model, target_vertices, target_model);
     Map(deformed) = Y;
     kernel_G.two_sigma_squared = 2 * beta * beta;
     switch (coherence_type) {
@@ -417,7 +417,7 @@ void coherent_point_drift_nonrigid3::init(vertex_container *source_vertices, Tra
     }
 }
 
-void coherent_point_drift_nonrigid3::accept_deformation(){
+void coherent_point_drift_nonrigid2::accept_deformation(){
     Map(source_positions) += MapConst(deformation);
     source_positions.set_dirty();
     Map(deformation).setZero();
@@ -426,7 +426,7 @@ void coherent_point_drift_nonrigid3::accept_deformation(){
     deformed.set_dirty();
 }
 
-void coherent_point_drift_nonrigid3::compute_step(){
+void coherent_point_drift_nonrigid2::compute_step(){
     update_P();
 
     VectorS<3> mean_x = X.transpose() * MapConst(PT1) / N_P;
@@ -482,18 +482,18 @@ void coherent_point_drift_nonrigid3::compute_step(){
     deformed.set_dirty();
 }
 
-MatrixS<-1, 3> coherent_point_drift_nonrigid3::transform_source(){
+MatrixS<-1, 3> coherent_point_drift_nonrigid2::transform_source(){
     return ((MapConst(source_positions) + MapConst(deformation)) * source_model->linear().transpose()).rowwise() +
            source_model->translation().transpose();
 }
 
-VectorS<3> coherent_point_drift_nonrigid3::transform_source(size_t idx){
+VectorS<3> coherent_point_drift_nonrigid2::transform_source(size_t idx){
     return source_model->linear() * (source_positions[idx] + deformation[idx]) + source_model->translation();
 }
 
-void coherent_point_drift_bayes2::init(vertex_container *source_vertices, Transform &source_model,
-                                       vertex_container *target_vertices,
-                                       Transform &target_model) {
+void coherent_point_drift_bayes::init(vertex_container *source_vertices, Transform &source_model,
+                                      vertex_container *target_vertices,
+                                      Transform &target_model) {
     alpha = source_vertices->get_or_add<bcg_scalar_t, 1>("v_cpd_alpha");
     deformation = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_deformation_vector", VectorS<3>::Zero());
     deformed = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_deformed");
@@ -505,7 +505,7 @@ void coherent_point_drift_bayes2::init(vertex_container *source_vertices, Transf
     s = 1.0;
     t.setZero();
     R.setIdentity();
-    coherent_point_drift_base2::init(source_vertices, source_model, target_vertices, target_model);
+    coherent_point_drift_base::init(source_vertices, source_model, target_vertices, target_model);
 
     sigma_squared *= gamma;
     Sigma = MatrixS<-1, -1>::Identity(M, M);
@@ -535,7 +535,7 @@ void coherent_point_drift_bayes2::init(vertex_container *source_vertices, Transf
     }
 }
 
-bcg_scalar_t coherent_point_drift_bayes2::compute_target_volume() const {
+bcg_scalar_t coherent_point_drift_bayes::compute_target_volume() const {
     VectorS<-1> diff = MapConst(target_positions).colwise().maxCoeff().array() -
                        MapConst(target_positions).colwise().minCoeff().array();
     bcg_scalar_t result = 1;
@@ -565,7 +565,7 @@ double digamma(double x) {
     return r + log(x) - 0.5 / x + t;
 }
 
-void coherent_point_drift_bayes2::compute_step() {
+void coherent_point_drift_bayes::compute_step() {
     update_P();
     Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     switch (coherence_type) {
@@ -575,6 +575,20 @@ void coherent_point_drift_bayes2::compute_step() {
             break;
         }
         case CoherenceType::eigen : {
+            //TODO Idea here ist to scale the entries of eigen vectors depending on registration error... locally...
+            //MatrixS<-1, -1> Evecs = (1.0 / (-Map(deformation).rowwise().norm()).array().exp()).matrix().asDiagonal() * kernel_G.Evecs;
+            //MatrixS<-1, -1> Evecs = (1.0 / (-Map(P1)).array().exp()).matrix().asDiagonal() * kernel_G.Evecs;
+            /*MatrixS<-1, -1> Evecs = (1.0 / (-Map(P1)).array().exp().max((-Map(deformation).rowwise().norm()).array().exp())).matrix().asDiagonal() * kernel_G.Evecs;
+            MatrixS<-1, -1> S = Evecs.cast<bcg_scalar_t>().transpose() * MapConst(P1).asDiagonal() *
+                                Evecs.cast<bcg_scalar_t>();
+            MatrixS<-1, -1> ID = MatrixS<-1, -1>::Identity(kernel_G.Evals.size(), kernel_G.Evals.size());
+            Sigma = (Evecs.cast<bcg_scalar_t>() * kernel_G.Evals.cast<bcg_scalar_t>().asDiagonal() *
+                     (ID - S * (ID * (lambda * sigma_squared /
+                                      (s * s * kernel_G.Evals.cast<bcg_scalar_t>().array())).matrix().asDiagonal() +
+                                S).inverse()) *
+                     Evecs.cast<bcg_scalar_t>().transpose()) / lambda;*/
+
+
             MatrixS<-1, -1> S = kernel_G.Evecs.cast<bcg_scalar_t>().transpose() * MapConst(P1).asDiagonal() *
                                 kernel_G.Evecs.cast<bcg_scalar_t>();
             MatrixS<-1, -1> ID = MatrixS<-1, -1>::Identity(kernel_G.Evals.size(), kernel_G.Evals.size());
@@ -625,7 +639,7 @@ void coherent_point_drift_bayes2::compute_step() {
 }
 
 
-void coherent_point_drift_bayes2::update_P_full() {
+void coherent_point_drift_bayes::update_P_full() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
 
@@ -646,7 +660,7 @@ void coherent_point_drift_bayes2::update_P_full() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_bayes2::update_P_FGT() {
+void coherent_point_drift_bayes::update_P_FGT() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
 
@@ -667,7 +681,7 @@ void coherent_point_drift_bayes2::update_P_FGT() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_bayes2::update_P_parallel(size_t parallel_grain_size) {
+void coherent_point_drift_bayes::update_P_parallel(size_t parallel_grain_size) {
     VectorS<-1> denominator(N);
     kernel_precision two_sigma_squared = 2 * sigma_squared;
     Vector<kernel_precision, -1> weight =
@@ -712,7 +726,7 @@ void coherent_point_drift_bayes2::update_P_parallel(size_t parallel_grain_size) 
     N_P = sum;
 }
 
-void coherent_point_drift_bayes2::update_P_nystroem() {
+void coherent_point_drift_bayes::update_P_nystroem() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
@@ -742,7 +756,7 @@ void coherent_point_drift_bayes2::update_P_nystroem() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_bayes2::update_P_nystroem_FGT() {
+void coherent_point_drift_bayes::update_P_nystroem_FGT() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
@@ -772,7 +786,7 @@ void coherent_point_drift_bayes2::update_P_nystroem_FGT() {
     N_P = Map(P1).sum();
 }
 
-void coherent_point_drift_bayes2::update_P_kdtree(size_t parallel_grain_size) {
+void coherent_point_drift_bayes::update_P_kdtree(size_t parallel_grain_size) {
     Matrix<kernel_precision, -1, -1> K = Matrix<kernel_precision, -1, -1>::Zero(M, N);
 
     kernel_precision two_sigma_squared = 2 * sigma_squared;
@@ -813,16 +827,16 @@ void coherent_point_drift_bayes2::update_P_kdtree(size_t parallel_grain_size) {
     N_P = Map(P1).sum();
 }
 
-MatrixS<-1, 3> coherent_point_drift_bayes2::transform_inverse(const MatrixS<-1, 3> &residual) {
+MatrixS<-1, 3> coherent_point_drift_bayes::transform_inverse(const MatrixS<-1, 3> &residual) {
     return (residual.rowwise() - t.transpose()) * R / s;
 }
 
-MatrixS<-1, 3> coherent_point_drift_bayes2::transform_source() {
+MatrixS<-1, 3> coherent_point_drift_bayes::transform_source() {
     return ((MapConst(source_positions) + MapConst(deformation)) * source_model->linear().transpose()).rowwise() +
            source_model->translation().transpose();
 }
 
-VectorS<3> coherent_point_drift_bayes2::transform_source(size_t idx) {
+VectorS<3> coherent_point_drift_bayes::transform_source(size_t idx) {
     return (source_positions[idx] + deformation[idx]).transpose() * source_model->linear().transpose() +
            source_model->translation().transpose();
 }
