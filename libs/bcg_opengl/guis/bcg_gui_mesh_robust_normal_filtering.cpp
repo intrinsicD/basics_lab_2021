@@ -6,62 +6,76 @@
 #include "bcg_viewer_state.h"
 #include "bcg_library/geometry/mesh/bcg_mesh_normal_filtering_robust_statistics.h"
 
-namespace bcg{
+namespace bcg {
 
-void gui_robust_normal_filtering(viewer_state *state){
+void gui_robust_normal_filtering(viewer_state *state) {
     static float sigma_p = 0.01;
-    static float sigma_n = 0.01;
     static float sigma_g = 0.01;
     ImGui::Separator();
-    ImGui::InputFloat("sigma_p", &sigma_p);
-    ImGui::InputFloat("sigma_n", &sigma_n);
-    ImGui::InputFloat("sigma_g", &sigma_g);
+
     static auto method_names = normal_filtering_names();
     static int e = 0;
+    static int iterations = 1;
     draw_combobox(&state->window, "Method", e, method_names);
-    if(ImGui::Button("Compute Filtering")){
+    if (static_cast<int>(NormalFilteringType::unilateral_probabilistic_quadric) == e) {
+        ImGui::InputInt("iterations", &iterations);
+    }else{
+        ImGui::InputFloat("sigma_g", &sigma_g);
+    }
+    ImGui::InputFloat("sigma_p", &sigma_p);
+
+    if (ImGui::Button("Compute Filtering")) {
         auto id = state->picker.entity_id;
-        if(state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)){
+        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
-            switch(static_cast<NormalFilteringType>(e)){
+            switch (static_cast<NormalFilteringType>(e)) {
                 case NormalFilteringType::unilateral_belyaev_ohtake : {
-                    mesh_normal_unilateral_filtering_belyaev_ohtake(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_belyaev_ohtake(mesh, sigma_g, sigma_p,
+                                                                    state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::unilateral_yagou_mean : {
-                    mesh_normal_unilateral_filtering_yagou_mean(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_yagou_mean(mesh, sigma_g, sigma_p,
+                                                                state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::unilateral_yagou_median : {
-                    mesh_normal_unilateral_filtering_yagou_median(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_yagou_median(mesh, sigma_g, sigma_p,
+                                                                  state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::unilateral_yadav : {
-                    mesh_normal_unilateral_filtering_yadav(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_yadav(mesh, sigma_g, sigma_p, state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::unilateral_shen : {
-                    mesh_normal_unilateral_filtering_shen(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_shen(mesh, sigma_g, sigma_p, state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::unilateral_tasdizen : {
-                    mesh_normal_unilateral_filtering_tasdizen(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_tasdizen(mesh, sigma_g, sigma_p,
+                                                              state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::unilateral_centin : {
-                    mesh_normal_unilateral_filtering_centin(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_unilateral_filtering_centin(mesh, sigma_g, sigma_p, state->config.parallel_grain_size);
+                    break;
+                }
+                case NormalFilteringType::unilateral_probabilistic_quadric : {
+                    mesh_normal_unilateral_filtering_probabilistic_quadric(mesh, iterations, sigma_p,
+                                                                           state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::bilateral_zheng : {
-                    mesh_normal_bilateral_filtering_zheng(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_bilateral_filtering_zheng(mesh, sigma_g, sigma_p, state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::bilateral_zhang : {
-                    mesh_normal_bilateral_filtering_zhang(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_bilateral_filtering_zhang(mesh, sigma_g, sigma_p, state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::bilateral_yadav : {
-                    mesh_normal_bilateral_filtering_yadav(mesh, sigma_g, sigma_p, sigma_n, state->config.parallel_grain_size);
+                    mesh_normal_bilateral_filtering_yadav(mesh, sigma_g, sigma_p, state->config.parallel_grain_size);
                     break;
                 }
                 case NormalFilteringType::__last__ : {
