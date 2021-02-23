@@ -194,6 +194,8 @@ void projection_operator::compute_step(size_t parallel_grain_size) {
     repulsion_forces.set_dirty();
     repulsion_forces_i.set_dirty();
     repulsion_forces_ii.set_dirty();
+    sampling_repulsion_weights.set_dirty();
+    sampling_projection_weights.set_dirty();
 }
 
 

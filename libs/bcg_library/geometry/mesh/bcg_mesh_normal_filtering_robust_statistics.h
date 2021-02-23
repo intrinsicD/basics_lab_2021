@@ -9,56 +9,69 @@
 
 namespace bcg {
 
-void mesh_normal_filtering_robust_statistics(halfedge_mesh &mesh,
-                                             property<bcg_scalar_t, 1> g,
-                                             property<bcg_scalar_t, 1> f,
-                                             bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                             size_t parallel_grain_size = 1024);
+enum class NormalFilteringType{
+    unilateral_belyaev_ohtake,
+    unilateral_yagou_mean,
+    unilateral_yagou_median,
+    unilateral_yadav,
+    unilateral_shen,
+    unilateral_tasdizen,
+    unilateral_centin,
+    bilateral_zheng,
+    bilateral_zhang,
+    bilateral_yadav,
+    __last__
+};
 
-void mesh_normal_filtering_belyaev_ohtake(halfedge_mesh &mesh,
+std::vector<std::string> normal_filtering_names();
+
+void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
                                           bcg_scalar_t sigma_g,
                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                           size_t parallel_grain_size = 1024);
 
-void mesh_normal_filtering_yagou_mean(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_g,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n
-                                          size_t parallel_grain_size = 1024);
-
-void mesh_normal_filtering_yagou_median(halfedge_mesh &mesh,
+void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh,
                                       bcg_scalar_t sigma_g,
-                                      bcg_scalar_t sigma_p, bcg_scalar_t sigma_n
+                                      bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                       size_t parallel_grain_size = 1024);
 
-void mesh_normal_filtering_huber(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                          size_t parallel_grain_size = 1024);
+void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
+                                        bcg_scalar_t sigma_g,
+                                        bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                        size_t parallel_grain_size = 1024);
 
-void mesh_normal_filtering_yadav(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                          size_t parallel_grain_size = 1024);
+void mesh_normal_unilateral_filtering_yadav(halfedge_mesh &mesh,
+                                 bcg_scalar_t sigma_g,
+                                 bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                 size_t parallel_grain_size = 1024);
 
-void mesh_normal_filtering_shen(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                          size_t parallel_grain_size = 1024);
+void mesh_normal_unilateral_filtering_shen(halfedge_mesh &mesh,
+                                bcg_scalar_t sigma_g,
+                                bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                size_t parallel_grain_size = 1024);
 
-void mesh_normal_filtering_tasdizen(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                          size_t parallel_grain_size = 1024);
+void mesh_normal_unilateral_filtering_tasdizen(halfedge_mesh &mesh,
+                                    bcg_scalar_t sigma_g,
+                                    bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                    size_t parallel_grain_size = 1024);
 
-void mesh_normal_filtering_centin(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                          size_t parallel_grain_size = 1024);
+void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
+                                  bcg_scalar_t sigma_g,
+                                  bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                  size_t parallel_grain_size = 1024);
 
 void mesh_normal_bilateral_filtering_zheng(halfedge_mesh &mesh,
-                                          bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                          size_t parallel_grain_size = 1024);
+                                           bcg_scalar_t sigma_g,
+                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                           size_t parallel_grain_size = 1024);
 
 void mesh_normal_bilateral_filtering_zhang(halfedge_mesh &mesh,
+                                           bcg_scalar_t sigma_g,
                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                            size_t parallel_grain_size = 1024);
 
 void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,
+                                           bcg_scalar_t sigma_g,
                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                            size_t parallel_grain_size = 1024);
 

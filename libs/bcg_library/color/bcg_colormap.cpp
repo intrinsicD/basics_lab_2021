@@ -1,13 +1,11 @@
 //
-// Created by alex on 14.10.20.
+// Created by alex on 22.02.21.
 //
 
-#include "bcg_colors.h"
-#include "Eigen/Core"
+#include "bcg_colormap.h"
 #include "math/vector/bcg_vector_map_eigen.h"
 
 namespace bcg {
-
 
 namespace colormap {
 
@@ -32,7 +30,7 @@ std::vector<VectorS<3>> base_colormap::operator()(const VectorS<-1> &scalarfield
     }
     for (size_t i = 0; i < scalarfield.size(); ++i) {
         auto s = scalarfield[i];
-        if(std::isnan(s)){
+        if (std::isnan(s)) {
             s = c_min;
         }
         auto t = std::min<bcg_scalar_t>(std::max<bcg_scalar_t>((s - c_min) / range, 0.0), 1.0);

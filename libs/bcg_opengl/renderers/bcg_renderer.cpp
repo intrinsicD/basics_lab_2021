@@ -33,6 +33,7 @@ std::vector<Vector<float, 3>>
 renderer::map_to_colors(property_container *container, const std::string &property_name, colormap::base_colormap color_map){
     std::vector<Vector<float, 3>> colors;
     auto *base_ptr = container->get_base_ptr(property_name);
+    colors.resize(base_ptr->size());
     if(base_ptr->dims() == 1){
         if(base_ptr->void_ptr() == nullptr){
             VectorS<-1> values = MapConst(container->get<bool, 1>(base_ptr->name())).cast<bcg_scalar_t>();
@@ -50,7 +51,7 @@ renderer::map_to_colors(property_container *container, const std::string &proper
             }
         }
     }else if(base_ptr->dims() == 3){
-        std::vector<Vector<float, 3>> colors1;
+        std::vector<Vector<float, 3>> colors1(base_ptr->size());
         auto values = container->get<VectorS<3>, 3>(base_ptr->name());
         if(!values){
             auto values1 = container->get<VectorI<3>, 3>(base_ptr->name());

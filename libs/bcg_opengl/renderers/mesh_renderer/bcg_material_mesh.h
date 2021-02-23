@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_MATERIAL_MESH_H
 #define BCG_GRAPHICS_BCG_MATERIAL_MESH_H
 
-#include "color/bcg_colors.h"
+#include "color/bcg_colormap.h"
 #include "renderers/bcg_material.h"
 
 namespace bcg{

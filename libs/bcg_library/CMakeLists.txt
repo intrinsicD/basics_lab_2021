@@ -7,7 +7,7 @@ find_package(spectra REQUIRED)
 find_package(nanoflann REQUIRED)
 
 add_library(bcg_graphics
-        color/bcg_colors.h color/bcg_colors.cpp
+        color/bcg_colors.h color/bcg_colormap.h color/bcg_colormap.cpp
         utils/bcg_file.h utils/bcg_file.cpp
         utils/bcg_dynamic_bitset.h
         utils/bcg_file_watcher.h
@@ -110,6 +110,7 @@ add_library(bcg_graphics
         geometry/mesh/bcg_mesh_simplification.h geometry/mesh/bcg_mesh_simplification.cpp
         geometry/mesh/bcg_mesh_remeshing.h geometry/mesh/bcg_mesh_remeshing.cpp
         geometry/mesh/bcg_mesh_statistics.h geometry/mesh/bcg_mesh_statistics.cpp
+        geometry/mesh/bcg_mesh_normal_filtering_robust_statistics.h geometry/mesh/bcg_mesh_normal_filtering_robust_statistics.cpp
         geometry/curve/bcg_curve.h geometry/curve/bcg_curve.cpp
         geometry/curve/bcg_curve_bezier.h geometry/curve/bcg_curve_bezier.cpp
         geometry/triangle/bcg_triangle.h geometry/triangle/bcg_barycentric_coordinates.h geometry/triangle/bcg_triangle_centers.h geometry/triangle/bcg_triangle_metric.h

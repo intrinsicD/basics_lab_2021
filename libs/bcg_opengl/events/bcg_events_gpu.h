@@ -10,7 +10,7 @@
 #include "entt/entt.hpp"
 #include "bcg_opengl/renderers/bcg_attribute.h"
 #include "bcg_property.h"
-#include "color/bcg_colors.h"
+#include "color/bcg_colormap.h"
 
 namespace bcg::event::gpu{
 

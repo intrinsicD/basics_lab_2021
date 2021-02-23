@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 
+#include "bcg_library/color/bcg_colormap.h"
 #include "bcg_opengl/systems/bcg_systems.h"
 #include "bcg_opengl/bcg_opengl.h"
 #include "entt/entt.hpp"

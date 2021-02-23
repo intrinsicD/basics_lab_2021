@@ -13,7 +13,7 @@ namespace bcg{
 
 template<typename T, int D>
 void vector_median_filter_fuzzy(const std::vector<Vector<T, D>> &V, bcg_scalar_t sigma){
-    return vector_median_filter_fuzzy(MapConst(V));
+    return vector_median_filter_fuzzy(MapConst(V), sigma);
 }
 
 template<typename Derived>
@@ -27,7 +27,7 @@ Vector<typename Derived::Scalar, -1> vector_median_filter_fuzzy(const Eigen::Eig
 
 template<typename T, int D>
 void vector_median_filter_directional_fuzzy(const std::vector<Vector<T, D>> &V, bcg_scalar_t sigma){
-    return vector_median_filter_directional_fuzzy(MapConst(V));
+    return vector_median_filter_directional_fuzzy(MapConst(V), sigma);
 }
 
 template<typename Derived>

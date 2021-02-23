@@ -31,6 +31,7 @@
 #include "bcg_opengl/guis/bcg_gui_sampling_octree.h"
 #include "bcg_opengl/guis/bcg_gui_sampling_grid.h"
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_robust_normal_filtering.h"
 
 int main() {
     using namespace bcg;
@@ -125,6 +126,9 @@ int main() {
             }
             if (ImGui::MenuItem("Statistics")) {
                 state->gui.left = gui_mesh_statistics;
+            }
+            if (ImGui::MenuItem("Robust Normal Filtering")) {
+                state->gui.left = gui_robust_normal_filtering;
             }
             ImGui::EndMenu();
         }

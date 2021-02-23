@@ -68,6 +68,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_mesh_remeshing.h guis/bcg_gui_mesh_remeshing.cpp
             guis/bcg_gui_mesh_statistics.h guis/bcg_gui_mesh_statistics.cpp
             guis/bcg_gui_mesh_smoothing.h guis/bcg_gui_mesh_smoothing.cpp
+            guis/bcg_gui_mesh_robust_normal_filtering.h guis/bcg_gui_mesh_robust_normal_filtering.cpp
             guis/bcg_gui_correspondences.h guis/bcg_gui_correspondences.cpp
             guis/bcg_gui_registration.h guis/bcg_gui_registration.cpp
             guis/bcg_gui_statistics.h guis/bcg_gui_statistics.cpp
