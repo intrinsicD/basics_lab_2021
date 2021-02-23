@@ -75,6 +75,7 @@ add_library(bcg_graphics
         geometry/point_cloud/bcg_point_cloud_kernel_density_estimation.h geometry/point_cloud/bcg_point_cloud_kernel_density_estimation.cpp
         geometry/point_cloud/bcg_point_cloud_vertex_quadric.h geometry/point_cloud/bcg_point_cloud_vertex_quadric.cpp
         geometry/point_cloud/bcg_point_cloud_bilateral_filter.h geometry/point_cloud/bcg_point_cloud_bilateral_filter.cpp
+        geometry/point_cloud/bcg_point_cloud_vertex_noise.h geometry/point_cloud/bcg_point_cloud_vertex_noise.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
         geometry/graph/bcg_graph_edge_lengths.h geometry/graph/bcg_graph_edge_lengths.cpp
