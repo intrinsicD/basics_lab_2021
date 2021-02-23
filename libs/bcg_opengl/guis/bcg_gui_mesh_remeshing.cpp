@@ -3,6 +3,7 @@
 //
 
 #include "bcg_gui_mesh_remeshing.h"
+#include "bcg_gui_reload_entity.h"
 #include "bcg_viewer_state.h"
 #include "bcg_gui_mesh_statistics.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
@@ -65,6 +66,8 @@ void gui_mesh_remeshing(viewer_state *state) {
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(state->picker.entity_id, edge_attributes);
         auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(state->picker.entity_id, face_attributes);
+
+        gui_reload_entity(state);
     }
 }
 

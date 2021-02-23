@@ -58,8 +58,14 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     }else{
         auto &material = state->scene.get<material_mesh>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
-        auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
+        std::vector<attribute> face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
+        if(material.use_face_color){
+            auto *faces = state->get_faces(event.id);
+            if(faces && faces->has(material.attributes[2].property_name)){
+                state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(event.id, material.attributes[2]);
+            }
+        }
         for(auto &attribute : material.attributes){
             attribute.update = false;
         }
@@ -196,7 +202,7 @@ void mesh_renderer::on_set_face_color_attribute(const event::mesh_renderer::set_
 
     auto *faces = state->get_faces(event.id);
     std::vector<Vector<float, 3>> colors = map_to_colors(faces, event.color.property_name, material.color_map);
-
+    material.attributes[2].property_name = event.color.property_name;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
     material.width = std::min((int)colors.size(), material.width);
     int height = colors.size() % material.width;

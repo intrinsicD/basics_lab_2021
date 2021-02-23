@@ -3,6 +3,7 @@
 //
 
 #include "bcg_gui_mesh_simplification.h"
+#include "bcg_gui_reload_entity.h"
 #include "bcg_viewer_state.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 
@@ -35,6 +36,7 @@ void gui_mesh_simplification(viewer_state *state) {
         auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(state->picker.entity_id, face_attributes);
     }
+    gui_reload_entity(state);
 }
 
 }

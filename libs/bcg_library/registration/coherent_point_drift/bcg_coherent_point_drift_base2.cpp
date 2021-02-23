@@ -21,6 +21,7 @@ void coherent_point_drift_base::init(vertex_container *source_vertices, Transfor
     P1 = source_vertices->get_or_add<bcg_scalar_t, 1>("v_cpd_P1");
     PX = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_PX");
     PT1 = target_vertices->get_or_add<bcg_scalar_t, 1>("v_cpd_PT1");
+    residual = source_vertices->get_or_add<VectorS<3>, 3>("v_cpd_residual");
     source_positions = source_vertices->get<VectorS<3>, 3>("v_position");
     target_positions = target_vertices->get<VectorS<3>, 3>("v_position");
     target_kdtree.build(target_positions);
@@ -84,6 +85,7 @@ void coherent_point_drift_base::update_P() {
             break;
         }
     }
+    residual.set_dirty();
     P1.set_dirty();
     PT1.set_dirty();
     PX.set_dirty();
@@ -102,6 +104,7 @@ void coherent_point_drift_base::update_P_full() {
     Map(PT1) = K.colwise().sum().cast<bcg_scalar_t>();
     Map(P1) = K.rowwise().sum().cast<bcg_scalar_t>();
     Map(PX) = (K * X.cast<kernel_precision>()).cast<bcg_scalar_t>();
+    Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     N_P = Map(P1).sum();
 }
 
@@ -116,6 +119,7 @@ void coherent_point_drift_base::update_P_FGT() {
     Map(PT1) = (1.0 - c * a.array()).cast<bcg_scalar_t>();
     Map(P1) = (K * a).cast<bcg_scalar_t>();
     Map(PX) = (K * (X.array().cast<kernel_precision>().colwise() * a.array()).matrix()).cast<bcg_scalar_t>();
+    Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     N_P = Map(P1).sum();
 }
 
@@ -156,6 +160,7 @@ void coherent_point_drift_base::update_P_parallel(size_t parallel_grain_size) {
                 }
             }
     );
+    Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     N_P = sum;
 }
 
@@ -179,6 +184,7 @@ void coherent_point_drift_base::update_P_nystroem() {
     Map(P1) = (kernel_P.K_AV * kernel_P.K_VV_INV * kernel_P.K_BV.transpose() * denominator).cast<bcg_scalar_t>();
     Map(PX) = (kernel_P.K_AV * kernel_P.K_VV_INV * kernel_P.K_BV.transpose() * denominator.asDiagonal() *
                X.cast<kernel_precision>()).cast<bcg_scalar_t>();
+    Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     N_P = Map(P1).sum();
 }
 
@@ -203,6 +209,7 @@ void coherent_point_drift_base::update_P_nystroem_FGT() {
     Map(PX) = (kernel_P.K_AV * (kernel_P.K_VV_INV * (kernel_P.K_BV.transpose() *
                                                      (X.array().cast<kernel_precision>().colwise() *
                                                       a.array()).matrix()))).cast<bcg_scalar_t>();
+    Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     N_P = Map(P1).sum();
 }
 
@@ -235,6 +242,7 @@ void coherent_point_drift_base::update_P_kdtree(size_t parallel_grain_size) {
     Map(PT1) = (1.0 - c * a.array()).cast<bcg_scalar_t>();
     Map(P1) = (K * a).cast<bcg_scalar_t>();
     Map(PX) = (K * (X.array().cast<kernel_precision>().colwise() * a.array()).matrix()).cast<bcg_scalar_t>();
+    Map(residual) = (1.0 / Map(P1).array()).matrix().asDiagonal() * MapConst(PX);
     N_P = Map(P1).sum();
 }
 

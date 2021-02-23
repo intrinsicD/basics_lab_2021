@@ -31,13 +31,13 @@ void loading_system::on_file_drop(const event::internal::file_drop &event){
             }else{
                 auto id = state->scene.create();
                 state->scene.emplace<point_cloud>(id, pc);
-                std::cout << pc << "\n";
+                std::cout << "read successful " << filename << "\n";
                 state->dispatcher.trigger<event::point_cloud::setup>(id, filename);
             }
         }else{
             auto id = state->scene.create();
             state->scene.emplace<halfedge_mesh>(id, mesh);
-
+            std::cout << "read successful " << filename << "\n";
             state->dispatcher.trigger<event::mesh::setup>(id, filename);
         }
 

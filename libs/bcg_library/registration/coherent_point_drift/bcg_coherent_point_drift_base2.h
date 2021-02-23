@@ -35,7 +35,7 @@ inline std::vector<std::string> softmatching_type_names(){
 
 struct coherent_point_drift_base {
     property<bcg_scalar_t, 1> P1, PT1;
-    property<VectorS<3>, 3> source_positions, target_positions, PX;
+    property<VectorS<3>, 3> source_positions, target_positions, PX, residual;
     bcg_scalar_t N_P, sigma_squared, kdtree_sigma_threshold = 0.02, omega = 0.5;
     kdtree_property<bcg_scalar_t> target_kdtree;
     Transform *source_model;

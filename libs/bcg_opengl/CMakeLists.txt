@@ -31,6 +31,7 @@ if (BCG_OPENGL)
             guis/bcg_gui_property_selector.h guis/bcg_gui_property_selector.cpp
             guis/bcg_gui_property_container_selector.h guis/bcg_gui_property_container_selector.cpp
             guis/bcg_gui_property_editfield.h guis/bcg_gui_property_editfield.cpp
+            guis/bcg_gui_reload_entity.h guis/bcg_gui_reload_entity.cpp
             guis/bcg_gui_point_cloud.h guis/bcg_gui_point_cloud.cpp
             guis/bcg_gui_point_cloud_graph_builder.h guis/bcg_gui_point_cloud_graph_builder.cpp
             guis/bcg_gui_point_cloud_vertex_pca.h guis/bcg_gui_point_cloud_vertex_pca.cpp

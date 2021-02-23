@@ -4,6 +4,7 @@
 #include "bcg_opengl/bcg_imgui.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_state.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_curve.h"
+#include "bcg_opengl/guis/bcg_gui_reload_entity.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_graph_builder.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_pca.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_curvature_taubin.h"
@@ -148,6 +149,9 @@ int main() {
             }
             if (ImGui::MenuItem("Registration")) {
                 state->gui.left = gui_registration;
+            }
+            if (ImGui::MenuItem("Reload")) {
+                state->gui.left = gui_reload_entity;
             }
             ImGui::EndMenu();
         }

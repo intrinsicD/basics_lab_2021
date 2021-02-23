@@ -3,6 +3,7 @@
 //
 
 #include "bcg_gui_point_cloud_bilateral_filter.h"
+#include "bcg_gui_reload_entity.h"
 #include "bcg_gui_kdtree_selector.h"
 #include "bcg_gui_material_points.h"
 #include "bcg_viewer_state.h"
@@ -36,6 +37,7 @@ void gui_point_cloud_bilateral_filter(viewer_state *state){
     }
 
     gui_material_points(state, state->scene.try_get<material_points>(state->picker.entity_id), state->picker.entity_id);
+    gui_reload_entity(state);
 }
 
 }

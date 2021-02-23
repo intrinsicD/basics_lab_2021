@@ -31,7 +31,7 @@ std::vector<std::string> normal_filtering_names() {
     return names;
 }
 
-void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, size_t parallel_grain_size) {
+void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, size_t parallel_grain_size) {
     auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
@@ -39,7 +39,7 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, size_t paral
     Map(f_normals) = MapConst(f_normals_filtered);
 
     vertex_normals(mesh, vertex_normal_uniform, parallel_grain_size);
-
+    auto v_normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -48,7 +48,7 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, size_t paral
 
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
-/*                        std::vector<VectorS<3>> V;
+                        /*std::vector<VectorS<3>> V;
                         for (const auto vf : mesh.get_vertices(fv)) {
                             V.push_back(positions[vf]);
                         }
@@ -57,9 +57,12 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, size_t paral
                         Q_total += Q;*/
 
                         quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals[fv], sigma_p, 0.1);
+                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals[fv], sigma_p, sigma_n);
                         Q_total += Q;
                     }
+
+                    /*VectorS<3> diff = Q_total.minimizer() - positions[v];
+                    positions[v] += v_normals[v].dot(diff) * v_normals[v] * 0.5;*/
                     positions[v] = Q_total.minimizer();
                 }
             }
@@ -73,7 +76,7 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, size_t paral
 
 void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
                                                      bcg_scalar_t sigma_g,
-                                                     bcg_scalar_t sigma_p,
+                                                     bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                      size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -122,12 +125,12 @@ void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh,
                                                  bcg_scalar_t,
-                                                 bcg_scalar_t sigma_p,
+                                                 bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                  size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -143,7 +146,7 @@ void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh,
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
-                    f_normals_filtered[f].setZero();
+                    f_normals_filtered[f] = f_areas[f] * f_normals[f];
                     for (const auto &fh : mesh.get_halfedges(f)) {
                         auto oh = mesh.get_opposite(fh);
                         if (!mesh.is_boundary(oh)) {
@@ -158,12 +161,12 @@ void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh,
             }
     );
     e_g.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
                                                    bcg_scalar_t sigma_g,
-                                                   bcg_scalar_t sigma_p,
+                                                   bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                    size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -185,7 +188,7 @@ void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
                         bcg_scalar_t x = (f_normals[f0] - f_normals[f1]).norm();
                         if (x < sigma_g) {
                             if (x > scalar_eps) {
-                                e_g[e] = 1.0 / std::abs(x);
+                                e_g[e] = 1.0 / x;
                             } else {
                                 e_g[e] = 1.0;
                             }
@@ -200,7 +203,7 @@ void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
-                    f_normals_filtered[f].setZero();
+                    f_normals_filtered[f] = f_areas[f] * f_normals[f];
                     for (const auto &fh : mesh.get_halfedges(f)) {
                         auto oh = mesh.get_opposite(fh);
                         if (!mesh.is_boundary(oh)) {
@@ -215,12 +218,12 @@ void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
             }
     );
     e_g.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_unilateral_filtering_yadav(halfedge_mesh &mesh,
                                             bcg_scalar_t sigma_g,
-                                            bcg_scalar_t sigma_p,
+                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                             size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -268,12 +271,12 @@ void mesh_normal_unilateral_filtering_yadav(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_unilateral_filtering_shen(halfedge_mesh &mesh,
                                            bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p,
+                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                            size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -316,12 +319,12 @@ void mesh_normal_unilateral_filtering_shen(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_unilateral_filtering_tasdizen(halfedge_mesh &mesh,
                                                bcg_scalar_t sigma_g,
-                                               bcg_scalar_t sigma_p,
+                                               bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -372,12 +375,12 @@ void mesh_normal_unilateral_filtering_tasdizen(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
                                              bcg_scalar_t sigma_g,
-                                             bcg_scalar_t sigma_p,
+                                             bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                              size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -444,13 +447,13 @@ void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 
 void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                                                             int iterations,
-                                                            bcg_scalar_t sigma_p,
+                                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                             size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -470,7 +473,6 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                     }
                     quadrics[f].probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
                     quadrics_avg[f] = quadrics[f];
-/*                    quadrics[f].probabilistic_plane_quadric(face_center(mesh, f), f_normals[f], sigma_p, 0.1);*/
                 }
             }
     );
@@ -509,7 +511,9 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                     for (const auto fv : mesh.get_faces(v)) {
                         Q_total += quadrics_avg[fv];
                     }
-                    positions[v] = Q_total.minimizer();
+                    if (!mesh.is_boundary(v)) {
+                        positions[v] = Q_total.minimizer();
+                    }
                 }
             }
     );
@@ -521,7 +525,7 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
 
 void mesh_normal_bilateral_filtering_zheng(halfedge_mesh &mesh,
                                            bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p,
+                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                            size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -575,12 +579,12 @@ void mesh_normal_bilateral_filtering_zheng(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_bilateral_filtering_zhang(halfedge_mesh &mesh,
                                            bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p,
+                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                            size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -657,12 +661,12 @@ void mesh_normal_bilateral_filtering_zhang(halfedge_mesh &mesh,
     );
     e_g.set_dirty();
     e_f.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,
                                            bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p,
+                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                            size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
@@ -721,7 +725,7 @@ void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,
     e_g.set_dirty();
     e_f.set_dirty();
 
-    mesh_postprocessing(mesh, sigma_p, parallel_grain_size);
+    mesh_postprocessing(mesh, sigma_p, sigma_n, parallel_grain_size);
 }
 
 }

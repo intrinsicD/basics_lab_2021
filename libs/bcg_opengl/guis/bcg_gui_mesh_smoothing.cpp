@@ -4,6 +4,7 @@
 
 #include "bcg_gui_mesh_smoothing.h"
 #include "bcg_gui_property_selector.h"
+#include "bcg_gui_reload_entity.h"
 #include "bcg_gui_mesh_laplacian.h"
 #include "bcg_viewer_state.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -104,6 +105,7 @@ void gui_mesh_smoothing(viewer_state *state) {
         color.property_name = current_property_name;
         state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(id, color);
     }
+    gui_reload_entity(state);
 }
 
 }
