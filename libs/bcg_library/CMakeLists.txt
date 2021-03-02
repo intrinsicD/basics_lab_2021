@@ -76,6 +76,7 @@ add_library(bcg_graphics
         geometry/point_cloud/bcg_point_cloud_vertex_quadric.h geometry/point_cloud/bcg_point_cloud_vertex_quadric.cpp
         geometry/point_cloud/bcg_point_cloud_bilateral_filter.h geometry/point_cloud/bcg_point_cloud_bilateral_filter.cpp
         geometry/point_cloud/bcg_point_cloud_vertex_noise.h geometry/point_cloud/bcg_point_cloud_vertex_noise.cpp
+        geometry/point_cloud/bcg_point_cloud_normal_filtering_robust_statistics.h geometry/point_cloud/bcg_point_cloud_normal_filtering_robust_statistics.cpp
         geometry/graph/bcg_graph.h geometry/graph/bcg_graph.cpp
         geometry/graph/bcg_graph_edge_centers.h geometry/graph/bcg_graph_edge_centers.cpp
         geometry/graph/bcg_graph_edge_lengths.h geometry/graph/bcg_graph_edge_lengths.cpp
@@ -134,6 +135,8 @@ add_library(bcg_graphics
         registration/rigid_idp/bcg_rigid_icp.h registration/rigid_idp/bcg_rigid_icp.cpp
         registration/coherent_point_drift/bcg_coherent_point_drift_base2.h registration/coherent_point_drift/bcg_coherent_point_drift_base2.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
+        ${CMAKE_SOURCE_DIR}/spike/bcg_mesh_normal_filtering.h ${CMAKE_SOURCE_DIR}/spike/bcg_mesh_normal_filtering.cpp
+        ${CMAKE_SOURCE_DIR}/spike/bcg_point_cloud_normal_filtering.h ${CMAKE_SOURCE_DIR}/spike/bcg_point_cloud_normal_filtering.cpp
         )
 
 target_compile_features(bcg_graphics PRIVATE cxx_std_17)
@@ -144,6 +147,7 @@ target_include_directories(bcg_graphics PUBLIC ${ENTT_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${NANOFLANN_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC ${SPECTRA_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
+target_include_directories(bcg_graphics PUBLIC ${CMAKE_SOURCE_DIR})
 
 target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb)
 

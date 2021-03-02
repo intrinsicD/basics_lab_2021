@@ -13,6 +13,7 @@
 #include "bcg_opengl/guis/bcg_gui_point_cloud_quadric.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_bilateral_filter.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_noise.h"
+#include "bcg_opengl/guis/bcg_gui_point_cloud_normal_filtering_robust_statistics.h"
 #include "bcg_opengl/guis/bcg_gui_graph_vertex_pca.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
@@ -27,13 +28,15 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_remeshing.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_statistics.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_smoothing.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_robust_normal_filtering.h"
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
 #include "bcg_opengl/guis/bcg_gui_sampling_octree.h"
 #include "bcg_opengl/guis/bcg_gui_sampling_grid.h"
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
-#include "bcg_opengl/guis/bcg_gui_mesh_robust_normal_filtering.h"
+#include "spike/bcg_gui_mesh_normal_filtering.h"
+#include "spike/bcg_gui_point_cloud_normal_filtering.h"
 
 int main() {
     using namespace bcg;
@@ -64,6 +67,9 @@ int main() {
             }
             if (ImGui::MenuItem("Quadrics")) {
                 state->gui.left = gui_point_cloud_quadric;
+            }
+            if (ImGui::MenuItem("Normal Filtering")) {
+                state->gui.left = gui_point_cloud_normal_filtering_robust_statistics;
             }
             if (ImGui::MenuItem("Bilateral Filter")) {
                 state->gui.left = gui_point_cloud_bilateral_filter;
@@ -133,7 +139,7 @@ int main() {
                 state->gui.left = gui_mesh_statistics;
             }
             if (ImGui::MenuItem("Robust Normal Filtering")) {
-                state->gui.left = gui_robust_normal_filtering;
+                state->gui.left = gui_mesh_normal_filtering_robust_statistics;
             }
             ImGui::EndMenu();
         }
@@ -167,6 +173,15 @@ int main() {
             }
             if (ImGui::MenuItem("Smoothing")) {
                 state->gui.left = gui_mesh_smoothing;
+            }
+            ImGui::EndMenu();
+        }
+        if(ImGui::BeginMenu("Basics Lab")){
+            if (ImGui::MenuItem("Mesh filtering")) {
+                state->gui.left = gui_mesh_normal_filtering;
+            }
+            if (ImGui::MenuItem("Point cLoud filtering")) {
+                state->gui.left = gui_point_cloud_normal_filtering;
             }
             ImGui::EndMenu();
         }

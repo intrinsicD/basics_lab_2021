@@ -24,7 +24,7 @@ void point_cloud_vertex_noise(vertex_container *vertices, bcg_scalar_t sigma_p, 
 
 void point_cloud_vertex_noise(vertex_container *vertices, const aligned_box3 &aabb, bcg_scalar_t noise_level,
                               size_t parallel_grain_size) {
-    bcg_scalar_t sigma_p = aabb.diagonal().norm() * noise_level;
+    bcg_scalar_t sigma_p = aabb.diagonal().norm() * noise_level / bcg_scalar_t(100);
     point_cloud_vertex_noise(vertices, sigma_p, parallel_grain_size);
 }
 

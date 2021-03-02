@@ -8,6 +8,10 @@
 
 namespace bcg{
 
+bcg_scalar_t face_area(halfedge_mesh &mesh, face_handle f){
+    return face_area_vector(mesh, f).norm();
+}
+
 void face_areas(halfedge_mesh &mesh, size_t parallel_grain_size){
     auto areas = mesh.faces.get_or_add<bcg_scalar_t, 1>("f_area");
 
@@ -16,7 +20,7 @@ void face_areas(halfedge_mesh &mesh, size_t parallel_grain_size){
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
-                    areas[f] = face_area_vector(mesh, f).norm();
+                    areas[f] = face_area(mesh, f);
                 }
             }
     );

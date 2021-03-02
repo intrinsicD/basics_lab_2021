@@ -402,6 +402,8 @@ struct kernel_matrix {
     void compute_eigen_approximation(const Matrix<T, -1, -1> &A, int num_evals) {
         use_nyström_approximation = false;
         Matrix<T, -1, -1> K_VV = compute_kernel(A, A);
+        two_sigma_squared /= 100;
+        K_VV += compute_kernel(A, A);
         int ncv = std::min<int>(A.rows(), 2 * num_evals);
         Spectra::DenseSymMatProd<T> op(K_VV);
         Spectra::SymEigsSolver<T, Spectra::LARGEST_MAGN, Spectra::DenseSymMatProd<T> > eigs(&op, num_evals, ncv);

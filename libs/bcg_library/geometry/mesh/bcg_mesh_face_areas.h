@@ -9,6 +9,8 @@
 
 namespace bcg{
 
+bcg_scalar_t face_area(halfedge_mesh &mesh, face_handle f);
+
 void face_areas(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
 
 }

@@ -9,7 +9,7 @@ namespace bcg{
 
 struct viewer_state;
 
-void gui_robust_normal_filtering(viewer_state *state);
+void gui_mesh_normal_filtering_robust_statistics(viewer_state *state);
 
 }
 

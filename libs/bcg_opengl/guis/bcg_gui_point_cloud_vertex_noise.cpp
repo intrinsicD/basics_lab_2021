@@ -10,10 +10,10 @@
 namespace bcg{
 
 void gui_point_cloud_vertex_noise(viewer_state *state){
-    auto id = state->picker.entity_id;
-    static bcg_scalar_t noise_level = 0.005;
+    static bcg_scalar_t noise_level = 1;
     draw_input(&state->window, "noise level %diag aabb", noise_level);
     if(ImGui::Button("Add noise")){
+        auto id = state->picker.entity_id;
         if(state->scene.valid(id)){
             auto *vertices = state->get_vertices(id);
             if(vertices){

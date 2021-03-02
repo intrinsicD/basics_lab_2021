@@ -41,14 +41,11 @@ if (BCG_OPENGL)
             guis/bcg_gui_point_cloud_quadric.h guis/bcg_gui_point_cloud_quadric.cpp
             guis/bcg_gui_point_cloud_bilateral_filter.h guis/bcg_gui_point_cloud_bilateral_filter.cpp
             guis/bcg_gui_point_cloud_vertex_noise.h guis/bcg_gui_point_cloud_vertex_noise.cpp
+            guis/bcg_gui_point_cloud_normal_filtering_robust_statistics.h guis/bcg_gui_point_cloud_normal_filtering_robust_statistics.cpp
             guis/bcg_gui_locally_optimal_projection.h guis/bcg_gui_locally_optimal_projection.cpp
             guis/bcg_gui_graph_vertex_pca.h guis/bcg_gui_graph_vertex_pca.cpp
             guis/bcg_gui_ogl_shape.h guis/bcg_gui_ogl_shape.cpp
             guis/bcg_gui_ogl_buffer.h guis/bcg_gui_ogl_buffer.cpp
-            guis/bcg_gui_mesh.h guis/bcg_gui_mesh.cpp
-            guis/bcg_gui_mesh_face_normals.h guis/bcg_gui_mesh_face_normals.cpp
-            guis/bcg_gui_mesh_vertex_normals.h guis/bcg_gui_mesh_vertex_normals.cpp
-            guis/bcg_gui_mesh_boundary.h guis/bcg_gui_mesh_boundary.cpp
             guis/bcg_gui_materials.h guis/bcg_gui_materials.cpp
             guis/bcg_gui_material_vectorfield.h guis/bcg_gui_material_vectorfield.cpp
             guis/bcg_gui_material_points.h guis/bcg_gui_material_points.cpp
@@ -59,6 +56,10 @@ if (BCG_OPENGL)
             guis/bcg_gui_entity_info.h guis/bcg_gui_entity_info.cpp
             guis/bcg_gui_aligned_box3.h guis/bcg_gui_aligned_box3.cpp
             guis/bcg_gui_entity_hierarchy.h guis/bcg_gui_entity_hierarchy.cpp
+            guis/bcg_gui_mesh.h guis/bcg_gui_mesh.cpp
+            guis/bcg_gui_mesh_face_normals.h guis/bcg_gui_mesh_face_normals.cpp
+            guis/bcg_gui_mesh_vertex_normals.h guis/bcg_gui_mesh_vertex_normals.cpp
+            guis/bcg_gui_mesh_boundary.h guis/bcg_gui_mesh_boundary.cpp
             guis/bcg_gui_mesh_dihedral_angle.h guis/bcg_gui_mesh_dihedral_angle.cpp
             guis/bcg_gui_mesh_vertex_convex_concave.h guis/bcg_gui_mesh_vertex_convex_concave.cpp
             guis/bcg_gui_mesh_features.h guis/bcg_gui_mesh_features.cpp
@@ -106,6 +107,8 @@ if (BCG_OPENGL)
             renderers/deferred_renderer/bcg_material_deferred.h renderers/deferred_renderer/bcg_deferred_renderer.h renderers/deferred_renderer/bcg_deferred_renderer.cpp renderers/deferred_renderer/bcg_events_deferred_renderer.h
             ${GLAD_SOURCE_DIRS}/glad.c
             ${IMGUI_SOURCES}
+            ${CMAKE_SOURCE_DIR}/spike/bcg_gui_mesh_normal_filtering.h ${CMAKE_SOURCE_DIR}/spike/bcg_gui_mesh_normal_filtering.cpp
+            ${CMAKE_SOURCE_DIR}/spike/bcg_gui_point_cloud_normal_filtering.h ${CMAKE_SOURCE_DIR}/spike/bcg_gui_point_cloud_normal_filtering.cpp
             )
 
     target_include_directories(bcg_opengl PRIVATE .)

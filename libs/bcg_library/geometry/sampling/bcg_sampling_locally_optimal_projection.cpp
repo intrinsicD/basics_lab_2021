@@ -99,7 +99,8 @@ void projection_operator::init(vertex_container &ref_vertices, vertex_container 
 void projection_operator::compute_step(size_t parallel_grain_size) {
     old_positions.vector() = sampling_positions.vector();
     auto old_normals = sampling_normals.vector();
-
+    kdtree_property<bcg_scalar_t> index;
+    index.build(old_positions);
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) old_positions.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -141,7 +142,18 @@ void projection_operator::compute_step(size_t parallel_grain_size) {
                     repulsion_forces_i[v].setZero();
                     repulsion_forces_ii[v].setZero();
 
-                    for (size_t ii = 0; ii < old_positions.size(); ++ii) {
+                    result = index.query_knn(old_positions[v], 12);
+                    for (size_t ii = 0; ii < result.indices.size(); ++ii) {
+                        if (result.indices[ii] == i) continue;
+                        bcg_scalar_t weight = compute_repulsion_beta(v.idx, result.indices[ii]);
+                        VectorS<3> diff = old_positions[v] - old_positions[result.indices[ii]];
+                        repulsion_forces[v] += diff * weight;
+                        repulsion_forces_i[v] += (diff - sampling_normals[v].dot(diff) * sampling_normals[v]) * weight;
+                        repulsion_forces_ii[v] +=
+                                (diff - sampling_normals[result.indices[ii]].dot(diff) * sampling_normals[result.indices[ii]]) * weight;
+                        sum_beta += weight;
+                    }
+                    /*for (size_t ii = 0; ii < old_positions.size(); ++ii) {
                         if (ii == i) continue;
                         bcg_scalar_t weight = compute_repulsion_beta(v.idx, ii);
                         VectorS<3> diff = old_positions[v] - old_positions[ii];
@@ -150,7 +162,7 @@ void projection_operator::compute_step(size_t parallel_grain_size) {
                         repulsion_forces_ii[v] +=
                                 (diff - sampling_normals[ii].dot(diff) * sampling_normals[ii]) * weight;
                         sum_beta += weight;
-                    }
+                    }*/
                     sampling_repulsion_weights[v] = sum_beta;
                     if (!std::isnan(sum_alpha) && !std::isinf(sum_alpha) && sum_alpha > scalar_eps) {
                         if(tangential_projection_force){
