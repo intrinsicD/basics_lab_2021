@@ -104,7 +104,7 @@ struct kernel_matrix {
     KernelMethodType kernel_method_type;
 
     bool use_eigen_decomposition = false;
-    bool use_nyström_approximation = false;
+    bool use_nystroem_approximation = false;
     T two_sigma_squared;
     Matrix<T, -1, -1> K_AV, K_VV_INV, K_BV, VV, Evecs;
     Vector<T, -1> Evals;
@@ -359,24 +359,24 @@ struct kernel_matrix {
         return (compute_kernel(A, B) - K_AV * K_VV_INV * K_BV.transpose()).norm();
     }
 
-    void compute_nyström_approximation(const Matrix<T, -1, -1> &A, int num_samples) {
-        use_nyström_approximation = true;
+    void compute_nystroem_approximation(const Matrix<T, -1, -1> &A, int num_samples) {
+        use_nystroem_approximation = true;
         sample(num_samples, A);
         K_AV = compute_kernel(A, VV);
         K_VV_INV = compute_kernel(VV, VV).inverse();
         K_BV = K_AV;
     }
 
-    void compute_nyström_approximation(const Matrix<T, -1, -1> &A, const Matrix<T, -1, -1> &B, int num_samples) {
-        use_nyström_approximation = true;
+    void compute_nystroem_approximation(const Matrix<T, -1, -1> &A, const Matrix<T, -1, -1> &B, int num_samples) {
+        use_nystroem_approximation = true;
         sample(num_samples, A, B);
         K_AV = compute_kernel(A, VV);
         K_VV_INV = compute_kernel(VV, VV).inverse();
         K_BV = compute_kernel(B, VV);
     }
 
-    void compute_nyström_eigen_approximation(const Matrix<T, -1, -1> &A, int num_samples, int num_evals) {
-        use_nyström_approximation = true;
+    void compute_nystroem_eigen_approximation(const Matrix<T, -1, -1> &A, int num_samples, int num_evals) {
+        use_nystroem_approximation = true;
         sample(num_samples, A);
         K_AV = compute_kernel(A, VV);
         Matrix<T, -1, -1> K_VV = compute_kernel(VV, VV);
@@ -402,7 +402,7 @@ struct kernel_matrix {
 
 
     void compute_eigen_approximation(const Matrix<T, -1, -1> &A, int num_evals) {
-        use_nyström_approximation = false;
+        use_nystroem_approximation = false;
         Matrix<T, -1, -1> K_VV = compute_kernel(A, A);
         two_sigma_squared /= 100;
         K_VV += compute_kernel(A, A);
