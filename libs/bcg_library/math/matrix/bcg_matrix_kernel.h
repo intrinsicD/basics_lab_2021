@@ -7,6 +7,7 @@
 
 #include <random>
 #include <iostream>
+#include <numeric>
 #include "bcg_matrix_pairwise_distances.h"
 #include "Spectra/SymEigsSolver.h"
 #include "math/vector/bcg_vector_map_eigen.h"
