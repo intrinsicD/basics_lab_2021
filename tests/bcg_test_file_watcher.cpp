@@ -3,6 +3,8 @@
 //
 
 #include <gtest/gtest.h>
+#include <chrono>
+#include <thread>
 
 #include "bcg_library/utils/bcg_file_watcher.h"
 #include "bcg_library/utils/bcg_file.h"
@@ -29,7 +31,7 @@ TEST(TestSuiteFileWatcher, add_file){
     watcher.watch(test_file, [&changed](){
         changed = true;
     });
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     test_file.save_text("lol");
     EXPECT_TRUE(watcher.trigger());
     EXPECT_TRUE(changed);
