@@ -10,8 +10,8 @@
 
 namespace bcg{
 
-template<typename T, int M, int N>
-using Matrix = Eigen::Matrix<T, M, N>;
+template<typename T, int M, int N, int Options=0>
+using Matrix = Eigen::Matrix<T, M, N, Options, M, N>;
 
 template<int M, int N>
 using MatrixS = Matrix<bcg_scalar_t, M, N>;
