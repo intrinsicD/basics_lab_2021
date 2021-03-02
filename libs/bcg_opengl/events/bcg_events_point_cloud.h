@@ -96,10 +96,10 @@ struct knn {
     entt::entity id;
     int num_closest = 0;
 };
-struct radius {
+typedef struct radius_t {
     entt::entity id;
     bcg_scalar_t radius = 0;
-};
+} radius;
 }
 namespace pca {
 struct svd {
