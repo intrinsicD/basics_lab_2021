@@ -7,6 +7,10 @@ option(BCG_TESTS "Build Tests" ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if (MSVC)
+    add_definitions(/bigobj)
+endif ()
+
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif ()
