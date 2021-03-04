@@ -22,15 +22,22 @@ If glad does not work:
 
 To compile the project create a *build* folder first.
 
-### Linux
+### Linux/Mac
 
 From the *build* folder run `cmake ..` to create a `Makefile`.
+
+For std::filesystem support using clang10: `cmake -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10 ..` or
+
+For std::filesystem support using gcc10: `cmake -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=gcc++-10 ..`
+
 Then run `make` to compile the project.
+
 If you want to build using multiple cpu cores in parallel run `make -j 5` for building with 5 cores for example.
 
 ### Windows
 
 From the *build* folder run `cmake .. -A x64` to create a Visual Studio project solution.
+
 Open the created project solution and compile it like a regular Visual Studio project.
 
 

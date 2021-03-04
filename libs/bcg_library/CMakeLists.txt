@@ -149,7 +149,7 @@ target_include_directories(bcg_graphics PUBLIC ${SPECTRA_INCLUDE_DIRS})
 target_include_directories(bcg_graphics PUBLIC . ./geometry)
 target_include_directories(bcg_graphics PUBLIC ${CMAKE_SOURCE_DIR})
 
-target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb)
+target_link_libraries(bcg_graphics ${OPENGL_gl_LIBRARY} tbb stdc++fs)
 
 if (UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)
