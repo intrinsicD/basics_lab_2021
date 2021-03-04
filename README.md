@@ -1,10 +1,13 @@
-**Setup:**
-- git clone --recurse-submodules https://github.com/intrinsicD/basics_lab.git
-- change in *external/spectral/CMakeLists.txt* all occurrences of
-    **CMAKE_SOURCE_DIR** to **CMAKE_CURRENT_SOURCE_DIR**
-  	and find_package(**Eigen3 NO_MODULE REQUIRED**) to find_package(**eigen3 REQUIRED**)
+# Setup
 
-- if glad does not work:
+Clone this repository by running `git clone --recurse-submodules https://github.com/intrinsicD/basics_lab.git`.
+
+In *external/spectral/CMakeLists.txt* the following modifications have to be performed:
+  - change all occurences of `CMAKE_SOURCE_DIR` to `CMAKE_CURRENT_SOURCE_DIR`.
+  - in line 23 replace `find_package(Eigen3 NO_MODULE REQUIRED)` with `find_package(eigen3 REQUIRED)`.
+  - in line 36 replace `target_link_libraries(Spectra INTERFACE Eigen3::Eigen)` with `target_link_libraries(Spectra INTERFACE Eigen3)`.
+
+If glad does not work:
     - go to the website **https://glad.dav1d.de/** and download the glad files
       - Language **C/C++**
       - use specification **OpenGL**
@@ -15,13 +18,24 @@
     - add the **KHR** folder to *external/*
 
 
-**Compilation**
-- to compile please add a **/build** folder
-- from that folder run **cmake ..**
-- then run **make**
-  - if you want to build in parallel please run **make -j 5** for building with 5 cores
+# Compilation
 
-**Usage**
+To compile the project create a *build* folder first.
+
+### Linux
+
+From the *build* folder run `cmake ..` to create a `Makefile`.
+Then run `make` to compile the project.
+If you want to build using multiple cpu cores in parallel run `make -j 5` for building with 5 cores for example.
+
+### Windows
+
+From the *build* folder run `cmake .. -A x64` to create a Visual Studio project solution.
+Open the created project solution and compile it like a regular Visual Studio project.
+
+
+# Usage
+
 - Quit: Strg/Ctrl+Q
 - Scale Points: Strg + Mouse wheel
 - Zoom Camera: Mouse wheel
@@ -34,4 +48,3 @@
   - Left Click: Add point
   - Right Click: End point
   - Strg Press: Fix Camera
-

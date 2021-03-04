@@ -168,7 +168,7 @@ void coherent_point_drift_base::update_P_nystroem() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
-    kernel_P.compute_nyström_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
+    kernel_P.compute_nystroem_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
 
     if (debug_output) {
         std::cout << "error: " << kernel_P.approximation_error(Y.cast<kernel_precision>(), X.cast<kernel_precision>())
@@ -192,7 +192,7 @@ void coherent_point_drift_base::update_P_nystroem_FGT() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
-    kernel_P.compute_nyström_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
+    kernel_P.compute_nystroem_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
 
     if (debug_output) {
         std::cout << "error: " << kernel_P.approximation_error(Y.cast<kernel_precision>(), X.cast<kernel_precision>())
@@ -738,7 +738,7 @@ void coherent_point_drift_bayes::update_P_nystroem() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
-    kernel_P.compute_nyström_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
+    kernel_P.compute_nystroem_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
 
     if (debug_output) {
         std::cout << "error: "
@@ -768,7 +768,7 @@ void coherent_point_drift_bayes::update_P_nystroem_FGT() {
     kernel_P.kernel_type = KernelType::gaussian;
     kernel_P.two_sigma_squared = 2 * sigma_squared;
     num_samples = std::min<int>(num_samples, M + N);
-    kernel_P.compute_nyström_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
+    kernel_P.compute_nystroem_approximation(Y.cast<kernel_precision>(), X.cast<kernel_precision>(), num_samples);
 
     if (debug_output) {
         std::cout << "error: " << kernel_P.approximation_error(Y.cast<kernel_precision>(), X.cast<kernel_precision>())
