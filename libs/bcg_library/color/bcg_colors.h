@@ -35,11 +35,11 @@ struct color {
     }
 
     static Vector<T, 3> rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-        return {r / 255.0, g / 255.0, b / 255.0};
+        return { r / T(255), g / T(255), b / T(255) };
     }
 
     static Vector<T, 3> rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a) {
-        return {r / 255.0, g / 255.0, b / 255.0, a / 255.0};
+        return { r / T(255), g / T(255), b / T(255), a / T(255) };
     }
 
     static Vector<T, 3> packed_int(unsigned int id) {

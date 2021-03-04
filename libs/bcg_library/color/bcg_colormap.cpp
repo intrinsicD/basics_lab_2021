@@ -103,7 +103,8 @@ base_colormap colormap_selector::get_colormap(colormap_type type) {
         case COOLWARM : {
             return coolwarm();
         }
-        case __LAST__ : {
+        //case __LAST__ : {
+        default : {
             return base_colormap();
         }
     }

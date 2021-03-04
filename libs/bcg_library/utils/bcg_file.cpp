@@ -14,7 +14,7 @@ static std::filesystem::path make_path(const std::string &filename) {
     return std::filesystem::u8path(filename);
 }
 
-file_stream::file_stream(std::string filename) : filename(std::move(filename)), fs(nullptr) {}
+file_stream::file_stream(std::string _filename) : filename{ std::move(_filename) }, fs{} {}
 
 file_stream::~file_stream() { close(); }
 
