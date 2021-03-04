@@ -2,7 +2,7 @@
 
 Clone this repository by running `git clone --recurse-submodules https://github.com/intrinsicD/basics_lab.git`.
 
-In *external/spectral/CMakeLists.txt* the following modifications have to be performed:
+In *external/spectra/CMakeLists.txt* the following modifications have to be performed:
   - change all occurences of `CMAKE_SOURCE_DIR` to `CMAKE_CURRENT_SOURCE_DIR`.
   - in line 23 replace `find_package(Eigen3 NO_MODULE REQUIRED)` with `find_package(eigen3 REQUIRED)`.
   - in line 36 replace `target_link_libraries(Spectra INTERFACE Eigen3::Eigen)` with `target_link_libraries(Spectra INTERFACE Eigen3)`.
