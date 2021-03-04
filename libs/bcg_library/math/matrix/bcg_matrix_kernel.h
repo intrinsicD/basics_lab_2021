@@ -411,9 +411,7 @@ struct kernel_matrix {
         Spectra::SymEigsSolver<Spectra::DenseSymMatProd<T>> eigs(op, num_evals, ncv);
         eigs.init();
         int nconv = eigs.compute(Spectra::SortRule::LargestAlge);
-/*        Spectra::SymEigsSolver<T, Spectra::LARGEST_MAGN, Spectra::DenseSymMatProd<T> > eigs(&op, num_evals, ncv);
-        eigs.init();
-        int nconv = eigs.compute();*/
+
         if (eigs.info() == Spectra::CompInfo::Successful) {
             use_eigen_decomposition = true;
             Evals = eigs.eigenvalues();

@@ -8,14 +8,14 @@ In *external/spectral/CMakeLists.txt* the following modifications have to be per
   - in line 36 replace `target_link_libraries(Spectra INTERFACE Eigen3::Eigen)` with `target_link_libraries(Spectra INTERFACE Eigen3)`.
 
 If glad does not work:
-    - go to the website **https://glad.dav1d.de/** and download the glad files
-      - Language **C/C++**
-      - use specification **OpenGL**
-      - Profile **Core**
-      - API gl **Version 4.6** if possible, but at least **Version 4.1**
-      - Options mark **Generate a loader**
-    - add the **glad.{c, h}** files to *external/glad*
-    - add the **KHR** folder to *external/*
+- go to the website **https://glad.dav1d.de/** and download the glad files
+  - Language **C/C++**
+  - use specification **OpenGL**
+  - Profile **Core**
+  - API gl **Version 4.6** if possible, but at least **Version 4.1**
+  - Options mark **Generate a loader**
+- add the **glad.{c, h}** files to *external/glad*
+- add the **KHR** folder to *external/*
 
 
 # Compilation
