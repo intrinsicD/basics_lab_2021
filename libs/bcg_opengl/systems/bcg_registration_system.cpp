@@ -7,7 +7,7 @@
 #include "correspondences/bcg_correspondences.h"
 #include "registration/bcg_registration.h"
 #include "registration/rigid_idp/bcg_rigid_icp.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_base2.h"
+#include "registration/coherent_point_drift/bcg_coherent_point_drift_base.h"
 #include "bcg_property_map_eigen.h"
 
 namespace bcg {

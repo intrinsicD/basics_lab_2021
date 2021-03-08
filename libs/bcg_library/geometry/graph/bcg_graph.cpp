@@ -338,7 +338,7 @@ halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
         set_next(new_h, new_o);
         set_next(new_o, new_h);
         set_halfedge(v0, new_h);
-        return h;
+        return new_h;
     }
 
     auto o = get_opposite(h);
@@ -353,7 +353,7 @@ halfedge_handle halfedge_graph::add_edge(vertex_handle v0, vertex_handle v1) {
 
     assert(halfedges.is_dirty());
     assert(edges.is_dirty());
-    return h;
+    return new_h;
 }
 
 void halfedge_graph::remove_edge(edge_handle e) {

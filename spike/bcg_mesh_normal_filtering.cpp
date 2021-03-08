@@ -2,6 +2,8 @@
 // Created by alex on 02.03.21.
 //
 
+#include "geometry/mesh/bcg_mesh_face_normals.h"
+#include "bcg_property_map_eigen.h"
 #include "bcg_mesh_normal_filtering.h"
 #include "tbb/tbb.h"
 
@@ -9,6 +11,7 @@ namespace bcg{
 
 void tutorial(halfedge_mesh &mesh, size_t parallel_grain_size){
     auto positions = mesh.positions;
+    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
 
     /* you can get or add properties to
      * vertices:
@@ -24,6 +27,7 @@ void tutorial(halfedge_mesh &mesh, size_t parallel_grain_size){
      *      auto property = mesh.faces.get<VectorS<3>, 3>("v_name"); // is nullptr if non-existent
      *      auto property = mesh.faces.get_or_add<bcg_scalar_t, 1>("v_name"); // is constructed if non-existent
      * */
+
 
     /// iterate over all vertices
     tbb::parallel_for(

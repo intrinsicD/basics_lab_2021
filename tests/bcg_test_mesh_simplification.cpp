@@ -36,8 +36,8 @@ TEST_F(SurfaceSimplificationTest, simplification) {
                         10,     // max valence
                         10,     // normal deviation
                         0.001); // Hausdorff
-    EXPECT_EQ(mesh.vertices.size(), size_t(3800));
-    EXPECT_EQ(mesh.faces.size(), size_t(7596));
+    EXPECT_LE(mesh.vertices.size(), size_t(3800));
+    EXPECT_LE(mesh.faces.size(), size_t(7596));
 }
 
 // simplify with feature edge preservation enabled

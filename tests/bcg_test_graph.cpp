@@ -6,10 +6,13 @@
 #include <gtest/gtest.h>
 
 #include "geometry/graph/bcg_graph.h"
+#include "geometry/aligned_box/bcg_aligned_box.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 
 using namespace bcg;
 
 TEST(TestSuiteGraph, first){
+    //TODO Fix me, halfedge graph is not correct for aligned_box3!
     halfedge_graph graph;
 
     EXPECT_TRUE(graph.empty());
@@ -19,126 +22,136 @@ TEST(TestSuiteGraph, first){
     EXPECT_FALSE(graph.edges.is_dirty());
     EXPECT_FALSE(graph.halfedges.is_dirty());
 
-    auto v0 = graph.add_vertex(VectorS<3>(0, 0, 0));
-    auto v1 = graph.add_vertex(VectorS<3>(1, 1, 0));
-    auto v2 = graph.add_vertex(VectorS<3>(-2, 2, -1));
-    auto v3 = graph.add_vertex(VectorS<3>(0.5, 2, 0));
-    auto v4 = graph.add_vertex(VectorS<3>(2, 1.5, 0));
-    auto v5 = graph.add_vertex(VectorS<3>(1, 2.5, 1));
-    auto v6 = graph.add_vertex(VectorS<3>(1.5, -0.5, 1));
+    aligned_box3 aabb = aligned_box3::unit();
 
-    auto h0 = graph.add_edge(v0, v1);
-    auto h1 = graph.get_opposite(h0);
-    auto h2 = graph.add_edge(v2, v3);
-    auto h3 = graph.get_opposite(h2);
-    auto h4 = graph.add_edge(v1, v3);
-    auto h5 = graph.get_opposite(h4);
-    auto h6 = graph.add_edge(v1, v4);
-    auto h7 = graph.get_opposite(h6);
-    auto h8 = graph.add_edge(v5, v3);
-    auto h9 = graph.get_opposite(h8);
-    auto h10 = graph.add_edge(v6, v1);
-    auto h11 = graph.get_opposite(h10);
-    auto h12 = graph.add_edge(v0, v2);
-    auto h13 = graph.get_opposite(h12);
+    auto vertices = get_vetices(aabb);
+    auto edges = get_edges(aabb);
+    std::vector<size_t> V;
+    for(const VectorS<3> v:vertices){
+        V.push_back(graph.add_vertex(v));
+    }
 
-    EXPECT_EQ(h0.idx, size_t(0));
-    EXPECT_EQ(h1.idx, size_t(1));
-    EXPECT_EQ(h2.idx, size_t(2));
-    EXPECT_EQ(h3.idx, size_t(3));
-    EXPECT_EQ(h4.idx, size_t(4));
-    EXPECT_EQ(h5.idx, size_t(5));
-    EXPECT_EQ(h6.idx, size_t(6));
-    EXPECT_EQ(h7.idx, size_t(7));
-    EXPECT_EQ(h8.idx, size_t(8));
-    EXPECT_EQ(h9.idx, size_t(9));
-    EXPECT_EQ(h10.idx, size_t(10));
-    EXPECT_EQ(h11.idx, size_t(11));
-    EXPECT_EQ(h12.idx, size_t(12));
-    EXPECT_EQ(h13.idx, size_t(13));
+    std::vector<size_t> H;
+    for(const auto e:edges){
+        H.push_back(graph.add_edge(V[e[0]], V[e[1]]));
+        H.push_back(graph.get_opposite(H.back()));
+    }
 
-    EXPECT_TRUE(graph.halfedges.is_valid(h0));
-    EXPECT_TRUE(graph.halfedges.is_valid(h1));
-    EXPECT_TRUE(graph.halfedges.is_valid(h2));
-    EXPECT_TRUE(graph.halfedges.is_valid(h3));
-    EXPECT_TRUE(graph.halfedges.is_valid(h4));
-    EXPECT_TRUE(graph.halfedges.is_valid(h5));
-    EXPECT_TRUE(graph.halfedges.is_valid(h6));
-    EXPECT_TRUE(graph.halfedges.is_valid(h7));
-    EXPECT_TRUE(graph.halfedges.is_valid(h8));
-    EXPECT_TRUE(graph.halfedges.is_valid(h9));
-    EXPECT_TRUE(graph.halfedges.is_valid(h10));
-    EXPECT_TRUE(graph.halfedges.is_valid(h11));
-    EXPECT_TRUE(graph.halfedges.is_valid(h12));
-    EXPECT_TRUE(graph.halfedges.is_valid(h13));
+    std::cout << "v: " << MapConst(V).transpose() << "\n";
+    std::cout << "h: " << MapConst(H).transpose() << "\n";
 
-    EXPECT_EQ(graph.get_from_vertex(h0), v0);
-    EXPECT_EQ(graph.get_from_vertex(h1), v1);
-    EXPECT_EQ(graph.get_from_vertex(h2), v2);
-    EXPECT_EQ(graph.get_from_vertex(h3), v3);
-    EXPECT_EQ(graph.get_from_vertex(h4), v1);
-    EXPECT_EQ(graph.get_from_vertex(h5), v3);
-    EXPECT_EQ(graph.get_from_vertex(h6), v1);
-    EXPECT_EQ(graph.get_from_vertex(h7), v4);
-    EXPECT_EQ(graph.get_from_vertex(h8), v5);
-    EXPECT_EQ(graph.get_from_vertex(h9), v3);
-    EXPECT_EQ(graph.get_from_vertex(h10), v6);
-    EXPECT_EQ(graph.get_from_vertex(h11), v1);
-    EXPECT_EQ(graph.get_from_vertex(h12), v0);
-    EXPECT_EQ(graph.get_from_vertex(h13), v2);
+    for(size_t i = 0; i < H.size(); ++i){
+        EXPECT_EQ(H[i], i);
+        EXPECT_TRUE(graph.halfedges.is_valid(H[i]));
+    }
 
-    EXPECT_EQ(graph.get_to_vertex(h0), v1);
-    EXPECT_EQ(graph.get_to_vertex(h1), v0);
-    EXPECT_EQ(graph.get_to_vertex(h2), v3);
-    EXPECT_EQ(graph.get_to_vertex(h3), v2);
-    EXPECT_EQ(graph.get_to_vertex(h4), v3);
-    EXPECT_EQ(graph.get_to_vertex(h5), v1);
-    EXPECT_EQ(graph.get_to_vertex(h6), v4);
-    EXPECT_EQ(graph.get_to_vertex(h7), v1);
-    EXPECT_EQ(graph.get_to_vertex(h8), v3);
-    EXPECT_EQ(graph.get_to_vertex(h9), v5);
-    EXPECT_EQ(graph.get_to_vertex(h10), v1);
-    EXPECT_EQ(graph.get_to_vertex(h11), v6);
-    EXPECT_EQ(graph.get_to_vertex(h12), v2);
-    EXPECT_EQ(graph.get_to_vertex(h13), v0);
+    EXPECT_EQ(graph.get_from_vertex(H[0]).idx, V[0]);
+    EXPECT_EQ(graph.get_from_vertex(H[1]).idx, V[1]);
+    EXPECT_EQ(graph.get_from_vertex(H[2]).idx, V[0]);
+    EXPECT_EQ(graph.get_from_vertex(H[3]).idx, V[2]);
+    EXPECT_EQ(graph.get_from_vertex(H[4]).idx, V[0]);
+    EXPECT_EQ(graph.get_from_vertex(H[5]).idx, V[4]);
+    EXPECT_EQ(graph.get_from_vertex(H[6]).idx, V[1]);
+    EXPECT_EQ(graph.get_from_vertex(H[7]).idx, V[3]);
+    EXPECT_EQ(graph.get_from_vertex(H[8]).idx, V[1]);
+    EXPECT_EQ(graph.get_from_vertex(H[9]).idx, V[5]);
+    EXPECT_EQ(graph.get_from_vertex(H[10]).idx, V[2]);
+    EXPECT_EQ(graph.get_from_vertex(H[11]).idx, V[3]);
+    EXPECT_EQ(graph.get_from_vertex(H[12]).idx, V[2]);
+    EXPECT_EQ(graph.get_from_vertex(H[13]).idx, V[6]);
+    EXPECT_EQ(graph.get_from_vertex(H[13]).idx, V[3]);
+    EXPECT_EQ(graph.get_from_vertex(H[14]).idx, V[7]);
+    EXPECT_EQ(graph.get_from_vertex(H[15]).idx, V[4]);
+    EXPECT_EQ(graph.get_from_vertex(H[16]).idx, V[5]);
+    EXPECT_EQ(graph.get_from_vertex(H[17]).idx, V[4]);
+    EXPECT_EQ(graph.get_from_vertex(H[18]).idx, V[6]);
+    EXPECT_EQ(graph.get_from_vertex(H[19]).idx, V[5]);
+    EXPECT_EQ(graph.get_from_vertex(H[20]).idx, V[7]);
+    EXPECT_EQ(graph.get_from_vertex(H[21]).idx, V[6]);
+    EXPECT_EQ(graph.get_from_vertex(H[22]).idx, V[7]);
 
-    EXPECT_EQ(graph.get_halfedge(v0), h12);
-    EXPECT_EQ(graph.get_halfedge(v1), h11);
-    EXPECT_EQ(graph.get_halfedge(v2), h13);
-    EXPECT_EQ(graph.get_halfedge(v3), h9);
-    EXPECT_EQ(graph.get_halfedge(v4), h7);
-    EXPECT_EQ(graph.get_halfedge(v5), h8);
-    EXPECT_EQ(graph.get_halfedge(v6), h10);
+    EXPECT_EQ(graph.get_to_vertex(H[0]).idx, V[1]);
+    EXPECT_EQ(graph.get_to_vertex(H[1]).idx, V[0]);
+    EXPECT_EQ(graph.get_to_vertex(H[2]).idx, V[2]);
+    EXPECT_EQ(graph.get_to_vertex(H[3]).idx, V[0]);
+    EXPECT_EQ(graph.get_to_vertex(H[4]).idx, V[3]);
+    EXPECT_EQ(graph.get_to_vertex(H[5]).idx, V[0]);
+    EXPECT_EQ(graph.get_to_vertex(H[6]).idx, V[3]);
+    EXPECT_EQ(graph.get_to_vertex(H[7]).idx, V[1]);
+    EXPECT_EQ(graph.get_to_vertex(H[8]).idx, V[5]);
+    EXPECT_EQ(graph.get_to_vertex(H[9]).idx, V[1]);
+    EXPECT_EQ(graph.get_to_vertex(H[10]).idx, V[3]);
+    EXPECT_EQ(graph.get_to_vertex(H[11]).idx, V[2]);
+    EXPECT_EQ(graph.get_to_vertex(H[12]).idx, V[6]);
+    EXPECT_EQ(graph.get_to_vertex(H[13]).idx, V[2]);
+    EXPECT_EQ(graph.get_to_vertex(H[13]).idx, V[7]);
+    EXPECT_EQ(graph.get_to_vertex(H[14]).idx, V[3]);
+    EXPECT_EQ(graph.get_to_vertex(H[15]).idx, V[5]);
+    EXPECT_EQ(graph.get_to_vertex(H[16]).idx, V[4]);
+    EXPECT_EQ(graph.get_to_vertex(H[17]).idx, V[6]);
+    EXPECT_EQ(graph.get_to_vertex(H[18]).idx, V[4]);
+    EXPECT_EQ(graph.get_to_vertex(H[19]).idx, V[7]);
+    EXPECT_EQ(graph.get_to_vertex(H[20]).idx, V[5]);
+    EXPECT_EQ(graph.get_to_vertex(H[21]).idx, V[7]);
+    EXPECT_EQ(graph.get_to_vertex(H[22]).idx, V[6]);
 
-    EXPECT_EQ(graph.get_next(h0), h11);
-    EXPECT_EQ(graph.get_next(h1), h12);
-    EXPECT_EQ(graph.get_next(h2), h9);
-    EXPECT_EQ(graph.get_next(h3), h13);
-    EXPECT_EQ(graph.get_next(h4), h3);
-    EXPECT_EQ(graph.get_next(h5), h1);
-    EXPECT_EQ(graph.get_next(h6), halfedge_handle());
-    EXPECT_EQ(graph.get_next(h7), h4);
-    EXPECT_EQ(graph.get_next(h8), h5);
-    EXPECT_EQ(graph.get_next(h9), halfedge_handle());
-    EXPECT_EQ(graph.get_next(h10), h6);
-    EXPECT_EQ(graph.get_next(h11), halfedge_handle());
-    EXPECT_EQ(graph.get_next(h12), h2);
-    EXPECT_EQ(graph.get_next(h13), h0);
+    EXPECT_EQ(graph.get_halfedge(V[0]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[1]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[2]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[3]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[4]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[5]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[6]).idx, H[2]);
 
-    EXPECT_EQ(graph.get_prev(h0), h13);
-    EXPECT_EQ(graph.get_prev(h1), h5);
-    EXPECT_EQ(graph.get_prev(h2), h12);
-    EXPECT_EQ(graph.get_prev(h3), h4);
-    EXPECT_EQ(graph.get_prev(h4), h7);
-    EXPECT_EQ(graph.get_prev(h5), h8);
-    EXPECT_EQ(graph.get_prev(h6), h10);
-    EXPECT_EQ(graph.get_prev(h7), halfedge_handle());
-    EXPECT_EQ(graph.get_prev(h8), halfedge_handle());
-    EXPECT_EQ(graph.get_prev(h9), h2);
-    EXPECT_EQ(graph.get_prev(h10), halfedge_handle());
-    EXPECT_EQ(graph.get_prev(h11), h0);
-    EXPECT_EQ(graph.get_prev(h12), h1);
-    EXPECT_EQ(graph.get_prev(h13), h3);
+    EXPECT_EQ(graph.get_next(H[0]).idx, V[1]);
+    EXPECT_EQ(graph.get_next(H[1]).idx, V[0]);
+    EXPECT_EQ(graph.get_next(H[2]).idx, V[2]);
+    EXPECT_EQ(graph.get_next(H[3]).idx, V[0]);
+    EXPECT_EQ(graph.get_next(H[4]).idx, V[3]);
+    EXPECT_EQ(graph.get_next(H[5]).idx, V[0]);
+    EXPECT_EQ(graph.get_next(H[6]).idx, V[3]);
+    EXPECT_EQ(graph.get_next(H[7]).idx, V[1]);
+    EXPECT_EQ(graph.get_next(H[8]).idx, V[5]);
+    EXPECT_EQ(graph.get_next(H[9]).idx, V[1]);
+    EXPECT_EQ(graph.get_next(H[10]).idx, V[3]);
+    EXPECT_EQ(graph.get_next(H[11]).idx, V[2]);
+    EXPECT_EQ(graph.get_next(H[12]).idx, V[6]);
+    EXPECT_EQ(graph.get_next(H[13]).idx, V[2]);
+    EXPECT_EQ(graph.get_next(H[13]).idx, V[7]);
+    EXPECT_EQ(graph.get_next(H[14]).idx, V[3]);
+    EXPECT_EQ(graph.get_next(H[15]).idx, V[5]);
+    EXPECT_EQ(graph.get_next(H[16]).idx, V[4]);
+    EXPECT_EQ(graph.get_next(H[17]).idx, V[6]);
+    EXPECT_EQ(graph.get_next(H[18]).idx, V[4]);
+    EXPECT_EQ(graph.get_next(H[19]).idx, V[7]);
+    EXPECT_EQ(graph.get_next(H[20]).idx, V[5]);
+    EXPECT_EQ(graph.get_next(H[21]).idx, V[7]);
+    EXPECT_EQ(graph.get_next(H[22]).idx, V[6]);
+
+    EXPECT_EQ(graph.get_prev(H[0]).idx, V[1]);
+    EXPECT_EQ(graph.get_prev(H[1]).idx, V[0]);
+    EXPECT_EQ(graph.get_prev(H[2]).idx, V[2]);
+    EXPECT_EQ(graph.get_prev(H[3]).idx, V[0]);
+    EXPECT_EQ(graph.get_prev(H[4]).idx, V[3]);
+    EXPECT_EQ(graph.get_prev(H[5]).idx, V[0]);
+    EXPECT_EQ(graph.get_prev(H[6]).idx, V[3]);
+    EXPECT_EQ(graph.get_prev(H[7]).idx, V[1]);
+    EXPECT_EQ(graph.get_prev(H[8]).idx, V[5]);
+    EXPECT_EQ(graph.get_prev(H[9]).idx, V[1]);
+    EXPECT_EQ(graph.get_prev(H[10]).idx, V[3]);
+    EXPECT_EQ(graph.get_prev(H[11]).idx, V[2]);
+    EXPECT_EQ(graph.get_prev(H[12]).idx, V[6]);
+    EXPECT_EQ(graph.get_prev(H[13]).idx, V[2]);
+    EXPECT_EQ(graph.get_prev(H[13]).idx, V[7]);
+    EXPECT_EQ(graph.get_prev(H[14]).idx, V[3]);
+    EXPECT_EQ(graph.get_prev(H[15]).idx, V[5]);
+    EXPECT_EQ(graph.get_prev(H[16]).idx, V[4]);
+    EXPECT_EQ(graph.get_prev(H[17]).idx, V[6]);
+    EXPECT_EQ(graph.get_prev(H[18]).idx, V[4]);
+    EXPECT_EQ(graph.get_prev(H[19]).idx, V[7]);
+    EXPECT_EQ(graph.get_prev(H[20]).idx, V[5]);
+    EXPECT_EQ(graph.get_prev(H[21]).idx, V[7]);
+    EXPECT_EQ(graph.get_prev(H[22]).idx, V[6]);
 
     size_t count = 0;
     for(const auto e : graph.edges){
@@ -167,37 +180,35 @@ TEST(TestSuiteGraph, first){
 
     count = 0;
     auto v_visited = graph.vertices.add<size_t, 1>("v_visited", 0);
-    for(const auto vv : graph.get_vertices(v1)){
+    for(const auto vv : graph.get_vertices(V[1])){
         EXPECT_TRUE(graph.vertices.is_valid(vv));
         v_visited[vv] = 1;
         ++count;
     }
 
-    EXPECT_TRUE(v_visited[v0]);
-    EXPECT_TRUE(v_visited[v3]);
-    EXPECT_TRUE(v_visited[v4]);
-    EXPECT_TRUE(v_visited[v6]);
-    EXPECT_FALSE(v_visited[v2]);
-    EXPECT_FALSE(v_visited[v5]);
-    EXPECT_FALSE(v_visited[v1]);
+    EXPECT_TRUE(v_visited[V[0]]);
+    EXPECT_TRUE(v_visited[V[1]]);
+    EXPECT_TRUE(v_visited[V[2]]);
+    EXPECT_TRUE(v_visited[V[4]]);
+
 
     EXPECT_EQ(count, 4);
 
-    EXPECT_EQ(graph.get_valence(v0), 2);
-    EXPECT_EQ(graph.get_valence(v1), 4);
-    EXPECT_EQ(graph.get_valence(v2), 2);
-    EXPECT_EQ(graph.get_valence(v3), 3);
-    EXPECT_EQ(graph.get_valence(v4), 1);
-    EXPECT_EQ(graph.get_valence(v5), 1);
-    EXPECT_EQ(graph.get_valence(v6), 1);
+    EXPECT_EQ(graph.get_valence(V[0]), 3);
+    EXPECT_EQ(graph.get_valence(V[1]), 3);
+    EXPECT_EQ(graph.get_valence(V[2]), 3);
+    EXPECT_EQ(graph.get_valence(V[3]), 3);
+    EXPECT_EQ(graph.get_valence(V[4]), 3);
+    EXPECT_EQ(graph.get_valence(V[5]), 3);
+    EXPECT_EQ(graph.get_valence(V[6]), 3);
 
-    auto result = graph.find_closest_edge(graph.get_center(graph.get_edge(h0)));
-    EXPECT_EQ(result, v0);
+    auto result = graph.find_closest_edge(graph.get_center(graph.get_edge(H[0])));
+    EXPECT_EQ(result, graph.get_edge(H[0]));
 
-    graph.remove_edge(graph.get_edge(h0));
+    graph.remove_edge(graph.get_edge(H[0]));
 
-    EXPECT_EQ(graph.get_halfedge(v0), h12);
-    EXPECT_EQ(graph.get_halfedge(v1), h11);
+    EXPECT_EQ(graph.get_halfedge(V[0]).idx, 4);
+    EXPECT_EQ(graph.get_halfedge(V[1]).idx, 8);
     EXPECT_TRUE(graph.halfedges.is_dirty());
     EXPECT_TRUE(graph.edges.is_dirty());
     EXPECT_TRUE(graph.has_garbage());

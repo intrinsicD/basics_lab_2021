@@ -81,23 +81,23 @@ TEST_F(TriangleTest, PointFromBarycentricCoords) {
 
 TEST_F(TriangleTest, centers) {
     auto center = incenter(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = centroid(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = circumcenter(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = orthocenter(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = nine_point_center(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = symmedian_point(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = gergonne_point(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = nagel_point(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = mitten_point(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
     center = spieker_point(triangle);
-    EXPECT_EQ(center, from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center)));
+    EXPECT_LE((center - from_barycentric_coords(triangle, to_barycentric_coordinates(triangle, center))).norm(), scalar_eps);
 }
