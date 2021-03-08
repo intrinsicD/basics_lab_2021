@@ -133,7 +133,7 @@ add_library(bcg_graphics
         geometry/correspondences/bcg_correspondences.h geometry/correspondences/bcg_correspondences.cpp
         registration/bcg_registration.h
         registration/rigid_idp/bcg_rigid_icp.h registration/rigid_idp/bcg_rigid_icp.cpp
-        registration/coherent_point_drift/bcg_coherent_point_drift_base2.h registration/coherent_point_drift/bcg_coherent_point_drift_base2.cpp
+        registration/coherent_point_drift/bcg_coherent_point_drift_base.h registration/coherent_point_drift/bcg_coherent_point_drift_base.cpp
         ${RPLY_SOURCE_DIRS}/rply.c
         ${CMAKE_SOURCE_DIR}/spike/bcg_mesh_normal_filtering.h ${CMAKE_SOURCE_DIR}/spike/bcg_mesh_normal_filtering.cpp
         ${CMAKE_SOURCE_DIR}/spike/bcg_point_cloud_normal_filtering.h ${CMAKE_SOURCE_DIR}/spike/bcg_point_cloud_normal_filtering.cpp

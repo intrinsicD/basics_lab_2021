@@ -7,7 +7,7 @@
 #include "bcg_gui_transform.h"
 #include "bcg_gui_kernel_matrix.h"
 #include "registration/bcg_registration.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_base2.h"
+#include "registration/coherent_point_drift/bcg_coherent_point_drift_base.h"
 
 namespace bcg {
 

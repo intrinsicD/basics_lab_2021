@@ -16,7 +16,9 @@ void gui_point_cloud_normal_filtering(viewer_state *state) {
     static float radius = 0.01;
     static float diagnal_percent = 1;
     static int num_closest = 12;
+
     draw_combobox(&state->window, "search_type", selected_search_type, search_type_names());
+
     if (static_cast<SearchType>(selected_search_type) == SearchType::knn) {
         ImGui::InputInt("num_closest", &num_closest);
     } else {

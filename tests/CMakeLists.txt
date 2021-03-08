@@ -4,13 +4,14 @@ project(bcg_library_test)
 link_directories(${CMAKE_BINARY_DIR})
 
 set(TEST_SOURCES
+        bcg_map_test.cpp
         bcg_template_test.cpp
         bcg_test_dynamic_bitset.cpp
         bcg_test_file.cpp
         bcg_test_file_watcher.cpp
         bcg_test_stl_utils.cpp
         bcg_test_string_utils.cpp
-        bcg_glm_vector_test.cpp
+        bcg_map_test.cpp
         bcg_test_property.cpp
         bcg_test_point_cloud.cpp
         bcg_test_point_cloudio.cpp

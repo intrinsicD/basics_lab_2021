@@ -2,8 +2,8 @@
 // Created by alex on 10.02.21.
 //
 
-#ifndef BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE2_H
-#define BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE2_H
+#ifndef BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE_H
+#define BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE_H
 
 #include "geometry/point_cloud/bcg_point_cloud.h"
 #include "kdtree/bcg_kdtree.h"
@@ -208,4 +208,4 @@ private:
 
 }
 
-#endif //BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE2_H
+#endif //BCG_GRAPHICS_BCG_COHERENT_POINT_DRIFT_BASE_H

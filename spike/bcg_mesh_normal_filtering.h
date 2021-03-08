@@ -13,6 +13,7 @@ struct mesh_nf_parameters{
     bcg_scalar_t sigma_f;
     bcg_scalar_t sigma_g;
     int iterations;
+    int something_else;
 };
 
 void mesh_normal_filtering(halfedge_mesh &mesh, const mesh_nf_parameters &params, size_t parallel_grain_size = 1024);

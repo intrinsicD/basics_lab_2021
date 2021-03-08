@@ -12,9 +12,9 @@
 using namespace bcg;
 
 #ifdef _WIN32
-static std::string test_data_path = "..\\..\\tests\\data\\";
+static std::string test_data_path = "..\\tests\\data\\";
 #else
-static std::string test_data_path = "../../tests/data/";
+static std::string test_data_path = "../tests/data/";
 #endif
 
 TEST(TestSuiteFileWatcher, constructor){
@@ -33,11 +33,10 @@ TEST(TestSuiteFileWatcher, add_file){
     });
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     test_file.save_text("lol");
-    EXPECT_TRUE(watcher.trigger());
+    EXPECT_TRUE(watcher.trigger(true));
     EXPECT_TRUE(changed);
     changed = false;
     EXPECT_FALSE(watcher.trigger());
-    EXPECT_TRUE(watcher.trigger(true));
-    EXPECT_TRUE(changed);
+    EXPECT_FALSE(changed);
     test_file.erase();
 }
