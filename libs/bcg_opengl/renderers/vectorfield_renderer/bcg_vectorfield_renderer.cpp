@@ -39,12 +39,12 @@ vectorfield_renderer::vectorfield_renderer(viewer_state *state) : renderer("vect
 }
 
 void vectorfield_renderer::on_startup(const event::internal::startup &) {
-    std::string geometry_shader =
-            state->config.renderers_path + "vectorfield_renderer/vectorfield_geometry_shader.glsl";
+    std::string renderers_path = state->config.get_renderers_path_from_config_file();
+    std::string geometry_shader = renderers_path + "vectorfield_renderer/vectorfield_geometry_shader.glsl";
     programs["vectorfield_renderer_program"] = state->shaders.load("vectorfield_renderer_program",
-                                                                   state->config.renderers_path +
+                                                                   renderers_path +
                                                                    "vectorfield_renderer/vectorfield_vertex_shader.glsl",
-                                                                   state->config.renderers_path +
+                                                                   renderers_path +
                                                                    "vectorfield_renderer/vectorfield_fragment_shader.glsl",
                                                                    &geometry_shader);
 }

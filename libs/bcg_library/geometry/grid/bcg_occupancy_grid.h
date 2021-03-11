@@ -63,6 +63,10 @@ neighbors_query query_knn(const occupancy_grid &grid, const VectorS<3> &query_po
 
 neighbors_query query_radius(const occupancy_grid &grid, const VectorS<3> &query_point, bcg_scalar_t radius);
 
+std::vector<VectorS<3>> get_vertices(const occupancy_grid &grid);
+
+std::vector<VectorI<2>> get_edges(const occupancy_grid &grid);
+
 }
 
 #endif //BCG_GRAPHICS_BCG_OCCUPANCY_GRID_H

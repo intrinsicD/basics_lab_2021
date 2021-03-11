@@ -195,7 +195,23 @@ neighbors_query query_radius(const occupancy_grid &grid, const VectorS<3> &query
     return result_set;
 }
 
+std::vector<VectorS<3>> get_vertices(const occupancy_grid &grid){
+    occupancy_grid dummy;
+    dummy.aabb = grid.aabb;
+    VectorS<3> vsl = grid.voxel_side_length();
+    dummy.aabb.max += vsl;
+    dummy.dims = grid.dims + VectorI<3>::Ones();
 
+    std::vector<VectorS<3>> vertices(dummy.dims.prod());
+    for(size_t i = 0; i < dummy.capacity(); ++i){
+        vertices[i] = dummy.idx_to_voxel_center(i) - vsl;
+    }
+    return vertices;
+}
+
+std::vector<VectorI<2>> get_edges(const occupancy_grid &grid){
+
+}
 
 
 }
