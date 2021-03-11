@@ -26,10 +26,11 @@ graph_renderer::graph_renderer(viewer_state *state) : renderer("graph_renderer",
 }
 
 void graph_renderer::on_startup(const event::internal::startup &) {
+    std::string renderers_path = state->config.get_renderers_path_from_config_file();
     programs["graph_renderer_program"] = state->shaders.load("graph_renderer_program",
-                                                            state->config.renderers_path +
+                                                            renderers_path +
                                                             "graph_renderer/graph_vertex_shader.glsl",
-                                                            state->config.renderers_path +
+                                                            renderers_path +
                                                             "graph_renderer/graph_fragment_shader.glsl");
 }
 

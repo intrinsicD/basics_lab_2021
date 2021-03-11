@@ -27,13 +27,14 @@ curve_renderer::curve_renderer(viewer_state *state) : renderer("curve_renderer",
 }
 
 void curve_renderer::on_startup(const event::internal::startup &) {
-    std::string tess_control = state->config.renderers_path + "curve_renderer/curve_tess_control_shader.glsl";
-    std::string tess_eval = state->config.renderers_path + "curve_renderer/curve_tess_eval_shader.glsl";
+    std::string renderers_path = state->config.get_renderers_path_from_config_file();
+    std::string tess_control = renderers_path + "curve_renderer/curve_tess_control_shader.glsl";
+    std::string tess_eval = renderers_path + "curve_renderer/curve_tess_eval_shader.glsl";
 
     programs["curve_renderer_program"] = state->shaders.load("curve_renderer_program",
-                                                             state->config.renderers_path +
+                                                             renderers_path +
                                                              "curve_renderer/curve_vertex_shader.glsl",
-                                                             state->config.renderers_path +
+                                                             renderers_path +
                                                              "curve_renderer/curve_fragment_shader.glsl",
                                                              nullptr,
                                                              &tess_control,

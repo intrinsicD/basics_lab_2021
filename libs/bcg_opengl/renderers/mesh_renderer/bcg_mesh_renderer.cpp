@@ -28,10 +28,11 @@ mesh_renderer::mesh_renderer(viewer_state *state) : renderer("mesh_renderer", st
 }
 
 void mesh_renderer::on_startup(const event::internal::startup &) {
+    std::string renderers_path = state->config.get_renderers_path_from_config_file();
     programs["mesh_renderer_program"] = state->shaders.load("mesh_renderer_program",
-                                                            state->config.renderers_path +
+                                                            renderers_path +
                                                             "mesh_renderer/mesh_vertex_shader.glsl",
-                                                            state->config.renderers_path +
+                                                            renderers_path +
                                                             "mesh_renderer/mesh_fragment_shader.glsl");
 }
 

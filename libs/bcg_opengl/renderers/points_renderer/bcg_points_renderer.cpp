@@ -32,10 +32,11 @@ points_renderer::points_renderer(viewer_state *state) : renderer("points_rendere
 }
 
 void points_renderer::on_startup(const event::internal::startup &) {
+    std::string renderers_path = state->config.get_renderers_path_from_config_file();
     programs["point_renderer_program"] = state->shaders.load("point_renderer_program",
-                                                             state->config.renderers_path +
+                                                             renderers_path +
                                                              "points_renderer/point_vertex_shader.glsl",
-                                                             state->config.renderers_path +
+                                                             renderers_path +
                                                              "points_renderer/point_fragment_shader.glsl");
 }
 

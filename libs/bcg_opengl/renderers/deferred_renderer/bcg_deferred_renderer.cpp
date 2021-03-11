@@ -22,15 +22,16 @@ deferred_renderer::deferred_renderer(viewer_state *state) : renderer("deferred_r
 }
 
 void deferred_renderer::on_startup(const event::internal::startup &event) {
+    std::string renderers_path = state->config.get_renderers_path_from_config_file();
     programs["deferred_shading_program"] = state->shaders.load("deferred_shading_program",
-                                                               state->config.renderers_path +
+                                                               renderers_path +
                                                                "deferred_renderer/deferred_shading_vertex_shader.glsl",
-                                                               state->config.renderers_path +
+                                                               renderers_path +
                                                                "deferred_renderer/deferred_shading_fragment_shader.glsl");
     programs["g_buffer_program"] = state->shaders.load("g_buffer_program",
-                                                       state->config.renderers_path +
+                                                       renderers_path +
                                                        "deferred_renderer/g_buffer_vertex_shader.glsl",
-                                                       state->config.renderers_path +
+                                                       renderers_path +
                                                        "deferred_renderer/g_buffer_fragment_shader.glsl");
 
     auto &shaderLightingPass = programs["deferred_shading_program"];

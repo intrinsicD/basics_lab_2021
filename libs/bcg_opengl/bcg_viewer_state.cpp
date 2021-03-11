@@ -104,6 +104,17 @@ void viewer_shaders::on_update(const event::internal::update &){
     watcher.trigger();
 }
 
+std::string viewer_config::get_renderers_path_from_config_file(){
+    file_stream config_file("bcg_viewer.config");
+    if(!config_file.exists()){
+        config_file.save_text("../libs/bcg_opengl/renderers/");
+    }
+
+    std::string text;
+    config_file.load_text(text);
+    return text;
+}
+
 viewer_state::viewer_state() : shaders(this){
     systems["camera_system"] = std::make_unique<camera_system>(this);
     systems["loading_system"] = std::make_unique<loading_system>(this);
