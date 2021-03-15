@@ -4,7 +4,7 @@
 
 #include "bcg_mesh_edge_dihedral_angle.h"
 #include "bcg_mesh_face_normals.h"
-#include "math/vector/bcg_math_vector_angle.h"
+#include "math/vector/bcg_vector_angle.h"
 #include "tbb/tbb.h"
 
 namespace bcg {

@@ -7,7 +7,7 @@
 
 namespace bcg {
 
-void mesh_convert_vertex_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0) {
+void mesh_convert_vertex_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0, size_t parallel_grain_size) {
     auto v_covs = mesh.vertices.get_or_add<MatrixS<3, 3>, 1>("v_covariance_matrices", MatrixS<3, 3>::Identity());
     MatrixS<3, 3> ID = MatrixS<3, 3>::Identity();
     tbb::parallel_for(
@@ -29,7 +29,7 @@ void mesh_convert_vertex_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_
     );
 }
 
-void mesh_convert_face_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0) {
+void mesh_convert_face_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0, size_t parallel_grain_size) {
     auto v_covs = mesh.vertices.get_or_add<MatrixS<3, 3>, 1>("v_covariance_matrices", MatrixS<3, 3>::Identity());
     auto f_covs = mesh.faces.get_or_add<MatrixS<3, 3>, 1>("f_covariance_matrices", MatrixS<3, 3>::Identity());
     MatrixS<3, 3> ID = MatrixS<3, 3>::Identity();
@@ -48,7 +48,7 @@ void mesh_convert_face_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_si
                     center /= bcg_scalar_t(count);
 
                     for (const auto vf : mesh.get_vertices(f)) {
-                        VectorS<3> diff = mesh.positions[mesh.get_to_vertex(vf)] - center;
+                        VectorS<3> diff = mesh.positions[vf] - center;
                         f_covs[f] += diff * diff.transpose();
                     }
                     f_covs[f] /= bcg_scalar_t(count);
@@ -72,11 +72,11 @@ void mesh_convert_face_based_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_si
     );
 }
 
-void mesh_convert_gaussian_mixture_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0) {
+void mesh_convert_gaussian_mixture_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0, size_t parallel_grain_size) {
 
 }
 
-void mesh_convert_hierarchical_gaussian_mixture_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0) {
+void mesh_convert_hierarchical_gaussian_mixture_covmesh(halfedge_mesh &mesh, bcg_scalar_t kernel_sigma_0, size_t parallel_grain_size) {
 
 }
 

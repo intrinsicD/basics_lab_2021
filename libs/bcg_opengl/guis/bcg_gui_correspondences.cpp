@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_correspondences.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "correspondences/bcg_correspondences.h"
 #include "bcg_gui_statistics.h"
 #include "bcg_gui_vectorfields.h"

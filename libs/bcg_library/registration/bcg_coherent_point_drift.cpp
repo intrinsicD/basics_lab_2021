@@ -2,7 +2,7 @@
 // Created by alex on 10.02.21.
 //
 
-#include "bcg_coherent_point_drift_base.h"
+#include "bcg_coherent_point_drift.h"
 #include "utils/bcg_timer.h"
 #include "bcg_property_map_eigen.h"
 #include "tbb/tbb.h"

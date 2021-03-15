@@ -3,10 +3,10 @@
 //
 
 #include "bcg_gui_entity_info.h"
-#include "bcg_viewer_state.h"
-#include "bcg_entity_info.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_entity_info.h"
 #include "utils/bcg_path.h"
-#include "bcg_imgui.h"
+#include "viewer/bcg_imgui.h"
 
 namespace bcg{
 

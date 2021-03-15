@@ -3,7 +3,7 @@
 //
 
 #include "bcg_transform_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 
 namespace bcg {
 
@@ -16,7 +16,7 @@ transform_system::transform_system(viewer_state *state) : system("transform_syst
 }
 
 void transform_system::on_add(const event::transform::add &event){
-    if (state->scene.valid(event.id) && !state->scene.has<Transform>(event.id)) {
+    if (state->scene.valid(event.id) && !state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
 }
@@ -49,7 +49,7 @@ void transform_system::on_rotate(const event::transform::rotate &event) {
 
 void transform_system::on_update(const event::internal::update &event){
     if (state->mouse.is_dragging && !state->mouse.is_captured_by_gui && state->keyboard.ctrl_pressed) {
-        if(!state->picker.valid || !state->scene.has<Transform>(state->picker.entity_id)) return;
+        if(!state->picker.valid || !state->scene.all_of<Transform>(state->picker.entity_id)) return;
         auto &model = state->scene.get<Transform>(state->picker.entity_id);
         if (state->mouse.middle) {
             //translate camera in plane

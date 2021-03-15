@@ -6,8 +6,8 @@
 #include <string>
 
 #include "bcg_points_renderer.h"
-#include "bcg_viewer_state.h"
-#include "bcg_opengl.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_opengl.h"
 #include "bcg_material_points.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_points_renderer.h"
@@ -52,7 +52,7 @@ void points_renderer::on_shutdown(const event::internal::shutdown &event) {
 void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
-    if (!state->scene.has<material_points>(event.id)) {
+    if (!state->scene.all_of<material_points>(event.id)) {
         auto &material = state->scene.emplace<material_points>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
@@ -68,7 +68,7 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
 
 void points_renderer::on_setup_for_rendering(const event::points_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
+    if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
     auto &material = state->scene.get_or_emplace<material_points>(event.id);
@@ -95,7 +95,7 @@ void points_renderer::on_setup_for_rendering(const event::points_renderer::setup
 
 void points_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        if (state->scene.has<event::points_renderer::enqueue>(id)) {
+        if (state->scene.all_of<event::points_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::points_renderer::enqueue>(id);
         }
     });
@@ -117,7 +117,7 @@ void points_renderer::on_render(const event::internal::render &) {
 
     for (const auto id : entities_to_draw) {
         if (!state->scene.valid(id)) continue;
-        if (!state->scene.has<material_points>(id)) continue;
+        if (!state->scene.all_of<material_points>(id)) continue;
 
         auto &model = state->scene.get<Transform>(id);
         auto &material = state->scene.get<material_points>(id);
@@ -142,11 +142,11 @@ void points_renderer::on_end_frame(const event::internal::end_frame &) {
 
 void points_renderer::on_uniform_point_size(const event::internal::uniform_point_size &event) {
     gl_state.set_point_size(
-            std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), 20.0));
+            std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), state->config.max_point_size));
 }
 
 void points_renderer::on_set_uniform_point_size(const event::internal::set_uniform_point_size &event) {
-    gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(event.value, 1.0), 20.0));
+    gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(event.value, 1.0), state->config.max_point_size));
 }
 
 void points_renderer::on_set_position_attribute(const event::points_renderer::set_position_attribute &event) {

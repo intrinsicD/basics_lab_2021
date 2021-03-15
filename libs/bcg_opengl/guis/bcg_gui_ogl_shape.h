@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_GUI_OGL_SHAPE_H
 #define BCG_GRAPHICS_BCG_GUI_OGL_SHAPE_H
 
-#include "bcg_opengl.h"
+#include "viewer/bcg_opengl.h"
 
 namespace bcg{
 

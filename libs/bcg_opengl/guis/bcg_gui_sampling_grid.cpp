@@ -4,8 +4,8 @@
 
 
 #include "bcg_gui_sampling_grid.h"
-#include "bcg_viewer_state.h"
-#include "bcg_entity_hierarchy.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_entity_hierarchy.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "geometry/sampling/bcg_sampling_grid.h"
 
@@ -65,7 +65,7 @@ void gui_sampling_grid(viewer_state *state) {
                 auto &hierarchy = state->scene.get_or_emplace<entity_hierarchy>(state->picker.entity_id);
                 entt::entity child_id = entt::null;
                 for (const auto &child : hierarchy.children) {
-                    if (state->scene.has<entt::tag<"subsampled_grid"_hs>>(child.first)) {
+                    if (state->scene.all_of<entt::tag<"subsampled_grid"_hs>>(child.first)) {
                         child_id = child.first;
                         break;
                     }

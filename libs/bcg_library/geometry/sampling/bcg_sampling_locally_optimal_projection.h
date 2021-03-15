@@ -7,7 +7,6 @@
 
 #include "point_cloud/bcg_point_cloud.h"
 #include "kdtree/bcg_kdtree.h"
-#include "entt/entt.hpp"
 
 namespace bcg {
 

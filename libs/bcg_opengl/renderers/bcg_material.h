@@ -7,7 +7,7 @@
 
 #include <vector>
 #include "bcg_attribute.h"
-#include "bcg_opengl.h"
+#include "viewer/bcg_opengl.h"
 
 namespace bcg{
 

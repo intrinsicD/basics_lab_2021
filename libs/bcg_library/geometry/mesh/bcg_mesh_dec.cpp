@@ -37,9 +37,9 @@ dec_operators mesh_dec(halfedge_mesh &mesh, size_t parallel_grain_size){
         VectorS<-1> hodge0V(nVerts);
         for (const auto v : mesh.vertices) {
             double primalArea = 1.0;
-            double dualArea = vertexDualAreas[v];
+            double dualArea = operators.vertexDualAreas[v];
             double ratio = dualArea / primalArea;
-            operators.hodge0V[v] = ratio;
+            hodge0V[v] = ratio;
         }
 
         operators.hodge0 = hodge0V.asDiagonal();
@@ -48,7 +48,7 @@ dec_operators mesh_dec(halfedge_mesh &mesh, size_t parallel_grain_size){
     { // Hodge 1
         VectorS<-1> hodge1V(nEdges);
         for (const auto e : mesh.edges) {
-            double ratio = edgeCotanWeights[e];
+            double ratio = operators.edgeCotanWeights[e];
             hodge1V[e] = ratio;
         }
 
@@ -58,7 +58,7 @@ dec_operators mesh_dec(halfedge_mesh &mesh, size_t parallel_grain_size){
     { // Hodge 2
         VectorS<-1> hodge2V(nFaces);
         for (const auto f : mesh.faces) {
-            double primalArea = faceAreas[f];
+            double primalArea = operators.faceAreas[f];
             double dualArea = 1.0;
             double ratio = dualArea / primalArea;
 
@@ -97,6 +97,7 @@ dec_operators mesh_dec(halfedge_mesh &mesh, size_t parallel_grain_size){
 
         operators.d1.setFromTriplets(tripletList.begin(), tripletList.end());
     }
+    return operators;
 }
 
 }

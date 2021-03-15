@@ -7,13 +7,13 @@
 namespace bcg{
 
 std::vector<std::string> kernel_function_names(){
-    std::vector<std::string> names(KernelFunctionType::__last__);
-    names[linear] = "linear";
-    names[polynomial] = "polynomial";
-    names[gaussian] = "gaussian";
-    names[exponential] = "exponential";
-    names[laplacian] = "laplacian";
-    names[anova] = "anova";
+    std::vector<std::string> names(static_cast<int>(KernelFunctionType::__last__));
+    names[static_cast<int>(KernelFunctionType ::linear)] = "linear";
+    names[static_cast<int>(KernelFunctionType ::polynomial)] = "polynomial";
+    names[static_cast<int>(KernelFunctionType ::gaussian)] = "gaussian";
+    names[static_cast<int>(KernelFunctionType ::exponential)] = "exponential";
+    names[static_cast<int>(KernelFunctionType ::laplacian)] = "laplacian";
+    names[static_cast<int>(KernelFunctionType ::anova)] = "anova";
     return names;
 }
 
@@ -44,6 +44,7 @@ bcg_scalar_t anova_kernel(bcg_scalar_t x, bcg_scalar_t y, int n, bcg_scalar_t si
         x *= x;
         y *= y;
     }
+    return value;
 }
 
 }

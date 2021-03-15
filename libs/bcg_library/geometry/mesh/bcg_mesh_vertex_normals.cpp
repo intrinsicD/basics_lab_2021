@@ -6,7 +6,7 @@
 #include "bcg_mesh_vertex_normals.h"
 #include "bcg_mesh_face_normals.h"
 #include "bcg_mesh_face_area_vector.h"
-#include "math/vector/bcg_math_vector_angle.h"
+#include "math/vector/bcg_vector_angle.h"
 #include "tbb/tbb.h"
 
 namespace bcg {

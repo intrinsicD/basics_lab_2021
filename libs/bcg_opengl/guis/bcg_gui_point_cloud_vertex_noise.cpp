@@ -4,7 +4,7 @@
 
 #include "bcg_gui_point_cloud_vertex_noise.h"
 #include "bcg_gui_reload_entity.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "geometry/point_cloud/bcg_point_cloud_vertex_noise.h"
 
 namespace bcg{

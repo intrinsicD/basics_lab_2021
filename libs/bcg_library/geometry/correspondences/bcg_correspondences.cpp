@@ -3,7 +3,6 @@
 //
 
 #include "bcg_correspondences.h"
-#include "entt/entt.hpp"
 
 namespace bcg {
 

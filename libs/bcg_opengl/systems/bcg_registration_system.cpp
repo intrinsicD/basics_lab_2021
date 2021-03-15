@@ -3,11 +3,11 @@
 //
 
 #include "bcg_registration_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "correspondences/bcg_correspondences.h"
 #include "registration/bcg_registration.h"
-#include "registration/rigid_idp/bcg_rigid_icp.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_base.h"
+#include "bcg_library/registration/bcg_rigid_icp.h"
+#include "bcg_library/registration/bcg_coherent_point_drift.h"
 #include "bcg_property_map_eigen.h"
 
 namespace bcg {
@@ -23,7 +23,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
     if (event.source_id == event.target_id) return;
-    if (!state->scene.has<registration>(event.source_id)) {
+    if (!state->scene.all_of<registration>(event.source_id)) {
         registration reg;
         state->scene.emplace<registration>(event.source_id, reg);
     }
@@ -138,7 +138,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
 void registration_system::on_align_converge(const event::registration::align_converge &event) {
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
-    if (!state->scene.has<registration>(event.source_id)) {
+    if (!state->scene.all_of<registration>(event.source_id)) {
         state->scene.emplace<registration>(event.source_id);
     }
     auto &reg = state->scene.get<registration>(event.source_id);
@@ -151,27 +151,27 @@ void registration_system::on_align_converge(const event::registration::align_con
 void registration_system::on_reset(const event::registration::reset &event) {
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
-    if (!state->scene.has<registration>(event.source_id))return;
+    if (!state->scene.all_of<registration>(event.source_id))return;
 
     auto &reg = state->scene.get<registration>(event.source_id);
     reg.errors.clear();
 
-    if(state->scene.has<coherent_point_drift_rigid>(event.source_id)){
+    if(state->scene.all_of<coherent_point_drift_rigid>(event.source_id)){
         auto &cpd = state->scene.get<coherent_point_drift_rigid>(event.source_id);
         cpd.reset();
         state->scene.remove_if_exists<coherent_point_drift_rigid>(event.source_id);
     }
-    if(state->scene.has<coherent_point_drift_affine>(event.source_id)){
+    if(state->scene.all_of<coherent_point_drift_affine>(event.source_id)){
         auto &cpd = state->scene.get<coherent_point_drift_affine>(event.source_id);
         cpd.reset();
         state->scene.remove_if_exists<coherent_point_drift_affine>(event.source_id);
     }
-    if(state->scene.has<coherent_point_drift_nonrigid>(event.source_id)){
+    if(state->scene.all_of<coherent_point_drift_nonrigid>(event.source_id)){
         auto &cpd = state->scene.get<coherent_point_drift_nonrigid>(event.source_id);
         cpd.reset();
         state->scene.remove_if_exists<coherent_point_drift_nonrigid>(event.source_id);
     }
-    if(state->scene.has<coherent_point_drift_bayes>(event.source_id)){
+    if(state->scene.all_of<coherent_point_drift_bayes>(event.source_id)){
         auto &cpd = state->scene.get<coherent_point_drift_bayes>(event.source_id);
         cpd.reset();
         state->scene.remove_if_exists<coherent_point_drift_bayes>(event.source_id);

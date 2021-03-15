@@ -5,7 +5,7 @@
 #include "bcg_gui_graph_vertex_pca.h"
 #include "bcg_gui_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 
 namespace bcg {
 

@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_point_cloud_graph_builder.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_kdtree_selector.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 #include "renderers/graph_renderer/bcg_material_graph.h"

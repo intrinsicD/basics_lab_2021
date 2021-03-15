@@ -62,6 +62,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
     auto v_pca_normal_loading = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_normal_loading");
     auto v_pca_tangent1_loading = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_tangent1_loading");
     auto v_pca_tangent2_loading = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_tangent2_loading");
+    auto v_pca_splat_size = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_splat_size");
     auto v_pca_loading = vertices->get_or_add<VectorS<3>, 3>("v_pca_loading");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) vertices->size(), parallel_grain_size),
@@ -81,6 +82,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
                     v_pca_normal[v] = pca.directions.col(2);
                     v_pca_tangent1_loading[v] = pca.loadings(0);
                     v_pca_tangent2_loading[v] = pca.loadings(1);
+                    v_pca_splat_size[v] = (v_pca_tangent1_loading[v] + v_pca_tangent2_loading[v]) / 2.0;
                     v_pca_normal_loading[v] = pca.loadings(2);
                     v_pca_loading[v] = pca.loadings;
                     v_pca_mean[v] = pca.mean;
@@ -95,6 +97,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
     v_pca_tangent1_loading.set_dirty();
     v_pca_tangent2_loading.set_dirty();
     v_pca_loading.set_dirty();
+    v_pca_splat_size.set_dirty();
     v_pca_mean.set_dirty();
 }
 

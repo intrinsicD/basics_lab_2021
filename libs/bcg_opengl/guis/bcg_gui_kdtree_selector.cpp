@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_kdtree_selector.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "aligned_box/bcg_aligned_box.h"
 #include "aligned_box/bcg_aligned_box_stats.h"
 
@@ -36,7 +36,7 @@ kdtree_parameters gui_kd_tree_selector(viewer_state *state){
         }
         ImGui::InputFloat("percentage", &percentage);
         if(ImGui::Button("% from AABB diagonal")){
-            if (state->scene.has<aligned_box3>(state->picker.entity_id)) {
+            if (state->scene.all_of<aligned_box3>(state->picker.entity_id)) {
                 auto *vertices = state->get_vertices(state->picker.entity_id);
                 if(vertices){
                     auto &aabb = state->scene.get<aligned_box3>(state->picker.entity_id);

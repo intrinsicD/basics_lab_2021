@@ -4,7 +4,7 @@
 
 #include "bcg_gui_mesh_simplification.h"
 #include "bcg_gui_reload_entity.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 
 namespace bcg {

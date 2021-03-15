@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_rendering_options.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_materials.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
@@ -15,12 +15,12 @@
 namespace bcg{
 
 void gui_rendering_options(viewer_state *state, entt::entity id){
-    bool show_points = state->scene.has<event::points_renderer::enqueue>(id);
-    bool show_edges = state->scene.has<event::graph_renderer::enqueue>(id);
-    bool show_mesh = state->scene.has<event::mesh_renderer::enqueue>(id);
-    bool show_vectors = state->scene.has<event::vectorfield_renderer::enqueue>(id);
-    bool show_curves = state->scene.has<event::curve_renderer::enqueue>(id);
-    bool render_deferred = state->scene.has<event::deferred_renderer::enqueue>(id);
+    bool show_points = state->scene.all_of<event::points_renderer::enqueue>(id);
+    bool show_edges = state->scene.all_of<event::graph_renderer::enqueue>(id);
+    bool show_mesh = state->scene.all_of<event::mesh_renderer::enqueue>(id);
+    bool show_vectors = state->scene.all_of<event::vectorfield_renderer::enqueue>(id);
+    bool show_curves = state->scene.all_of<event::curve_renderer::enqueue>(id);
+    bool render_deferred = state->scene.all_of<event::deferred_renderer::enqueue>(id);
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {

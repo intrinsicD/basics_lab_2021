@@ -7,8 +7,8 @@
 #include <bcg_library/geometry/bcg_property_map_eigen.h>
 
 #include "bcg_picking_renderer.h"
-#include "bcg_viewer_state.h"
-#include "bcg_opengl.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_opengl.h"
 #include "bcg_material_picking.h"
 #include "bcg_events_picking_renderer.h"
 #include "kdtree/bcg_kdtree.h"
@@ -40,7 +40,7 @@ void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event)
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if (!state->scene.has<material_picking>(event.id)) {
+    if (!state->scene.all_of<material_picking>(event.id)) {
         auto &material = state->scene.emplace<material_picking>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         state->dispatcher.trigger<event::picking_renderer::setup_for_rendering>(event.id);
@@ -49,7 +49,7 @@ void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event)
 
 void picking_renderer::on_setup_for_rendering(const event::picking_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
+    if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
 
@@ -123,11 +123,11 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
 
-        if (state->scene.has<halfedge_graph>(id)) {
+        if (state->scene.all_of<halfedge_graph>(id)) {
             shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
             glDrawArrays(GL_POINTS, 0, shape.num_vertices);
-        } else if(state->scene.has<halfedge_mesh>(id)){
+        } else if(state->scene.all_of<halfedge_mesh>(id)){
             shape.triangle_buffer.bind();
             glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
         }else{
@@ -186,7 +186,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     }
 
     Transform model = Transform::Identity();
-    if(state->scene.valid(id) && state->scene.has<Transform>(id)){
+    if(state->scene.valid(id) && state->scene.all_of<Transform>(id)){
         model = state->scene.get<Transform>(id);
     }
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
@@ -201,7 +201,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);
     state->picker.vertex_id = vertex_handle(result.indices[0]);
 
-    if (state->scene.has<halfedge_graph>(id)) {
+    if (state->scene.all_of<halfedge_graph>(id)) {
         auto &graph = state->scene.get<halfedge_graph>(id);
         state->picker.edge_id = graph.find_closest_edge_in_neighborhood(state->picker.vertex_id,
                                                                         state->picker.model_space_point);
@@ -209,7 +209,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         state->picker.edge_id = edge_handle();
     }
 
-    if (state->scene.has<halfedge_mesh>(id)) {
+    if (state->scene.all_of<halfedge_mesh>(id)) {
         auto &mesh = state->scene.get<halfedge_mesh>(id);
         state->picker.edge_id = mesh.find_closest_edge_in_neighborhood(state->picker.vertex_id,
                                                                        state->picker.model_space_point);

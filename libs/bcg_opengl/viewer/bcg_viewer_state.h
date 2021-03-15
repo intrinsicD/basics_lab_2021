@@ -11,9 +11,8 @@
 #include "bcg_camera.h"
 #include "bcg_imgui.h"
 #include "bcg_opengl.h"
-#include "events/bcg_events.h"
 #include "color/bcg_colors.h"
-#include "bcg_opengl/systems/bcg_systems.h"
+#include "../systems/bcg_systems.h"
 #include "bcg_library/utils/bcg_dynamic_bitset.h"
 #include "bcg_library/utils/bcg_file_watcher.h"
 #include "bcg_library/geometry/mesh/bcg_mesh.h"
@@ -177,7 +176,7 @@ struct viewer_picker {
 
 struct viewer_config {
     size_t parallel_grain_size = 1024;
-
+    bcg_scalar_t max_point_size = 20.0;
     std::string get_renderers_path_from_config_file();
 };
 

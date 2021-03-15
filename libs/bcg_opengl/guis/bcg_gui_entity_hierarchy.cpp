@@ -2,9 +2,9 @@
 // Created by alex on 19.11.20.
 //
 
-#include "bcg_entity_hierarchy.h"
-#include "bcg_viewer_state.h"
-#include "bcg_entity_info.h"
+#include "viewer/bcg_entity_hierarchy.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_entity_info.h"
 #include "bcg_gui_entity_info.h"
 
 namespace bcg{

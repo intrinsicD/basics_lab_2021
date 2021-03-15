@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include "bcg_gui_transform.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 
 namespace bcg{
 

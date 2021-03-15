@@ -6,7 +6,7 @@
 #include "bcg_gui_kdtree_selector.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 
 namespace bcg{
 

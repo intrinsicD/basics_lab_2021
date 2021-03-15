@@ -3,8 +3,8 @@
 //
 
 #include "bcg_mesh_system.h"
-#include "bcg_viewer_state.h"
-#include "bcg_entity_info.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_entity_info.h"
 #include "bcg_property_map_eigen.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "geometry/mesh/bcg_mesh_factory.h"
@@ -127,7 +127,7 @@ void mesh_system::on_make_box(const event::mesh::make_box &event) {
 
 void mesh_system::on_boundary(const event::mesh::boundary &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_boundary(mesh, state->config.parallel_grain_size);
@@ -135,7 +135,7 @@ void mesh_system::on_boundary(const event::mesh::boundary &event) {
 
 void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_concave &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     vertex_convex_concave(mesh, state->config.parallel_grain_size);
@@ -143,7 +143,7 @@ void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_conc
 
 void mesh_system::on_features(const event::mesh::features &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_features(mesh, event.boundary, event.angle, event.threshold_degrees, state->config.parallel_grain_size);
@@ -151,7 +151,7 @@ void mesh_system::on_features(const event::mesh::features &event) {
 
 void mesh_system::on_features_clear(const event::mesh::features_clear &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_clear_features(mesh);
@@ -159,7 +159,7 @@ void mesh_system::on_features_clear(const event::mesh::features_clear &event) {
 
 void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::catmull_clark &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_subdivision_catmull_clark(mesh, state->config.parallel_grain_size);
@@ -169,7 +169,7 @@ void mesh_system::on_subdivision_catmull_clark(const event::mesh::subdivision::c
 
 void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_subdivision_loop(mesh, state->config.parallel_grain_size);
@@ -179,7 +179,7 @@ void mesh_system::on_subdivision_loop(const event::mesh::subdivision::loop &even
 
 void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_subdivision_sqrt3(mesh, state->config.parallel_grain_size);
@@ -189,7 +189,7 @@ void mesh_system::on_subdivision_sqrt3(const event::mesh::subdivision::sqrt3 &ev
 
 void mesh_system::on_connected_components_detect(const event::mesh::connected_components::detect &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_connected_components_detect(mesh);
@@ -197,7 +197,7 @@ void mesh_system::on_connected_components_detect(const event::mesh::connected_co
 
 void mesh_system::on_connected_components_split(const event::mesh::connected_components::split &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto parts = mesh_connected_components_split(mesh);
@@ -212,7 +212,7 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
 
 void mesh_system::on_build_laplacian(const event::mesh::laplacian::build &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto laplacian = build_laplacian(mesh, event.s_type, event.m_type, state->config.parallel_grain_size,
@@ -222,7 +222,7 @@ void mesh_system::on_build_laplacian(const event::mesh::laplacian::build &event)
 
 void mesh_system::on_curvature_taubin(const event::mesh::curvature::taubin &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_curvature_taubin(mesh, event.post_smoothing_steps, event.two_ring_neighborhood,
@@ -231,7 +231,7 @@ void mesh_system::on_curvature_taubin(const event::mesh::curvature::taubin &even
 
 void mesh_system::on_simplification(const event::mesh::simplification &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_simplification(mesh, event.n_vertices, event.aspect_ratio,
@@ -245,7 +245,7 @@ void mesh_system::on_simplification(const event::mesh::simplification &event) {
 
 void mesh_system::on_remeshing_uniform(const event::mesh::remeshing::uniform &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_remeshing_uniform(mesh, event.edge_length, event.iterations, event.use_projection);
@@ -256,7 +256,7 @@ void mesh_system::on_remeshing_uniform(const event::mesh::remeshing::uniform &ev
 
 void mesh_system::on_remeshing_adaptive(const event::mesh::remeshing::adaptive &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     mesh_remeshing_adaptive(mesh, event.min_edge_length, event.max_edge_length, event.approx_error, event.iterations,
@@ -268,7 +268,7 @@ void mesh_system::on_remeshing_adaptive(const event::mesh::remeshing::adaptive &
 
 void mesh_system::on_statistics(const event::mesh::statistics &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto stats = mesh_statistics(mesh, state->config.parallel_grain_size);
@@ -277,8 +277,8 @@ void mesh_system::on_statistics(const event::mesh::statistics &event){
 
 void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_smoothing &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
-    if (!state->scene.has<mesh_laplacian>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<mesh_laplacian>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -288,7 +288,7 @@ void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_s
 
 void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_smoothing &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -298,7 +298,7 @@ void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_s
 
 void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explicit_smoothing_1D &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -308,7 +308,7 @@ void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explici
 
 void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -318,7 +318,7 @@ void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implici
 
 void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explicit_smoothing_3D &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -328,7 +328,7 @@ void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explici
 
 void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -338,7 +338,7 @@ void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implici
 
 void mesh_system::on_smoothing_taubin(const event::mesh::smoothing::taubin_smoothing &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
@@ -351,7 +351,7 @@ void mesh_system::on_smoothing_taubin(const event::mesh::smoothing::taubin_smoot
 
 void mesh_system::on_vertex_normal_uniform(const event::mesh::vertex_normals::uniform &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     vertex_normals(mesh, vertex_normal_uniform, state->config.parallel_grain_size);
@@ -359,7 +359,7 @@ void mesh_system::on_vertex_normal_uniform(const event::mesh::vertex_normals::un
 
 void mesh_system::on_vertex_normal_area(const event::mesh::vertex_normals::area &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     vertex_normals(mesh, vertex_normal_area, state->config.parallel_grain_size);
@@ -367,7 +367,7 @@ void mesh_system::on_vertex_normal_area(const event::mesh::vertex_normals::area 
 
 void mesh_system::on_vertex_normal_angle(const event::mesh::vertex_normals::angle &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     vertex_normals(mesh, vertex_normal_angle, state->config.parallel_grain_size);
@@ -375,7 +375,7 @@ void mesh_system::on_vertex_normal_angle(const event::mesh::vertex_normals::angl
 
 void mesh_system::on_vertex_normal_area_angle(const event::mesh::vertex_normals::area_angle &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     vertex_normals(mesh, vertex_normal_area_angle, state->config.parallel_grain_size);
@@ -385,7 +385,7 @@ void mesh_system::on_vertex_normal_area_angle(const event::mesh::vertex_normals:
 
 void mesh_system::on_dihedral_angle(const event::mesh::edge::dihedral_angle &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     edge_dihedral_angles(mesh, state->config.parallel_grain_size);
@@ -394,7 +394,7 @@ void mesh_system::on_dihedral_angle(const event::mesh::edge::dihedral_angle &eve
 
 void mesh_system::on_edge_centers(const event::graph::edge::centers &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     edge_centers(mesh, state->config.parallel_grain_size);
@@ -404,7 +404,7 @@ void mesh_system::on_edge_centers(const event::graph::edge::centers &event) {
 
 void mesh_system::on_face_centers(const event::mesh::face::centers &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     face_centers(mesh, state->config.parallel_grain_size);
@@ -412,7 +412,7 @@ void mesh_system::on_face_centers(const event::mesh::face::centers &event) {
 
 void mesh_system::on_face_normals(const event::mesh::face::normals &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<halfedge_mesh>(event.id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     face_normals(mesh, state->config.parallel_grain_size);

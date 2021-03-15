@@ -3,7 +3,7 @@
 //
 
 #include "bcg_deferred_renderer.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_events_deferred_renderer.h"
 #include "bcg_material_deferred.h"
 
@@ -107,7 +107,7 @@ void deferred_renderer::on_enqueue(const event::deferred_renderer::enqueue &even
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if (!state->scene.has<material_deferred>(event.id)) {
+    if (!state->scene.all_of<material_deferred>(event.id)) {
         auto &material = state->scene.emplace<material_deferred>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
@@ -130,7 +130,7 @@ void deferred_renderer::on_enqueue(const event::deferred_renderer::enqueue &even
 
 void deferred_renderer::on_setup_for_rendering(const event::deferred_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
+    if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
     auto &material = state->scene.get_or_emplace<material_deferred>(event.id);
@@ -163,7 +163,7 @@ void deferred_renderer::on_setup_for_rendering(const event::deferred_renderer::s
 
 void deferred_renderer::on_begin_frame(const event::internal::begin_frame &event) {
     state->scene.each([&](auto id) {
-        if (state->scene.has<event::deferred_renderer::enqueue>(id)) {
+        if (state->scene.all_of<event::deferred_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::deferred_renderer::enqueue>(id);
         }
     });
@@ -198,12 +198,12 @@ void deferred_renderer::on_render(const event::internal::render &event) {
         material.vao.bind();
 
         //Render Here
-        if (state->scene.has<halfedge_graph>(id)) {
+        if (state->scene.all_of<halfedge_graph>(id)) {
             shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
             assert_ogl_error();
             glDrawArrays(GL_POINTS, 0, shape.num_vertices);
-        } else if (state->scene.has<halfedge_mesh>(id)) {
+        } else if (state->scene.all_of<halfedge_mesh>(id)) {
             shape.triangle_buffer.bind();
             glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
         } else {

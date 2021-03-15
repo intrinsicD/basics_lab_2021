@@ -1,21 +1,5 @@
-add_compile_options(-w)
-if (BCG_APPS)
-    find_package(eigen3 REQUIRED)
-
-    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
-    set(GLFW_BUILD_TESTS OFF CACHE BOOL " " FORCE)
-    set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)
-    set(GLFW_INSTALL OFF CACHE BOOL " " FORCE)
-    add_subdirectory(glfw)
-    add_subdirectory(tbb)
-    add_subdirectory(glm)
-    add_subdirectory(spectra)
-    include_directories(cgltf)
-    include_directories(entt/single_include)
-    include_directories(imgui)
-    include_directories(eigen)
-
-endif (BCG_APPS)
+add_subdirectory(spectra)
+add_subdirectory(entt)
 
 if(BCG_TESTS)
     add_subdirectory(googletest)

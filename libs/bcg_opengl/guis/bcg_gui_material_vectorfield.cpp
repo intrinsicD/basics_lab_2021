@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_material_vectorfield.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_property_selector.h"
 #include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
 

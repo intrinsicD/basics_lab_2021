@@ -6,8 +6,8 @@
 #include <string>
 
 #include "bcg_graph_renderer.h"
-#include "bcg_viewer_state.h"
-#include "bcg_opengl.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_opengl.h"
 #include "bcg_material_graph.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_graph_renderer.h"
@@ -48,7 +48,7 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
     if(!state->get_edges(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if(!state->scene.has<material_graph>(event.id)){
+    if(!state->scene.all_of<material_graph>(event.id)){
         auto &material = state->scene.emplace<material_graph>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
@@ -67,7 +67,7 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
 
 void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
+    if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
     auto &material = state->scene.get_or_emplace<material_graph>(event.id);
@@ -97,7 +97,7 @@ void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_f
 
 void graph_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        if (state->scene.has<event::graph_renderer::enqueue>(id)) {
+        if (state->scene.all_of<event::graph_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::graph_renderer::enqueue>(id);
         }
     });
@@ -157,7 +157,7 @@ void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_
 
 void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color_texture &event){
     if (!state->scene.valid(event.id)) return;
-    if(!state->scene.has<event::graph_renderer::enqueue>(event.id)){
+    if(!state->scene.all_of<event::graph_renderer::enqueue>(event.id)){
         state->scene.emplace_or_replace<event::graph_renderer::enqueue>(event.id);
         state->dispatcher.trigger<event::graph_renderer::enqueue>(event.id);
     }

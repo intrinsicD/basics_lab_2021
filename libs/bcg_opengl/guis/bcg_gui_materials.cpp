@@ -8,7 +8,7 @@
 #include "bcg_gui_material_mesh.h"
 #include "bcg_gui_material_curve.h"
 #include "bcg_gui_vectorfields.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 
 namespace bcg{
 

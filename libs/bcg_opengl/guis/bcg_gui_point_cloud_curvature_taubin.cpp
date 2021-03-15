@@ -6,7 +6,7 @@
 #include "bcg_gui_point_cloud_vertex_pca.h"
 #include "bcg_gui_material_points.h"
 #include "bcg_gui_kdtree_selector.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 
 namespace bcg{

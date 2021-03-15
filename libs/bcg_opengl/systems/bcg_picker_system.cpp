@@ -3,8 +3,8 @@
 //
 
 #include "bcg_picker_system.h"
-#include "bcg_viewer_state.h"
-#include "bcg_selection.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_selection.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
@@ -49,7 +49,7 @@ void picker_system::on_disable(const event::picker::disable &event) {
 void picker_system::on_pick_point(const event::picker::pick::point &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::points) return;
-    if (!state->scene.has<selected_points>(event.id)) {
+    if (!state->scene.all_of<selected_points>(event.id)) {
         state->scene.emplace<selected_points>(event.id);
     }
     auto &selection = state->scene.get<selected_points>(event.id);
@@ -58,7 +58,7 @@ void picker_system::on_pick_point(const event::picker::pick::point &event) {
 void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::vertices) return;
-    if (!state->scene.has<selected_vertices>(event.id)) {
+    if (!state->scene.all_of<selected_vertices>(event.id)) {
         state->scene.emplace<selected_vertices>(event.id);
     }
     auto &selection = state->scene.get<selected_vertices>(event.id);
@@ -89,7 +89,7 @@ void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
 void picker_system::on_pick_edge(const event::picker::pick::edge &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::edges) return;
-    if (!state->scene.has<selected_edges>(event.id)) {
+    if (!state->scene.all_of<selected_edges>(event.id)) {
         state->scene.emplace<selected_edges>(event.id);
     }
     auto &selection = state->scene.get<selected_edges>(event.id);
@@ -119,7 +119,7 @@ void picker_system::on_pick_edge(const event::picker::pick::edge &event) {
 void picker_system::on_pick_face(const event::picker::pick::face &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::faces) return;
-    if (!state->scene.has<selected_faces>(event.id)) {
+    if (!state->scene.all_of<selected_faces>(event.id)) {
         state->scene.emplace<selected_faces>(event.id);
     }
     auto &selection = state->scene.get<selected_faces>(event.id);

@@ -2,8 +2,8 @@
 // Created by alex on 05.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_MATH_VECTOR_COS_H
-#define BCG_GRAPHICS_BCG_MATH_VECTOR_COS_H
+#ifndef BCG_GRAPHICS_BCG_VECTOR_COS_H
+#define BCG_GRAPHICS_BCG_VECTOR_COS_H
 
 #include "math/bcg_linalg.h"
 #include "math/bcg_math_common.h"
@@ -22,4 +22,4 @@ inline bcg_scalar_t vector_cos(const VectorS<N> &v0, const VectorS<N> &v1) {
 
 }
 
-#endif //BCG_GRAPHICS_BCG_MATH_VECTOR_COS_H
+#endif //BCG_GRAPHICS_BCG_VECTOR_COS_H

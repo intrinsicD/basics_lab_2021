@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_mesh_vertex_convex_concave.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 
