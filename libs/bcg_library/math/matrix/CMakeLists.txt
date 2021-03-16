@@ -1,5 +1,3 @@
-find_package(Eigen3 REQUIRED PATHS external/eigen)
-
 target_link_libraries(bcg_graphics PUBLIC Eigen3::Eigen)
 target_link_libraries(bcg_graphics PUBLIC Spectra)
 

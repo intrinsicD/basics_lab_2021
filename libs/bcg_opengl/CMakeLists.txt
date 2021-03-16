@@ -1,8 +1,6 @@
 if (BCG_OPENGL)
     find_package(OpenGL REQUIRED)
 
-    find_package(glfw3 REQUIRED glfw)
-
     add_library(bcg_opengl STATIC)
 
     target_include_directories(bcg_opengl PRIVATE .)
