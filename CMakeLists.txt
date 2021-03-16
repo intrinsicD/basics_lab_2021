@@ -8,6 +8,7 @@ option(BCG_TESTS "Build Tests" ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
+    #apparently: And when doing a debug build, some cpp file will generate huge obj, so a /bigobj is needed.
     add_definitions(/bigobj)
 endif ()
 
