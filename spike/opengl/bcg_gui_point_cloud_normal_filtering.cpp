@@ -3,8 +3,8 @@
 //
 
 #include "bcg_gui_point_cloud_normal_filtering.h"
-#include "bcg_opengl/bcg_viewer_state.h"
-#include "bcg_point_cloud_normal_filtering.h"
+#include "viewer/bcg_viewer_state.h"
+#include "../graphics/bcg_point_cloud_normal_filtering.h"
 #include "guis/bcg_gui_point_cloud_vertex_noise.h"
 
 namespace bcg {

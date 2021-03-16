@@ -7,6 +7,7 @@
 
 #include "bcg_systems.h"
 
+
 namespace bcg{
 
 struct camera_system : public system {

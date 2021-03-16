@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_GUI_ENTITY_HIERARCHY_H
 
 #include "entt/entt.hpp"
-#include "bcg_entity_hierarchy.h"
+#include "viewer/bcg_entity_hierarchy.h"
 
 namespace bcg{
 

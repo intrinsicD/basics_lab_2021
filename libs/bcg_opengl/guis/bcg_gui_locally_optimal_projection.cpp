@@ -3,9 +3,9 @@
 //
 
 #include "bcg_gui_locally_optimal_projection.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "sampling/bcg_sampling_locally_optimal_projection.h"
-#include "bcg_entity_hierarchy.h"
+#include "viewer/bcg_entity_hierarchy.h"
 #include "bcg_gui_sampling_octree.h"
 
 namespace bcg{
@@ -45,7 +45,7 @@ void gui_locally_optimal_projection(viewer_state *state){
             auto &hierarchy = state->scene.get_or_emplace<entity_hierarchy>(state->picker.entity_id);
             entt::entity child_id = entt::null;
             for (const auto &child : hierarchy.children) {
-                if (state->scene.has<entt::tag<"subsampled"_hs>>(child.first)) {
+                if (state->scene.all_of<entt::tag<"subsampled"_hs>>(child.first)) {
                     child_id = child.first;
                     break;
                 }
@@ -109,7 +109,7 @@ void gui_locally_optimal_projection(viewer_state *state){
         if(state->scene.valid(id)) {
             switch (static_cast<LopType>(method_idx)) {
                 case LopType::lop : {
-                    if(state->scene.has<lop>(id)){
+                    if(state->scene.all_of<lop>(id)){
                         auto &projection = state->scene.get<lop>(id);
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
@@ -121,7 +121,7 @@ void gui_locally_optimal_projection(viewer_state *state){
                     break;
                 }
                 case LopType::wlop : {
-                    if(state->scene.has<wlop>(id)){
+                    if(state->scene.all_of<wlop>(id)){
                         auto &projection = state->scene.get<wlop>(id);
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
@@ -133,7 +133,7 @@ void gui_locally_optimal_projection(viewer_state *state){
                     break;
                 }
                 case LopType::flop : {
-                    if(state->scene.has<flop>(id)){
+                    if(state->scene.all_of<flop>(id)){
                         auto &projection = state->scene.get<flop>(id);
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;
@@ -145,7 +145,7 @@ void gui_locally_optimal_projection(viewer_state *state){
                     break;
                 }
                 case LopType::clop : {
-                    if(state->scene.has<clop>(id)){
+                    if(state->scene.all_of<clop>(id)){
                         auto &projection = state->scene.get<clop>(id);
                         projection.attraction_radius = attraction_radius;
                         projection.repulsion_weight = repulsion_weight;

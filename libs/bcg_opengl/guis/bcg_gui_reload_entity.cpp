@@ -3,14 +3,14 @@
 //
 
 #include "bcg_gui_reload_entity.h"
-#include "bcg_viewer_state.h"
-#include "bcg_entity_info.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_entity_info.h"
 
 namespace bcg{
 
 void gui_reload_entity(viewer_state *state){
     if(state->scene.valid(state->picker.entity_id)){
-        if(state->scene.has<entity_info>(state->picker.entity_id)){
+        if(state->scene.all_of<entity_info>(state->picker.entity_id)){
             auto &info = state->scene.get<entity_info>(state->picker.entity_id);
             if(!info.filename.empty()){
                 auto filename = info.filename;

@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "bcg_loading_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_library/geometry/mesh/bcg_meshio.h"
 #include "bcg_library/geometry/point_cloud/bcg_point_cloudio.h"
 

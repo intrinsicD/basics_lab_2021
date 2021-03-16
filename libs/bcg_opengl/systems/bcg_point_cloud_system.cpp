@@ -3,9 +3,9 @@
 //
 
 #include "bcg_point_cloud_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "aligned_box/bcg_aligned_box.h"
-#include "bcg_entity_info.h"
+#include "viewer/bcg_entity_info.h"
 #include "bcg_property_map_eigen.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
@@ -90,7 +90,7 @@ void point_cloud_system::on_build_graph_knn(const event::point_cloud::build::gra
     if (!state->scene.valid(event.id)) return;
     auto *vertices = state->get_vertices(event.id);
     if (!vertices) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -106,7 +106,7 @@ void point_cloud_system::on_build_graph_radius(const event::point_cloud::build::
     if (!state->scene.valid(event.id)) return;
     auto *vertices = state->get_vertices(event.id);
     if (!vertices) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -120,7 +120,7 @@ void point_cloud_system::on_build_graph_radius(const event::point_cloud::build::
 
 void point_cloud_system::on_vertex_pca_svd(const event::point_cloud::vertex::pca::svd &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -141,7 +141,7 @@ void point_cloud_system::on_vertex_pca_svd(const event::point_cloud::vertex::pca
 
 void point_cloud_system::on_vertex_pca_weighted_svd(const event::point_cloud::vertex::pca::weighted_svd &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -164,7 +164,7 @@ void point_cloud_system::on_vertex_pca_weighted_svd(const event::point_cloud::ve
 
 void point_cloud_system::on_vertex_pca_eig(const event::point_cloud::vertex::pca::eig &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -186,7 +186,7 @@ void point_cloud_system::on_vertex_pca_eig(const event::point_cloud::vertex::pca
 
 void point_cloud_system::on_vertex_pca_weighted_eig(const event::point_cloud::vertex::pca::weighted_eig &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -210,7 +210,7 @@ void point_cloud_system::on_vertex_pca_weighted_eig(const event::point_cloud::ve
 void
 point_cloud_system::on_vertex_curvature_taubin_knn(const event::point_cloud::vertex::curvature::taubin_knn &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -224,7 +224,7 @@ point_cloud_system::on_vertex_curvature_taubin_knn(const event::point_cloud::ver
 void point_cloud_system::on_vertex_curvature_taubin_radius(
         const event::point_cloud::vertex::curvature::taubin_radius &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -238,7 +238,7 @@ void point_cloud_system::on_vertex_curvature_taubin_radius(
 void point_cloud_system::on_vertex_outlier_probability_knn(
         const event::point_cloud::vertex::outliers::probability_knn &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -252,7 +252,7 @@ void point_cloud_system::on_vertex_outlier_probability_knn(
 void point_cloud_system::on_vertex_outlier_probability_radius(
         const event::point_cloud::vertex::outliers::probability_radius &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -274,7 +274,7 @@ void point_cloud_system::on_vertex_outlier_remove(const event::point_cloud::vert
 void point_cloud_system::on_vertex_kernel_density_estimation_knn(
         const event::point_cloud::vertex::kernel_density::knn &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -288,7 +288,7 @@ void point_cloud_system::on_vertex_kernel_density_estimation_knn(
 void point_cloud_system::on_vertex_kernel_density_estimation_radius(
         const event::point_cloud::vertex::kernel_density::radius &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -301,7 +301,7 @@ void point_cloud_system::on_vertex_kernel_density_estimation_radius(
 
 void point_cloud_system::on_vertex_quadric_point(const event::point_cloud::vertex::quadric::point &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -314,7 +314,7 @@ void point_cloud_system::on_vertex_quadric_point(const event::point_cloud::verte
 
 void point_cloud_system::on_vertex_quadric_plane(const event::point_cloud::vertex::quadric::plane &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -328,7 +328,7 @@ void point_cloud_system::on_vertex_quadric_plane(const event::point_cloud::verte
 void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic_knn(
         const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_knn &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -343,7 +343,7 @@ void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic
 void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic_radius(
         const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_isotropic_radius &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -358,7 +358,7 @@ void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_isotropic
 void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_knn(
         const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_knn &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -373,7 +373,7 @@ void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotrop
 void point_cloud_system::on_vertex_quadric_probabilistic_plane_quadric_anisotropic_radius(
         const event::point_cloud::vertex::quadric::probabilistic_plane_quadric_anisotropic_radius &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -398,7 +398,7 @@ point_cloud_system::on_vertex_bilateral_filter_knn(const event::point_cloud::ver
     if (!state->scene.valid(event.id)) return;
     auto *vertices = state->get_vertices(event.id);
     if (!vertices) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);
@@ -411,7 +411,7 @@ void point_cloud_system::on_vertex_bilateral_filter_radius(
     if (!state->scene.valid(event.id)) return;
     auto *vertices = state->get_vertices(event.id);
     if (!vertices) return;
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.id);

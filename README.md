@@ -41,6 +41,11 @@ From the *build* folder run `cmake .. -A x64` to create a Visual Studio project 
 Open the created project solution and compile it like a regular Visual Studio project.
 
 
+### Troubleshooting
+
+If the application can't find the renderers, change the path in `bin/bcg_viewer.config` to the correct path on your machine.  
+Maybe you need to provide the full path to the renderers in `libs/bcg_opengl/renderers`, instead of the relative path from the binary.
+
 # Usage
 
 - Quit: Strg/Ctrl+Q

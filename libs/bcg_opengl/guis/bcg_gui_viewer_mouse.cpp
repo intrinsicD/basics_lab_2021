@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_viewer_mouse.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 
 namespace bcg{
 

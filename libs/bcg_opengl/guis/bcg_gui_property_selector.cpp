@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_property_selector.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "geometry/bcg_property.h"
 
 namespace bcg{

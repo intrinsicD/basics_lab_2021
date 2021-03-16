@@ -3,9 +3,9 @@
 //
 
 #include "bcg_graph_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "aligned_box/bcg_aligned_box.h"
-#include "bcg_entity_info.h"
+#include "viewer/bcg_entity_info.h"
 #include "bcg_property_map_eigen.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
@@ -44,7 +44,7 @@ void graph_system::on_setup(const event::graph::setup &event){
 
 void graph_system::on_vertex_pca_svd(const event::graph::vertex::pca::svd &event){
     if(!state->scene.valid(event.id)) return;
-    if(!state->scene.has<halfedge_graph>(event.id)) return;
+    if(!state->scene.all_of<halfedge_graph>(event.id)) return;
     halfedge_graph &graph = state->scene.get<halfedge_graph>(event.id);
 
     graph_vertex_pcas(graph, graph_vertex_pca_least_squares_svd, event.compute_mean,
@@ -53,7 +53,7 @@ void graph_system::on_vertex_pca_svd(const event::graph::vertex::pca::svd &event
 
 void graph_system::on_vertex_pca_weighted_svd(const event::graph::vertex::pca::weighted_svd &event){
     if(!state->scene.valid(event.id)) return;
-    if(!state->scene.has<halfedge_graph>(event.id)) return;
+    if(!state->scene.all_of<halfedge_graph>(event.id)) return;
     halfedge_graph &graph = state->scene.get<halfedge_graph>(event.id);
 
     graph_vertex_pcas(graph, graph_vertex_pca_weighted_least_squares_svd, event.compute_mean,
@@ -62,7 +62,7 @@ void graph_system::on_vertex_pca_weighted_svd(const event::graph::vertex::pca::w
 
 void graph_system::on_vertex_pca_eig(const event::graph::vertex::pca::eig &event){
     if(!state->scene.valid(event.id)) return;
-    if(!state->scene.has<halfedge_graph>(event.id)) return;
+    if(!state->scene.all_of<halfedge_graph>(event.id)) return;
     halfedge_graph &graph = state->scene.get<halfedge_graph>(event.id);
 
     graph_vertex_pcas(graph, graph_vertex_pca_least_squares_eig, event.compute_mean,
@@ -71,7 +71,7 @@ void graph_system::on_vertex_pca_eig(const event::graph::vertex::pca::eig &event
 
 void graph_system::on_vertex_pca_weighted_eig(const event::graph::vertex::pca::weighted_eig &event){
     if(!state->scene.valid(event.id)) return;
-    if(!state->scene.has<halfedge_graph>(event.id)) return;
+    if(!state->scene.all_of<halfedge_graph>(event.id)) return;
     halfedge_graph &graph = state->scene.get<halfedge_graph>(event.id);
 
     graph_vertex_pcas(graph, graph_vertex_pca_weighted_least_squares_eig, event.compute_mean,

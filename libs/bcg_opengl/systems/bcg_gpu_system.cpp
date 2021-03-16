@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gpu_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 #include "geometry/bcg_property_map_eigen.h"
 #include "geometry/curve/bcg_curve_bezier.h"
@@ -57,6 +57,16 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
         if (base_ptr->void_ptr() != nullptr) {
             if(base_ptr->type() == property_types::Type::DOUBLE || base_ptr->type() == property_types::Type::FLOAT){
                 Matrix<float, -1, -1> DATAF = Map<bcg_scalar_t>(base_ptr).transpose().cast<float>();
+                if(event.attrib.shader_attribute_name == "color"){
+                    DATAF.array() -= DATAF.array().minCoeff();
+                    DATAF.array() /= DATAF.array().maxCoeff();
+                }
+                if(event.attrib.shader_attribute_name == "point_size"){
+                    DATAF.array() -= DATAF.array().minCoeff();
+                    DATAF.array() /= DATAF.array().maxCoeff();
+                    DATAF.array() *= (state->config.max_point_size - 1);
+                    DATAF.array() += 1.0;
+                }
                 buffer->upload((const void *) DATAF.data(), base_ptr->size(), base_ptr->dims(), 0, true);
             }else{
                 buffer->upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
@@ -100,15 +110,15 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
             if (halfedges->get<halfedge_graph::halfedge_connectivity, 4>("h_connectivity").is_dirty() &&
                 attribute.property_name == "edges") {
                 property<VectorI<2>, 2> property;
-                if (state->scene.has<halfedge_mesh>(event.id)) {
+                if (state->scene.all_of<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
                     property = mesh.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = mesh.get_connectivity();
-                } else if (state->scene.has<halfedge_graph>(event.id)) {
+                } else if (state->scene.all_of<halfedge_graph>(event.id)) {
                     auto &graph = state->scene.get<halfedge_graph>(event.id);
                     property = graph.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = graph.get_connectivity();
-                } else if (state->scene.has<curve_bezier>(event.id)) {
+                } else if (state->scene.all_of<curve_bezier>(event.id)) {
                     auto &curve = state->scene.get<curve_bezier>(event.id);
                     property = curve.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = curve.get_connectivity();
@@ -118,7 +128,7 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
             }
             if (attribute.buffer_name == "e_position") {
                 property<VectorS<3>, 3> property;
-                if (state->scene.has<halfedge_mesh>(event.id)) {
+                if (state->scene.all_of<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
                     property = mesh.edges.get_or_add<VectorS<3>, 3>("e_position");
                     auto connectivity = mesh.get_connectivity();
@@ -126,7 +136,7 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
                         property[e] =
                                 (mesh.positions[connectivity[e.idx][0]] + mesh.positions[connectivity[e.idx][1]]) / 2.0;
                     }
-                } else if (state->scene.has<halfedge_graph>(event.id)) {
+                } else if (state->scene.all_of<halfedge_graph>(event.id)) {
                     auto &graph = state->scene.get<halfedge_graph>(event.id);
                     property = graph.edges.get_or_add<VectorS<3>, 3>("e_position");
                     auto connectivity = graph.get_connectivity();
@@ -166,7 +176,7 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
 
             if (attribute.buffer_name == "f_position") {
                 property<VectorS<3>, 3> property;
-                if (state->scene.has<halfedge_mesh>(event.id)) {
+                if (state->scene.all_of<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
                     property = mesh.faces.get_or_add<VectorS<3>, 3>("f_position");
                     auto triangles = mesh.get_triangles();

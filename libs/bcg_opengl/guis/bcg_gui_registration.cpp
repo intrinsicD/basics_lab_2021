@@ -3,11 +3,11 @@
 //
 
 #include "bcg_gui_registration.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_transform.h"
 #include "bcg_gui_kernel_matrix.h"
 #include "registration/bcg_registration.h"
-#include "registration/coherent_point_drift/bcg_coherent_point_drift_base.h"
+#include "registration/bcg_coherent_point_drift.h"
 
 namespace bcg {
 
@@ -57,7 +57,7 @@ void gui_registration(viewer_state *state) {
     }
 
 
-    if (state->scene.valid(source_id) && state->scene.has<registration>(source_id)) {
+    if (state->scene.valid(source_id) && state->scene.all_of<registration>(source_id)) {
         ImGui::Separator();
         auto &reg = state->scene.get<registration>(source_id);
         draw_histogram(&state->window, "errors", reg.errors);

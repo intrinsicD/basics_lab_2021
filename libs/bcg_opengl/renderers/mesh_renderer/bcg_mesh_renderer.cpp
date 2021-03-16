@@ -7,8 +7,8 @@
 #include <string>
 
 #include "bcg_mesh_renderer.h"
-#include "bcg_viewer_state.h"
-#include "bcg_opengl.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_opengl.h"
 #include "bcg_material_mesh.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_mesh_renderer.h"
@@ -50,7 +50,7 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->get_faces(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if(!state->scene.has<material_mesh>(event.id)){
+    if(!state->scene.all_of<material_mesh>(event.id)){
         auto &material = state->scene.emplace<material_mesh>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
@@ -75,7 +75,7 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
 
 void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
+    if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
     auto &material = state->scene.get_or_emplace<material_mesh>(event.id);
@@ -105,7 +105,7 @@ void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for
 
 void mesh_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        if (state->scene.has<event::mesh_renderer::enqueue>(id)) {
+        if (state->scene.all_of<event::mesh_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::mesh_renderer::enqueue>(id);
         }
     });

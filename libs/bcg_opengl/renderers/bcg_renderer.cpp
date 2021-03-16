@@ -3,7 +3,7 @@
 //
 
 #include "bcg_renderer.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_property_map_eigen.h"
 #include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 #include "utils/bcg_string_utils.h"

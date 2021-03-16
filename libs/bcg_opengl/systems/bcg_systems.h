@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-#include "bcg_opengl/events/bcg_events.h"
+#include "../events/bcg_events.h"
 
 namespace bcg {
 

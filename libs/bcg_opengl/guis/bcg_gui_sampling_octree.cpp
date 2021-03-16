@@ -3,10 +3,10 @@
 //
 
 #include "bcg_gui_sampling_octree.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_property_selector.h"
 #include "geometry/sampling/bcg_sampling_octree.h"
-#include "bcg_entity_hierarchy.h"
+#include "viewer/bcg_entity_hierarchy.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "math/vector/bcg_vector_map_eigen.h"
 #include "entt/entt.hpp"
@@ -64,7 +64,7 @@ void gui_sampling_octree(viewer_state *state) {
             trigger = true;
         }
     }
-    if(state->scene.valid(state->picker.entity_id) && state->scene.has<sampling_octree>(state->picker.entity_id)){
+    if(state->scene.valid(state->picker.entity_id) && state->scene.all_of<sampling_octree>(state->picker.entity_id)){
         if(ImGui::Button("+")){
             ++sample_depth;
             trigger = true;
@@ -85,7 +85,7 @@ void gui_sampling_octree(viewer_state *state) {
             auto &hierarchy = state->scene.get_or_emplace<entity_hierarchy>(state->picker.entity_id);
             entt::entity child_id = entt::null;
             for (const auto &child : hierarchy.children) {
-                if (state->scene.has<entt::tag<"subsampled"_hs>>(child.first)) {
+                if (state->scene.all_of<entt::tag<"subsampled"_hs>>(child.first)) {
                     child_id = child.first;
                     break;
                 }

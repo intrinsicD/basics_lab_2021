@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_mesh_dihedral_angle.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "renderers/graph_renderer/bcg_material_graph.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 

@@ -4,7 +4,7 @@
 
 
 #include "bcg_gui_kernel_matrix.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "math/matrix/bcg_matrix_kernel.h"
 
 namespace bcg{

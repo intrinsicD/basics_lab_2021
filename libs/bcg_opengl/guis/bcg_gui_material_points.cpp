@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_material_points.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_property_selector.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 
@@ -56,6 +56,7 @@ void gui_material_points(viewer_state *state, material_points *material, entt::e
         }
         draw_coloredit(&state->window, "uniform_color", material->uniform_color);
         ImGui::InputFloat("alpha", &material->alpha);
+        draw_input(&state->window, "max_point_size", state->config.max_point_size);
         ImGui::PopID();
     }
 

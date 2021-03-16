@@ -10,7 +10,6 @@
 #include "math/sparse_matrix/bcg_sparse_matrix.h"
 #include "math/statistics/bcg_statistics_running.h"
 
-
 namespace bcg {
 
 struct correspondences {

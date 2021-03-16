@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "bcg_opengl/bcg_viewer.h"
-#include "bcg_opengl/bcg_imgui.h"
+#include "bcg_opengl/viewer/bcg_viewer.h"
+#include "bcg_opengl/viewer/bcg_imgui.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_state.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_curve.h"
 #include "bcg_opengl/guis/bcg_gui_reload_entity.h"
@@ -35,8 +35,8 @@
 #include "bcg_opengl/guis/bcg_gui_sampling_octree.h"
 #include "bcg_opengl/guis/bcg_gui_sampling_grid.h"
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
-#include "spike/bcg_gui_mesh_normal_filtering.h"
-#include "spike/bcg_gui_point_cloud_normal_filtering.h"
+#include "../spike/opengl/bcg_gui_mesh_normal_filtering.h"
+#include "../spike/opengl/bcg_gui_point_cloud_normal_filtering.h"
 
 int main() {
     using namespace bcg;

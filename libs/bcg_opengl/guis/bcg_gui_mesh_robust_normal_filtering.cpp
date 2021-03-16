@@ -4,7 +4,7 @@
 
 #include "bcg_gui_mesh_robust_normal_filtering.h"
 #include "bcg_gui_point_cloud_vertex_noise.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_library/geometry/mesh/bcg_mesh_normal_filtering_robust_statistics.h"
 
 namespace bcg {
@@ -42,7 +42,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
 
     if (update_every_frame || ImGui::Button("Compute Filtering")) {
         auto id = state->picker.entity_id;
-        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
+        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
             switch (static_cast<NormalFilteringType>(e)) {
                 case NormalFilteringType::unilateral_belyaev_ohtake : {

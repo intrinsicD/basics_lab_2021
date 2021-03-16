@@ -3,10 +3,10 @@
 //
 
 #include "bcg_correspondence_system.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "kdtree/bcg_kdtree.h"
 #include "correspondences/bcg_correspondences.h"
-#include "math/vector/bcg_math_vector_cos.h"
+#include "math/vector/bcg_vector_cos.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
@@ -22,10 +22,10 @@ correspondence_system::correspondence_system(viewer_state *state) : system("corr
 
 void correspondence_system::on_correspondences_estiamte(const event::correspondences::estimate &event) {
     if (!state->scene.valid(event.source_id) || !state->scene.valid(event.target_id)) return;
-    if (!state->scene.has<Transform>(event.source_id)) return;
-    if (!state->scene.has<Transform>(event.target_id)) return;
+    if (!state->scene.all_of<Transform>(event.source_id)) return;
+    if (!state->scene.all_of<Transform>(event.target_id)) return;
 
-    if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.target_id)) {
+    if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(event.target_id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.target_id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.target_id);
@@ -46,7 +46,7 @@ void correspondence_system::on_correspondences_estiamte(const event::corresponde
     auto corrs_vector = src->get_or_add<VectorS<3>, 3>("v_corrs_vector");
     auto corrs_valid = src->get_or_add<bool, 1>("v_corrs_valid", true);
 
-    if(!state->scene.has<entity_correspondences>(event.source_id)){
+    if(!state->scene.all_of<entity_correspondences>(event.source_id)){
         state->scene.emplace<entity_correspondences>(event.source_id);
     }
     auto &corrs = state->scene.get<entity_correspondences>(event.source_id);
@@ -132,8 +132,8 @@ void correspondence_system::on_correspondences_filter_normal_angle(
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
 
-    if (!state->scene.has<Transform>(event.source_id)) return;
-    if (!state->scene.has<Transform>(event.target_id)) return;
+    if (!state->scene.all_of<Transform>(event.source_id)) return;
+    if (!state->scene.all_of<Transform>(event.target_id)) return;
 
     auto &src_model = state->scene.get<Transform>(event.source_id);
     auto &target_model = state->scene.get<Transform>(event.target_id);

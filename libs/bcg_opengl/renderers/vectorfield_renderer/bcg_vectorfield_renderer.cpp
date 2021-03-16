@@ -7,8 +7,8 @@
 #include <string>
 
 #include "bcg_vectorfield_renderer.h"
-#include "bcg_viewer_state.h"
-#include "bcg_opengl.h"
+#include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_opengl.h"
 #include "bcg_material_vectorfield.h"
 #include "renderers/bcg_attribute.h"
 #include "renderers/bcg_vectorfields.h"
@@ -69,7 +69,7 @@ void vectorfield_renderer::on_shutdown(const event::internal::shutdown &event) {
 void vectorfield_renderer::on_enqueue(const event::vectorfield_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
-    if (!state->scene.has<vectorfields>(event.id)) {
+    if (!state->scene.all_of<vectorfields>(event.id)) {
         auto &vectors = state->scene.emplace<vectorfields>(event.id);
         for (auto &item : vectors.vertex_vectorfields) {
             state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, item.second.attributes);
@@ -119,10 +119,10 @@ void setup_material(material_vectorfield &material, ogl_shape &shape) {
 
 void vectorfield_renderer::on_setup_for_rendering(const event::vectorfield_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
+    if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
     }
-    if (!state->scene.has<vectorfields>(event.id)) {
+    if (!state->scene.all_of<vectorfields>(event.id)) {
         state->scene.emplace<vectorfields>(event.id);
     }
     auto &vectors = state->scene.get_or_emplace<vectorfields>(event.id);
@@ -140,7 +140,7 @@ void vectorfield_renderer::on_setup_for_rendering(const event::vectorfield_rende
 
 void vectorfield_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
-        if (state->scene.has<event::vectorfield_renderer::enqueue>(id)) {
+        if (state->scene.all_of<event::vectorfield_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::vectorfield_renderer::enqueue>(id);
         }
     });
@@ -173,7 +173,7 @@ void vectorfield_renderer::on_render(const event::internal::render &) {
 
     for (const auto id : entities_to_draw) {
         if (!state->scene.valid(id)) continue;
-        if (!state->scene.has<vectorfields>(id)) continue;
+        if (!state->scene.all_of<vectorfields>(id)) continue;
 
         auto &model = state->scene.get<Transform>(id);
         auto &vectors = state->scene.get<vectorfields>(id);

@@ -4,7 +4,7 @@
 
 #include "bcg_gui_point_cloud_quadric.h"
 #include "bcg_gui_kdtree_selector.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "geometry/point_cloud/bcg_point_cloud_vertex_quadric.h"

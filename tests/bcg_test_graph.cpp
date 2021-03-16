@@ -8,6 +8,7 @@
 #include "geometry/graph/bcg_graph.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "math/vector/bcg_vector_map_eigen.h"
+#include "math/matrix/bcg_matrix_map_eigen.h"
 
 using namespace bcg;
 
@@ -27,7 +28,8 @@ TEST(TestSuiteGraph, first){
     auto vertices = get_vetices(aabb);
     auto edges = get_edges(aabb);
     std::vector<size_t> V;
-    for(const VectorS<3> v:vertices){
+
+    for(const VectorS<3> &v:vertices){
         V.push_back(graph.add_vertex(v));
     }
 
@@ -39,6 +41,7 @@ TEST(TestSuiteGraph, first){
 
     std::cout << "v: " << MapConst(V).transpose() << "\n";
     std::cout << "h: " << MapConst(H).transpose() << "\n";
+    std::cout << "e:\n" << MapConst(edges).transpose() << "\n";
 
     for(size_t i = 0; i < H.size(); ++i){
         EXPECT_EQ(H[i], i);
@@ -59,22 +62,21 @@ TEST(TestSuiteGraph, first){
     EXPECT_EQ(graph.get_from_vertex(H[11]).idx, V[3]);
     EXPECT_EQ(graph.get_from_vertex(H[12]).idx, V[2]);
     EXPECT_EQ(graph.get_from_vertex(H[13]).idx, V[6]);
-    EXPECT_EQ(graph.get_from_vertex(H[13]).idx, V[3]);
-    EXPECT_EQ(graph.get_from_vertex(H[14]).idx, V[7]);
-    EXPECT_EQ(graph.get_from_vertex(H[15]).idx, V[4]);
-    EXPECT_EQ(graph.get_from_vertex(H[16]).idx, V[5]);
-    EXPECT_EQ(graph.get_from_vertex(H[17]).idx, V[4]);
-    EXPECT_EQ(graph.get_from_vertex(H[18]).idx, V[6]);
-    EXPECT_EQ(graph.get_from_vertex(H[19]).idx, V[5]);
-    EXPECT_EQ(graph.get_from_vertex(H[20]).idx, V[7]);
-    EXPECT_EQ(graph.get_from_vertex(H[21]).idx, V[6]);
-    EXPECT_EQ(graph.get_from_vertex(H[22]).idx, V[7]);
+    EXPECT_EQ(graph.get_from_vertex(H[14]).idx, V[3]);
+    EXPECT_EQ(graph.get_from_vertex(H[15]).idx, V[7]);
+    EXPECT_EQ(graph.get_from_vertex(H[16]).idx, V[4]);
+    EXPECT_EQ(graph.get_from_vertex(H[17]).idx, V[5]);
+    EXPECT_EQ(graph.get_from_vertex(H[18]).idx, V[4]);
+    EXPECT_EQ(graph.get_from_vertex(H[19]).idx, V[6]);
+    EXPECT_EQ(graph.get_from_vertex(H[20]).idx, V[5]);
+    EXPECT_EQ(graph.get_from_vertex(H[21]).idx, V[7]);
+    EXPECT_EQ(graph.get_from_vertex(H[22]).idx, V[6]);
 
     EXPECT_EQ(graph.get_to_vertex(H[0]).idx, V[1]);
     EXPECT_EQ(graph.get_to_vertex(H[1]).idx, V[0]);
     EXPECT_EQ(graph.get_to_vertex(H[2]).idx, V[2]);
     EXPECT_EQ(graph.get_to_vertex(H[3]).idx, V[0]);
-    EXPECT_EQ(graph.get_to_vertex(H[4]).idx, V[3]);
+    EXPECT_EQ(graph.get_to_vertex(H[4]).idx, V[4]);
     EXPECT_EQ(graph.get_to_vertex(H[5]).idx, V[0]);
     EXPECT_EQ(graph.get_to_vertex(H[6]).idx, V[3]);
     EXPECT_EQ(graph.get_to_vertex(H[7]).idx, V[1]);
@@ -84,24 +86,24 @@ TEST(TestSuiteGraph, first){
     EXPECT_EQ(graph.get_to_vertex(H[11]).idx, V[2]);
     EXPECT_EQ(graph.get_to_vertex(H[12]).idx, V[6]);
     EXPECT_EQ(graph.get_to_vertex(H[13]).idx, V[2]);
-    EXPECT_EQ(graph.get_to_vertex(H[13]).idx, V[7]);
-    EXPECT_EQ(graph.get_to_vertex(H[14]).idx, V[3]);
-    EXPECT_EQ(graph.get_to_vertex(H[15]).idx, V[5]);
-    EXPECT_EQ(graph.get_to_vertex(H[16]).idx, V[4]);
-    EXPECT_EQ(graph.get_to_vertex(H[17]).idx, V[6]);
-    EXPECT_EQ(graph.get_to_vertex(H[18]).idx, V[4]);
-    EXPECT_EQ(graph.get_to_vertex(H[19]).idx, V[7]);
-    EXPECT_EQ(graph.get_to_vertex(H[20]).idx, V[5]);
-    EXPECT_EQ(graph.get_to_vertex(H[21]).idx, V[7]);
-    EXPECT_EQ(graph.get_to_vertex(H[22]).idx, V[6]);
+    EXPECT_EQ(graph.get_to_vertex(H[14]).idx, V[7]);
+    EXPECT_EQ(graph.get_to_vertex(H[15]).idx, V[3]);
+    EXPECT_EQ(graph.get_to_vertex(H[16]).idx, V[5]);
+    EXPECT_EQ(graph.get_to_vertex(H[17]).idx, V[4]);
+    EXPECT_EQ(graph.get_to_vertex(H[18]).idx, V[6]);
+    EXPECT_EQ(graph.get_to_vertex(H[19]).idx, V[4]);
+    EXPECT_EQ(graph.get_to_vertex(H[20]).idx, V[7]);
+    EXPECT_EQ(graph.get_to_vertex(H[21]).idx, V[5]);
+    EXPECT_EQ(graph.get_to_vertex(H[22]).idx, V[7]);
 
-    EXPECT_EQ(graph.get_halfedge(V[0]).idx, H[2]);
-    EXPECT_EQ(graph.get_halfedge(V[1]).idx, H[2]);
-    EXPECT_EQ(graph.get_halfedge(V[2]).idx, H[2]);
-    EXPECT_EQ(graph.get_halfedge(V[3]).idx, H[2]);
-    EXPECT_EQ(graph.get_halfedge(V[4]).idx, H[2]);
-    EXPECT_EQ(graph.get_halfedge(V[5]).idx, H[2]);
-    EXPECT_EQ(graph.get_halfedge(V[6]).idx, H[2]);
+    EXPECT_EQ(graph.get_halfedge(V[0]).idx, H[4]);
+    EXPECT_EQ(graph.get_halfedge(V[1]).idx, H[8]);
+    EXPECT_EQ(graph.get_halfedge(V[2]).idx, H[12]);
+    EXPECT_EQ(graph.get_halfedge(V[3]).idx, H[14]);
+    EXPECT_EQ(graph.get_halfedge(V[4]).idx, H[18]);
+    EXPECT_EQ(graph.get_halfedge(V[5]).idx, H[20]);
+    EXPECT_EQ(graph.get_halfedge(V[6]).idx, H[22]);
+    EXPECT_EQ(graph.get_halfedge(V[7]).idx, H[2]);
 
     EXPECT_EQ(graph.get_next(H[0]).idx, V[1]);
     EXPECT_EQ(graph.get_next(H[1]).idx, V[0]);

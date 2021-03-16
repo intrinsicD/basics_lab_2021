@@ -4,7 +4,7 @@
 
 #include "bcg_gui_point_cloud_normal_filtering_robust_statistics.h"
 #include "geometry/point_cloud/bcg_point_cloud_normal_filtering_robust_statistics.h"
-#include "bcg_viewer_state.h"
+#include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_point_cloud_vertex_noise.h"
 
 namespace bcg {
@@ -41,7 +41,7 @@ void gui_point_cloud_normal_filtering_robust_statistics(viewer_state *state) {
         if (state->scene.valid(id)) {
             auto *vertices = state->get_vertices(id);
             if (vertices) {
-                if (!state->scene.has<kdtree_property<bcg_scalar_t >>(id)) {
+                if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(id)) {
                     state->dispatcher.trigger<event::spatial_index::setup_kdtree>(id);
                 }
                 auto &index = state->scene.get<kdtree_property<bcg_scalar_t>>(id);
