@@ -1,6 +1,7 @@
 .idea
 bin/
 build/
+external/libtorch/*
 libs/*/exts/*/
 cmake-build-*
 libs/bcg_opengl/.DS_Store
