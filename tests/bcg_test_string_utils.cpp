@@ -63,7 +63,7 @@ TEST(TestSuiteStrings, split2) {
     std::string first = "test";
     std::string second = " 1";
     std::string third = "2!";
-    auto result = split("test, 1;2!", {',',';'});
+    auto result = split("test, 1;2!", std::vector<char>{',',';'});
     EXPECT_EQ(first, result[0]);
     EXPECT_EQ(second, result[1]);
     EXPECT_EQ(third, result[2]);

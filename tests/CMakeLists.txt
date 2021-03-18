@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.17)
 project(bcg_library_test)
 
+option(BCG_TORCH "Build Torch" ON)
+
 add_executable(bcg_library_test)
 
 target_sources(bcg_library_test PRIVATE
@@ -25,9 +27,13 @@ target_sources(bcg_library_test PRIVATE
         bcg_test_monomial_basis.cpp
         bcg_test_bernstein_basis.cpp
         bcg_test_occupancy_grid.cpp
-        bcg_test_torch.cpp)
+        )
+if(BCG_TORCH)
+    target_sources(bcg_library_test PRIVATE
+            bcg_test_torch.cpp
+            )
 
+    target_link_libraries(bcg_library_test PUBLIC torch)
+endif()
 
-set_target_properties(bcg_library_test PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
-
-target_link_libraries(bcg_library_test PUBLIC gtest gtest_main bcg_graphics bcg_opengl)
+target_link_libraries(bcg_library_test PUBLIC bcg_graphics bcg_opengl gtest gtest_main)

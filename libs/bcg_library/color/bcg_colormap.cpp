@@ -28,7 +28,7 @@ std::vector<VectorS<3>> base_colormap::operator()(const VectorS<-1> &scalarfield
         c_min = 0;
         range = 1;
     }
-    for (size_t i = 0; i < scalarfield.size(); ++i) {
+    for (bcg_size_t i = 0; i < scalarfield.size(); ++i) {
         auto s = scalarfield[i];
         if (std::isnan(s)) {
             s = c_min;

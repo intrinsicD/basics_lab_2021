@@ -4,6 +4,7 @@ project(bcg_graphics VERSION 1.0)
 option(BCG_APPS "Build Apps" ON)
 option(BCG_OPENGL "Build OpenGL" ON)
 option(BCG_TESTS "Build Tests" ON)
+option(BCG_TORCH "Build Torch" ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -38,6 +39,12 @@ if (GENERATOR_IS_MULTI_CONFIG)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
 endif ()
+
+if(BCG_TORCH)
+    #because of scoping of cmake, imported targets are not visible outside of the add_subdirectory()
+    #thus we put torch here, so its targets are visible in all subdirectories.
+    find_package(Torch REQUIRED PATHS ${CMAKE_SOURCE_DIR}/external/libtorch_release)
+endif()
 
 add_subdirectory(libs)
 add_subdirectory(external)

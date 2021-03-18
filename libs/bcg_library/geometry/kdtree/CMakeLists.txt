@@ -1,4 +1,4 @@
-find_package(nanoflann REQUIRED)
+find_package(nanoflann REQUIRED PATHS ${CMAKE_SOURCE_DIR}/external/nanoflann)
 
 target_sources(bcg_graphics PRIVATE
         bcg_kdtree.h

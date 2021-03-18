@@ -168,7 +168,7 @@ std::vector<VectorI<2>> get_edges(const aligned_box<N> &alignedBox, size_t offse
             }
         }
     }
-    size_t num_eges = (BIT(N - 1)) * N;
+    [[maybe_unused]] size_t num_eges = (BIT(N - 1)) * N;
     assert(edges.size() == num_eges);
     return edges;
 }

@@ -6,10 +6,12 @@
 #define BCG_GRAPHICS_BCG_MATH_COMMON_H
 
 #include <cmath>
+#include <cstdint>
 #include <limits>
 
 namespace bcg {
-using byte = unsigned int;
+
+using bcg_size_t = std::int64_t;
 using bcg_index_t = unsigned int;
 using bcg_scalar_t = double;
 

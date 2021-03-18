@@ -1,5 +1,6 @@
 find_package(glad REQUIRED)
 find_package(imgui REQUIRED)
+find_package(OpenGL REQUIRED)
 
 target_sources(bcg_opengl PRIVATE
         bcg_camera.h bcg_camera.cpp
@@ -17,3 +18,4 @@ target_sources(bcg_opengl PRIVATE
 target_include_directories(bcg_opengl PUBLIC ${GLAD_INCLUDE_DIRS})
 target_include_directories(bcg_opengl PUBLIC ${IMGUI_INCLUDE_DIRS})
 target_compile_definitions(bcg_opengl PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
+target_link_libraries(bcg_opengl PUBLIC glfw OpenGL::GL)
