@@ -4,7 +4,7 @@ project(bcg_graphics VERSION 1.0)
 option(BCG_APPS "Build Apps" ON)
 option(BCG_OPENGL "Build OpenGL" ON)
 option(BCG_TESTS "Build Tests" ON)
-option(BCG_TORCH "Build Torch" ON)
+option(BCG_TORCH "Build Torch" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

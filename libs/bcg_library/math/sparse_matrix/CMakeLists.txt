@@ -1,5 +1,4 @@
 target_link_libraries(bcg_graphics PUBLIC Eigen3::Eigen)
-
 target_sources(bcg_graphics PRIVATE
         bcg_sparse_matrix.h
         bcg_sparse_check_finite.h bcg_sparse_check_finite.cpp

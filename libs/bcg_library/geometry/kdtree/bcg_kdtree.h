@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_KDTREE_H
 
 #include <memory>
+
 #include <nanoflann.hpp>
 #include "math/bcg_linalg.h"
 #include "bcg_neighbors_query.h"

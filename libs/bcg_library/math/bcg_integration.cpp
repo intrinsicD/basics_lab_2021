@@ -3,6 +3,7 @@
 //
 
 #include <array>
+#include <vector>
 #include "bcg_integration.h"
 
 namespace bcg {

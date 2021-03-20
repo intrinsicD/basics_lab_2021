@@ -1,8 +1,8 @@
-set(BUILD_TESTING OFF CACHE BOOL "Enable creation of Eigen tests.") # You don't want this.
+set(BUILD_TESTING OFF CACHE BOOL "Enable creation of Eigen tests." FORCE) # You don't want this.
 add_subdirectory(eigen)
-
 add_subdirectory(spectra)
 add_subdirectory(entt)
+add_subdirectory(tbb)
 
 if(BCG_OPENGL)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
