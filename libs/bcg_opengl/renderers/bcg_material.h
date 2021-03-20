@@ -18,7 +18,7 @@ struct material{
     ogl_vertex_array vao;
     size_t num_elements;
 
-    virtual void upload(const glsl_program &program){
+    virtual void upload(const glsl_program &){
         for(auto &texture : textures){
             if(texture.is_valid()){
                 texture.activate();

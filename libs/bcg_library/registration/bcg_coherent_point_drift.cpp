@@ -133,7 +133,7 @@ void coherent_point_drift_base::update_P_parallel(size_t parallel_grain_size) {
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t n = range.begin(); n != range.end(); ++n) {
                     PT1[n] = 0;
-                    for (long m = 0; m < M; ++m) {
+                    for (size_t m = 0; m < M; ++m) {
                         bcg_scalar_t k_mn = std::exp(-(X.row(n) - Y.row(m)).squaredNorm() / two_sigma_squared);
                         PT1[n] += k_mn;
                     }
@@ -150,7 +150,7 @@ void coherent_point_drift_base::update_P_parallel(size_t parallel_grain_size) {
                 for (uint32_t m = range.begin(); m != range.end(); ++m) {
                     P1[m] = 0;
                     PX[m].setZero();
-                    for (long n = 0; n < N; ++n) {
+                    for (size_t n = 0; n < N; ++n) {
                         bcg_scalar_t k_mn = std::exp(-(X.row(n) - Y.row(m)).squaredNorm() / two_sigma_squared) /
                                             denominator[n];
                         P1[m] += k_mn;
@@ -702,7 +702,7 @@ void coherent_point_drift_bayes::update_P_parallel(size_t parallel_grain_size) {
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t n = range.begin(); n != range.end(); ++n) {
                     PT1[n] = 0;
-                    for (long m = 0; m < M; ++m) {
+                    for (size_t m = 0; m < M; ++m) {
                         bcg_scalar_t k_mn =
                                 std::exp(-(X.row(n) - Y.row(m)).squaredNorm() / two_sigma_squared) * weight[m];
                         PT1[n] += k_mn;
@@ -720,7 +720,7 @@ void coherent_point_drift_bayes::update_P_parallel(size_t parallel_grain_size) {
                 for (uint32_t m = range.begin(); m != range.end(); ++m) {
                     P1[m] = 0;
                     PX[m].setZero();
-                    for (long n = 0; n < N; ++n) {
+                    for (size_t n = 0; n < N; ++n) {
                         bcg_scalar_t k_mn =
                                 std::exp(-(X.row(n) - Y.row(m)).squaredNorm() / two_sigma_squared) * weight[m] /
                                 denominator[n];

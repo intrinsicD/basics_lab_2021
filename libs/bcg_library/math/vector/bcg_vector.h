@@ -21,31 +21,31 @@ using VectorI = Vector<bcg_index_t , N>;
 
 // Zero vector constants.
 template<int N>
-[[maybe_unused]] inline const auto zeroi = VectorI<N>::Zero();
-[[maybe_unused]] inline const auto zero2i = VectorI<2>::Zero();
-[[maybe_unused]] inline const auto zero3i = VectorI<3>::Zero();
-[[maybe_unused]] inline const auto zero4i = VectorI<4>::Zero();
+BCG_MAYBE_UNUSED inline const auto zeroi = VectorI<N>::Zero();
+BCG_MAYBE_UNUSED inline const auto zero2i = VectorI<2>::Zero();
+BCG_MAYBE_UNUSED inline const auto zero3i = VectorI<3>::Zero();
+BCG_MAYBE_UNUSED inline const auto zero4i = VectorI<4>::Zero();
 
 // One vector constants.
 template<int N>
-[[maybe_unused]] inline const auto onei = VectorI<N>::Ones();
-[[maybe_unused]] inline const auto one2i = VectorI<2>::Ones();
-[[maybe_unused]] inline const auto one3i = VectorI<3>::Ones();
-[[maybe_unused]] inline const auto one4i = VectorI<4>::Ones();
+BCG_MAYBE_UNUSED inline const auto onei = VectorI<N>::Ones();
+BCG_MAYBE_UNUSED inline const auto one2i = VectorI<2>::Ones();
+BCG_MAYBE_UNUSED inline const auto one3i = VectorI<3>::Ones();
+BCG_MAYBE_UNUSED inline const auto one4i = VectorI<4>::Ones();
 
 // Zero vector constants.
 template<int N>
-[[maybe_unused]] inline const auto zeros = VectorS<N>::Zero();
-[[maybe_unused]] inline const auto zero2s = VectorS<2>::Zero();
-[[maybe_unused]] inline const auto zero3s = VectorS<3>::Zero();
-[[maybe_unused]] inline const auto zero4s = VectorS<4>::Zero();
+BCG_MAYBE_UNUSED inline const auto zeros = VectorS<N>::Zero();
+BCG_MAYBE_UNUSED inline const auto zero2s = VectorS<2>::Zero();
+BCG_MAYBE_UNUSED inline const auto zero3s = VectorS<3>::Zero();
+BCG_MAYBE_UNUSED inline const auto zero4s = VectorS<4>::Zero();
 
 // One vector constants.
 template<int N>
-[[maybe_unused]] inline const auto ones = VectorS<N>::Ones();
-[[maybe_unused]] inline const auto one2s = VectorS<2>::Ones();
-[[maybe_unused]] inline const auto one3s = VectorS<3>::Ones();
-[[maybe_unused]] inline const auto one4s = VectorS<4>::Ones();
+BCG_MAYBE_UNUSED inline const auto ones = VectorS<N>::Ones();
+BCG_MAYBE_UNUSED inline const auto one2s = VectorS<2>::Ones();
+BCG_MAYBE_UNUSED inline const auto one3s = VectorS<3>::Ones();
+BCG_MAYBE_UNUSED inline const auto one4s = VectorS<4>::Ones();
 
 template<int N>
 inline auto unit(bcg_index_t i) {

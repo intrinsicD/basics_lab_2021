@@ -11,17 +11,21 @@ add_subdirectory(torch)
 
 #target_link_options(bcg_graphics PUBLIC -v)
 
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
     message("CMAKE_CXX_COMPILER_VERSION " ${CMAKE_CXX_COMPILER_VERSION})
 
     target_link_libraries(bcg_graphics PUBLIC stdc++fs)
-endif()
+endif ()
 
 target_compile_features(bcg_graphics PUBLIC cxx_std_17)
 
 target_include_directories(bcg_graphics PUBLIC "." "./geometry")
 
-#target_compile_options(bcg_graphics PUBLIC "-Wall" "-Wextra")
+target_compile_options(bcg_graphics PUBLIC
+        "-Wall"
+        "-Wextra"
+        #"-Werror"
+        )
 
 if (UNIX AND NOT APPLE)
     #target_compile_options(bcg_graphics PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)

@@ -158,17 +158,17 @@ std::vector<VectorS<N>> get_vetices(const aligned_box<N> &alignedBox) {
 }
 
 template<int N>
-std::vector<VectorI<2>> get_edges(const aligned_box<N> &alignedBox, size_t offset = 0) {
+std::vector<VectorI<2>> get_edges(const aligned_box<N> &, size_t offset = 0) {
     std::vector<VectorI<2>> edges;
     size_t n = BIT(N);
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i; j < n; ++j) {
             if (HAMMING(i, j) == 1) {
-                edges.push_back({static_cast<int>(offset + i), static_cast<int>(offset + j)});
+                edges.template emplace_back(static_cast<bcg_index_t>(offset + i), static_cast<bcg_index_t>(offset + j));
             }
         }
     }
-    [[maybe_unused]] size_t num_eges = (BIT(N - 1)) * N;
+    BCG_MAYBE_UNUSED size_t num_eges = (BIT(N - 1)) * N;
     assert(edges.size() == num_eges);
     return edges;
 }

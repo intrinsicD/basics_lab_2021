@@ -32,7 +32,7 @@ struct octree{
 
     neighbors_query query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) const;
 
-    neighbors_query query_knn(const VectorS<3> &query_point, int num_closest) const;
+    neighbors_query query_knn(const VectorS<3> &query_point, size_t num_closest) const;
 
     property<VectorS<3>, 3> positions;
     aligned_box3 aabb;
@@ -43,7 +43,7 @@ struct octree{
 private:
     void query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set) const;
 
-    void query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest, neighbors_query &result_set) const;
+    void query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, size_t num_closest, neighbors_query &result_set) const;
 };
 
 }

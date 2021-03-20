@@ -27,7 +27,8 @@ VectorS<3> curve_bezier::evaluate(bcg_scalar_t t) const {
     assert(t >= 0);
     assert(t <= 1);
     bernstein_basis b(degree());
-    for (size_t i = 0; i < degree(); ++i) {
+
+    for (size_t i = 0; i < static_cast<size_t>(degree()); ++i) {
         result += positions[i] * b.evaluate(i, t);
     }
     return result;
@@ -46,7 +47,9 @@ curve_bezier curve_bezier::derivative(int order) const {
         }
         return result;
     };
-    for (size_t i = 0; i < degree() - order; ++i) {
+
+    size_t degree_minus_order = degree() - order;
+    for (size_t i = 0; i < degree_minus_order; ++i) {
         d.add_vertex(delta(order, i) * fac(degree()) / bcg_scalar_t(fac(degree() - order)));
     }
     return d;
@@ -66,8 +69,9 @@ VectorS<3> curve_bezier::derivative_vector(bcg_scalar_t t, int order) const {
     };
     VectorS<3> result = VectorS<3>::Zero();
     factorial fac;
-    bernstein_basis b(degree() - order);
-    for (size_t i = 0; i < degree() - order; ++i) {
+    size_t degree_minus_order = degree() - order;
+    bernstein_basis b(degree_minus_order);
+    for (size_t i = 0; i < degree_minus_order; ++i) {
         result += b.evaluate(i, t) * delta(order, i) * fac(degree()) / bcg_scalar_t(fac(degree() - order));
     }
     return result;

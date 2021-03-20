@@ -4,13 +4,13 @@ Clone this repository by running `git clone --recurse-submodules https://github.
 
 In *external/spectra/CMakeLists.txt* the following modifications have to be performed:
   - change all occurences of `CMAKE_SOURCE_DIR` to `CMAKE_CURRENT_SOURCE_DIR`.
-  - in line 23 replace `find_package(Eigen3 NO_MODULE REQUIRED)` with `find_package(eigen3 REQUIRED)`.
-  - in line 36 replace `target_link_libraries(Spectra INTERFACE Eigen3::Eigen)` with `target_link_libraries(Spectra INTERFACE Eigen3)`.
+  - ~~in line 23 replace `find_package(Eigen3 NO_MODULE REQUIRED)` with `find_package(eigen3 REQUIRED)`.~~
+  - ~~in line 36 replace `target_link_libraries(Spectra INTERFACE Eigen3::Eigen)` with `target_link_libraries(Spectra INTERFACE Eigen3)`.~~
 
-In *external/eigen/CMakeLists.txt* the following modifications have to be performed:
-  - comment out the `add_custom_target(uninstall ...)` command in lines 672 and 673.
-In *external/nanoflann/CMakeLists.txt* the following modifications have to be performed:
-  - comment out the `add_custom_target(uninstall ...)` command in lines 151 and 152.
+~~In *external/eigen/CMakeLists.txt* the following modifications have to be performed:~~
+  - ~~comment out the `add_custom_target(uninstall ...)` command in lines 672 and 673.~~
+~~In *external/nanoflann/CMakeLists.txt* the following modifications have to be performed:~~
+  - ~~comment out the `add_custom_target(uninstall ...)` command in lines 151 and 152.~~
 
 If glad does not work:
 - go to the website **https://glad.dav1d.de/** and download the glad files

@@ -55,7 +55,7 @@ bool draw_button(viewer_window *win, const char *lbl, bool enabled = true);
 bool draw_textinput(viewer_window *win, const char *lbl, std::string &value);
 
 template<typename T>
-bool draw_input(viewer_window *win, const char *lbl, T &value){
+bool draw_input(viewer_window *, const char *lbl, T &value){
     float vf = value;
     auto edited = ImGui::InputFloat(lbl, &vf);
     value = vf;
@@ -63,7 +63,7 @@ bool draw_input(viewer_window *win, const char *lbl, T &value){
 }
 
 template<typename T>
-bool draw_input_vec2(viewer_window *win, const char *lbl, Vector<T, 2> &value){
+bool draw_input_vec2(viewer_window *, const char *lbl, Vector<T, 2> &value){
     Vector<float, 2> vf = value.template cast<float>();
     bool edited = ImGui::InputFloat2(lbl, vf.data());
     value = vf.cast<T>();
@@ -71,7 +71,7 @@ bool draw_input_vec2(viewer_window *win, const char *lbl, Vector<T, 2> &value){
 }
 
 template<typename T>
-bool draw_input_vec3(viewer_window *win, const char *lbl, Vector<T, 3> &value){
+bool draw_input_vec3(viewer_window *, const char *lbl, Vector<T, 3> &value){
     Vector<float, 3> vf = value.template cast<float>();
     bool edited = ImGui::InputFloat3(lbl, vf.data());
     value = vf.cast<T>();
@@ -79,7 +79,7 @@ bool draw_input_vec3(viewer_window *win, const char *lbl, Vector<T, 3> &value){
 }
 
 template<typename T>
-bool draw_input_vec4(viewer_window *win, const char *lbl, Vector<T, 4> &value){
+bool draw_input_vec4(viewer_window *, const char *lbl, Vector<T, 4> &value){
     Vector<float, 4> vf = value.template cast<float>();
     bool edited = ImGui::InputFloat4(lbl, vf.data());
     value = vf.cast<T>();

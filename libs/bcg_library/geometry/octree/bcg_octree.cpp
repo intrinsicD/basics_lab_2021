@@ -64,7 +64,6 @@ void octree::build(property<VectorS<3>, 3> positions, int leaf_size, int max_dep
 
     std::queue<build_node> queue;
     queue.emplace(aabb, 0);
-    const auto &node = queue.front();
     storage.push_back({0, positions.size() - 1, positions.size(), BCG_INVALID_ID, BCG_INVALID_ID, 0, 0});
     size_t counter = 0;
     int max_depth_ = std::min<int>(max_depth, 21);
@@ -130,7 +129,7 @@ neighbors_query octree::query_radius(const VectorS<3> &query_point, bcg_scalar_t
     return result_set;
 }
 
-neighbors_query octree::query_knn(const VectorS<3> &query_point, int num_closest) const {
+neighbors_query octree::query_knn(const VectorS<3> &query_point, size_t num_closest) const {
     neighbors_query result_set;
     query_knn(0, aabb, query_point, num_closest, result_set);
     return result_set;
@@ -170,7 +169,7 @@ octree::query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphe
     }
 }
 
-void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, int num_closest,
+void octree::query_knn(size_t index, const aligned_box3 &aabb, const VectorS<3> &query_point, size_t num_closest,
                        neighbors_query &result_set) const {
     if (storage[index].depth == max_depth || storage[index].config == 0) {
         for (size_t j = storage[index].v_start; j <= storage[index].v_end; ++j) {

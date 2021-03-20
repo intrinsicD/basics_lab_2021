@@ -10,9 +10,9 @@ VectorS<3> curve::operator()(bcg_scalar_t t) const {
     return evaluate(t);
 }
 
-VectorS<3> curve::evaluate(bcg_scalar_t t) const { return VectorS<3>::Zero(); }
+VectorS<3> curve::evaluate(bcg_scalar_t ) const { return VectorS<3>::Zero(); }
 
-VectorS<3> curve::derivative_vector(bcg_scalar_t t, int order) const { return VectorS<3>::Zero(); }
+VectorS<3> curve::derivative_vector(bcg_scalar_t , int ) const { return VectorS<3>::Zero(); }
 
 const std::vector<VectorS<3>> &curve::control_points() const { return positions.vector(); };
 
@@ -82,7 +82,7 @@ std::vector<VectorS<3>> curve::sample(size_t num_points) const {
     std::vector<VectorS<3>> samples(num_points);
     bcg_scalar_t t = 0;
     bcg_scalar_t dt = 1.0 / bcg_scalar_t(num_points);
-    for (int i = 0; i < num_points; ++i) {
+    for (size_t i = 0; i < num_points; ++i) {
         samples[i] = evaluate(t);
         t += dt;
     }
@@ -91,7 +91,7 @@ std::vector<VectorS<3>> curve::sample(size_t num_points) const {
 
 std::vector<VectorI<2>> curve::connectivity(size_t num_points) const {
     std::vector<VectorI<2>> edges(num_points);
-    for (int i = 0; i < num_points - 1; ++i) {
+    for (size_t i = 0; i < num_points - 1; ++i) {
         edges[i] = VectorI<2>(i, i + 1);
     }
     return edges;

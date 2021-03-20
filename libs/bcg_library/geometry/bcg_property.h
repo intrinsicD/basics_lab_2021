@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "bcg_property_eigen_trait.h"
+#include "math/bcg_math_common.h"
 
 namespace bcg {
 
@@ -863,7 +864,7 @@ struct property_container {
             bool add = false;
             if (!filter_dims.empty()) {
                 for (const auto filter_dim : filter_dims) {
-                    if (p.second->dims() == filter_dim) {
+                    if (p.second->dims() == static_cast<size_t>(filter_dim)) {
                         add = true;
                     }
                 }

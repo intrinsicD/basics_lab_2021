@@ -29,7 +29,7 @@ std::vector<VectorS<3>> get_vetices_mc(const aligned_box<3> &alignedBox) {
     return vertices;
 }
 
-std::vector<VectorI<2>> get_edges_mc(const aligned_box<3> &alignedBox) {
+std::vector<VectorI<2>> get_edges_mc(const aligned_box<3> &) {
     std::vector<VectorI<2>> edges;
     edges.emplace_back(0, 1);
     edges.emplace_back(1, 2);

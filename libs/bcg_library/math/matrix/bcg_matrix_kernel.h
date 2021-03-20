@@ -252,7 +252,7 @@ struct kernel_matrix {
                 VV.resize(num_samples, A.cols());
 
                 for (size_t i = 0; i < num_samples; ++i) {
-                    if (sampled_indices[i] < A.rows()) {
+                    if (sampled_indices[i] < static_cast<size_t>(A.rows())) {
                         VV.row(i) = A.row(sampled_indices[i]);
                     } else {
                         VV.row(i) = B.row(sampled_indices[i] - A.rows());
@@ -264,11 +264,11 @@ struct kernel_matrix {
             case SamplingType::grid_first: {
                 aligned_box3 aabb;
                 std::vector<VectorS<3>> Union(A.rows() + B.rows());
-                for (size_t i = 0; i < A.rows(); ++i) {
+                for (bcg_size_t i = 0; i < A.rows(); ++i) {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                for (size_t i = 0; i < B.rows(); ++i) {
+                for (bcg_size_t i = 0; i < B.rows(); ++i) {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
@@ -286,11 +286,11 @@ struct kernel_matrix {
             case SamplingType::grid_last: {
                 aligned_box3 aabb;
                 std::vector<VectorS<3>> Union(A.rows() + B.rows());
-                for (size_t i = 0; i < A.rows(); ++i) {
+                for (bcg_size_t i = 0; i < A.rows(); ++i) {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                for (size_t i = 0; i < B.rows(); ++i) {
+                for (bcg_size_t i = 0; i < B.rows(); ++i) {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
@@ -308,11 +308,11 @@ struct kernel_matrix {
             case SamplingType::grid_closest: {
                 aligned_box3 aabb;
                 std::vector<VectorS<3>> Union(A.rows() + B.rows());
-                for (size_t i = 0; i < A.rows(); ++i) {
+                for (bcg_size_t i = 0; i < A.rows(); ++i) {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                for (size_t i = 0; i < B.rows(); ++i) {
+                for (bcg_size_t i = 0; i < B.rows(); ++i) {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
@@ -330,11 +330,11 @@ struct kernel_matrix {
             case SamplingType::grid_mean: {
                 aligned_box3 aabb;
                 std::vector<VectorS<3>> Union(A.rows() + B.rows());
-                for (size_t i = 0; i < A.rows(); ++i) {
+                for (bcg_size_t i = 0; i < A.rows(); ++i) {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                for (size_t i = 0; i < B.rows(); ++i) {
+                for (bcg_size_t i = 0; i < B.rows(); ++i) {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
