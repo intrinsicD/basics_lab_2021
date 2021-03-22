@@ -34,7 +34,7 @@ void gui_sampling_octree(viewer_state *state) {
     if(importance_sampling){
         if (state->picker.valid) {
             auto *vertices = state->get_vertices(state->picker.entity_id);
-            bool val = gui_property_selector(state, vertices,{1},"importance sampling",current_property_name);
+            gui_property_selector(state, vertices,{1},"importance sampling",current_property_name);
         }
     }
     if (ImGui::Button("Compute Samples")) {
@@ -57,7 +57,7 @@ void gui_sampling_octree(viewer_state *state) {
             state->dispatcher.trigger<event::spatial_index::setup_sampling_octree>(state->picker.entity_id,
                                                                                    static_cast<sampling_octree::SamplingType>(idx),
                                                                                    indices,
-                                                                                   leaf_size, max_depth);
+                                                                                   static_cast<size_t>(leaf_size), max_depth);
             auto &index = state->scene.get<sampling_octree>(state->picker.entity_id);
             max_depth = index.current_depth;
             sample_depth = index.current_depth / 2;

@@ -22,7 +22,7 @@ void spatial_index_system::on_setup_kdtree(const event::spatial_index::setup_kdt
     if (!state->scene.all_of<kdtree_property<bcg_scalar_t>>(event.id)) {
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &index = state->scene.get_or_emplace<kdtree_property<bcg_scalar_t>>(event.id, positions, 10);
+        state->scene.emplace_or_replace<kdtree_property<bcg_scalar_t>>(event.id, positions, 10);
     }
 }
 
@@ -31,7 +31,7 @@ void spatial_index_system::on_setup_octree(const event::spatial_index::setup_oct
     if (!state->scene.all_of<octree>(event.id)) {
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &index = state->scene.get_or_emplace<octree>(event.id, positions, event.leaf_size, event.max_depth);
+        state->scene.emplace_or_replace<octree>(event.id, positions, event.leaf_size, event.max_depth);
     }
 }
 
@@ -40,7 +40,7 @@ void spatial_index_system::on_setup_sampling_octree(const event::spatial_index::
     if (!state->scene.all_of<sampling_octree>(event.id)) {
         auto *vertices = state->get_vertices(event.id);
         auto positions = vertices->get<VectorS<3>, 3>("v_position");
-        auto &index = state->scene.get_or_emplace<sampling_octree>(event.id, event.type, positions, event.indices, event.leaf_size, event.max_depth);
+        state->scene.emplace_or_replace<sampling_octree>(event.id, event.type, positions, event.indices, event.leaf_size, event.max_depth);
     }else{
         auto &index = state->scene.get<sampling_octree>(event.id);
         auto *vertices = state->get_vertices(event.id);

@@ -118,52 +118,6 @@ namespace property_types {
         UNSIGNED_LONG,
         UNKNOWN
     };
-    //TODO figure this out! with eigen matrices! function templates ...
-/*
-    template<typename T>
-    inline std::enable_if<is_eigen_type<T>, Type> get_property_type(const T *data) {
-        return get_property_type(data->data());
-    }
-
-    template<typename T>
-    inline Type get_property_type(const T * data) {
-        return Type::UNKNOWN;
-    }
-
-    template<>
-    inline Type get_property_type<bool>(const bool *) {
-        return Type::BOOL;
-    }
-
-    template<>
-    inline Type get_property_type<float>(const float *) {
-        return Type::FLOAT;
-    }
-
-    template<>
-    inline Type get_property_type<double>(const double *) {
-        return Type::DOUBLE;
-    }
-
-    template<>
-    inline Type get_property_type<int>(const int *) {
-        return Type::INT;
-    }
-
-    template<>
-    inline Type get_property_type<unsigned int>(const unsigned int *) {
-        return Type::UNSIGNED_INT;
-    }
-
-    template<>
-    inline Type get_property_type<long>(const long *) {
-        return Type::LONG;
-    }
-
-    template<>
-    inline Type get_property_type<unsigned long>(const unsigned long *) {
-        return Type::UNSIGNED_LONG;
-    }*/
 
     constexpr Type get_property_type(const bool *) {
         return Type::BOOL;

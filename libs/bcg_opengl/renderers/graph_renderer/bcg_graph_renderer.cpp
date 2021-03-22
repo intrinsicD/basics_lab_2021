@@ -34,7 +34,7 @@ void graph_renderer::on_startup(const event::internal::startup &) {
                                                             "graph_renderer/graph_fragment_shader.glsl");
 }
 
-void graph_renderer::on_shutdown(const event::internal::shutdown &event){
+void graph_renderer::on_shutdown(const event::internal::shutdown &){
     auto view = state->scene.view<material_graph>();
     for(const auto id : view){
         auto &material = view.get<material_graph>(id);

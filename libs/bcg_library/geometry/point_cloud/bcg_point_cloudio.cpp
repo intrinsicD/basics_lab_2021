@@ -47,6 +47,10 @@ bool point_cloudio::read(point_cloud &pc) {
 }
 
 bool point_cloudio::write(point_cloud &pc) {
+    return write(&pc.vertices);
+}
+
+bool point_cloudio::write(vertex_container *vertices) {
 // extract file extension
     std::string ext = path_extension(filename);
 
@@ -70,6 +74,19 @@ bool point_cloudio::write(point_cloud &pc) {
 
     // we didn't find a writer module
     return false;
+}
+
+std::vector<std::string> point_cloudio::formats(){
+    std::vector<std::string> names;
+    names.emplace_back("pts");
+    names.emplace_back("xyz");
+    names.emplace_back("pwn");
+    names.emplace_back("pb");
+    names.emplace_back("csv");
+    names.emplace_back("3d");
+    names.emplace_back("txt");
+    names.emplace_back("ply");
+    return names;
 }
 
 bool point_cloudio::read_pts(point_cloud &pc) {

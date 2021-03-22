@@ -26,6 +26,7 @@
 #include "geometry/graph/bcg_graph_edge_centers.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
+#include "utils/bcg_path.h"
 
 namespace bcg {
 
@@ -102,7 +103,7 @@ void mesh_system::on_make_triangle(const event::mesh::make_triangle &) {
     auto mesh = factory.make_triangle();
     auto id = state->scene.create();
     state->scene.emplace<halfedge_mesh>(id, mesh);
-    state->dispatcher.trigger<event::mesh::setup>(id);
+    state->dispatcher.trigger<event::mesh::setup>(id, "");
 }
 
 void mesh_system::on_make_quad(const event::mesh::make_quad &) {
@@ -111,16 +112,16 @@ void mesh_system::on_make_quad(const event::mesh::make_quad &) {
     auto mesh = factory.make_quad();
     auto id = state->scene.create();
     state->scene.emplace<halfedge_mesh>(id, mesh);
-    state->dispatcher.trigger<event::mesh::setup>(id);
+    state->dispatcher.trigger<event::mesh::setup>(id, "");
 }
 
-void mesh_system::on_make_box(const event::mesh::make_box &event) {
+void mesh_system::on_make_box(const event::mesh::make_box &) {
     mesh_factory factory;
 
     auto mesh = factory.make_box();
     auto id = state->scene.create();
     state->scene.emplace<halfedge_mesh>(id, mesh);
-    state->dispatcher.trigger<event::mesh::setup>(id);
+    state->dispatcher.trigger<event::mesh::setup>(id, "");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -200,11 +201,14 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
+    auto &info = state->scene.get<entity_info>(event.id);
     auto parts = mesh_connected_components_split(mesh);
-    for (const auto part : parts) {
+    for (const auto &part : parts) {
         auto id = state->scene.create();
         state->scene.emplace<halfedge_mesh>(id, part);
-        state->dispatcher.trigger<event::mesh::setup>(id);
+
+        std::string filename = path_join(path_dirname(info.filename), path_filename(info.filename)) + "_part_" + std::to_string(int(id)) + path_extension(info.filename);
+        state->dispatcher.trigger<event::mesh::setup>(id, filename);
         state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }

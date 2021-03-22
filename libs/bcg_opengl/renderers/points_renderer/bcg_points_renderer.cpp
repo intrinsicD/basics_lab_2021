@@ -167,7 +167,6 @@ void points_renderer::on_set_position_attribute(const event::points_renderer::se
 void points_renderer::on_set_color_attribute(const event::points_renderer::set_color_attribute &event) {
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_points>(event.id);
-    //TODO convert to colormap if 1 dimensional.
     auto &color = material.attributes[1];
     color.property_name = event.color.property_name;
     color.buffer_name = color.property_name;

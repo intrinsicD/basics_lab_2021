@@ -51,6 +51,8 @@ struct coherent_point_drift_base {
 
     SoftmatchingType softmatching_type;
 
+    virtual ~coherent_point_drift_base() = default;
+
     virtual void init(vertex_container *source_vertices,
                       Transform &source_model,
                       vertex_container *target_vertices,
@@ -91,6 +93,8 @@ struct coherent_point_drift_rigid : public coherent_point_drift_base {
     VectorS<3> t;
     MatrixS<3, 3> R;
 
+    ~coherent_point_drift_rigid() override = default;
+
     void init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
               Transform &target_model) override;
 
@@ -100,6 +104,8 @@ struct coherent_point_drift_rigid : public coherent_point_drift_base {
 struct coherent_point_drift_affine : public coherent_point_drift_base {
     VectorS<3> t;
     MatrixS<3, 3> B;
+
+    ~coherent_point_drift_affine() override = default;
 
     void init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
               Transform &target_model) override;
@@ -129,6 +135,8 @@ struct coherent_point_drift_nonrigid : public coherent_point_drift_base {
     bcg_scalar_t beta = 2, lambda = 2;
     bcg_scalar_t error;
 
+    ~coherent_point_drift_nonrigid() override = default;
+
     void init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
               Transform &target_model) override;
 
@@ -152,6 +160,8 @@ struct coherent_point_drift_nonrigid2 : public coherent_point_drift_base {
     bcg_scalar_t s;
     VectorS<3> t;
     MatrixS<3, 3> R;
+
+    ~coherent_point_drift_nonrigid2() override = default;
 
     void init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
               Transform &target_model) override;
@@ -178,6 +188,8 @@ struct coherent_point_drift_bayes : public coherent_point_drift_base {
     kernel_matrix<double> kernel_G;
 
     bcg_scalar_t beta = 2, gamma = 2, kappa = 1, lambda = 2;
+
+    ~coherent_point_drift_bayes() override = default;
 
     void init(vertex_container *source_vertices, Transform &source_model, vertex_container *target_vertices,
               Transform &target_model) override;

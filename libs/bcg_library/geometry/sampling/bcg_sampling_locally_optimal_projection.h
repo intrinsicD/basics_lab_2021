@@ -42,6 +42,8 @@ struct projection_operator {
 
     projection_operator() = default;
 
+    virtual ~projection_operator() = default;
+
     virtual void init(vertex_container &ref_vertices, vertex_container &sampling_vertices, bool use_density_weight, size_t parallel_grain_size = 1024);
 
     virtual bcg_scalar_t compute_attraction_alpha(size_t i, size_t j) = 0;
@@ -52,24 +54,32 @@ struct projection_operator {
 };
 
 struct lop : public projection_operator {
+    ~lop() override = default;
+
     bcg_scalar_t compute_attraction_alpha(size_t i, size_t j) override;
 
     bcg_scalar_t compute_repulsion_beta(size_t i, size_t ii) override;
 };
 
 struct wlop : public projection_operator {
+    ~wlop() override = default;
+
     bcg_scalar_t compute_attraction_alpha(size_t i, size_t j) override;
 
     bcg_scalar_t compute_repulsion_beta(size_t i, size_t ii) override;
 };
 
 struct flop : public projection_operator {
+    ~flop() override = default;
+
     bcg_scalar_t compute_attraction_alpha(size_t i, size_t j) override;
 
     bcg_scalar_t compute_repulsion_beta(size_t i, size_t ii) override;
 };
 
 struct clop : public projection_operator {
+    ~clop() override = default;
+
     property<MatrixS<3, 3>, 1> Sigma_S;
     property<bcg_scalar_t , 1> w_s;
     VectorS<3> sigma_k = {0.11772, 0.03287, 0.01010};

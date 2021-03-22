@@ -15,6 +15,8 @@ struct base_grid {
 
     base_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
 
+    virtual ~base_grid() = default;
+
     size_t to_idx(const VectorS<3> &item) const;
 
     VectorI<3> to_coord(const VectorS<3> &item) const;

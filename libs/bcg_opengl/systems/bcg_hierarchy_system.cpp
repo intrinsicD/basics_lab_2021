@@ -37,7 +37,7 @@ void hierarchy_system::on_add_child(const event::hierarchy::add_child &event) {
     }
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     hierarchy.children[event.child_id] = event.child_id;
-    state->dispatcher.trigger<event::hierarchy::set_parent>(event.child_id);
+    state->dispatcher.trigger<event::hierarchy::set_parent>(event.child_id, event.id);
 }
 
 void hierarchy_system::on_remove_child(const event::hierarchy::remove_child &event) {
@@ -73,7 +73,7 @@ void hierarchy_system::update_accumulated_model(entt::entity id){
     }
 }
 
-void hierarchy_system::on_update(const event::internal::update &event){
+void hierarchy_system::on_update(const event::internal::update &){
     auto view = state->scene.view<entity_hierarchy, Transform>();
     for(const auto id : view){
         auto &hierarchy = state->scene.get<entity_hierarchy>(id);

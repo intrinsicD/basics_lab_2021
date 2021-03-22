@@ -66,7 +66,7 @@ void mouse_system::on_scroll(const event::internal::mouse::scroll &event) {
     state->dispatcher.trigger<event::mouse::scroll>(event.value);
 }
 
-void mouse_system::on_end_frame(const event::internal::end_frame &event) {
+void mouse_system::on_end_frame(const event::internal::end_frame &) {
     state->mouse.cursor_delta.setZero();
 }
 

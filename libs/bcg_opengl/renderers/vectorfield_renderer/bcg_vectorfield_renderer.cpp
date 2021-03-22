@@ -49,7 +49,7 @@ void vectorfield_renderer::on_startup(const event::internal::startup &) {
                                                                    &geometry_shader);
 }
 
-void vectorfield_renderer::on_shutdown(const event::internal::shutdown &event) {
+void vectorfield_renderer::on_shutdown(const event::internal::shutdown &) {
     auto view = state->scene.view<vectorfields>();
     for (const auto id : view) {
         auto &vectors = view.get<vectorfields>(id);

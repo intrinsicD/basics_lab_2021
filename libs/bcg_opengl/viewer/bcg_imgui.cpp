@@ -8,20 +8,8 @@
 #include "imgui/imgui_internal.h"
 
 #include "bcg_entity_info.h"
-#include "aligned_box/bcg_aligned_box.h"
-#include "renderers/mesh_renderer/bcg_material_mesh.h"
-#include "renderers/graph_renderer/bcg_material_graph.h"
-#include "renderers/vectorfield_renderer/bcg_material_vectorfield.h"
-#include "renderers/points_renderer/bcg_material_points.h"
-#include "renderers/curve_renderer/bcg_material_curve.h"
-#include "renderers/points_renderer/bcg_events_points_renderer.h"
-#include "renderers/graph_renderer/bcg_events_graph_renderer.h"
-#include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
-#include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
 #include "renderers/curve_renderer/bcg_events_curve_renderer.h"
-#include "renderers/bcg_vectorfields.h"
-#include "geometry/mesh/bcg_mesh.h"
-#include "utils/bcg_path.h"
+
 
 namespace bcg {
 using namespace std::string_literals;
@@ -93,12 +81,12 @@ bool is_glmodal_open(viewer_window *, const char *lbl) {
 }
 
 struct filedialog_state {
-    std::string dirname = "";
-    std::string filename = "";
+    std::string dirname;
+    std::string filename;
     std::vector<std::pair<std::string, bool>> entries = {};
     bool save = false;
     bool remove_hidden = true;
-    std::string filter = "";
+    std::string filter;
     std::vector<std::string> extensions = {};
 
     filedialog_state() = default;
@@ -108,12 +96,12 @@ struct filedialog_state {
         set(dirname, filename, filter, save);
     }
 
-    void set(const std::string &dirname, const std::string &filename, const std::string &filter,
-             bool save) {
-        this->save = save;
-        _set_filter(filter);
-        _set_dirname(dirname);
-        _set_filename(filename);
+    void set(const std::string &dirname_, const std::string &filename_, const std::string &filter_,
+             bool save_) {
+        save = save_;
+        _set_filter(filter_);
+        _set_dirname(dirname_);
+        _set_filename(filename_);
     }
 
     void _set_dirname(const std::string &name) {
@@ -126,12 +114,12 @@ struct filedialog_state {
         }
         dirname = normalize_path(dirname);
         entries.clear();
-        for (auto entry : list_directory(dirname)) {
+        for (const auto &entry : list_directory(dirname)) {
             if (remove_hidden && path_basename(entry)[0] == '.') continue;
             if (path_isdir(entry)) {
-                entries.push_back({path_filename(entry) + "/", true});
+                entries.emplace_back(path_filename(entry) + "/", true);
             } else {
-                entries.push_back({path_filename(entry), false});
+                entries.emplace_back(path_filename(entry), false);
             }
         }
         std::sort(entries.begin(), entries.end(), [](auto &a, auto &b) {
@@ -157,21 +145,21 @@ struct filedialog_state {
 
     void _set_filter(const std::string &flt) {
         auto globs = std::vector<std::string>{""};
-        for (auto i = 0; i < flt.size(); i++) {
-            if (flt[i] == ';') {
-                globs.push_back("");
+        for (char i : flt) {
+            if (i == ';') {
+                globs.emplace_back("");
             } else {
-                globs.back() += flt[i];
+                globs.back() += i;
             }
         }
         filter = "";
         extensions.clear();
-        for (auto pattern : globs) {
-            if (pattern == "") continue;
+        for (const auto& pattern : globs) {
+            if (pattern.empty()) continue;
             auto ext = path_extension(pattern);
-            if (ext != "") {
+            if (!ext.empty()) {
                 extensions.push_back(ext);
-                filter += (filter == "") ? ("*." + ext) : (";*." + ext);
+                filter += (filter.empty()) ? ("*." + ext) : (";*." + ext);
             }
         }
     }
@@ -199,7 +187,7 @@ bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool s
         auto dir_buffer = std::array<char,
                 1024>{};
         snprintf(dir_buffer.data(), dir_buffer.size(), "%s", state.dirname.c_str());
-        if (ImGui::InputText("dir", dir_buffer.data(), sizeof(dir_buffer))) {
+        if (ImGui::InputText("dir", dir_buffer.data(), dir_buffer.size())) {
             state.set(dir_buffer.data(), state.filename, state.filter, save);
         }
         auto current_item = -1;
@@ -230,7 +218,7 @@ bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool s
         }
         auto ok = false, exit = false;
         if (ImGui::Button("Ok")) {
-            path = state.dirname + state.filename;
+            path = path_join(state.dirname, state.filename);
             ok = true;
             exit = true;
         }
@@ -460,10 +448,10 @@ bool draw_combobox(viewer_window *, const char *lbl, int &value,
     if(static_cast<size_t>(value) >= labels.size()) return false;
     if (!ImGui::BeginCombo(lbl, labels[value].c_str())) return false;
     auto old_val = value;
-    for (auto i = 0; i < labels.size(); i++) {
+    for (size_t i = 0; i < labels.size(); i++) {
         ImGui::PushID(i);
-        if (ImGui::Selectable(labels[i].c_str(), value == i)) value = i;
-        if (value == i) ImGui::SetItemDefaultFocus();
+        if (ImGui::Selectable(labels[i].c_str(), value == static_cast<int>(i))) value = i;
+        if (value == static_cast<int>(i)) ImGui::SetItemDefaultFocus();
         ImGui::PopID();
     }
     ImGui::EndCombo();
@@ -474,7 +462,7 @@ bool draw_combobox(viewer_window *, const char *lbl, std::string &value,
                    const std::vector<std::string> &labels) {
     if (!ImGui::BeginCombo(lbl, value.c_str())) return false;
     auto old_val = value;
-    for (auto i = 0; i < labels.size(); i++) {
+    for (size_t i = 0; i < labels.size(); i++) {
         ImGui::PushID(i);
         if (ImGui::Selectable(labels[i].c_str(), value == labels[i]))
             value = labels[i];
@@ -572,7 +560,7 @@ struct ImGuiAppLog {
     ImGuiTextBuffer Buf;
     ImGuiTextFilter Filter;
     ImVector<int> LineOffsets;  // Index to lines offset
-    bool ScrollToBottom;
+    bool ScrollToBottom{false};
 
     void Clear() {
         Buf.clear();

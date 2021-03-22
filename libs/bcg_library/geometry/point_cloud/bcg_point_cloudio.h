@@ -25,6 +25,10 @@ struct point_cloudio {
     //TODO implement point cloud writing!
     bool write(point_cloud &pc);
 
+    bool write(vertex_container *vertices);
+
+    static std::vector<std::string> formats();
+
 private:
 
     bool read_pts(point_cloud &pc);

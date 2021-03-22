@@ -98,7 +98,7 @@ void point_cloud_system::on_build_graph_knn(const event::point_cloud::build::gra
     if (graph.num_edges() != 0) {
         auto id = state->scene.create();
         state->scene.emplace<halfedge_graph>(id, graph);
-        state->dispatcher.trigger<event::graph::setup>(id);
+        state->dispatcher.trigger<event::graph::setup>(id, "");
     }
 }
 
@@ -114,7 +114,7 @@ void point_cloud_system::on_build_graph_radius(const event::point_cloud::build::
     if (graph.num_edges() != 0) {
         auto id = state->scene.create();
         state->scene.emplace<halfedge_graph>(id, graph);
-        state->dispatcher.trigger<event::graph::setup>(id);
+        state->dispatcher.trigger<event::graph::setup>(id, "");
     }
 }
 

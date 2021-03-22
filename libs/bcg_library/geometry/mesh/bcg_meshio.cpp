@@ -784,7 +784,6 @@ bool meshio::read_xyz(halfedge_mesh &mesh) {
     }
 
     // add normal property
-    // \todo this adds property even if no normals present. change it.
     auto vnormal = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
 
     char line[200];
@@ -794,6 +793,7 @@ bool meshio::read_xyz(halfedge_mesh &mesh) {
     vertex_handle v;
 
     // read data
+    bool has_normals = false;
     while (in && !feof(in) && fgets(line, 200, in)) {
         n = sscanf(line, "%lf %lf %lf %lf %lf %lf", reinterpret_cast<double *>(&x), reinterpret_cast<double *>(&y),
                    reinterpret_cast<double *>(&z), reinterpret_cast<double *>(&nx), reinterpret_cast<double *>(&ny),
@@ -801,9 +801,13 @@ bool meshio::read_xyz(halfedge_mesh &mesh) {
         if (n >= 3) {
             v = mesh.add_vertex(VectorS<3>(x, y, z));
             if (n >= 6) {
+                has_normals = true;
                 vnormal[v] = VectorS<3>(nx, ny, nz);
             }
         }
+    }
+    if(!has_normals){
+        mesh.vertices.remove(vnormal);
     }
 
     fclose(in);

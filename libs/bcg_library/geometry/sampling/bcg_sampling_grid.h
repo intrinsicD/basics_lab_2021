@@ -25,6 +25,8 @@ struct sampling_grid : protected occupancy_grid{
 
     sampling_grid(const VectorI<3> &dims, const aligned_box3 &aabb) : occupancy_grid(dims, aabb) {};
 
+    ~sampling_grid() override = default;
+
     virtual void build(property<VectorS<3>, 3> points) = 0;
 
     virtual void build(const std::vector<VectorS<3>> &points) = 0;
@@ -42,6 +44,8 @@ struct sample_first_grid : public sampling_grid{
     sample_first_grid() = default;
 
     sample_first_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
+
+    ~sample_first_grid() override = default;
 
     void build(property<VectorS<3>, 3> points) override;
 
@@ -65,6 +69,8 @@ struct sample_last_grid : public sampling_grid{
     sample_last_grid() = default;
 
     sample_last_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
+
+    ~sample_last_grid() override = default;
 
     void build(property<VectorS<3>, 3> points) override;
 
@@ -90,6 +96,8 @@ struct sample_closest_grid : public sampling_grid{
 
     sample_closest_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
 
+    ~sample_closest_grid() override = default;
+
     void build(property<VectorS<3>, 3> points) override;
 
     void build(const std::vector<VectorS<3>> &points) override;
@@ -113,6 +121,8 @@ struct sample_mean_grid : public sampling_grid{
     sample_mean_grid() = default;
 
     sample_mean_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
+
+    ~sample_mean_grid() override = default;
 
     void build(property<VectorS<3>, 3> points) override;
 

@@ -28,7 +28,6 @@ struct kdtree_matrix {
             return positions.rows();
         }
 
-        //TODO somehow the shared pointer gets lost. Figure out why!
         inline Real kdtree_get_pt(const size_t idx, const size_t dim) const {
             return positions.row(idx)[dim];
         }
@@ -94,7 +93,6 @@ struct kdtree_property {
             return positions.size();
         }
 
-        //TODO somehow the shared pointer gets lost. Figure out why!
         inline Real kdtree_get_pt(const size_t idx, const size_t dim) const {
             return positions[idx][dim];
         }

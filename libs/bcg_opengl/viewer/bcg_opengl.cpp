@@ -1300,25 +1300,25 @@ void ogl_buffer_object::release() const {
     assert_ogl_error();
 }
 
-void ogl_buffer_object::upload(const void *data, size_t size, size_t dims, size_t offset, bool dynamic) {
+void ogl_buffer_object::upload(const void *data, size_t size, size_t dims_, size_t offset, bool dynamic_) {
     if (target == GL_ELEMENT_ARRAY_BUFFER) {
-        num_elements = size * dims;
+        num_elements = size * dims_;
         capacity = num_elements;
         size_bytes = capacity * sizeof(bcg_index_t);
     } else {
         num_elements = size;
-        capacity = num_elements * dims;
+        capacity = num_elements * dims_;
         size_bytes = capacity * sizeof(float);
     }
 
-    glBufferData(target, size_bytes, data, (dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+    glBufferData(target, size_bytes, data, (dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
     assert_ogl_error();
-    this->dims = dims;
-    this->dynamic = dynamic;
+    dims = dims_;
+    dynamic = dynamic_;
 }
 
-void ogl_buffer_object::download(bcg_scalar_t *data, size_t size_bytes, size_t offset_bytes) {
-    glGetBufferSubData(target, offset_bytes, size_bytes, data);
+void ogl_buffer_object::download(bcg_scalar_t *data, size_t size_bytes_, size_t offset_bytes) {
+    glGetBufferSubData(target, offset_bytes, size_bytes_, data);
     assert_ogl_error();
 }
 
@@ -1359,7 +1359,7 @@ void ogl_vertex_buffer::upload(const std::vector<VectorS<4>> &data, size_t offse
 }
 
 void ogl_vertex_buffer::upload(const void *data, size_t size, size_t dims, size_t offset, bool dynamic) {
-    if (size > capacity || !(*this)) {
+    if (size > static_cast<size_t>(capacity) || !(*this)) {
         // reallocate buffer if needed
         num_elements = size;
         capacity = num_elements;
@@ -1433,7 +1433,7 @@ void ogl_element_buffer::upload(const std::vector<VectorI<3>> &data, size_t offs
 }
 
 void ogl_element_buffer::upload(const void *data, size_t size, int dims, size_t offset, bool dynamic) {
-    if (size > capacity) {
+    if (size > static_cast<size_t>(capacity)) {
         // reallocate buffer if needed
         capacity = size * dims;
         num_elements = capacity;
@@ -1511,7 +1511,7 @@ void ogl_vertex_array::release() const {
 }
 
 void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buffer &buffer) const {
-    if (index == -1) return;
+    if (index == static_cast<unsigned int>(-1)) return;
     glVertexAttribPointer(index, buffer.dims, buffer.type, (bool) buffer.normalized, buffer.dims * sizeof(float),
                           (void *) 0);
     assert_ogl_error();
@@ -1521,7 +1521,7 @@ void ogl_vertex_array::enable_attribute(unsigned int index, const ogl_vertex_buf
 }
 
 void ogl_vertex_array::disable_attribute(unsigned int index) const {
-    if (index == -1) return;
+    if (index == static_cast<unsigned int>(-1)) return;
     glDisableVertexAttribArray(index);
     assert_ogl_error();
 }

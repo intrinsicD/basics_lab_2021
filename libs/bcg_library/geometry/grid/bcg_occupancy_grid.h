@@ -16,6 +16,8 @@ struct occupancy_grid : public base_grid {
 
     occupancy_grid(const VectorI<3> &dims, const aligned_box3 &aabb);
 
+    ~occupancy_grid() override = default;
+
     void build(property<VectorS<3>, 3> positions, const VectorI<3> &dims);
 
     bool is_occupied_point(const VectorS<3> &point) const;
