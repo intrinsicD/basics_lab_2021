@@ -30,6 +30,7 @@ struct meshio {
 
     bool write(halfedge_mesh &mesh);
 
+    static std::vector<std::string> formats();
 private:
 
     bool read_off(halfedge_mesh &mesh);
@@ -59,6 +60,7 @@ private:
     bool write_pmp(const halfedge_mesh &mesh);
 
     bool write_xyz(const halfedge_mesh &mesh);
+
 
 private:
     std::string filename;

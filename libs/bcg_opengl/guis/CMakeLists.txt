@@ -62,5 +62,6 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_viewer_picker.h bcg_gui_viewer_picker.cpp
         bcg_gui_viewer_state.h bcg_gui_viewer_state.cpp
         bcg_gui_viewer_time.h bcg_gui_viewer_time.cpp
-        bcg_gui_viewer_window.h bcg_gui_viewer_window.cpp)
+        bcg_gui_viewer_window.h bcg_gui_viewer_window.cpp
+        bcg_gui_exporting.h bcg_gui_exporting.cpp)
 

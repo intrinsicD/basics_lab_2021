@@ -1155,4 +1155,15 @@ bool meshio::write_xyz(const halfedge_mesh &mesh) {
     ofs.close();
     return true;
 }
+
+std::vector<std::string> meshio::formats(){
+    std::vector<std::string> names;
+    names.emplace_back("off");
+    names.emplace_back("obj");
+    names.emplace_back("stl");
+    names.emplace_back("ply");
+    names.emplace_back("pmp");
+    names.emplace_back("xyz");
+    return names;
+}
 }

@@ -190,7 +190,7 @@ struct filedialog_state {
 bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool save,
                      const std::string &dirname, const std::string &filename, const std::string &filter) {
     static auto states = std::unordered_map<std::string, filedialog_state>{};
-    ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
+    //ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
     if (ImGui::BeginPopupModal(lbl)) {
         if (states.find(lbl) == states.end()) {
             states[lbl] = filedialog_state{dirname, filename, filter, save};

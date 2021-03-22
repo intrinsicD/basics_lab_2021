@@ -2,6 +2,7 @@
 
 #include "bcg_opengl/viewer/bcg_viewer.h"
 #include "bcg_opengl/viewer/bcg_imgui.h"
+#include "bcg_opengl/guis/bcg_gui_exporting.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_state.h"
 #include "bcg_opengl/guis/bcg_gui_viewer_curve.h"
 #include "bcg_opengl/guis/bcg_gui_reload_entity.h"
@@ -42,8 +43,13 @@ int main() {
     using namespace bcg;
 
     viewer viewer;
+
     viewer.state.gui.menu.show = [](viewer_state *state, gui_menu */*self*/) {
+
         if (ImGui::BeginMenu("Viewer")) {
+            if (ImGui::MenuItem("Export")) {
+                state->gui.left = gui_exporting;
+            }
             if (ImGui::MenuItem("Info")) {
                 state->gui.left = gui_viewer_state;
             }

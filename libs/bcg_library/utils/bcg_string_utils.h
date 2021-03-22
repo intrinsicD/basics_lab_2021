@@ -23,6 +23,10 @@ bool contains(const std::string &s, const std::string &substring);
 
 std::string join(const std::string &str1, const std::string &str2);
 
+std::string join(const std::vector<std::string> &strs, const std::string &sep);
+
+std::vector<std::string> join(const std::string &prep, const std::vector<std::string> &strs);
+
 std::vector<std::string> split(const std::string &str, const std::vector<char> &delims);
 
 std::vector<std::string> split(const std::string &str, char delim);

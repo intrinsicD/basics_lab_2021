@@ -35,6 +35,22 @@ std::string join(const std::string &str1, const std::string &str2) {
     return std::string(str1 + str2);
 }
 
+std::string join(const std::vector<std::string> &strs, const std::string &sep){
+    std::string result;
+    for(const auto &str : strs){
+        result += str + sep;
+    }
+    return result;
+}
+
+std::vector<std::string> join(const std::string &prep, const std::vector<std::string> &strs){
+    std::vector<std::string> result;
+    for(const auto &str : strs){
+       result.push_back(prep + str);
+    }
+    return result;
+}
+
 std::vector<std::string> split(const std::string &str, const std::vector<char> &delims) {
     size_t start = 0;
     std::vector<std::string> tokens;

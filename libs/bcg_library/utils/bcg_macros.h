@@ -23,7 +23,7 @@ else std::cout << "pre-standard C++\n";
 #if BCG_GE_CPP17
 #define BCG_MAYBE_UNUSED [[maybe_unused]]
 #else
-#define BCG_MAYBE_UNUSED (void*)
+#define BCG_MAYBE_UNUSED (void*) &
 #endif
 }
 
