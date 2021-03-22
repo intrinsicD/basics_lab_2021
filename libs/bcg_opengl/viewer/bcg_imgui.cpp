@@ -173,17 +173,28 @@ struct filedialog_state {
     }
 
     std::string get_path() const { return path_join(dirname, filename); }
+
+    bool exists(const std::string &filename) const{
+        auto file_name = path_filename(filename);
+        for(const auto &entry : entries){
+            if(entry.second) continue;
+            if(path_filename(entry.first) == file_name)
+                return true;
+        }
+        return false;
+    }
 };
 
 bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool save,
-                     const std::string &dirname, const std::string &filename, const std::string &filter) {
+                     const std::string &dirname, const std::string &filename, const std::string &filter, bool &file_exists) {
     static auto states = std::unordered_map<std::string, filedialog_state>{};
-    //ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
     if (ImGui::BeginPopupModal(lbl)) {
         if (states.find(lbl) == states.end()) {
             states[lbl] = filedialog_state{dirname, filename, filter, save};
         }
         auto &state = states.at(lbl);
+
         auto dir_buffer = std::array<char,
                 1024>{};
         snprintf(dir_buffer.data(), dir_buffer.size(), "%s", state.dirname.c_str());
@@ -221,6 +232,7 @@ bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool s
             path = path_join(state.dirname, state.filename);
             ok = true;
             exit = true;
+            file_exists = state.exists(state.filename);
         }
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {
@@ -239,10 +251,10 @@ bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool s
 
 bool draw_filedialog_button(viewer_window *win, const char *button_lbl,
                             bool button_active, const char *lbl, std::string &path, bool save,
-                            const std::string &dirname, const std::string &filename, const std::string &filter) {
+                            const std::string &dirname, const std::string &filename, const std::string &filter, bool &file_exists) {
     if (is_glmodal_open(win, lbl)) {
         draw_button(win, button_lbl, button_active);
-        return draw_filedialog(win, lbl, path, save, dirname, filename, filter);
+        return draw_filedialog(win, lbl, path, save, dirname, filename, filter, file_exists);
     } else {
         if (draw_button(win, button_lbl, button_active)) {
             open_glmodal(win, lbl);

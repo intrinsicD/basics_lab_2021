@@ -208,11 +208,11 @@ void draw_histogram(
 &values);
 
 bool draw_filedialog(viewer_window *win, const char *lbl, std::string &path, bool save,
-                     const std::string &dirname, const std::string &filename, const std::string &filter);
+                     const std::string &dirname, const std::string &filename, const std::string &filter, bool &file_exists);
 
 bool draw_filedialog_button(viewer_window *win, const char *button_lbl,
                             bool button_active, const char *lbl, std::string &path, bool save,
-                            const std::string &dirname, const std::string &filename, const std::string &filter);
+                            const std::string &dirname, const std::string &filename, const std::string &filter, bool &file_exists);
 
 void log_info(viewer_window *win, const std::string &msg);
 
