@@ -8,10 +8,10 @@
 #include "bcg_path.h"
 
 namespace bcg {
-
+namespace fs = std::filesystem;
 // Make a path from a utf8 std::string
-static std::filesystem::path make_path(const std::string &filename) {
-    return std::filesystem::u8path(filename);
+static fs::path make_path(const std::string &filename) {
+    return fs::u8path(filename);
 }
 
 // Normalize path
@@ -71,7 +71,7 @@ bool path_isfile(const std::string &filename) {
 // List the contents of a directory
 std::vector<std::string> list_directory(const std::string &filename) {
     auto entries = std::vector<std::string>{};
-    for (auto entry : std::filesystem::directory_iterator(make_path(filename))) {
+    for (auto entry : fs::directory_iterator(make_path(filename))) {
         entries.push_back(entry.path().generic_u8string());
     }
     std::sort(entries.begin(), entries.end());
@@ -91,7 +91,7 @@ bool make_directory(const std::string &dirname, std::string &error) {
 }
 
 // Get the current directory
-std::string path_current() { return std::filesystem::current_path().u8string(); }
+std::string path_current() { return fs::current_path().u8string(); }
 
 
 }

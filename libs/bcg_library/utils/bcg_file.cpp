@@ -8,10 +8,10 @@
 #include "bcg_path.h"
 
 namespace bcg {
-
+namespace fs = std::filesystem;
 // Make a path from a utf8 string
-static std::filesystem::path make_path(const std::string &filename) {
-    return std::filesystem::u8path(filename);
+static fs::path make_path(const std::string &filename) {
+    return fs::u8path(filename);
 }
 
 file_stream::file_stream(std::string _filename) : filename{ std::move(_filename) }, fs{} {}
@@ -19,7 +19,7 @@ file_stream::file_stream(std::string _filename) : filename{ std::move(_filename)
 file_stream::~file_stream() { close(); }
 
 size_t file_stream::size() const {
-    return std::filesystem::file_size(make_path(filename));
+    return fs::file_size(make_path(filename));
 }
 
 file_stream::operator bool() const { return check_valid(); }
@@ -48,7 +48,7 @@ bool file_stream::is_directory() const {
 }
 
 bool file_stream::is_empty() const {
-    return std::filesystem::is_empty(make_path(filename));
+    return fs::is_empty(make_path(filename));
 }
 
 bool file_stream::create() {
@@ -75,7 +75,7 @@ bool file_stream::create() {
 }
 
 bool file_stream::erase() {
-    return std::filesystem::remove(make_path(filename));
+    return fs::remove(make_path(filename));
 }
 
 bool file_stream::open_in() {
@@ -108,8 +108,8 @@ bool file_stream::check_valid() const {
 }
 
 time_t file_stream::last_write_time() const{
-    auto tp = std::filesystem::last_write_time(make_path(filename));
-    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - std::filesystem::file_time_type::clock::now()
+    auto tp = fs::last_write_time(make_path(filename));
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - fs::file_time_type::clock::now()
                                                         + std::chrono::system_clock::now());
     return std::chrono::system_clock::to_time_t(sctp);
 }
