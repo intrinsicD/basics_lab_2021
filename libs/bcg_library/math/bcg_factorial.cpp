@@ -23,13 +23,13 @@ unsigned int factorial::operator()(int n) {
 
 unsigned int factorial::value(int n){
     if(n < 0) return 1;
-    if(n < cache.size()){
+    if(static_cast<size_t>(n) < cache.size()){
         return cache[n];
     }
 
     unsigned int last = cache.empty() ? 1 : cache.back();
     unsigned int i_start = cache.empty() ? 0 : cache.size() - 1;
-    for(unsigned int i = i_start; i < n; ++i){
+    for(unsigned int i = i_start; i < static_cast<unsigned int>(n); ++i){
         last *= (i + 1);
         cache.push_back(last);
     }

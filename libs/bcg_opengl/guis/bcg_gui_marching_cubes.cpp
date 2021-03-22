@@ -16,13 +16,14 @@ void gui_marching_cubes(viewer_state *state) {
     static VectorS<3> max = 2 * VectorS<3>::Ones();
     static VectorS<3> dims = {30, 30, 30};
     static bcg_scalar_t isovalue = 0;
+    draw_input(&state->window, "isovalue", isovalue);
     draw_input_vec3(&state->window, "min", min);
     draw_input_vec3(&state->window, "max", max);
     draw_input_vec3(&state->window, "dims", dims);
     static marching_cubes mc;
     mc.implicit_function = marching_cubes::hearts_function;
     if (ImGui::Button("convert to mesh")) {
-        auto mesh = mc.reconstruct(0, min, max, dims.cast<bcg_index_t>());
+        auto mesh = mc.reconstruct(isovalue, min, max, dims.cast<bcg_index_t>());
         auto id = state->scene.create();
         state->scene.emplace<halfedge_mesh>(id, mesh);
         state->dispatcher.trigger<event::mesh::setup>(id, "marching cubes");

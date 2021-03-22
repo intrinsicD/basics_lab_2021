@@ -14,7 +14,7 @@
 
 namespace bcg {
 
-bezier_curve_system::bezier_curve_system(viewer_state *state) : system("bezier_curve_system", state) {
+bezier_curve_system::bezier_curve_system(viewer_state *state) : system("bezier_curve_system", state), mode(curve_mode::disabled) {
     state->dispatcher.sink<event::internal::startup>().connect<&bezier_curve_system::on_startup>(this);
     state->dispatcher.sink<event::curve::enable_2d_drawing>().connect<&bezier_curve_system::on_enable_2d_drawing>(this);
     state->dispatcher.sink<event::curve::enable_3d_drawing>().connect<&bezier_curve_system::on_enable_3d_drawing>(this);
@@ -22,11 +22,11 @@ bezier_curve_system::bezier_curve_system(viewer_state *state) : system("bezier_c
     state->dispatcher.sink<event::curve::setup>().connect<&bezier_curve_system::on_setup>(this);
 }
 
-void bezier_curve_system::on_startup(const event::internal::startup &event) {
+void bezier_curve_system::on_startup(const event::internal::startup &) {
     mode = curve_mode::disabled;
 }
 
-void bezier_curve_system::on_enable_2d_drawing(const event::curve::enable_2d_drawing &event) {
+void bezier_curve_system::on_enable_2d_drawing(const event::curve::enable_2d_drawing &) {
     if (state->scene.valid(current_curve_id)) {
         auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
         if (curve && curve->is_3d && !curve->finished) return;
@@ -37,7 +37,7 @@ void bezier_curve_system::on_enable_2d_drawing(const event::curve::enable_2d_dra
     state->dispatcher.sink<event::curve::make>().connect<&bezier_curve_system::on_make>(this);
 }
 
-void bezier_curve_system::on_enable_3d_drawing(const event::curve::enable_3d_drawing &event) {
+void bezier_curve_system::on_enable_3d_drawing(const event::curve::enable_3d_drawing &) {
     if (state->scene.valid(current_curve_id)) {
         auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
         if (curve && !curve->is_3d && !curve->finished) return;
@@ -48,7 +48,7 @@ void bezier_curve_system::on_enable_3d_drawing(const event::curve::enable_3d_dra
     state->dispatcher.sink<event::curve::make>().connect<&bezier_curve_system::on_make>(this);
 }
 
-void bezier_curve_system::on_disable_drawing(const event::curve::disable_drawing &event) {
+void bezier_curve_system::on_disable_drawing(const event::curve::disable_drawing &) {
     if (state->scene.valid(current_curve_id)) {
         auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
         curve->finished = true;
@@ -83,13 +83,13 @@ void bezier_curve_system::on_setup(const event::curve::setup &event) {
     state->picker.entity_id = event.id;
 }
 
-void bezier_curve_system::on_make(const event::curve::make &event) {
+void bezier_curve_system::on_make(const event::curve::make &) {
     auto id = state->scene.create();
     state->scene.emplace<curve_bezier>(id);
     state->dispatcher.trigger<event::curve::setup>(id);
 }
 
-void bezier_curve_system::on_mouse_button(const event::mouse::button &event) {
+void bezier_curve_system::on_mouse_button(const event::mouse::button &) {
     if (state->mouse.is_captured_by_gui) return;
     if (!state->scene.valid(current_curve_id)) return;
     auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
@@ -172,7 +172,7 @@ void bezier_curve_system::on_mouse_button(const event::mouse::button &event) {
     }
 }
 
-void bezier_curve_system::on_mouse_motion(const event::mouse::motion &event) {
+void bezier_curve_system::on_mouse_motion(const event::mouse::motion &) {
     if (state->mouse.is_captured_by_gui) return;
     if (!state->scene.valid(current_curve_id)) return;
     auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
@@ -207,7 +207,7 @@ void bezier_curve_system::on_mouse_motion(const event::mouse::motion &event) {
     }
 }
 
-VectorS<3> bezier_curve_system::get_point() const{
+const VectorS<3> &bezier_curve_system::get_point() const{
     if(mode == curve_mode::drawing_2d){
         return state->mouse.world_space_position;
     }else{

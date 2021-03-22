@@ -17,14 +17,14 @@ std::vector<std::string> quadric_names(){
 }
 
 
-quadric point_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &result,
-                      property<VectorS<3>, 3> normals) {
+quadric point_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &,
+                      property<VectorS<3>, 3> ) {
     quadric Q;
     Q.point_quadric(positions[v]);
     return Q;
 }
 
-quadric plane_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &result,
+quadric plane_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &,
                       property<VectorS<3>, 3> normals) {
     quadric Q;
     Q.plane_quadric(positions[v], normals[v]);
@@ -32,7 +32,7 @@ quadric plane_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const 
 }
 
 quadric
-probabilistic_plane_quadric_isotropic(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &result,
+probabilistic_plane_quadric_isotropic(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &,
                                       property<VectorS<3>, 3> normals) {
     quadric Q;
     Q.probabilistic_plane_quadric(positions[v], normals[v], 0, 1);
@@ -127,7 +127,7 @@ void point_cloud_vertex_quadric_collect_neighbors(vertex_container *vertices, si
                     auto v = vertex_handle(i);
                     quadric Q;
                     for(const auto &idx : neighbors[v].indices){
-                        Q += quadrics[v];
+                        Q += quadrics[idx];
                     }
 
                     quadric_sums[v] = Q;

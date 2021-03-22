@@ -37,8 +37,7 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
         }
 
         ImGui::Checkbox("use_face_color", &material->use_face_color);
-        static float min = 0;
-        static float max = 0;
+
         if(material->use_face_color){
             auto &color = material->attributes[2];
             auto *faces = state->get_faces(id);
@@ -69,15 +68,6 @@ void gui_material_mesh(viewer_state *state, material_mesh *material, entt::entit
             if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
                 color.property_name = "";
                 material->use_face_color = false;
-            }
-        }
-
-        if(!material->use_uniform_color){
-            auto &color = material->attributes[2];
-            if(!material->use_face_color){
-
-            }else{
-
             }
         }
 

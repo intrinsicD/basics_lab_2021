@@ -33,7 +33,7 @@ explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, int smo
     rescale(mesh, center_before, area_before);
 }
 
-void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property<bcg_scalar_t, 1> &property,
+void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &, property<bcg_scalar_t, 1> &property,
                         int smoothing_steps, bcg_scalar_t timestep, size_t parallel_grain_size) {
     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
     auto e_weight = mesh.edges.get<bcg_scalar_t, 1>("e_laplacian_weight");
@@ -69,7 +69,7 @@ void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, pr
     property.set_dirty();
 }
 
-void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property<VectorS<3>, 3> &property,
+void explicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &, property<VectorS<3>, 3> &property,
                         int smoothing_steps, bcg_scalar_t timestep, size_t parallel_grain_size) {
     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
     auto e_weight = mesh.edges.get<bcg_scalar_t, 1>("e_laplacian_weight");

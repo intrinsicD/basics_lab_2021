@@ -859,7 +859,6 @@ void remeshing::project_to_reference(vertex_handle v) {
     vertex_handle v2 = (*(++fvIt));
 
     triangle3 t(refpoints[v0], refpoints[v1], refpoints[2]);
-    auto barycentric_coords = to_barycentric_coordinates(t, points[v]);
 
     // set result
     points[v] = nn.result.closest;
@@ -869,6 +868,7 @@ void remeshing::project_to_reference(vertex_handle v) {
                  refsizing[v2] * nn.result.barycentric_coords[2];
 
 /*    triangle3 tn(refnormals[v0] ,refnormals[v1], refnormals[2]);
+    auto barycentric_coords = to_barycentric_coordinates(t, points[v]);
     points[v] = from_barycentric_coords(t, barycentric_coords);
     vnormal[v] = from_barycentric_coords(tn, barycentric_coords).normalized();
     vsizing[v] = refsizing[v0] * barycentric_coords[0] + refsizing[v1] * barycentric_coords[1] + refsizing[v2] * barycentric_coords[2];*/

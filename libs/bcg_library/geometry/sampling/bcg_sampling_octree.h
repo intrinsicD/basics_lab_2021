@@ -35,18 +35,18 @@ struct sampling_octree {
 
     sampling_octree() = default;
 
-    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size,
+    sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, size_t leaf_size,
                     int max_depth = 20);
 
     sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
-                    const std::vector<size_t> &ordering, int leaf_size, int max_depth = 20);
+                    const std::vector<size_t> &ordering, size_t leaf_size, int max_depth = 20);
 
     void clear();
 
-    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size, int max_depth = 20);
+    void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, size_t leaf_size, int max_depth = 20);
 
     void build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, const std::vector<size_t> &ordering,
-               int leaf_size, int max_depth = 20);
+               size_t leaf_size, int max_depth = 20);
 
     void rebuild();
 
@@ -63,7 +63,7 @@ struct sampling_octree {
     std::vector<sampling_node> storage;
     std::vector<size_t> indices;
     int max_depth, current_depth;
-    int leaf_size;
+    size_t leaf_size;
     SamplingType sampling_type;
 private:
     void query_radius(size_t counter, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set,

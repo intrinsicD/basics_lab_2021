@@ -40,7 +40,7 @@ bcg_scalar_t polynomial::derivative_value(bcg_scalar_t t, int degree) {
     bcg_scalar_t result = 0;
     bcg_scalar_t tt = std::pow(t, degree);
     factorial fac;
-    for (size_t i = degree; i < order; ++i) {
+    for (int i = degree; i < order; ++i) {
         result += coefficients[i] * tt * fac(i) / bcg_scalar_t(fac(i - degree));
         tt *= t;
     }
@@ -52,7 +52,7 @@ polynomial polynomial::derivative(int degree) {
     if (degree == 0) return *this;
     polynomial result(order - degree);
     factorial fac;
-    for (size_t i = degree; i < order; ++i) {
+    for (int i = degree; i < order; ++i) {
         result.coefficients[i - degree] = coefficients[i] * fac(i) / bcg_scalar_t(fac(i - degree));
     }
     return result;
@@ -60,7 +60,7 @@ polynomial polynomial::derivative(int degree) {
 
 bool polynomial::operator==(const polynomial &other) const {
     if (order != other.order) return false;
-    for (size_t i = 0; i < order; ++i) {
+    for (int i = 0; i < order; ++i) {
         if (coefficients[i] != other.coefficients[i]) return false;
     }
     return true;
@@ -68,7 +68,7 @@ bool polynomial::operator==(const polynomial &other) const {
 
 bool polynomial::operator!=(const polynomial &other) const {
     if (order != other.order) return true;
-    for (size_t i = 0; i < order; ++i) {
+    for (int i = 0; i < order; ++i) {
         if (coefficients[i] != other.coefficients[i]) return true;
     }
     return false;
@@ -84,7 +84,7 @@ std::ostream &operator<<(std::ostream &stream, const polynomial &p) {
 polynomial operator+(const polynomial &first, const polynomial &second) {
     int order = std::min(first.order, second.order);
     polynomial result(order);
-    for (size_t i = 0; i < order; ++i) {
+    for (int i = 0; i < order; ++i) {
         result.coefficients[i] = first.coefficients[i] + second.coefficients[i];
     }
     return result;
@@ -93,7 +93,7 @@ polynomial operator+(const polynomial &first, const polynomial &second) {
 polynomial operator-(const polynomial &first, const polynomial &second) {
     int order = std::min(first.order, second.order);
     polynomial result(order);
-    for (size_t i = 0; i < order; ++i) {
+    for (int i = 0; i < order; ++i) {
         result.coefficients[i] = first.coefficients[i] - second.coefficients[i];
     }
     return result;
@@ -101,7 +101,7 @@ polynomial operator-(const polynomial &first, const polynomial &second) {
 
 polynomial operator*(bcg_scalar_t s, const polynomial &p) {
     polynomial result(p.order);
-    for (size_t i = 0; i < p.order; ++i) {
+    for (int i = 0; i < p.order; ++i) {
         result.coefficients[i] = p.coefficients[i] * s;
     }
     return result;
@@ -109,7 +109,7 @@ polynomial operator*(bcg_scalar_t s, const polynomial &p) {
 
 polynomial operator*(const polynomial &p, bcg_scalar_t s) {
     polynomial result(p.order);
-    for (size_t i = 0; i < p.order; ++i) {
+    for (int i = 0; i < p.order; ++i) {
         result.coefficients[i] = p.coefficients[i] * s;
     }
     return result;
@@ -119,7 +119,7 @@ polynomial operator/(const polynomial &p, bcg_scalar_t s) {
     if (s == 0) return p;
 
     polynomial result(p.order);
-    for (size_t i = 0; i < p.order; ++i) {
+    for (int i = 0; i < p.order; ++i) {
         result.coefficients[i] = p.coefficients[i] / s;
     }
     return result;

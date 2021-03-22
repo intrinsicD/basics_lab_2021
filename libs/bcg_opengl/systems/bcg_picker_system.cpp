@@ -26,23 +26,23 @@ picker_system::picker_system(viewer_state *state) : system("picker_system", stat
     state->dispatcher.sink<event::picker::pick::face>().connect<&picker_system::on_pick_face>(this);
 }
 
-void picker_system::on_enable_point(const event::picker::enable::point &event) {
+void picker_system::on_enable_point(const event::picker::enable::point &) {
     state->picker.mode = viewer_picker::Mode::points;
 }
 
-void picker_system::on_enable_vertex(const event::picker::enable::vertex &event) {
+void picker_system::on_enable_vertex(const event::picker::enable::vertex &) {
     state->picker.mode = viewer_picker::Mode::vertices;
 }
 
-void picker_system::on_enable_edge(const event::picker::enable::edge &event) {
+void picker_system::on_enable_edge(const event::picker::enable::edge &) {
     state->picker.mode = viewer_picker::Mode::edges;
 }
 
-void picker_system::on_enable_face(const event::picker::enable::face &event) {
+void picker_system::on_enable_face(const event::picker::enable::face &) {
     state->picker.mode = viewer_picker::Mode::faces;
 }
 
-void picker_system::on_disable(const event::picker::disable &event) {
+void picker_system::on_disable(const event::picker::disable &) {
     state->picker.mode = viewer_picker::Mode::disabled;
 }
 
@@ -53,6 +53,7 @@ void picker_system::on_pick_point(const event::picker::pick::point &event) {
         state->scene.emplace<selected_points>(event.id);
     }
     auto &selection = state->scene.get<selected_points>(event.id);
+    selection.selected.emplace_back(state->picker.world_space_point);
 }
 
 void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {

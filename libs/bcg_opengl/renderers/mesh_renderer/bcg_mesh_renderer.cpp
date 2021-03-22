@@ -36,7 +36,7 @@ void mesh_renderer::on_startup(const event::internal::startup &) {
                                                             "mesh_renderer/mesh_fragment_shader.glsl");
 }
 
-void mesh_renderer::on_shutdown(const event::internal::shutdown &event){
+void mesh_renderer::on_shutdown(const event::internal::shutdown &){
     auto view = state->scene.view<material_mesh>();
     for(const auto id : view){
         auto &material = view.get<material_mesh>(id);

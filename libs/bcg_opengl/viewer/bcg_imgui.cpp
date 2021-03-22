@@ -70,25 +70,25 @@ void left_panel::render(viewer_state *state) {
     ImGui::End();
 }
 
-bool begin_header(viewer_window *win, const char *lbl) {
+bool begin_header(viewer_window *, const char *lbl) {
     if (!ImGui::CollapsingHeader(lbl)) return false;
     ImGui::PushID(lbl);
     return true;
 }
 
-void end_header(viewer_window *win) { ImGui::PopID(); }
+void end_header(viewer_window *) { ImGui::PopID(); }
 
-void open_glmodal(viewer_window *win, const char *lbl) { ImGui::OpenPopup(lbl); }
+void open_glmodal(viewer_window *, const char *lbl) { ImGui::OpenPopup(lbl); }
 
-void clear_glmodal(viewer_window *win) { ImGui::CloseCurrentPopup(); }
+void clear_glmodal(viewer_window *) { ImGui::CloseCurrentPopup(); }
 
-bool begin_glmodal(viewer_window *win, const char *lbl) {
+bool begin_glmodal(viewer_window *, const char *lbl) {
     return ImGui::BeginPopupModal(lbl);
 }
 
-void end_glmodal(viewer_window *win) { ImGui::EndPopup(); }
+void end_glmodal(viewer_window *) { ImGui::EndPopup(); }
 
-bool is_glmodal_open(viewer_window *win, const char *lbl) {
+bool is_glmodal_open(viewer_window *, const char *lbl) {
     return ImGui::IsPopupOpen(lbl);
 }
 
@@ -187,7 +187,7 @@ struct filedialog_state {
     std::string get_path() const { return path_join(dirname, filename); }
 };
 
-bool draw_filedialog(viewer_window *win, const char *lbl, std::string &path, bool save,
+bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool save,
                      const std::string &dirname, const std::string &filename, const std::string &filter) {
     static auto states = std::unordered_map<std::string, filedialog_state>{};
     ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
@@ -263,7 +263,7 @@ bool draw_filedialog_button(viewer_window *win, const char *button_lbl,
     }
 }
 
-bool draw_button(viewer_window *win, const char *lbl, bool enabled) {
+bool draw_button(viewer_window *, const char *lbl, bool enabled) {
     if (enabled) {
         return ImGui::Button(lbl);
     } else {
@@ -276,15 +276,15 @@ bool draw_button(viewer_window *win, const char *lbl, bool enabled) {
     }
 }
 
-void draw_label(viewer_window *win, const char *lbl, const std::string &label) {
+void draw_label(viewer_window *, const char *lbl, const std::string &label) {
     ImGui::LabelText(lbl, "%s", label.c_str());
 }
 
-void draw_separator(viewer_window *win) { ImGui::Separator(); }
+void draw_separator(viewer_window *) { ImGui::Separator(); }
 
-void continue_line(viewer_window *win) { ImGui::SameLine(); }
+void continue_line(viewer_window *) { ImGui::SameLine(); }
 
-bool draw_textinput(viewer_window *win, const char *lbl, std::string &value) {
+bool draw_textinput(viewer_window *, const char *lbl, std::string &value) {
     auto buffer = std::array<char,
             4096>{};
     auto num = 0;
@@ -296,86 +296,86 @@ bool draw_textinput(viewer_window *win, const char *lbl, std::string &value) {
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, float &value, float min, float max) {
+        viewer_window *, const char *lbl, float &value, float min, float max) {
     return ImGui::SliderFloat(lbl, &value, min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, Vector<float, 2> &value, float min, float max) {
+        viewer_window *, const char *lbl, Vector<float, 2> &value, float min, float max) {
     return ImGui::SliderFloat2(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, Vector<float,3> &value, float min, float max) {
+        viewer_window *, const char *lbl, Vector<float,3> &value, float min, float max) {
     return ImGui::SliderFloat3(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, Vector<float,4> &value, float min, float max) {
+        viewer_window *, const char *lbl, Vector<float,4> &value, float min, float max) {
     return ImGui::SliderFloat4(lbl, reinterpret_cast<float *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, int &value, int min, int max) {
+        viewer_window *, const char *lbl, int &value, int min, int max) {
     return ImGui::SliderInt(lbl, &value, min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorI<2> &value, int min, int max) {
+        viewer_window *, const char *lbl, VectorI<2> &value, int min, int max) {
     return ImGui::SliderInt2(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorI<3> &value, int min, int max) {
+        viewer_window *, const char *lbl, VectorI<3> &value, int min, int max) {
     return ImGui::SliderInt3(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
 bool draw_slider(
-        viewer_window *win, const char *lbl, VectorI<4> &value, int min, int max) {
+        viewer_window *, const char *lbl, VectorI<4> &value, int min, int max) {
     return ImGui::SliderInt4(lbl, reinterpret_cast<int *>(value.data()), min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, float &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, float &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, Vector<float,2> &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, Vector<float,2> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat2(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, Vector<float,3> &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, Vector<float,3> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat3(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, Vector<float,4> &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, Vector<float,4> &value, float speed,
                   float min, float max) {
     return ImGui::DragFloat4(lbl, reinterpret_cast<float *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, int &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, int &value, float speed,
                   int min, int max) {
     return ImGui::DragInt(lbl, &value, speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorI<2> &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, VectorI<2> &value, float speed,
                   int min, int max) {
     return ImGui::DragInt2(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorI<3> &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, VectorI<3> &value, float speed,
                   int min, int max) {
     return ImGui::DragInt3(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_dragger(viewer_window *win, const char *lbl, VectorI<4> &value, float speed,
+bool draw_dragger(viewer_window *, const char *lbl, VectorI<4> &value, float speed,
                   int min, int max) {
     return ImGui::DragInt4(lbl, reinterpret_cast<int *>(value.data()), speed, min, max);
 }
 
-bool draw_checkbox(viewer_window *win, const char *lbl, bool &value) {
+bool draw_checkbox(viewer_window *, const char *lbl, bool &value) {
     return ImGui::Checkbox(lbl, &value);
 }
 
@@ -390,7 +390,7 @@ bool draw_checkbox(viewer_window *win, const char *lbl, bool &value, bool invert
     }
 }
 
-bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float,3> &value) {
+bool draw_coloredit(viewer_window *, const char *lbl, Vector<float,3> &value) {
     auto flags = ImGuiColorEditFlags_Float;
     Vector<float, 3> color = value.cast<float>();
     auto edit = ImGui::ColorEdit3(lbl, color.data(), flags);
@@ -401,7 +401,7 @@ bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float,3> &value)
     return false;
 }
 
-bool draw_coloredit(viewer_window *win, const char *lbl, Vector<float,4> &value) {
+bool draw_coloredit(viewer_window *, const char *lbl, Vector<float,4> &value) {
     auto flags = ImGuiColorEditFlags_Float;
     Vector<float, 4> color = value.cast<float>();
     auto edit = ImGui::ColorEdit4(lbl, color.data(), flags);
@@ -455,9 +455,9 @@ bool draw_hdrcoloredit(viewer_window *win, const char *lbl, Vector<float,4> &val
     }
 }
 
-bool draw_combobox(viewer_window *win, const char *lbl, int &value,
+bool draw_combobox(viewer_window *, const char *lbl, int &value,
                    const std::vector<std::string> &labels) {
-    if(value >= labels.size()) return false;
+    if(static_cast<size_t>(value) >= labels.size()) return false;
     if (!ImGui::BeginCombo(lbl, labels[value].c_str())) return false;
     auto old_val = value;
     for (auto i = 0; i < labels.size(); i++) {
@@ -470,7 +470,7 @@ bool draw_combobox(viewer_window *win, const char *lbl, int &value,
     return value != old_val;
 }
 
-bool draw_combobox(viewer_window *win, const char *lbl, std::string &value,
+bool draw_combobox(viewer_window *, const char *lbl, std::string &value,
                    const std::vector<std::string> &labels) {
     if (!ImGui::BeginCombo(lbl, value.c_str())) return false;
     auto old_val = value;
@@ -485,7 +485,7 @@ bool draw_combobox(viewer_window *win, const char *lbl, std::string &value,
     return value != old_val;
 }
 
-bool draw_combobox(viewer_window *win, const char *lbl, int &idx, int num,
+bool draw_combobox(viewer_window *, const char *lbl, int &idx, int num,
                    const std::function<std::string(int)> &labels, bool include_null) {
     if (num <= 0) idx = -1;
     if (!ImGui::BeginCombo(lbl, idx >= 0 ? labels(idx).c_str() : "<none>"))
@@ -507,7 +507,7 @@ bool draw_combobox(viewer_window *win, const char *lbl, int &idx, int num,
     return idx != old_idx;
 }
 
-void draw_progressbar(viewer_window *win, const char *lbl, float fraction) {
+void draw_progressbar(viewer_window *, const char *lbl, float fraction) {
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5, 0.5, 1, 0.25));
     ImGui::ProgressBar(fraction, ImVec2(0.0f, 0.0f));
     ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
@@ -516,7 +516,7 @@ void draw_progressbar(viewer_window *win, const char *lbl, float fraction) {
 }
 
 void draw_progressbar(
-        viewer_window *win, const char *lbl, int current, int total) {
+        viewer_window *, const char *lbl, int current, int total) {
     auto overlay = std::to_string(current) + "/" + std::to_string(total);
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5, 0.5, 1, 0.25));
     ImGui::ProgressBar(
@@ -527,18 +527,18 @@ void draw_progressbar(
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const float *values, int count) {
+        viewer_window *, const char *lbl, const float *values, int count) {
     ImGui::PlotHistogram(lbl, values, count);
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<float> &values) {
+        viewer_window *, const char *lbl, const std::vector<float> &values) {
     ImGui::PlotHistogram(lbl, values.data(), (int) values.size(), 0, nullptr,
                          scalar_max, scalar_max, {0, 0}, 4);
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<Vector<float,2>> &values) {
+        viewer_window *, const char *lbl, const std::vector<Vector<float,2>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
                          (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,2>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
@@ -546,7 +546,7 @@ void draw_histogram(
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<Vector<float,3>> &values) {
+        viewer_window *, const char *lbl, const std::vector<Vector<float,3>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
                          (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,3>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
@@ -556,7 +556,7 @@ void draw_histogram(
 }
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<Vector<float,4>> &values) {
+        viewer_window *, const char *lbl, const std::vector<Vector<float,4>> &values) {
     ImGui::PlotHistogram((lbl + " x"s).c_str(), (const float *) values.data() + 0,
                          (int) values.size(), 0, nullptr, scalar_max, scalar_max, {0, 0}, sizeof(Vector<float,4>));
     ImGui::PlotHistogram((lbl + " y"s).c_str(), (const float *) values.data() + 1,
@@ -630,25 +630,25 @@ struct ImGuiAppLog {
 std::mutex _log_mutex;
 ImGuiAppLog _log_widget;
 
-void log_info(viewer_window *win, const std::string &msg) {
+void log_info(viewer_window *, const std::string &msg) {
     _log_mutex.lock();
     _log_widget.AddLog(msg.c_str(), "info");
     _log_mutex.unlock();
 }
 
-void log_error(viewer_window *win, const std::string &msg) {
+void log_error(viewer_window *, const std::string &msg) {
     _log_mutex.lock();
     _log_widget.AddLog(msg.c_str(), "errn");
     _log_mutex.unlock();
 }
 
-void clear_log(viewer_window *win) {
+void clear_log(viewer_window *) {
     _log_mutex.lock();
     _log_widget.Clear();
     _log_mutex.unlock();
 }
 
-void draw_log(viewer_window *win) {
+void draw_log(viewer_window *) {
     _log_mutex.lock();
     _log_widget.Draw();
     _log_mutex.unlock();

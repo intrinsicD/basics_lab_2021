@@ -40,7 +40,7 @@ void points_renderer::on_startup(const event::internal::startup &) {
                                                              "points_renderer/point_fragment_shader.glsl");
 }
 
-void points_renderer::on_shutdown(const event::internal::shutdown &event) {
+void points_renderer::on_shutdown(const event::internal::shutdown &) {
     auto view = state->scene.view<material_points>();
     for (const auto id : view) {
         auto &material = view.get<material_points>(id);

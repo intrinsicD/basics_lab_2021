@@ -26,7 +26,7 @@ void point_cloud_normal_filtering(vertex_container *vertices, kdtree_property<bc
                         auto v = vertex_handle(i);
 
                         auto result = index.query_knn(positions[v], params.search_params.num_closest);
-                        for(const auto vv : result.indices){
+                        for(BCG_MAYBE_UNUSED const auto vv : result.indices){
                             /* do stuff:
                              * positions[vv]: query neighbor position of vertex v
                              * normals[vv]: query neighbor normal of vertex v

@@ -39,7 +39,7 @@ bcg_scalar_t laplacian_kernel(bcg_scalar_t x, bcg_scalar_t sigma){
 
 bcg_scalar_t anova_kernel(bcg_scalar_t x, bcg_scalar_t y, int n, bcg_scalar_t sigma, int degree){
     bcg_scalar_t value = 0;
-    for(size_t k = 0; k < n; ++k){
+    for(size_t k = 0; k < static_cast<size_t>(n); ++k){
         value += std::pow(std::exp(-sigma * std::pow(x - y, 2)), degree);
         x *= x;
         y *= y;

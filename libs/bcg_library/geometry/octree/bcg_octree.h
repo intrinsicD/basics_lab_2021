@@ -24,11 +24,11 @@ struct octree_node{
 struct octree{
     octree() = default;
 
-    octree(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 20);
+    octree(property<VectorS<3>, 3> positions, size_t leaf_size, int max_depth = 20);
 
     void clear();
 
-    void build(property<VectorS<3>, 3> positions, int leaf_size, int max_depth = 20);
+    void build(property<VectorS<3>, 3> positions, size_t leaf_size, int max_depth = 20);
 
     neighbors_query query_radius(const VectorS<3> &query_point, bcg_scalar_t radius) const;
 
@@ -39,7 +39,7 @@ struct octree{
     std::vector<octree_node> storage;
     std::vector<size_t> indices;
     int max_depth;
-    int leaf_size;
+    size_t leaf_size;
 private:
     void query_radius(size_t index, const aligned_box3 &aabb, const sphere3 &sphere, neighbors_query &result_set) const;
 

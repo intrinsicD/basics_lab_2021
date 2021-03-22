@@ -21,7 +21,7 @@ deferred_renderer::deferred_renderer(viewer_state *state) : renderer("deferred_r
     state->dispatcher.sink<event::internal::resize>().connect<&deferred_renderer::on_resize>(this);
 }
 
-void deferred_renderer::on_startup(const event::internal::startup &event) {
+void deferred_renderer::on_startup(const event::internal::startup &) {
     std::string renderers_path = state->config.get_renderers_path_from_config_file();
     programs["deferred_shading_program"] = state->shaders.load("deferred_shading_program",
                                                                renderers_path +
@@ -93,7 +93,7 @@ void deferred_renderer::on_startup(const event::internal::startup &event) {
     gBuffer.release();
 }
 
-void deferred_renderer::on_shutdown(const event::internal::shutdown &event) {
+void deferred_renderer::on_shutdown(const event::internal::shutdown &) {
     auto view = state->scene.view<material_deferred>();
     for (const auto id : view) {
         auto &material = view.get<material_deferred>(id);
@@ -161,7 +161,7 @@ void deferred_renderer::on_setup_for_rendering(const event::deferred_renderer::s
     material.vao.release();
 }
 
-void deferred_renderer::on_begin_frame(const event::internal::begin_frame &event) {
+void deferred_renderer::on_begin_frame(const event::internal::begin_frame &) {
     state->scene.each([&](auto id) {
         if (state->scene.all_of<event::deferred_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::deferred_renderer::enqueue>(id);
@@ -169,7 +169,7 @@ void deferred_renderer::on_begin_frame(const event::internal::begin_frame &event
     });
 }
 
-void deferred_renderer::on_render(const event::internal::render &event) {
+void deferred_renderer::on_render(const event::internal::render &) {
     if (entities_to_draw.empty()) return;
     gl_state.set_depth_test(true);
     gl_state.set_depth_mask(true);
@@ -261,11 +261,11 @@ void deferred_renderer::on_render(const event::internal::render &event) {
     entities_to_draw.clear();
 }
 
-void deferred_renderer::on_end_frame(const event::internal::end_frame &event) {
+void deferred_renderer::on_end_frame(const event::internal::end_frame &) {
 
 }
 
-void deferred_renderer::on_resize(const event::internal::resize &event) {
+void deferred_renderer::on_resize(const event::internal::resize &) {
     if (!gBuffer.rbo.is_valid()) return;
 
     int SCR_WIDTH = state->window.framebuffer_viewport[2];

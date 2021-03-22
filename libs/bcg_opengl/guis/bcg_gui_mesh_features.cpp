@@ -42,7 +42,6 @@ void gui_mesh_features(viewer_state *state) {
             material.use_uniform_color = true;
         }
         {
-            auto &material = state->scene.get_or_emplace<material_graph>(state->picker.entity_id);
             state->scene.remove_if_exists<event::graph_renderer::enqueue>(state->picker.entity_id);
         }
     }

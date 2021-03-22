@@ -23,15 +23,20 @@ std::vector<std::string> sampling_octree::type_names() {
     return names;
 }
 
-sampling_octree::sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size,
-                                 int max_depth) : sampling_type(
-        sampling_type), ref_positions(ref_positions), leaf_size(leaf_size), max_depth(max_depth) {
+sampling_octree::sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, size_t leaf_size,
+                                 int max_depth) : ref_positions(ref_positions),
+                                                  max_depth(max_depth),
+                                                  leaf_size(leaf_size),
+                                                  sampling_type(sampling_type) {
     build(sampling_type, ref_positions, leaf_size, max_depth);
 }
 
 sampling_octree::sampling_octree(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
-                                 const std::vector<size_t> &ordering, int leaf_size, int max_depth) : sampling_type(
-        sampling_type), ref_positions(ref_positions), leaf_size(leaf_size), max_depth(max_depth) {
+                                 const std::vector<size_t> &ordering, size_t leaf_size, int max_depth) :
+        ref_positions(ref_positions),
+        max_depth(max_depth),
+        leaf_size(leaf_size),
+        sampling_type(sampling_type) {
     build(sampling_type, ref_positions, ordering, leaf_size, max_depth);
 }
 
@@ -63,7 +68,7 @@ inline void SetChildExists(uint8_t &config, uint8_t i) {
     SET_BIT(config, i);
 }
 
-void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, int leaf_size,
+void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions, size_t leaf_size,
                             int max_depth) {
     this->sampling_type = sampling_type;
     this->ref_positions = ref_positions;
@@ -75,7 +80,7 @@ void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> 
 
 void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> ref_positions,
                             const std::vector<size_t> &ordering,
-                            int leaf_size, int max_depth) {
+                            size_t leaf_size, int max_depth) {
 
     this->sampling_type = sampling_type;
     this->ref_positions = ref_positions;
@@ -88,14 +93,14 @@ void sampling_octree::build(SamplingType sampling_type, property<VectorS<3>, 3> 
 void sampling_octree::rebuild() {
     clear();
     aabb = aligned_box3();
-    if(indices.empty()){
+    if (indices.empty()) {
         indices.resize(ref_positions.size());
         for (size_t i = 0; i < ref_positions.size(); ++i) {
             aabb.grow(ref_positions[i]);
             indices[i] = i;
         }
-    }else{
-        if(indices.size() != ref_positions.size()){
+    } else {
+        if (indices.size() != ref_positions.size()) {
             std::cout << "indices.size() does not match ref_positions.size()!\n";
             return;
         }
@@ -306,7 +311,7 @@ sampling_octree::query_knn(size_t counter, const aligned_box3 &current_aabb, con
             result_set.distances.push_back(dist);
         }
 
-        if (result_set.indices.size() >= num_closest) {
+        if (result_set.indices.size() >= static_cast<size_t>(num_closest)) {
             sort_by_first(result_set.distances, result_set.indices);
             result_set.indices.resize(num_closest);
             result_set.distances.resize(num_closest);
@@ -335,7 +340,7 @@ sampling_octree::query_knn(size_t counter, const aligned_box3 &current_aabb, con
             continue;
         }
         auto childBox = child_box(current_aabb, octant);
-        if (result_set.indices.size() < num_closest ||
+        if (result_set.indices.size() < static_cast<size_t>(num_closest) ||
             intersect<3>(sphere3(query_point, result_set.distances.back()), childBox)) {
             query_knn(storage[counter].first_child_index + offset, childBox, query_point, num_closest, result_set,
                       search_depth);
@@ -375,7 +380,8 @@ bool sampling_octree::reject(size_t counter, const aligned_box3 &current_aabb, c
 
 bool sampling_octree::reject_down(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
     if (sampling_type == SamplingType::mean) {
-        if (storage[counter].sampled_index != BCG_INVALID_ID && contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
+        if (storage[counter].sampled_index != BCG_INVALID_ID &&
+            contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
             return true;
         }
     } else {
@@ -403,9 +409,11 @@ bool sampling_octree::reject_down(size_t counter, const aligned_box3 &current_aa
 }
 
 bool sampling_octree::reject_up(size_t counter, const aligned_box3 &current_aabb, const sphere3 &sphere) const {
-    if (sampling_type == SamplingType::mean && storage[counter].sampled_index != BCG_INVALID_ID && contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
+    if (sampling_type == SamplingType::mean && storage[counter].sampled_index != BCG_INVALID_ID &&
+        contains<3>(sphere, sample_points[storage[counter].sampled_index])) {
         return true;
-    } else if (storage[counter].sampled_index != BCG_INVALID_ID && contains<3>(sphere, ref_positions[storage[counter].sampled_index])) {
+    } else if (storage[counter].sampled_index != BCG_INVALID_ID &&
+               contains<3>(sphere, ref_positions[storage[counter].sampled_index])) {
         return true;
     }
 

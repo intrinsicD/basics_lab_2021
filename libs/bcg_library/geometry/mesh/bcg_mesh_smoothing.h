@@ -29,7 +29,7 @@ void taubin_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, bcg_
 
 template<typename T, int N>
 void
-implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &laplacian, property<T, N> &p, bcg_scalar_t timestep) {
+implicit_smoothing(halfedge_mesh &mesh, const mesh_laplacian &, property<T, N> &p, bcg_scalar_t timestep) {
     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
     auto e_weight = mesh.edges.get<bcg_scalar_t, 1>("e_laplacian_weight");
     auto v_weight = mesh.vertices.get<bcg_scalar_t, 1>("v_laplacian_weight");

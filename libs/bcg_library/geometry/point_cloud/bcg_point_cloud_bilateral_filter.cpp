@@ -84,7 +84,7 @@ void point_cloud_bilateral_filter_radius(vertex_container *vertices, const kdtre
                     auto result = index.query_radius(positions[v], radius);
                     delta[v] = 0;
                     bcg_scalar_t sum = 0;
-                    for (int j = 0; j < result.indices.size(); ++j) {
+                    for (size_t j = 0; j < result.indices.size(); ++j) {
                         VectorS<3> diff = positions[result.indices[j]] - positions[v];
                         bcg_scalar_t d_d = diff.squaredNorm();
                         bcg_scalar_t d_n = diff.dot(normals[v]);

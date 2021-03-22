@@ -195,7 +195,7 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
     }
 }
 
-void gpu_system::on_shutdown(const event::internal::shutdown &event) {
+void gpu_system::on_shutdown(const event::internal::shutdown &) {
     auto view = state->scene.view<ogl_shape>();
     for (const auto id : view) {
         auto &shape = view.get<ogl_shape>(id);

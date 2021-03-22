@@ -141,15 +141,15 @@ void mesh_curvature_taubin(halfedge_mesh &mesh, int post_smoothing_steps, bool t
                         MatrixS<3, 3> tensor(MatrixS<3, 3>::Zero());
 
                         // compute tensor over vertex neighborhood stored in vertices
-                        for (const auto nit : neighborhood) {
+                        for (const auto &nit : neighborhood) {
                             // accumulate tensor from dihedral angles around vertices
                             for (const auto hv : mesh.halfedge_graph::get_halfedges(nit)) {
                                 auto ee = mesh.get_edge(hv);
                                 VectorS<3> ev = evec[ee];
                                 bcg_scalar_t beta = angle[ee];
-                                for (int i = 0; i < 3; ++i) {
+                                for (int k = 0; k < 3; ++k) {
                                     for (int j = 0; j < 3; ++j) {
-                                        tensor(i, j) += beta * ev[i] * ev[j];
+                                        tensor(k, j) += beta * ev[k] * ev[j];
                                     }
                                 }
                             }

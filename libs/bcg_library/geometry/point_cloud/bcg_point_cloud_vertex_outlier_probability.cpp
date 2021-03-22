@@ -91,7 +91,7 @@ point_cloud_vertex_outlier_probability_radius(vertex_container *vertices, const 
 
                     covs[v] = MatrixS<3, 3>::Zero(3, 3);
 
-                    for (int j = 0; j < knn[v].size(); ++j) {
+                    for (size_t j = 0; j < knn[v].size(); ++j) {
                         VectorS<3> diff = positions[v] - positions[knn[v][j]];
                         covs[v] += diff * diff.transpose() *
                                    std::exp(-knn_dists[v][j] * knn_dists[v][j] / (avg_distance[v]));
@@ -109,7 +109,7 @@ point_cloud_vertex_outlier_probability_radius(vertex_container *vertices, const 
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     likelihood[v] = 0;
-                    for (int j = 0; j < knn[v].size(); ++j) {
+                    for (size_t j = 0; j < knn[v].size(); ++j) {
                         VectorS<3> diff = positions[knn[v][j]] - positions[v];
                         likelihood[v] += std::exp(-diff.transpose() * covs[v].inverse() * diff) / knn[v].size();
                         if (std::isnan(likelihood[v])) likelihood[v] = 0;

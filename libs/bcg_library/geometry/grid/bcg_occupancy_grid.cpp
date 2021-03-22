@@ -148,7 +148,7 @@ neighbors_query query_kring(const occupancy_grid &grid, const VectorS<3> &query_
 neighbors_query query_knn(const occupancy_grid &grid, const VectorS<3> &query_point, size_t num_closest){
     VectorI<3> query_coord = grid.to_coord(query_point);
     neighbors_query result_set;
-    int kring = 1;
+    bcg_index_t kring = 1;
     occupancy_grid boundary({2, 2, 2}, grid.aabb);
     VectorI<3> center_coord = boundary.to_coord(grid.aabb.center());
 

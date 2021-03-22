@@ -32,7 +32,7 @@ void picking_renderer::on_startup(const event::internal::startup &) {
                                                                "picking_renderer/picking_fragment_shader.glsl");
 }
 
-void picking_renderer::on_shutdown(const event::internal::shutdown &event) {
+void picking_renderer::on_shutdown(const event::internal::shutdown &) {
     programs["picking_renderer_program"].destroy();
 }
 
@@ -89,8 +89,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     if(state->mouse.is_captured_by_gui) return;
     if (!state->mouse.left || event.action == GLFW_RELEASE) return;
 
-    const auto &vp = state->window.framebuffer_viewport;
-/*    int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
+/*    const auto &vp = state->window.framebuffer_viewport;
+    int x = static_cast<int>( state->mouse.cursor_position[0] * state->window.high_dpi_scaling);
     int y = static_cast<int>( vp[3] - state->mouse.cursor_position[1] * state->window.high_dpi_scaling);*/
     float x = state->mouse.window_coordinates[0];
     float y = state->mouse.window_coordinates[1];

@@ -379,7 +379,7 @@ void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
 
 void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                                                             int iterations,
-                                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+                                                            bcg_scalar_t sigma_p, bcg_scalar_t /*sigma_n*/,
                                                             size_t parallel_grain_size) {
     auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     auto quadrics = mesh.faces.get_or_add<quadric, 1>("f_quadric");

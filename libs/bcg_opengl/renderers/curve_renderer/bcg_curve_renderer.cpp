@@ -41,7 +41,7 @@ void curve_renderer::on_startup(const event::internal::startup &) {
                                                              &tess_eval);
 }
 
-void curve_renderer::on_shutdown(const event::internal::shutdown &event) {
+void curve_renderer::on_shutdown(const event::internal::shutdown &) {
     auto view = state->scene.view<material_curve>();
     for (const auto id : view) {
         auto &material = view.get<material_curve>(id);
@@ -144,7 +144,7 @@ void curve_renderer::on_render(const event::internal::render &) {
 
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
-        for (size_t offset = 0; offset < shape.num_vertices - 3; offset += 3) {
+        for (int offset = 0; offset < shape.num_vertices - 3; offset += 3) {
 
             if (material.show_hermite) {
 /*                program.set_uniform_i("show_hermite", material.show_hermite);
@@ -187,7 +187,7 @@ void curve_renderer::on_set_position_attribute(const event::curve_renderer::set_
     std::vector<attribute> vertex_attributes = {position};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
     auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
-    state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
     state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(event.id);
 }
 

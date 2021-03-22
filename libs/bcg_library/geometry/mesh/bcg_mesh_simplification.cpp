@@ -182,15 +182,16 @@ private:
 simplification::simplification(halfedge_mesh &mesh, bcg_scalar_t aspect_ratio,
                                bcg_scalar_t edge_length, unsigned int max_valence,
                                bcg_scalar_t normal_deviation, bcg_scalar_t hausdorff_error) : mesh(mesh),
-                                                                                              aspect_ratio(
-                                                                                                      aspect_ratio),
-                                                                                              edge_length(edge_length),
-                                                                                              max_valence(max_valence),
                                                                                               normal_deviation(
                                                                                                       normal_deviation /
                                                                                                       180.0 * pi),
                                                                                               hausdorff_error(
-                                                                                                      hausdorff_error) {
+                                                                                                      hausdorff_error),
+                                                                                              aspect_ratio(
+                                                                                                      aspect_ratio),
+                                                                                              edge_length(edge_length),
+                                                                                              max_valence(max_valence)
+{
 
     if (!mesh.is_triangle_mesh()) {
         mesh.triangulate();

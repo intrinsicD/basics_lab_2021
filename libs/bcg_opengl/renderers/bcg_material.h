@@ -12,6 +12,8 @@
 namespace bcg{
 
 struct material{
+    virtual ~material() = default;
+
     std::vector<attribute> attributes;
     std::vector<ogl_texture> textures;
 

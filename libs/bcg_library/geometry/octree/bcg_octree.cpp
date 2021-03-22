@@ -13,7 +13,7 @@
 
 namespace bcg {
 
-octree::octree(property<VectorS<3>, 3> positions, int leaf_size, int max_depth){
+octree::octree(property<VectorS<3>, 3> positions, size_t leaf_size, int max_depth){
     build(positions, leaf_size, max_depth);
 }
 
@@ -44,7 +44,7 @@ inline void SetChildExists(uint8_t &config, uint8_t i) {
     SET_BIT(config, i);
 }
 
-void octree::build(property<VectorS<3>, 3> positions, int leaf_size, int max_depth) {
+void octree::build(property<VectorS<3>, 3> positions, size_t leaf_size, int max_depth) {
     clear();
     this->max_depth = max_depth;
     this->leaf_size = leaf_size;

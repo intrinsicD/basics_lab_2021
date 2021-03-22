@@ -17,13 +17,13 @@ halfedge_graph point_cloud_build_knn_graph(vertex_container &vertices, const kdt
     halfedge_handle h;
     for(const auto v : graph.vertices){
         auto result = kdtree.query_knn(graph.positions[v], num_closest);
-        assert(result.indices.size() == num_closest);
+        assert(result.indices.size() == static_cast<size_t>(num_closest));
         for(const auto &idx : result.indices){
             if(v.idx == idx) continue;
             h = graph.add_edge(v, vertex_handle(idx));
         }
 
-        assert( graph.get_valence(v) == num_closest - 1);
+        assert( graph.get_valence(v) == static_cast<size_t>(num_closest - 1));
     }
     return graph;
 }

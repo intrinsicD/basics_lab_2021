@@ -162,7 +162,7 @@ void point_cloud_curvature_taubin(vertex_container *vertices, const kdtree_prope
                     MatrixS<3, 3> tensor(MatrixS<3, 3>::Zero());
                     bcg_scalar_t H = v_pca_loading[v][2] / v_pca_loading[v].sum();
                     size_t size = result.indices.size();
-                    for (int j = 0; j < size; ++j) {
+                    for (size_t j = 0; j < size; ++j) {
                         VectorS<3> ev = positions[result.indices[j]] - positions[v];
                         bcg_scalar_t l = ev.norm();
                         if (l == 0) continue;

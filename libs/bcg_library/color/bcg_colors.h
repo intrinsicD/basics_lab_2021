@@ -13,18 +13,18 @@ namespace bcg {
 
 template<typename T = bcg_scalar_t>
 struct color {
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> white = {1.0, 1.0, 1.0};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> yellow = {1.0f, 1.0f, 0.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> magenta = {1.0f, 0.0f, 1.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> red = {1.0f, 0.0f, 0.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> cyan = {0.0f, 1.0f, 1.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> green = {0.0f, 1.0f, 0.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> blue = {0.0f, 0.0f, 1.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> black = {0, 0, 0};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> orange = {1.0f, 0.5f, 0.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> violet = {0.5f, 0.0f, 1.0f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 3> grey = {0.5f, 0.5f, 0.5f};
-    BCG_MAYBE_UNUSED inline static const Vector<T, 4> default_background = {0.2f, 0.4f, 0.8f, 1.0f};
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> white = Vector<T, 3>(1.0, 1.0, 1.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> yellow = Vector<T, 3>(1.0, 1.0, 0.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> magenta = Vector<T, 3>(1.0, 0.0, 1.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> red = Vector<T, 3>(1.0, 0.0, 0.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> cyan = Vector<T, 3>(0.0, 1.0, 1.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> green = Vector<T, 3>(0.0, 1.0, 0.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> blue = Vector<T, 3>(0.0, 0.0, 1.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> black = Vector<T, 3>(0.0, 0.0, 0.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> orange = Vector<T, 3>(1.0, 0.5, 0.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> violet = Vector<T, 3>(0.5, 0.0, 1.0);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 3> grey = Vector<T, 3>(0.5, 0.5, 0.5);
+    BCG_MAYBE_UNUSED inline static const Vector<T, 4> default_background = Vector<T, 4>(0.2, 0.4, 0.8, 1.0);
 
     static Vector<T, 3> random() {
         return Vector<T, 3>::Random().cwiseAbs();
