@@ -228,12 +228,13 @@ bool draw_filedialog(viewer_window *, const char *lbl, std::string &path, bool s
             state.set(state.dirname, state.filename, filter_buffer.data(), save);
         }
         auto ok = false, exit = false;
-        if (ImGui::Button("Ok")) {
+        file_exists = state.exists(state.filename);
+        if (ImGui::Button(file_exists?"Replace":"Ok")) {
             path = path_join(state.dirname, state.filename);
             ok = true;
             exit = true;
-            file_exists = state.exists(state.filename);
         }
+
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {
             exit = true;

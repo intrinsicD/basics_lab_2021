@@ -47,6 +47,20 @@ private:
 
     bool read_ply(point_cloud &pc);
 
+    bool write_pts(vertex_container *vertices);
+
+    bool write_xyz(vertex_container *vertices);
+
+    bool write_pwn(vertex_container *vertices);
+
+    bool write_pb(vertex_container *vertices);
+
+    bool write_csv(vertex_container *vertices);
+
+    bool write_3d(vertex_container *vertices);
+
+    bool write_txt(vertex_container *vertices);
+
 private:
     std::string filename;
     point_cloudio_flags flags;

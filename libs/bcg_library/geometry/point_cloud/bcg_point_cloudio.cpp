@@ -56,21 +56,21 @@ bool point_cloudio::write(vertex_container *vertices) {
 
     //TODO implement write functions for pointclouds
     // extension determines reader
-    /*if (ext == ".pts") {
-        return write_pts(pc);
+    if (ext == ".pts") {
+        return write_pts(vertices);
     } else if (ext == ".xyz") {
-        return write_xyz(pc);
+        return write_xyz(vertices);
     } else if (ext == ".pwn") {
-        return write_pwn(pc);
+        return write_pwn(vertices);
     } else if (ext == ".pb") {
-        return write_pb(pc);
+        return write_pb(vertices);
     } else if (ext == ".csv") {
-        return write_csv(pc);
+        return write_csv(vertices);
     } else if (ext == ".3d") {
-        return write_3d(pc);
+        return write_3d(vertices);
     } else if (ext == ".txt") {
-        return write_txt(pc);
-    }*/
+        return write_txt(vertices);
+    }
 
     // we didn't find a writer module
     return false;
@@ -368,6 +368,79 @@ bool point_cloudio::read_ply(point_cloud &pc) {
     pc.object_properties.remove(point);
 
     return pc.vertices.size() > 0;
+}
+
+bool point_cloudio::write_pts(vertex_container *vertices){
+    std::ofstream ofs(filename);
+    if (!ofs) {
+        return false;
+    }
+
+    auto positions = vertices->get<VectorS<3>, 3>("v_position");
+
+    ofs << positions.size();
+    ofs << "\n";
+    for (const auto v : *vertices) {
+        ofs << positions[v].transpose();
+        ofs << "\n";
+    }
+
+    ofs.close();
+    return true;
+}
+
+bool point_cloudio::write_xyz(vertex_container *vertices){
+    std::ofstream ofs(filename);
+    if (!ofs) {
+        return false;
+    }
+
+    auto positions = vertices->get<VectorS<3>, 3>("v_position");
+
+    for (const auto v : *vertices) {
+        ofs << positions[v].transpose();
+        ofs << ";\t\n";
+    }
+
+    ofs.close();
+    return true;
+}
+
+bool point_cloudio::write_pwn(vertex_container *vertices){
+
+}
+
+bool point_cloudio::write_pb(vertex_container *vertices){
+
+}
+
+bool point_cloudio::write_csv(vertex_container *vertices){
+    std::ofstream ofs(filename);
+    if (!ofs) {
+        return false;
+    }
+
+    auto positions = vertices->get<VectorS<3>, 3>("v_position");
+
+    for (const auto v : *vertices) {
+        for(int i = 0; i < positions[v].size() - 1; ++i){
+            ofs << positions[v][i];
+            ofs << ",";
+        }
+        ofs << positions[v][positions[v].size() - 1];
+        ofs << "\n";
+    }
+
+    ofs.close();
+    return true;
+}
+
+bool point_cloudio::write_3d(vertex_container *vertices){
+
+}
+
+bool point_cloudio::write_txt(vertex_container *vertices){
+
 }
 
 }
