@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_QUAD_H
 #define BCG_GRAPHICS_BCG_QUAD_H
 
-#include "../triangle/bcg_triangle.h"
+#include "triangle/bcg_triangle.h"
 
 namespace bcg {
 

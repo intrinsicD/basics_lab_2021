@@ -12,6 +12,7 @@ namespace bcg::event::mesh{
 struct setup{
     entt::entity id;
     std::string filename;
+    bool normalize = true;
 };
 struct make_triangle{
 
@@ -20,6 +21,9 @@ struct make_quad{
 
 };
 struct make_box{
+
+};
+struct make_parameterized_plane{
 
 };
 

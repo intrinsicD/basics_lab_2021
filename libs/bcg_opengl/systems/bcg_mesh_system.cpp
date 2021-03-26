@@ -30,11 +30,14 @@
 
 namespace bcg {
 
+using namespace entt::literals;
+
 mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::setup>().connect<&mesh_system::on_setup>(this);
     state->dispatcher.sink<event::mesh::make_triangle>().connect<&mesh_system::on_make_triangle>(this);
     state->dispatcher.sink<event::mesh::make_quad>().connect<&mesh_system::on_make_quad>(this);
     state->dispatcher.sink<event::mesh::make_box>().connect<&mesh_system::on_make_box>(this);
+    state->dispatcher.sink<event::mesh::make_parameterized_plane>().connect<&mesh_system::on_make_parameterized_plane>(this);
     state->dispatcher.sink<event::mesh::boundary>().connect<&mesh_system::on_boundary>(this);
     state->dispatcher.sink<event::mesh::vertex_convex_concave>().connect<&mesh_system::on_vertex_convex_concave>(this);
     state->dispatcher.sink<event::mesh::features>().connect<&mesh_system::on_features>(this);
@@ -80,8 +83,10 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
     aligned_box3 aabb(mesh.positions.vector());
     state->scene.emplace<entity_info>(event.id, event.filename, "mesh", aabb.center(), aabb.halfextent().maxCoeff());
 
-    Map(mesh.positions) =
-            (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
+    if(event.normalize){
+        Map(mesh.positions) =
+                (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
+    }
 
     if(!mesh.vertices.has("v_normal")){
         state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
@@ -122,6 +127,19 @@ void mesh_system::on_make_box(const event::mesh::make_box &) {
     auto id = state->scene.create();
     state->scene.emplace<halfedge_mesh>(id, mesh);
     state->dispatcher.trigger<event::mesh::setup>(id, "");
+}
+
+void mesh_system::on_make_parameterized_plane(const event::mesh::make_parameterized_plane &){
+    mesh_factory factory;
+
+    ParameterizedPlane3 plane;
+    auto mesh = factory.make_parameterized_plane(plane);
+    auto id = state->scene.create();
+    state->scene.emplace<halfedge_mesh>(id, mesh);
+    state->scene.emplace<ParameterizedPlane3>(id, plane);
+    state->scene.emplace<entt::tag<"parameterized_plane"_hs>>(id);
+    assert(state->scene.all_of<entt::tag<"parameterized_plane"_hs>>(id));
+    state->dispatcher.trigger<event::mesh::setup>(id, "", false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

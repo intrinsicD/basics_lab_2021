@@ -9,6 +9,7 @@
 #include "triangle/bcg_triangle.h"
 #include "quad/bcg_quad.h"
 #include "aligned_box/bcg_aligned_box.h"
+#include "parameterized_plane/bcg_parameterized_plane.h"
 
 namespace bcg{
     struct mesh_factory{
@@ -21,6 +22,10 @@ namespace bcg{
         halfedge_mesh make_quad();
 
         halfedge_mesh make_quad(const quad3 &quad);
+
+        halfedge_mesh make_parameterized_plane();
+
+        halfedge_mesh make_parameterized_plane(const ParameterizedPlane3 &plane);
 
         halfedge_mesh make_icosahedron();
 

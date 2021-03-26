@@ -22,6 +22,8 @@ struct mesh_system : public system {
 
     void on_make_box(const event::mesh::make_box &event);
 
+    void on_make_parameterized_plane(const event::mesh::make_parameterized_plane &event);
+
     //------------------------------------------------------------------------------------------------------------------
 
     void on_boundary(const event::mesh::boundary &event);

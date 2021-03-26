@@ -27,6 +27,7 @@ target_sources(bcg_library_test PRIVATE
         bcg_test_monomial_basis.cpp
         bcg_test_bernstein_basis.cpp
         bcg_test_occupancy_grid.cpp
+        bcg_test_color_rgb.cpp
         )
 if(BCG_TORCH)
     target_sources(bcg_library_test PRIVATE

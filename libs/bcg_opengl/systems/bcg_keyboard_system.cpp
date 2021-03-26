@@ -54,7 +54,7 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     }
     if (state->keyboard.keys[GLFW_KEY_S]) {}
     if (state->keyboard.keys[GLFW_KEY_T]) {
-        state->dispatcher.trigger<event::mesh::make_box>();
+        state->dispatcher.trigger<event::mesh::make_parameterized_plane>();
     }
     if (state->keyboard.keys[GLFW_KEY_U]) {}
     if (state->keyboard.keys[GLFW_KEY_V]) {}

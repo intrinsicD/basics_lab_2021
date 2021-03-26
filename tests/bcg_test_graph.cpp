@@ -34,7 +34,7 @@ TEST(TestSuiteGraph, first){
     }
 
     std::vector<size_t> H;
-    for(const auto e:edges){
+    for(const VectorI<2> &e:edges){
         H.push_back(graph.add_edge(V[e[0]], V[e[1]]));
         H.push_back(graph.get_opposite(H.back()));
     }

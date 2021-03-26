@@ -207,7 +207,6 @@ void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color
 
         std::vector<VectorS<3>> test_data(material.width * (height + 1));
         material.edge_colors().download_data(test_data.data());
-        std::cout << MapConst<3>(test_data).block<3, 3>(0, 0) << "\n";
     }
 
     material.use_uniform_color = false;

@@ -43,6 +43,28 @@ halfedge_mesh mesh_factory::make_quad(const quad3 &quad) {
     return mesh;
 }
 
+halfedge_mesh mesh_factory::make_parameterized_plane(){
+    return make_parameterized_plane(ParameterizedPlane3());
+}
+
+halfedge_mesh mesh_factory::make_parameterized_plane(const ParameterizedPlane3 &plane){
+    halfedge_mesh mesh;
+
+    auto vertices = get_vertices(plane);
+
+    for (const auto &point : vertices) {
+        mesh.add_vertex(point);
+    }
+
+    auto faces = get_faces(plane);
+    VectorI<3> face0 = faces[0];
+    VectorI<3> face1 = faces[1];
+    mesh.add_face({face0[0], face0[1], face0[2]});
+    mesh.add_face({face1[0], face1[1], face1[2]});
+
+    return mesh;
+}
+
 halfedge_mesh mesh_factory::make_icosahedron() {
     halfedge_mesh mesh;
     const auto X = 0.525731112119133606;

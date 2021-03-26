@@ -63,8 +63,6 @@ glsl_program viewer_shaders::load(std::string name,
         shaders.push_back(load_shader(*tess_eval_shader_file, GL_TESS_EVALUATION_SHADER));
     }
 
-    std::cout << vertex_shader_file;
-
     program.build(shaders);
 
     for (const auto &shader : shaders) {

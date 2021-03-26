@@ -38,6 +38,7 @@
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
 #include "../spike/opengl/bcg_gui_mesh_normal_filtering.h"
 #include "../spike/opengl/bcg_gui_point_cloud_normal_filtering.h"
+#include "bcg_opengl/guis/bcg_gui_parameterized_plane.h"
 
 int main() {
     using namespace bcg;
@@ -164,6 +165,9 @@ int main() {
             }
             if (ImGui::MenuItem("Reload")) {
                 state->gui.left = gui_reload_entity;
+            }
+            if (ImGui::MenuItem("Plane")) {
+                state->gui.left = gui_parameterized_plane;
             }
             ImGui::EndMenu();
         }
