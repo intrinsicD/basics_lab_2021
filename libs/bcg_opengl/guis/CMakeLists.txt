@@ -30,6 +30,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_subdivision.h bcg_gui_mesh_subdivision.cpp
         bcg_gui_mesh_vertex_convex_concave.h bcg_gui_mesh_vertex_convex_concave.cpp
         bcg_gui_mesh_vertex_normals.h bcg_gui_mesh_vertex_normals.cpp
+        bcg_gui_mesh_vertex_extremal_values.h bcg_gui_mesh_vertex_extremal_values.cpp
         bcg_gui_ogl_buffer.h bcg_gui_ogl_buffer.cpp
         bcg_gui_ogl_shape.h bcg_gui_ogl_shape.cpp
         bcg_gui_point_cloud.h bcg_gui_point_cloud.cpp
@@ -42,6 +43,8 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_point_cloud_vertex_noise.h bcg_gui_point_cloud_vertex_noise.cpp
         bcg_gui_point_cloud_vertex_outlier_probability.h bcg_gui_point_cloud_vertex_outlier_probability.cpp
         bcg_gui_point_cloud_vertex_pca.h bcg_gui_point_cloud_vertex_pca.cpp
+        bcg_gui_point_cloud_height_field.h bcg_gui_point_cloud_height_field.cpp
+        bcg_gui_point_cloud_vertex_extremal_values.h bcg_gui_point_cloud_vertex_extremal_values.cpp
         bcg_gui_property_container_selector.h bcg_gui_property_container_selector.cpp
         bcg_gui_property_editfield.h bcg_gui_property_editfield.cpp
         bcg_gui_property_selector.h bcg_gui_property_selector.cpp
@@ -65,5 +68,5 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_viewer_window.h bcg_gui_viewer_window.cpp
         bcg_gui_exporting.h bcg_gui_exporting.cpp
         bcg_gui_parameterized_plane.h bcg_gui_parameterized_plane.cpp
-        bcg_gui_point_cloud_height_field.h bcg_gui_point_cloud_height_field.cpp)
+        )
 
