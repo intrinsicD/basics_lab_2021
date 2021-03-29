@@ -1,5 +1,6 @@
 target_sources(bcg_opengl PRIVATE
         bcg_gui_aligned_box3.h bcg_gui_aligned_box3.cpp
+        bcg_gui_radius_from_aabb.h bcg_gui_radius_from_aabb.cpp
         bcg_gui_correspondences.h bcg_gui_correspondences.cpp
         bcg_gui_entity_hierarchy.h bcg_gui_entity_hierarchy.cpp
         bcg_gui_entity_info.h bcg_gui_entity_info.cpp
@@ -45,6 +46,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_point_cloud_vertex_pca.h bcg_gui_point_cloud_vertex_pca.cpp
         bcg_gui_point_cloud_height_field.h bcg_gui_point_cloud_height_field.cpp
         bcg_gui_point_cloud_vertex_extremal_values.h bcg_gui_point_cloud_vertex_extremal_values.cpp
+        bcg_gui_point_cloud_vertex_saliency.h bcg_gui_point_cloud_vertex_saliency.cpp
         bcg_gui_property_container_selector.h bcg_gui_property_container_selector.cpp
         bcg_gui_property_editfield.h bcg_gui_property_editfield.cpp
         bcg_gui_property_selector.h bcg_gui_property_selector.cpp

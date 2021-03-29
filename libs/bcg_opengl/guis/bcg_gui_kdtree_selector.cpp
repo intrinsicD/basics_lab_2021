@@ -3,16 +3,14 @@
 //
 
 #include "bcg_gui_kdtree_selector.h"
+#include "bcg_gui_radius_from_aabb.h"
 #include "viewer/bcg_viewer_state.h"
-#include "aligned_box/bcg_aligned_box.h"
-#include "aligned_box/bcg_aligned_box_stats.h"
 
 namespace bcg{
 
 kdtree_parameters gui_kd_tree_selector(viewer_state *state){
     static int num_closest = 12;
     static float radius = 0.001;
-    static float percentage = 1;
     static kdtree_parameters parameters;
     static int e = 0;
     ImGui::PushID("kdtree_selector");
@@ -29,20 +27,11 @@ kdtree_parameters gui_kd_tree_selector(viewer_state *state){
         }
     }else if(e == 1){
         parameters.type = kdtree_parameters::Type::radius;
-        parameters.radius = radius;
-        if(ImGui::InputFloat("radius", &radius, 0.001, 0.1, "%.6f")){
+        bool changed = false;
+        parameters.radius = gui_radius_from_aabb(state, &changed);
+        if(changed){
             num_closest = parameters.num_closest;
             parameters.num_closest = 0;
-        }
-        ImGui::InputFloat("percentage", &percentage);
-        if(ImGui::Button("% from AABB diagonal")){
-            if (state->scene.all_of<aligned_box3>(state->picker.entity_id)) {
-                auto *vertices = state->get_vertices(state->picker.entity_id);
-                if(vertices){
-                    auto &aabb = state->scene.get<aligned_box3>(state->picker.entity_id);
-                    radius = aabb_stats::percentage_diagonal(aabb, percentage);
-                }
-            }
         }
     }
     ImGui::PopID();

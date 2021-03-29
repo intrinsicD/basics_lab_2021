@@ -11,4 +11,5 @@ target_sources(bcg_graphics PRIVATE
         bcg_point_cloud_vertex_quadric.h bcg_point_cloud_vertex_quadric.cpp
         bcg_point_cloud_height_field.h bcg_point_cloud_height_field.cpp
         bcg_point_cloud_extremal_vertex_values.h bcg_point_cloud_extremal_vertex_values.cpp
+        bcg_point_cloud_vertex_saliency.h bcg_point_cloud_vertex_saliency.cpp
         bcg_point_cloudio.h bcg_point_cloudio.cpp)
