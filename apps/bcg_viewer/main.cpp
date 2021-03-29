@@ -15,6 +15,7 @@
 #include "bcg_opengl/guis/bcg_gui_point_cloud_bilateral_filter.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_noise.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_normal_filtering_robust_statistics.h"
+#include "bcg_opengl/guis/bcg_gui_point_cloud_height_field.h"
 #include "bcg_opengl/guis/bcg_gui_graph_vertex_pca.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
@@ -83,6 +84,9 @@ int main() {
             }
             if (ImGui::MenuItem("Vertex Noise")) {
                 state->gui.left = gui_point_cloud_vertex_noise;
+            }
+            if (ImGui::MenuItem("Height Field")) {
+                state->gui.left = gui_point_cloud_height_field;
             }
             if(ImGui::BeginMenu("Sampling")){
                 if(ImGui::MenuItem("Octree Sampling")){

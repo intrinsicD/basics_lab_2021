@@ -9,4 +9,5 @@ target_sources(bcg_graphics PRIVATE
         bcg_point_cloud_vertex_outlier_probability.h bcg_point_cloud_vertex_outlier_probability.cpp
         bcg_point_cloud_vertex_pca.h bcg_point_cloud_vertex_pca.cpp
         bcg_point_cloud_vertex_quadric.h bcg_point_cloud_vertex_quadric.cpp
-        bcg_point_cloudio.h bcg_point_cloudio.cpp)
+        bcg_point_cloudio.h bcg_point_cloudio.cpp
+        bcg_point_cloud_height_field.h bcg_point_cloud_height_field.cpp)

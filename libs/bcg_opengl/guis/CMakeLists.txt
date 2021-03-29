@@ -64,5 +64,6 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_viewer_time.h bcg_gui_viewer_time.cpp
         bcg_gui_viewer_window.h bcg_gui_viewer_window.cpp
         bcg_gui_exporting.h bcg_gui_exporting.cpp
-        bcg_gui_parameterized_plane.h bcg_gui_parameterized_plane.cpp)
+        bcg_gui_parameterized_plane.h bcg_gui_parameterized_plane.cpp
+        bcg_gui_point_cloud_height_field.h bcg_gui_point_cloud_height_field.cpp)
 
