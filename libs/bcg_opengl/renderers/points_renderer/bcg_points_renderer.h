@@ -38,6 +38,8 @@ private:
     void on_set_color_attribute(const event::points_renderer::set_color_attribute &event);
 
     void on_set_point_size_attribute(const event::points_renderer::set_point_size_attribute &event);
+
+    void on_set_normal_attribute(const event::points_renderer::set_normal_attribute &event);
 };
 
 }

@@ -27,5 +27,9 @@ struct set_point_size_attribute{
     entt::entity id;
     attribute point_size;
 };
+struct set_normal_attribute{
+    entt::entity id;
+    attribute normal;
+};
 }
 #endif //BCG_GRAPHICS_BCG_EVENTS_POINTS_RENDERER_H

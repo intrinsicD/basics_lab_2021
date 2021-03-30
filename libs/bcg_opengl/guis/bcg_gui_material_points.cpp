@@ -44,6 +44,14 @@ void gui_material_points(viewer_state *state, material_points *material, entt::e
                 state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(id, point_size);
             }
         }
+        auto &normal = material->attributes[3];
+        if (gui_property_selector(state, vertices, {3}, ("shader " + normal.shader_attribute_name).c_str(), normal.property_name)) {
+            if (normal.property_name.empty()) {
+                material->has_normals = false;
+            } else {
+                state->dispatcher.trigger<event::points_renderer::set_normal_attribute>(id, normal);
+            }
+        }
         if (ImGui::Checkbox("use_uniform_color", &material->use_uniform_color)) {
             if (material->use_uniform_color) {
                 color.property_name = "";

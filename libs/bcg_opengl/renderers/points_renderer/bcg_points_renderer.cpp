@@ -29,6 +29,8 @@ points_renderer::points_renderer(viewer_state *state) : renderer("points_rendere
             this);
     state->dispatcher.sink<event::points_renderer::set_point_size_attribute>().connect<&points_renderer::on_set_point_size_attribute>(
             this);
+    state->dispatcher.sink<event::points_renderer::set_normal_attribute>().connect<&points_renderer::on_set_normal_attribute>(
+            this);
 }
 
 void points_renderer::on_startup(const event::internal::startup &) {
@@ -126,6 +128,7 @@ void points_renderer::on_render(const event::internal::render &) {
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.uniform_size = gl_state.point_size_value;
+        material.viewport = state->get_viewport().cast<float>();
         material.upload(program);
 
         auto &shape = state->scene.get<ogl_shape>(id);
@@ -192,6 +195,22 @@ void points_renderer::on_set_point_size_attribute(const event::points_renderer::
     point_size.update = true;
     material.use_uniform_size = false;
     std::vector<attribute> vertex_attributes = {point_size};
+    state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
+    state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
+}
+
+void points_renderer::on_set_normal_attribute(const event::points_renderer::set_normal_attribute &event){
+    if (!state->scene.valid(event.id)) return;
+    auto &material = state->scene.get<material_points>(event.id);
+    auto *vertices = state->get_vertices(event.id);
+    if (vertices->get_base_ptr(event.normal.property_name)->dims() != 3) return;
+    auto &normal = material.attributes[3];
+    normal.property_name = event.normal.property_name;
+    normal.buffer_name = normal.property_name;
+    normal.enable = true;
+    normal.update = true;
+    material.has_normals = true;
+    std::vector<attribute> vertex_attributes = {normal};
     state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, vertex_attributes);
     state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
 }

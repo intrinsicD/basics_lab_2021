@@ -82,7 +82,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
                     v_pca_normal[v] = pca.directions.col(2);
                     v_pca_tangent1_loading[v] = pca.loadings(0);
                     v_pca_tangent2_loading[v] = pca.loadings(1);
-                    v_pca_splat_size[v] = (v_pca_tangent1_loading[v] + v_pca_tangent2_loading[v]) / 2.0;
+                    v_pca_splat_size[v] = std::exp(-pca.loadings(2)) * (v_pca_tangent1_loading[v] + v_pca_tangent2_loading[v]) / 2.0;
                     v_pca_normal_loading[v] = pca.loadings(2);
                     v_pca_loading[v] = pca.loadings;
                     v_pca_mean[v] = pca.mean;
