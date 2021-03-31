@@ -27,7 +27,7 @@ void main() {
     float diff = max(abs(dot(normal, light_dir)), 0.0);
 
     vec3 reflect_dir = reflect(light_dir, normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 5.0);
+    float spec = pow(max(abs(dot(view_dir, reflect_dir)), 0.0), 5.0);
     float d2 = dot(sphere_normal.xy, sphere_normal.xy);
     float dr =  sqrt(radius - d2);
     final_color = f_color * diff + f_color * spec;
