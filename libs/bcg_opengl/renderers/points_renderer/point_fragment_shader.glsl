@@ -38,6 +38,7 @@ void old() {
 
 
 void main() {
+    // code from: High-Quality Point-Based Rendering Using FastSingle-Pass Interpolation
     float u = 2.0 * gl_PointCoord.x - 1.0;
     float v = 2.0 * gl_PointCoord.y - 1.0;
     float w = 1.0 - ( u*u + v*v );

@@ -54,7 +54,7 @@ void main() {
     gl_Position = proj * f_position;
     //gl_Position.z *= 0.999999;
 
-
+    // code from: High-Quality Point-Based Rendering Using FastSingle-Pass Interpolation
     float projFactor = 1.0 / tan(fovy / 2.0);
     projFactor = projFactor / -f_position.z;
     projFactor = projFactor * viewport[3] / 2.0;
