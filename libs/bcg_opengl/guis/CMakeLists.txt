@@ -71,5 +71,6 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_viewer_window.h bcg_gui_viewer_window.cpp
         bcg_gui_exporting.h bcg_gui_exporting.cpp
         bcg_gui_parameterized_plane.h bcg_gui_parameterized_plane.cpp
+        bcg_gui_property_edit.h bcg_gui_property_edit.cpp
         )
 

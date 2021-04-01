@@ -10,8 +10,12 @@
 namespace bcg {
 
 void gui_mesh_vertex_convex_concave(viewer_state *state){
+    static int post_smoothing_steps = 3;
+    static bool two_ring_neighborhood = true;
+    ImGui::InputInt("post smoothing steps", &post_smoothing_steps);
+    ImGui::Checkbox("two ring neighborhood", &two_ring_neighborhood);
     if(ImGui::Button("compute vertex convex concave")){
-        state->dispatcher.trigger<event::mesh::vertex_convex_concave>(state->picker.entity_id);
+        state->dispatcher.trigger<event::mesh::vertex_convex_concave>(state->picker.entity_id, post_smoothing_steps, two_ring_neighborhood);
         auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
         auto &color = material.attributes[2];
         color.property_name = "v_convex";

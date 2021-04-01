@@ -9,7 +9,7 @@
 
 namespace bcg{
 
-void vertex_convex_concave(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
+void vertex_convex_concave(halfedge_mesh &mesh, int post_smoothing_steps = 3, bool two_ring_neighborhood = true, size_t parallel_grain_size = 1024);
 
 }
 

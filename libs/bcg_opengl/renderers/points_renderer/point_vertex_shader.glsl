@@ -26,6 +26,7 @@ out vec3 f_normal;
 out mat4 f_proj;
 out vec4 f_position;
 out float f_point_size;
+
 uniform bool has_normals;
 uniform float fovy;
 
@@ -59,6 +60,6 @@ void main() {
     projFactor = projFactor / -f_position.z;
     projFactor = projFactor * viewport[3] / 2.0;
 
-    //f_point_size = gl_PointSize / projFactor;
-    f_point_size = 1.0 / projFactor;
+    f_point_size = gl_PointSize / projFactor;
+    //f_point_size = 1.0 / projFactor;
 }

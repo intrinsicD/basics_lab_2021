@@ -5,6 +5,7 @@
 #include "bcg_gui_mesh.h"
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_property_container_selector.h"
+#include "bcg_gui_property_edit.h"
 #include "bcg_gui_property_editfield.h"
 
 namespace bcg{
@@ -20,9 +21,10 @@ void gui_mesh(viewer_state *state, halfedge_mesh *mesh){
         gui_property_container_selector(state, &mesh->halfedges, state->picker.halfedge_id.idx);
         gui_property_container_selector(state, &mesh->edges, state->picker.edge_id.idx);
         gui_property_container_selector(state, &mesh->faces, state->picker.face_id.idx);
-        if(ImGui::Button("edit vertices")){
+        gui_property_edit(state, &mesh->vertices, "edit vertices");
+        /*if(ImGui::Button("edit vertices")){
             show_vertices_edit = true;
-        }
+        }*/
         ImGui::SameLine();
         if(ImGui::Button("edit halfedges")){
             show_halfedges_edit = true;

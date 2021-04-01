@@ -94,7 +94,8 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
             bcg_scalar_t delta = dir.norm();
 
             if (heuristic) {
-                delta *= (std::abs(heuristic[v]) + scalar_eps);
+                //delta += (1 - std::exp(- std::abs(heuristic[v]) * std::abs(heuristic[v]) / (2.0 * 9)));
+                delta *= (1 - std::abs(heuristic[v]));
             }
 
             if (guide_vectorfield) {

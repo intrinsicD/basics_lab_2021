@@ -138,6 +138,8 @@ struct boundary{
 };
 struct vertex_convex_concave{
     entt::entity id;
+    int post_smoothing_steps = 0;
+    bool two_ring_neighborhood = false;
 };
 struct features{
     entt::entity id;

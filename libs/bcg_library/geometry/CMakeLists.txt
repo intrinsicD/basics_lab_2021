@@ -2,7 +2,8 @@ target_sources(bcg_graphics PRIVATE
         bcg_neighbors_query.h
         bcg_property.h
         bcg_property_eigen_trait.h
-        bcg_property_map_eigen.h)
+        bcg_property_map_eigen.h
+        bcg_property_utils.h bcg_property_utils.cpp)
 
 add_subdirectory(aligned_box)
 add_subdirectory(correspondences)

@@ -12,7 +12,7 @@
 
 namespace bcg {
 
-void post_smoothing(halfedge_mesh &mesh, int post_smoothing_steps, size_t parallel_grain_size) {
+void post_smoothing_curvature(halfedge_mesh &mesh, int post_smoothing_steps, size_t parallel_grain_size) {
     // properties
     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
 
@@ -238,7 +238,7 @@ void mesh_curvature_taubin(halfedge_mesh &mesh, int post_smoothing_steps, bool t
     mean_curvature.set_dirty();
 
     // smooth curvature values
-    post_smoothing(mesh, post_smoothing_steps, parallel_grain_size);
+    post_smoothing_curvature(mesh, post_smoothing_steps, parallel_grain_size);
 
     vertex_classify_curvature(&mesh.vertices, min_curvature, max_curvature, parallel_grain_size);
 }

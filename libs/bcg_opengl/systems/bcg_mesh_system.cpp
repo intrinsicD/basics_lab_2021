@@ -157,7 +157,7 @@ void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_conc
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    vertex_convex_concave(mesh, state->config.parallel_grain_size);
+    vertex_convex_concave(mesh, event.post_smoothing_steps, event.two_ring_neighborhood, state->config.parallel_grain_size);
 }
 
 void mesh_system::on_features(const event::mesh::features &event) {
