@@ -8,13 +8,8 @@
 
 namespace bcg {
 
-void edit_field(viewer_state *state, property_container *container, const std::string &name, bool &open) {
-    if (!ImGui::Begin(name.c_str(), &open)) {
-        // Early out if the window is collapsed, as an optimization.
-        ImGui::End();
-        return;
-    }
-
+void edit_field(viewer_state *state, property_container *container, const std::string &name) {
+    ImGui::PushID((name + "editfield").c_str());
     static std::string current_property_name;
     gui_property_selector(state, container, {}, "property", current_property_name);
 
@@ -39,8 +34,7 @@ void edit_field(viewer_state *state, property_container *container, const std::s
             current_property_name = new_name;
         }
     }
-
-    ImGui::End();
+    ImGui::PopID();
 }
 
 }

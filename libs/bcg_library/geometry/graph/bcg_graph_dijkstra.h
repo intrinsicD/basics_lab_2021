@@ -23,7 +23,6 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
 
 Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, vertex_handle v_end, property<bcg_scalar_t, 1> heuristic, property<VectorS<3>, 3> guide_vectorfield);
 
-
 }
 
 #endif //BCG_GRAPHICS_BCG_GRAPH_DIJKSTRA_H

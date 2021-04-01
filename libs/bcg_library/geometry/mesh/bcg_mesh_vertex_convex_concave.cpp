@@ -3,6 +3,7 @@
 //
 
 #include "bcg_mesh_vertex_convex_concave.h"
+#include "bcg_property_map_eigen.h"
 #include "bcg_mesh_edge_cotan.h"
 #include "tbb/tbb.h"
 
@@ -107,6 +108,13 @@ void vertex_convex_concave(halfedge_mesh &mesh,int post_smoothing_steps, bool tw
                 }
             }
     );
+
+    Map(convex) = MapConst(convex).array() - MapConst(convex).minCoeff();
+    Map(convex) = MapConst(convex).array() / MapConst(convex).maxCoeff();
+
+    Map(concave) = MapConst(concave).array() - MapConst(concave).minCoeff();
+    Map(concave) = MapConst(concave).array() / MapConst(concave).maxCoeff();
+
 
     post_smoothing_convex_concave(mesh, post_smoothing_steps, parallel_grain_size);
 

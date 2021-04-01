@@ -75,8 +75,8 @@ void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
         }
         auto iter = selection.selected.find(state->picker.vertex_id);
         if(iter != selection.selected.end()){
-            selection.selected.erase(iter);
             selection.ordering.erase(selection.ordering.begin() + iter->second.index_in_numbering);
+            selection.selected.erase(iter);
             v_selected[state->picker.vertex_id] = false;
         }else{
             selection.ordering.push_back(state->picker.vertex_id.idx);

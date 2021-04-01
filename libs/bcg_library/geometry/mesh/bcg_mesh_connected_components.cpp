@@ -68,13 +68,14 @@ size_t mesh_connected_components_detect(halfedge_mesh &mesh) {
     size_t num_connected_components = 0;
     size_t visited_count = 0;
 
-    for (const auto v : mesh.vertices) {
+    for (const auto &v : mesh.vertices) {
         if (!visited[v]) {
             visited_count += search_from_vertex(mesh, v, num_connected_components);
             ++num_connected_components;
         }
         if (visited_count >= mesh.vertices.size()) {
             //early out if all are already visited
+            std::cout << "early out... \n";
             break;
         }
     }
@@ -102,7 +103,7 @@ std::vector<halfedge_mesh> mesh_connected_components_split(halfedge_mesh &mesh) 
         auto cc = connected_components[v];
         index_map[v] = parts[cc].vertices.size();
         component_map[v] = cc;
-        v_new = parts[cc].add_vertex(mesh.positions[v]);
+        parts[cc].add_vertex(mesh.positions[v]);
     }
 
     face_handle f_new;
@@ -114,7 +115,7 @@ std::vector<halfedge_mesh> mesh_connected_components_split(halfedge_mesh &mesh) 
             component = connected_components[v];
         }
         if (component == -1) std::abort();
-        f_new = parts[component].add_face(face);
+        parts[component].add_face(face);
     }
 
     mesh.vertices.remove(index_map);

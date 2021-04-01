@@ -37,6 +37,7 @@ target_sources(bcg_graphics PRIVATE
         bcg_mesh_vertex_valences.h bcg_mesh_vertex_valences.cpp
         bcg_mesh_vertex_extremal_values.h bcg_mesh_vertex_extremal_values.cpp
         bcg_meshio.h bcg_meshio.cpp
+        bcg_mesh_split_path.h bcg_mesh_split_path.cpp
         ${RPLY_SOURCE_DIRS}/rply.c)
 
 target_include_directories(bcg_graphics PUBLIC ${RPLY_INCLUDE_DIRS})

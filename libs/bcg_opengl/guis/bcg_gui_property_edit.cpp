@@ -16,11 +16,8 @@
 namespace bcg {
 
 void gui_property_edit(viewer_state *state, property_container *container, const std::string &name) {
-    static bool show_edit = false;
-    if(ImGui::Button(name.c_str())){
-        show_edit = true;
-    }
-    if(show_edit) edit_field(state, container, name, show_edit);
+    ImGui::PushID(name.c_str());
+
     if(ImGui::CollapsingHeader((name + " 1 dimensional").c_str())){
         static std::string current_property_name11;
         static std::string current_property_name12;
@@ -155,8 +152,11 @@ void gui_property_edit(viewer_state *state, property_container *container, const
             }
         }
     }
-
-    ImGui::End();
+    if(ImGui::CollapsingHeader("rename or delete")){
+        edit_field(state, container, name);
+        ImGui::End();
+    }
+    ImGui::PopID();
 }
 
 }

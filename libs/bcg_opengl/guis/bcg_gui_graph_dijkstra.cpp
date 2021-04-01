@@ -8,6 +8,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_selection.h"
 #include "graph/bcg_graph_dijkstra.h"
+#include "mesh/bcg_mesh_split_path.h"
 #include "bcg_opengl/renderers/points_renderer/bcg_material_points.h"
 #include "bcg_opengl/renderers/points_renderer/bcg_events_points_renderer.h"
 #include "bcg_opengl/renderers/mesh_renderer/bcg_material_mesh.h"
@@ -43,24 +44,49 @@ void gui_graph_dijkstra(viewer_state *state) {
                 state->dispatcher.trigger<event::points_renderer::set_color_attribute>(state->picker.entity_id, color);
             }
         }
+        static std::vector<Path> paths;
         if (ImGui::Button("Shortest path between")) {
             if(state->scene.all_of<selected_vertices>(state->picker.entity_id)){
                 auto &selection = state->scene.get<selected_vertices>(state->picker.entity_id);
                 auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
+
                 Map(merged_path).setZero();
                 auto heuristic = vertices->get<bcg_scalar_t, 1>(current_selected_heuristic);
                 auto guide_vectorfield = vertices->get<VectorS<3>, 3>(current_selected_guide_vectorfield);
 
+                if(paths.empty()){
+                    paths.emplace_back();
+                }
+                paths.back().vertices.clear();
                 for(size_t i = 0; i < selection.ordering.size() - 1; ++i){
-                    Path result_path;
+                    Path result;
                     if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
                         auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
-                        result_path = graph_shortest_path_between(mesh, selection.ordering[i], selection.ordering[i+1], heuristic, guide_vectorfield);
+                        result = graph_shortest_path_between(mesh, selection.ordering[i], selection.ordering[i+1], heuristic, guide_vectorfield);
                     }else if(state->scene.all_of<halfedge_graph>(state->picker.entity_id)){
                         auto &graph = state->scene.get<halfedge_graph>(state->picker.entity_id);
-                        result_path = graph_shortest_path_between(graph, selection.ordering[i], selection.ordering[i+1], heuristic, guide_vectorfield);
+                        result = graph_shortest_path_between(graph, selection.ordering[i], selection.ordering[i+1], heuristic, guide_vectorfield);
                     }
-                    for(const auto &v : result_path.vertices){
+                    for(const auto &v : result.vertices){
+                        paths.back().vertices.push_back(v);
+                    }
+                    for(const auto &e : result.edges){
+                        paths.back().edges.push_back(e);
+                    }
+                }
+                auto *edges = state->get_edges(state->picker.entity_id);
+                if(edges){
+                    auto merged_path_edges = edges->get_or_add<bcg_scalar_t, 1>("e_merged_shortest_path");
+                    merged_path_edges.reset(0);
+                    for(const auto &path : paths){
+                        for(const auto &e : path.edges){
+                            merged_path_edges[e] = 1;
+                        }
+                    }
+                    merged_path_edges.set_dirty();
+                }
+                for(const auto &path : paths){
+                    for(const auto &v : path.vertices){
                         merged_path[v] = 1;
                     }
                 }
@@ -76,6 +102,52 @@ void gui_graph_dijkstra(viewer_state *state) {
                     auto &color = material.attributes[1];
                     color.property_name = "v_merged_shortest_path";
                     state->dispatcher.trigger<event::points_renderer::set_color_attribute>(state->picker.entity_id, color);
+                }
+            }
+        }
+        bool show_heuristic = false;
+        if(ImGui::Button("New Path")){
+            paths.emplace_back();
+            show_heuristic = true;
+        }
+        if(ImGui::Button("Clear Paths")){
+            paths.clear();
+            auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
+            merged_path.reset(0);
+            merged_path.set_dirty();
+            show_heuristic = true;
+        }
+
+        if(show_heuristic){
+            if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+                auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
+                auto &color = material.attributes[2];
+                color.property_name = current_selected_heuristic;
+                state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(state->picker.entity_id, color);
+            }else{
+                auto &material = state->scene.get<material_points>(state->picker.entity_id);
+                auto &color = material.attributes[1];
+                color.property_name = current_selected_heuristic;
+                state->dispatcher.trigger<event::points_renderer::set_color_attribute>(state->picker.entity_id, color);
+            }
+        }
+        ImGui::LabelText("num paths", "%zu", paths.size());
+        if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+            if(ImGui::Button("Remove path")){
+                auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
+                auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
+                mesh_remove_path(mesh, merged_path);
+            }
+            if(ImGui::Button("Split path")){
+                auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
+                auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
+                auto components = mesh_split_path(mesh, merged_path);
+                size_t count = 0;
+                for(const auto &component : components){
+                    auto id = state->scene.create();
+                    state->scene.emplace<halfedge_mesh>(id, component);
+                    state->dispatcher.trigger<event::mesh::setup>(id, "split_part " + std::to_string(count));
+                    ++count;
                 }
             }
         }

@@ -31,7 +31,11 @@ void graph_shortest_paths_from(halfedge_graph &graph, vertex_handle v_start, pro
     auto v_visited = graph.vertices.get_or_add<bool, 1>("v_visited", false);
     v_visited.reset(false);
 
-    std::priority_queue<Node, std::vector<Node>, Greater> unvisited_queue;
+    auto greater = [](const Node &a, const Node &b){
+        return (*a.distance)[a.v] > (*b.distance)[b.v];
+    };
+
+    std::priority_queue<Node, std::vector<Node>, decltype(greater)> unvisited_queue(greater);
     unvisited_queue.emplace(v_start, &v_dijkstra_distance);
 
     v_dijkstra_distance[v_start] = 0;
@@ -76,7 +80,11 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
     auto v_visited = graph.vertices.get_or_add<bool, 1>("v_visited", false);
     v_visited.reset(false);
 
-    std::priority_queue<Node, std::vector<Node>, Greater> unvisited_queue;
+    auto greater = [](const Node &a, const Node &b){
+        return (*a.distance)[a.v] > (*b.distance)[b.v];
+    };
+    //In debug mode this does not seem to be a valid heap. Rethink Dijkstra!!
+    std::priority_queue<Node, std::vector<Node>, decltype(greater)> unvisited_queue(greater);
     unvisited_queue.emplace(v_start, &v_dijkstra_distance);
 
     v_dijkstra_distance[v_start] = 0;
@@ -95,7 +103,7 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
 
             if (heuristic) {
                 //delta += (1 - std::exp(- std::abs(heuristic[v]) * std::abs(heuristic[v]) / (2.0 * 9)));
-                delta *= (1 - std::abs(heuristic[v]));
+                delta += std::abs(heuristic[v]);
             }
 
             if (guide_vectorfield) {
