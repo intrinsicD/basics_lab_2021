@@ -19,6 +19,7 @@
 #include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_extremal_values.h"
 #include "bcg_opengl/guis/bcg_gui_point_cloud_vertex_saliency.h"
 #include "bcg_opengl/guis/bcg_gui_graph_vertex_pca.h"
+#include "bcg_opengl/guis/bcg_gui_graph_dijkstra.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_dihedral_angle.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_face_normals.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_normals.h"
@@ -116,6 +117,9 @@ int main() {
             if (ImGui::MenuItem("Vertex Pca")) {
                 state->gui.left = gui_graph_vertex_pca;
             }
+            if (ImGui::MenuItem("Dijkstra")) {
+                state->gui.left = gui_graph_dijkstra;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Mesh")) {
@@ -163,6 +167,9 @@ int main() {
             }
             if (ImGui::MenuItem("Vertex Extremal Values")) {
                 state->gui.left = gui_mesh_vertex_extremal_values;
+            }
+            if (ImGui::MenuItem("Dijkstra")) {
+                state->gui.left = gui_graph_dijkstra;
             }
             ImGui::EndMenu();
         }

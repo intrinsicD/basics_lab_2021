@@ -38,7 +38,7 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
         buffer = &shape.triangle_buffer;
     } else if (event.attrib.property_name == "triangles_adjacency") {
         buffer = &shape.adjacency_buffer;
-    } else {
+    }else {
         buffer = &shape.vertex_buffers[event.attrib.buffer_name];
     }
     if (buffer == nullptr) return;

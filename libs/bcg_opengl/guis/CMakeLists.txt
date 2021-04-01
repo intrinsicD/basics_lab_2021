@@ -6,6 +6,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_entity_info.h bcg_gui_entity_info.cpp
         bcg_gui_graph.h bcg_gui_graph.cpp
         bcg_gui_graph_vertex_pca.h bcg_gui_graph_vertex_pca.cpp
+        bcg_gui_graph_dijkstra.h bcg_gui_graph_dijkstra.cpp
         bcg_gui_kdtree_selector.h bcg_gui_kdtree_selector.cpp
         bcg_gui_kernel_matrix.h bcg_gui_kernel_matrix.cpp
         bcg_gui_locally_optimal_projection.h bcg_gui_locally_optimal_projection.cpp

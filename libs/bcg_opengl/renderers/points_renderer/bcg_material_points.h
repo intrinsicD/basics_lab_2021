@@ -28,6 +28,7 @@ struct material_points : public material{
     Vector<float, 4> viewport;
     float uniform_size = 1.0;
     float alpha = 1.0;
+    float fovy = 1.0;
 
     void upload(const glsl_program &program) override {
         program.set_uniform_i("material.use_uniform_point_size", use_uniform_size);
@@ -36,6 +37,7 @@ struct material_points : public material{
         program.set_uniform_i("material.use_uniform_color", use_uniform_color);
         program.set_uniform_3f("material.uniform_color", 1, uniform_color.data());
         program.set_uniform_f("material.alpha", alpha);
+        program.set_uniform_f("fovy", fovy);
         program.set_uniform_4f("viewport", 1, viewport.data());
         material::upload(program);
     }

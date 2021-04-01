@@ -69,14 +69,17 @@ void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
     auto v_selected = vertices->get_or_add<bool, 1>("v_selected");
     if(!state->keyboard.shift_pressed){
         selection.selected.clear();
+        selection.ordering.clear();
         v_selected.reset(false);
     }
     auto iter = selection.selected.find(state->picker.vertex_id);
     if(iter != selection.selected.end()){
         selection.selected.erase(iter);
+        selection.ordering.erase(selection.ordering.begin() + iter->second.index_in_numbering);
         v_selected[state->picker.vertex_id] = false;
     }else{
-        selection.selected[state->picker.vertex_id.idx] = state->picker.vertex_id;
+        selection.ordering.push_back(state->picker.vertex_id.idx);
+        selection.selected[state->picker.vertex_id.idx] = {state->picker.vertex_id, selection.selected.size()};
         v_selected[state->picker.vertex_id] = true;
     }
     v_selected.set_dirty();

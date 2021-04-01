@@ -128,6 +128,7 @@ void points_renderer::on_render(const event::internal::render &) {
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.uniform_size = gl_state.point_size_value;
+        material.fovy = state->cam.fovy_radians();
         material.viewport = state->get_viewport().cast<float>();
         material.upload(program);
 

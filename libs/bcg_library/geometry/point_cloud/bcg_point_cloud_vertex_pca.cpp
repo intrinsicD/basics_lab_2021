@@ -63,6 +63,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
     auto v_pca_tangent1_loading = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_tangent1_loading");
     auto v_pca_tangent2_loading = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_tangent2_loading");
     auto v_pca_splat_size = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_splat_size");
+    auto v_pca_splat_size_avg_dist = vertices->get_or_add<bcg_scalar_t, 1>("v_pca_splat_size_avg_dist");
     auto v_pca_loading = vertices->get_or_add<VectorS<3>, 3>("v_pca_loading");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) vertices->size(), parallel_grain_size),
@@ -72,8 +73,16 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
                     auto v = vertex_handle(i);
                     auto result = index.query_knn(positions[v], num_closest);
                     P.resize(result.indices.size(), 3);
+                    bcg_scalar_t min_dist = std::numeric_limits<bcg_scalar_t>::max();
+                    bcg_scalar_t avg_dist = 0;
                     for(size_t i = 0; i < result.indices.size(); ++i){
                         P.row(i) = positions[result.indices[i]];
+                        bcg_scalar_t dist = (positions[v] - positions[result.indices[i]]).norm();
+                        avg_dist += dist / bcg_scalar_t(result.indices.size() - 1);
+                        if(i == v.idx) continue;
+                        if(dist < min_dist){
+                            min_dist = dist;
+                        }
                     }
                     auto pca = method(P, positions[v], compute_mean);
 
@@ -83,6 +92,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
                     v_pca_tangent1_loading[v] = pca.loadings(0);
                     v_pca_tangent2_loading[v] = pca.loadings(1);
                     v_pca_splat_size[v] = std::exp(-pca.loadings(2)) * (v_pca_tangent1_loading[v] + v_pca_tangent2_loading[v]) / 2.0;
+                    v_pca_splat_size_avg_dist[v] = avg_dist;
                     v_pca_normal_loading[v] = pca.loadings(2);
                     v_pca_loading[v] = pca.loadings;
                     v_pca_mean[v] = pca.mean;
@@ -98,6 +108,7 @@ void point_cloud_vertex_pcas_knn(vertex_container *vertices, const kdtree_proper
     v_pca_tangent2_loading.set_dirty();
     v_pca_loading.set_dirty();
     v_pca_splat_size.set_dirty();
+    v_pca_splat_size_avg_dist.set_dirty();
     v_pca_mean.set_dirty();
 }
 
