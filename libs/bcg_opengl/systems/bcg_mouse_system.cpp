@@ -22,6 +22,13 @@ void mouse_system::on_button(const event::internal::mouse::button &event) {
         state->mouse.last_left_click = state->mouse.cursor_position;
     }
     state->mouse.middle = state->mouse.buttons[GLFW_MOUSE_BUTTON_MIDDLE];
+
+#ifdef __APPLE__
+    if(state->mouse.left && state->keyboard.alt_pressed){
+        state->mouse.middle = true;
+        state->mouse.left = false;
+    }
+#endif
     if (state->mouse.middle) {
         state->mouse.last_middle_click = state->mouse.cursor_position;
     }
@@ -29,6 +36,7 @@ void mouse_system::on_button(const event::internal::mouse::button &event) {
     if (state->mouse.right) {
         state->mouse.last_right_click = state->mouse.cursor_position;
     }
+
     state->mouse.is_dragging =
             state->mouse.is_moving && (state->mouse.left || state->mouse.middle || state->mouse.right);
     state->dispatcher.trigger<event::mouse::button>(event.button, event.action);
