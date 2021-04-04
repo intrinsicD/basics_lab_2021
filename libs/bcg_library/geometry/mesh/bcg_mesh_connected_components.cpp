@@ -89,9 +89,9 @@ std::vector<halfedge_mesh> mesh_connected_components_split(halfedge_mesh &mesh) 
         mesh_connected_components_detect(mesh);
     }
     auto connected_components = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_connected_component");
-    size_t num_connected_components = MapConst(connected_components).maxCoeff();
+    size_t num_connected_components = MapConst(connected_components).maxCoeff() + 1;
 
-    if (num_connected_components == 1) return {};
+    if (num_connected_components < 2) return {};
 
     std::vector<halfedge_mesh> parts(num_connected_components);
 

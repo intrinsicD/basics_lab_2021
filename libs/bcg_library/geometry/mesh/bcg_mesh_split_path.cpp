@@ -13,6 +13,7 @@ void mesh_remove_path(halfedge_mesh &mesh, property<bcg_scalar_t, 1> path){
             mesh.delete_vertex(v);
         }
     }
+    mesh.garbage_collection();
 }
 
 std::vector<halfedge_mesh> mesh_split_path(halfedge_mesh &mesh, property<bcg_scalar_t, 1> path){

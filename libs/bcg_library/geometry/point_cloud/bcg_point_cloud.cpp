@@ -28,6 +28,7 @@ void point_cloud::assign(const point_cloud &other) {
         vertices.remove_all();
         positions = vertices.get_or_add<position_t, 3>("v_position");
         vertices_deleted = vertices.get_or_add<bool, 1>("v_deleted");
+
         positions.vector() = other.positions.vector();
         vertices_deleted.vector() = other.vertices_deleted.vector();
 

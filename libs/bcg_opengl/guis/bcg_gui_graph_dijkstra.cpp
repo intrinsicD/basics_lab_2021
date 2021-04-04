@@ -146,7 +146,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                 for(const auto &component : components){
                     auto id = state->scene.create();
                     state->scene.emplace<halfedge_mesh>(id, component);
-                    state->dispatcher.trigger<event::mesh::setup>(id, "split_part " + std::to_string(count));
+                    state->dispatcher.trigger<event::mesh::setup>(id, "split_part " + std::to_string(count), false);
                     ++count;
                 }
             }

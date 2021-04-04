@@ -35,10 +35,9 @@ void halfedge_mesh::assign(const halfedge_mesh &other) {
 
         // allocate standard properties
         fconn = faces.get_or_add<face_connectivity, 1>("f_connectivity");
-
+        faces_deleted = faces.get_or_add<bool, 1>("f_deleted");
         // copy properties from other mesh
         fconn.vector() = other.fconn.vector();
-
         faces_deleted.vector() = other.faces_deleted.vector();
 
         // resize (needed by property containers)
