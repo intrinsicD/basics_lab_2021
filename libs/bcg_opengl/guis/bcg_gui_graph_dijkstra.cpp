@@ -45,6 +45,7 @@ void gui_graph_dijkstra(viewer_state *state) {
             }
         }
         static std::vector<Path> paths;
+        static float shortest_path_length = 0;
         if (ImGui::Button("Shortest path between")) {
             if(state->scene.all_of<selected_vertices>(state->picker.entity_id)){
                 auto &selection = state->scene.get<selected_vertices>(state->picker.entity_id);
@@ -58,6 +59,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                     paths.emplace_back();
                 }
                 paths.back().vertices.clear();
+                shortest_path_length = 0;
                 for(size_t i = 0; i < selection.ordering.size() - 1; ++i){
                     Path result;
                     if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
@@ -67,6 +69,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                         auto &graph = state->scene.get<halfedge_graph>(state->picker.entity_id);
                         result = graph_shortest_path_between(graph, selection.ordering[i], selection.ordering[i+1], heuristic, guide_vectorfield);
                     }
+                    shortest_path_length += result.length;
                     for(const auto &v : result.vertices){
                         paths.back().vertices.push_back(v);
                     }
@@ -105,6 +108,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                 }
             }
         }
+        ImGui::LabelText("shortest_path_length", "%f", shortest_path_length);
         bool show_heuristic = false;
         if(ImGui::Button("New Path")){
             paths.emplace_back();
