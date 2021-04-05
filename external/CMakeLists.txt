@@ -1,4 +1,5 @@
 set(BUILD_TESTING OFF CACHE BOOL "Enable creation of Eigen tests." FORCE) # You don't want this.
+set(OpenGL_GL_PREFERENCE "GLVND")
 add_subdirectory(eigen)
 add_subdirectory(spectra)
 add_subdirectory(entt)
