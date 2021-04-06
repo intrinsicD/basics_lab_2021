@@ -24,6 +24,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_face_normals.h bcg_gui_mesh_face_normals.cpp
         bcg_gui_mesh_features.h bcg_gui_mesh_features.cpp
         bcg_gui_mesh_laplacian.h bcg_gui_mesh_laplacian.cpp
+        bcg_gui_mesh_laplacian_harmonic_field.h bcg_gui_mesh_laplacian_harmonic_field.cpp
         bcg_gui_mesh_remeshing.h bcg_gui_mesh_remeshing.cpp
         bcg_gui_mesh_robust_normal_filtering.h bcg_gui_mesh_robust_normal_filtering.cpp
         bcg_gui_mesh_simplification.h bcg_gui_mesh_simplification.cpp

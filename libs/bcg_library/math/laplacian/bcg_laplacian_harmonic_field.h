@@ -16,13 +16,14 @@ template<typename T, int N>
 void laplacian_harmonic_field(vertex_container *vertices, const laplacian_matrix &laplacian, property<T, N> &p, bcg_scalar_t weight = 1000){
     Eigen::SparseMatrix<bcg_scalar_t > Op = laplacian.S;
     auto v_feature = vertices->get<bool, 1>("v_feature");
-    MatrixS<-1, N> F = MatrixS<-1, N>::Zeros(p.size(), p.dims());
-    MatrixS<-1, N> B = MatrixS<-1, N>::Zeros(p.size(), p.dims());
+
+    MatrixS<-1, N> F = MatrixS<-1, N>::Zero(p.size(), p.dims());
+    MatrixS<-1, N> B = MatrixS<-1, N>::Zero(p.size(), p.dims());
 
     std::vector<vertex_handle> constrained;
     for (const auto &v : *vertices) {
         if(v_feature && v_feature[v]){
-            F.row(v.idx) = p[v];
+            F.row(v.idx) = MapConst(p).row(v);
             constrained.push_back(v);
         }
     }
@@ -34,11 +35,11 @@ void laplacian_harmonic_field(vertex_container *vertices, const laplacian_matrix
 
     B -= Op * F;
 
-    for (const auto v : constrained) {
+    for (const auto &v : constrained) {
         Op.row(v.idx) *= 0;
         Op.col(v.idx) *= 0;
         Op.coeffRef(v.idx, v.idx) = weight;
-        B.row(v.idx) = p[v] * weight;
+        B.row(v.idx) = MapConst(p).row(v) * weight;
     }
 
     Eigen::SparseLU<Eigen::SparseMatrix<bcg_scalar_t>> solver;
@@ -50,7 +51,7 @@ void laplacian_harmonic_field(vertex_container *vertices, const laplacian_matrix
     }
     auto result = vertices->get_or_add<T, N>("v_harmonic_field");
     Map(result) = solver.solve(B);
-    for (const auto v : constrained) {
+    for (const auto &v : constrained) {
         if (result[v] != p[v]) {
             std::cout << "idx: " << v.idx << " result: " << result[v] << "!=" << p[v] << std::endl;
             assert(false);

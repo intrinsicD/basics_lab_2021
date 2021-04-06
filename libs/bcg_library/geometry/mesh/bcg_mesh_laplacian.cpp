@@ -174,7 +174,6 @@ compute_vertex_weights(halfedge_mesh &mesh, MeshLaplacianMass m_type, property<b
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t k = range.begin(); k != range.end(); ++k) {
                     auto v = vertex_handle(k);
-                    assert(vweight[v] > 0);
                     v_coeffs.emplace_back(v.idx, v.idx, vweight[v]);
                 }
             }

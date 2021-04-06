@@ -28,6 +28,7 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_subdivision.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_features.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_laplacian.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_laplacian_harmonic_field.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_curvature_taubin.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_simplification.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_remeshing.h"
@@ -144,9 +145,16 @@ int main() {
             if (ImGui::MenuItem("Subdivision")) {
                 state->gui.left = gui_mesh_subdivision;
             }
-            if (ImGui::MenuItem("Laplacian")) {
-                state->gui.left = gui_mesh_laplacian;
+            if(ImGui::BeginMenu("Laplacian")){
+                if (ImGui::MenuItem("Build Laplacian")) {
+                    state->gui.left = gui_mesh_laplacian;
+                }
+                if (ImGui::MenuItem("Harmonic Field")) {
+                    state->gui.left = gui_mesh_laplacian_harmonic_field;
+                }
+                ImGui::EndMenu();
             }
+
             if (ImGui::MenuItem("Curvature Taubin")) {
                 state->gui.left = gui_mesh_curvature_taubin;
             }

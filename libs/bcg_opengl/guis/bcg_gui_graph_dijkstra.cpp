@@ -137,12 +137,12 @@ void gui_graph_dijkstra(viewer_state *state) {
         }
         ImGui::LabelText("num paths", "%zu", paths.size());
         if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
-            if(ImGui::Button("Remove path")){
+            if(ImGui::Button("Remove path vertices from mesh")){
                 auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                 auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
                 mesh_remove_path(mesh, merged_path);
             }
-            if(ImGui::Button("Split path")){
+            if(ImGui::Button("Split mesh at path")){
                 auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                 auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
                 auto components = mesh_split_path(mesh, merged_path);
