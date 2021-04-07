@@ -5,6 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_COLORMAP_H
 #define BCG_GRAPHICS_BCG_COLORMAP_H
 
+#include <utility>
+
 #include "bcg_colors.h"
 
 namespace bcg {
@@ -14,7 +16,7 @@ namespace colormap {
 struct base_colormap {
     base_colormap() = default;
 
-    base_colormap(const std::vector<VectorS<3>> &colorpath) : colorpath(colorpath) {
+    explicit base_colormap(std::vector<VectorS<3>> colorpath) : colorpath(std::move(colorpath)) {
 
     }
 
@@ -26,7 +28,7 @@ struct base_colormap {
     std::vector<VectorS<3>> operator()(const VectorS<-1> &scalarfield,
                                        bcg_scalar_t minClamp, bcg_scalar_t maxClamp) const;
 
-    VectorS<3> interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) const;
+    static VectorS<3> interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) ;
 
     bcg_scalar_t quantize(bcg_scalar_t t, size_t num_bins) const;
 

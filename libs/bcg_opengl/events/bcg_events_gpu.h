@@ -24,6 +24,13 @@ struct update_vertex_attributes {
     entt::entity id;
     std::vector<attribute> attributes;
 };
+struct update_vertex_colors_scalarfield {
+    entt::entity id;
+    property_container *container;
+    attribute color;
+    colormap::base_colormap color_map;
+    bcg_scalar_t min, max;
+};
 struct update_edge_attributes {
     entt::entity id;
     std::vector<attribute> attributes;

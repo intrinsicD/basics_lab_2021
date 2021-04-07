@@ -8,26 +8,26 @@
 #include "entt/entt.hpp"
 #include "renderers/bcg_attribute.h"
 
-namespace bcg::event::points_renderer{
-struct enqueue{
+namespace bcg::event::points_renderer {
+struct enqueue {
     entt::entity id;
 };
-struct setup_for_rendering{
+struct setup_for_rendering {
     entt::entity id;
 };
-struct set_position_attribute{
+struct set_position_attribute {
     entt::entity id;
     attribute position;
 };
-struct set_color_attribute{
+struct set_color_attribute {
     entt::entity id;
     attribute color;
 };
-struct set_point_size_attribute{
+struct set_point_size_attribute {
     entt::entity id;
     attribute point_size;
 };
-struct set_normal_attribute{
+struct set_normal_attribute {
     entt::entity id;
     attribute normal;
 };

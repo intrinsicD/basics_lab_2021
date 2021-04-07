@@ -14,6 +14,8 @@ struct gpu_system : public system {
 
     void on_update_property(const event::gpu::update_property &event);
 
+    void on_update_vertex_colors_scalarfield(const event::gpu::update_vertex_colors_scalarfield &event);
+
     void on_update_vertex_attributes(const event::gpu::update_vertex_attributes &event);
 
     void on_update_edge_attributes(const event::gpu::update_edge_attributes &event);

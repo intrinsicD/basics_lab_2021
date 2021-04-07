@@ -38,7 +38,7 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
         buffer = &shape.triangle_buffer;
     } else if (event.attrib.property_name == "triangles_adjacency") {
         buffer = &shape.adjacency_buffer;
-    }else {
+    } else {
         buffer = &shape.vertex_buffers[event.attrib.buffer_name];
     }
     if (buffer == nullptr) return;
@@ -51,30 +51,75 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
 
     auto *base_ptr = event.container->get_base_ptr(event.attrib.property_name);
     if (event.attrib.shader_attribute_name == "color" && base_ptr->dims() == 1) {
-        auto colors = renderer::map_to_colors(event.container, event.attrib.property_name, event.color_map);
-        buffer->upload(colors[0].data(), base_ptr->size(), 3, 0, true);
+/*        auto colors = renderer::map_to_colors(event.container, event.attrib.property_name, event.color_map);
+        buffer->upload(colors[0].data(), base_ptr->size(), 3, 0, true);*/
+        on_update_vertex_colors_scalarfield({event.id, event.container, event.attrib, event.color_map, 0, 0});
     } else {
         if (base_ptr->void_ptr() != nullptr) {
-            if(base_ptr->type() == property_types::Type::DOUBLE || base_ptr->type() == property_types::Type::FLOAT){
+            if (base_ptr->type() == property_types::Type::DOUBLE || base_ptr->type() == property_types::Type::FLOAT) {
                 Matrix<float, -1, -1> DATAF = Map<bcg_scalar_t>(base_ptr).transpose().cast<float>();
-                if(event.attrib.shader_attribute_name == "color"){
+                if (event.attrib.shader_attribute_name == "color") {
                     DATAF.array() -= DATAF.array().minCoeff();
                     DATAF.array() /= DATAF.array().maxCoeff();
                 }
-                if(event.attrib.shader_attribute_name == "point_size"){
+                if (event.attrib.shader_attribute_name == "point_size") {
                     DATAF.array() -= DATAF.array().minCoeff();
                     DATAF.array() /= DATAF.array().maxCoeff();
                     DATAF.array() *= (state->config.max_point_size - 1);
                     DATAF.array() += 1.0;
                 }
                 buffer->upload((const void *) DATAF.data(), base_ptr->size(), base_ptr->dims(), 0, true);
-            }else{
+            } else {
                 buffer->upload(base_ptr->void_ptr(), base_ptr->size(), base_ptr->dims(), 0, true);
             }
         } else {
             std::cerr << "vector of bools?\n";
         }
     }
+    base_ptr->set_clean();
+    buffer->release();
+}
+
+void gpu_system::on_update_vertex_colors_scalarfield(const event::gpu::update_vertex_colors_scalarfield &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (!event.container->has(event.color.property_name)) return;
+    auto *base_ptr = event.container->get_base_ptr(event.color.property_name);
+    if (base_ptr->dims() != 1) return;
+
+    if (!event.container->get_base_ptr(event.color.property_name)->is_dirty() && !event.color.update) return;
+    auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
+
+    ogl_buffer_object *buffer = &shape.vertex_buffers[event.color.buffer_name];
+    if (buffer == nullptr) return;
+
+    if (!buffer->is_valid()) {
+        buffer->name = event.color.buffer_name;
+        buffer->create();
+    }
+    buffer->bind();
+
+    std::vector<Vector<float, 3>> colors(base_ptr->size());
+    VectorS<-1> values;
+    if (base_ptr->void_ptr() == nullptr) {
+        values = MapConst(event.container->get<bool, 1>(base_ptr->name())).cast<bcg_scalar_t>();
+    } else {
+        if (contains(event.color.property_name, "v_connectivity")) {
+            values = MapConst(event.container->get<halfedge_graph::vertex_connectivity, 1>(
+                    base_ptr->name())).cast<bcg_scalar_t>();
+        } else if (contains(event.color.property_name, "f_connectivity")) {
+            values = MapConst(
+                    event.container->get<halfedge_mesh::face_connectivity, 1>(base_ptr->name())).cast<bcg_scalar_t>();
+        } else {
+            values = MapConst(event.container->get<bcg_scalar_t, 1>(base_ptr->name()));
+        }
+    }
+    if (event.min == event.max) {
+        Map(colors) = MapConst(event.color_map(values, values.minCoeff(), values.maxCoeff())).cast<float>();
+    } else {
+        Map(colors) = MapConst(event.color_map(values, event.min, event.max)).cast<float>();
+    }
+
+    buffer->upload(colors[0].data(), base_ptr->size(), 3, 0, true);
     base_ptr->set_clean();
     buffer->release();
 }

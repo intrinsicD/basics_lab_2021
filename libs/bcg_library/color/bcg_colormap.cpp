@@ -36,7 +36,7 @@ std::vector<VectorS<3>> base_colormap::operator()(const VectorS<-1> &scalarfield
         auto t = std::min<bcg_scalar_t>(std::max<bcg_scalar_t>((s - c_min) / range, 0.0), 1.0);
         size_t j = interval(t);
 
-        t = t * (colorpath.size() - 1.0) - j;
+        t = t * (bcg_scalar_t(colorpath.size()) - 1.0) - j;
 
         colors.push_back(interpolate(t, colorpath[j], colorpath[j + 1]));
     }
@@ -49,12 +49,12 @@ std::vector<VectorS<3>> base_colormap::operator()(const std::vector<bcg_scalar_t
     return (*this)(MapConst(scalarfield), minClamp, maxClamp);
 }
 
-VectorS<3> base_colormap::interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) const {
+VectorS<3> base_colormap::interpolate(bcg_scalar_t t, const VectorS<3> &from, const VectorS<3> &to) {
     return t * to + (1.0 - t) * from;
 }
 
 bcg_scalar_t base_colormap::quantize(bcg_scalar_t t, size_t num_bins) const {
-    return std::floor(t * num_bins) / bcg_scalar_t(num_bins - 1.0);
+    return std::floor(t * bcg_scalar_t(num_bins)) / (bcg_scalar_t(num_bins) - 1.0);
 }
 
 size_t base_colormap::interval(bcg_scalar_t t) const {
