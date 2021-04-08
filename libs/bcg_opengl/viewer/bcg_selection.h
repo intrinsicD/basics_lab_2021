@@ -10,7 +10,7 @@
 
 namespace bcg{
 template<typename T>
-struct selected{
+struct select{
     T element;
     size_t index_in_numbering;
 };
@@ -18,7 +18,7 @@ struct selected_points{
     std::vector<VectorS<3>> selected;
 };
 struct selected_vertices{
-    std::unordered_map<size_t, selected<vertex_handle>> selected;
+    std::unordered_map<size_t, select<vertex_handle>> selected;
     std::vector<size_t> ordering;
 };
 struct selected_edges{
