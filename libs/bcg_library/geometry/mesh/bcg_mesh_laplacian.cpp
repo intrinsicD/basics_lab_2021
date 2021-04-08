@@ -6,6 +6,7 @@
 #include "bcg_mesh_edge_cotan.h"
 #include "bcg_mesh_edge_fujiwara.h"
 #include "bcg_mesh_vertex_area_voronoi.h"
+#include "bcg_mesh_vertex_cotan.h"
 #include "bcg_mesh_vertex_area_barycentric.h"
 #include "math/sparse_matrix/bcg_sparse_check_symmetric.h"
 #include "tbb/tbb.h"
@@ -77,6 +78,7 @@ compute_edge_weights(halfedge_mesh &mesh, MeshLaplacianStiffness s_type, propert
     std::copy(e_coeffs.begin(), e_coeffs.end(), result.begin());
     return result;
 }
+//TODO fix me, edge scaling should probably not be in vertex things!
 
 void vertex_from_edges(halfedge_mesh &mesh, property<bcg_scalar_t, 1> e_weight, property<bcg_scalar_t, 1> e_scaling,
                        size_t parallel_grain_size) {
@@ -98,8 +100,21 @@ void vertex_from_edges(halfedge_mesh &mesh, property<bcg_scalar_t, 1> e_weight, 
     vweight.set_dirty();
 }
 
-void vertex_fujuwara(halfedge_mesh &mesh, property<bcg_scalar_t, 1> e_weight, property<bcg_scalar_t, 1> e_scaling,
-                     size_t parallel_grain_size) {
+void vertex_uniform(halfedge_mesh &mesh, size_t parallel_grain_size){
+    property<bcg_scalar_t, 1> vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_uniform");
+    tbb::parallel_for(
+            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+            [&](const tbb::blocked_range<uint32_t> &range) {
+                for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                    auto v = vertex_handle(i);
+                    vweight[v] = mesh.halfedge_graph::get_valence(v);
+                }
+            }
+    );
+    vweight.set_dirty();
+}
+
+void vertex_fujuwara(halfedge_mesh &mesh, size_t parallel_grain_size) {
     property<bcg_scalar_t, 1> vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_fujiwara");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
@@ -109,8 +124,7 @@ void vertex_fujuwara(halfedge_mesh &mesh, property<bcg_scalar_t, 1> e_weight, pr
                     bcg_scalar_t weight = 0;
                     for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
                         auto e = mesh.get_edge(h);
-                        if (e_weight[e] == 0) continue;
-                        weight += (e_scaling ? e_scaling[e] : 1.0) / e_weight[e];
+                        weight += std::max<bcg_scalar_t>(mesh.get_length(e), scalar_eps);
                     }
                     if (weight != 0) {
                         vweight[v] = 1.0 / weight;
@@ -128,24 +142,19 @@ compute_vertex_weights(halfedge_mesh &mesh, MeshLaplacianMass m_type, property<b
     property<bcg_scalar_t, 1> vweight;
     switch (m_type) {
         case MeshLaplacianMass::uniform : {
-            auto e_uniform = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_laplacian_uniform", 1.0);
-            vertex_from_edges(mesh, e_uniform, e_scaling, parallel_grain_size);
-            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_uniform");
-            vweight.vector() = mesh.vertices.get<bcg_scalar_t, 1>("v_laplacian_weight").vector();
+            vertex_uniform(mesh, parallel_grain_size);
+            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
+            vweight.vector() = mesh.vertices.get<bcg_scalar_t, 1>("v_laplacian_uniform").vector();
             break;
         }
         case MeshLaplacianMass::cotan : {
-            edge_cotans(mesh, parallel_grain_size);
-            auto e_cotan = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_cotan");
-            vertex_from_edges(mesh, e_cotan, e_scaling, parallel_grain_size);
-            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_cotan");
-            vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight").vector();
+            vertex_cotans(mesh, parallel_grain_size);
+            vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
+            vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_cotan").vector();
             break;
         }
         case MeshLaplacianMass::fujiwara : {
-            edge_fujiwaras(mesh, parallel_grain_size);
-            auto e_fujiwara = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_fujiwara");
-            vertex_fujuwara(mesh, e_fujiwara, e_scaling, parallel_grain_size);
+            vertex_fujuwara(mesh, parallel_grain_size);
             vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_weight");
             vweight.vector() = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_fujiwara").vector();
             break;

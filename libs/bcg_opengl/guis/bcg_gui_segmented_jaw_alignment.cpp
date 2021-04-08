@@ -13,6 +13,8 @@
 #include "viewer/bcg_viewer_state.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
+#include "renderers/points_renderer/bcg_material_points.h"
+#include "renderers/points_renderer/bcg_events_points_renderer.h"
 
 namespace bcg{
 
@@ -58,6 +60,7 @@ void gui_segmented_jaw_alignment(viewer_state *state){
 
                             auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                             if (ImGui::Button("Compute Edge Scaling Function")) {
+                                std::cout << "property " << result.current_property_name << " does exist!\n";
                                 auto vertex_property = mesh.vertices.get<bcg_scalar_t, 1>(result.current_property_name);
                                 if (vertex_property) {
                                     edge_from_vertex_boolean_function_or(mesh, "e_laplacian_scaling", vertex_property,
@@ -70,6 +73,13 @@ void gui_segmented_jaw_alignment(viewer_state *state){
                             if(mesh.edges.has("e_laplacian_scaling")){
                                 ImGui::Separator();
                                 gui_mesh_laplacian_harmonic_field(state);
+                                if(state->picker.mode == viewer_picker::Mode::vertices && state->scene.all_of<material_points>(state->picker.entity_id)){
+                                    auto &material = state->scene.get<material_points>(state->picker.entity_id);
+                                    if(material.attributes[2].buffer_name.empty() && mesh.vertices.has("v_selected")){
+                                        material.attributes[2].property_name = "v_selected";
+                                        state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(state->picker.entity_id, material.attributes[2]);
+                                    }
+                                }
                                 if(mesh.vertices.has("v_harmonic_field")){
                                     ImGui::Separator();
                                     auto v_harmon_field = mesh.vertices.get<bcg_scalar_t, 1>("v_harmonic_field");

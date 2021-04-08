@@ -19,7 +19,7 @@ edge_from_vertex_boolean_function_or(halfedge_graph &graph, const std::string &e
                     auto e = edge_handle(i);
                     auto v0 = graph.get_vertex(e, 0);
                     auto v1 = graph.get_vertex(e, 1);
-                    if (vertex_property[v0] || vertex_property[v1]) {
+                    if (vertex_property[v0] > 0 || vertex_property[v1] > 0) {
                         edge_property[e] = value_true;
                     } else {
                         edge_property[e] = value_false;
@@ -44,7 +44,7 @@ edge_from_vertex_boolean_function_and(halfedge_graph &graph, const std::string &
                     auto e = edge_handle(i);
                     auto v0 = graph.get_vertex(e, 0);
                     auto v1 = graph.get_vertex(e, 1);
-                    if (vertex_property[v0] && vertex_property[v1]) {
+                    if (vertex_property[v0] > 0 && vertex_property[v1] > 0) {
                         edge_property[e] = value_true;
                     } else {
                         edge_property[e] = value_false;

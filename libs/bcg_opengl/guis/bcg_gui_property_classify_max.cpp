@@ -12,8 +12,6 @@
 
 namespace bcg {
 
-
-
 Result gui_property_classify_max(viewer_state *state){
     static Result result{false, ""};
     if(state->scene.valid(state->picker.entity_id)){
@@ -45,7 +43,7 @@ Result gui_property_classify_max(viewer_state *state){
                         max = MapConst(p).cast<float>().maxCoeff();
                         threshold = MapConst(p).mean();
                     }
-                    gui_property_classify_max(state, vertices, p, threshold, min, max);
+                    result = gui_property_classify_max(state, vertices, p, threshold, min, max);
                 }
             }
         }
@@ -53,22 +51,26 @@ Result gui_property_classify_max(viewer_state *state){
     return result;
 }
 
-void gui_property_classify_max(viewer_state *state, property_container *container, property<bcg_scalar_t, 1> p,
+Result gui_property_classify_max(viewer_state *state, property_container *container, property<bcg_scalar_t, 1> p,
                                bcg_scalar_t &threshold, bcg_scalar_t min, bcg_scalar_t max) {
+    static Result result{false, ""};
     ImGui::PushID((p.name() + "_classify_max").c_str());
     float classify_max_value = threshold;
     if (ImGui::DragFloat((p.name() + "_classify_max_value").c_str(), &classify_max_value, 0.001, min, max)) {
-        auto result = classify_max(container, p, classify_max_value);
+        auto result_max = classify_max(container, p, classify_max_value);
         if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
             auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
             auto &color = material.attributes[2];
-            color.property_name = result.name();
+            color.property_name = result_max.name();
             state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(state->picker.entity_id,
                                                                                         color);
+            result.current_property_name = result_max.name();
+            result.triggered = true;
         }
         threshold = classify_max_value;
     }
     ImGui::PopID();
+    return result;
 }
 
 }

@@ -20,7 +20,7 @@ struct Result{
 
 Result gui_property_classify_max(viewer_state *state);
 
-void gui_property_classify_max(viewer_state *state, property_container *container, property<bcg_scalar_t, 1> p,
+Result gui_property_classify_max(viewer_state *state, property_container *container, property<bcg_scalar_t, 1> p,
                                bcg_scalar_t &threshold, bcg_scalar_t min = -1, bcg_scalar_t max = -1);
 
 }

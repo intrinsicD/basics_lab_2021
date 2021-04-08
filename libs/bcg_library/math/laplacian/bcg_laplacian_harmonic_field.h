@@ -59,6 +59,10 @@ void laplacian_harmonic_field(vertex_container *vertices, const laplacian_matrix
     }
 }
 
+void laplacian_harmonic_field_segmentation(vertex_container *vertices){
+
+}
+
 }
 
 #endif //BCG_GRAPHICS_BCG_LAPLACIAN_HARMONIC_FIELD_H

@@ -18,7 +18,7 @@ bcg_scalar_t vertex_cotan(halfedge_mesh &mesh, vertex_handle v){
 }
 
 void vertex_cotans(halfedge_mesh &mesh, size_t parallel_grain_size){
-    auto v_cotan = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_cotan");
+    auto v_cotan = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_cotan");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
