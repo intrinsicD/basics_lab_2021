@@ -11,13 +11,27 @@ namespace bcg {
 
 property<bcg_scalar_t, 1>
 edge_from_vertex_boolean_function_or(halfedge_graph &graph, const std::string &edge_property_name,
-                                     property<bcg_scalar_t, 1> vertex_property, bcg_scalar_t value_true, bcg_scalar_t value_false,
+                                     property<bcg_scalar_t, 1> vertex_property, bcg_scalar_t value_true,
+                                     bcg_scalar_t value_false,
                                      size_t parallel_grain_size = 1024);
 
 property<bcg_scalar_t, 1>
 edge_from_vertex_boolean_function_and(halfedge_graph &graph, const std::string &edge_property_name,
-                                      property<bcg_scalar_t, 1> vertex_property, bcg_scalar_t value, bcg_scalar_t value_false,
+                                      property<bcg_scalar_t, 1> vertex_property, bcg_scalar_t value_true,
+                                      bcg_scalar_t value_false,
                                       size_t parallel_grain_size = 1024);
+
+property<bcg_scalar_t, 1>
+edge_from_vertex_function_average(halfedge_graph &graph, const std::string &edge_property_name,
+                                  property<bcg_scalar_t, 1> vertex_property, size_t parallel_grain_size = 1024);
+
+property<bcg_scalar_t, 1>
+edge_from_vertex_function_min(halfedge_graph &graph, const std::string &edge_property_name,
+                                  property<bcg_scalar_t, 1> vertex_property, size_t parallel_grain_size = 1024);
+
+property<bcg_scalar_t, 1>
+edge_from_vertex_function_max(halfedge_graph &graph, const std::string &edge_property_name,
+                              property<bcg_scalar_t, 1> vertex_property, size_t parallel_grain_size = 1024);
 
 }
 

@@ -48,9 +48,10 @@ void graph_shortest_paths_from(halfedge_graph &graph, vertex_handle v_start, pro
         for (const auto &h : graph.get_halfedges(fn.v_to)) {
             auto v_next = graph.get_to_vertex(h);
             if (v_visited[v_next] >= 1) continue;
-            bcg_scalar_t accumulated_path_length = v_dijkstra_distance[fn.v_to] + graph.get_length(graph.get_edge(h));
+            auto e = graph.get_edge(h);
+            bcg_scalar_t accumulated_path_length = v_dijkstra_distance[fn.v_to] + graph.get_length(e);
             if(heuristic){
-                accumulated_path_length += heuristic[v_next];
+                accumulated_path_length += heuristic[e];
             }
             if(guide_vectorfield){
                 VectorS<3> dir = graph.positions[v_next] - graph.positions[fn.v_to];
@@ -96,9 +97,10 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
         for (const auto &h : graph.get_halfedges(fn.v_to)) {
             auto v_next = graph.get_to_vertex(h);
             if (v_visited[v_next] >= 1) continue;
-            bcg_scalar_t accumulated_path_length = v_dijkstra_distance[fn.v_to] + graph.get_length(graph.get_edge(h));
+            auto e = graph.get_edge(h);
+            bcg_scalar_t accumulated_path_length = v_dijkstra_distance[fn.v_to] + graph.get_length(e);
             if(heuristic){
-                accumulated_path_length += heuristic[v_next];
+                accumulated_path_length += heuristic[e];
             }
             if(guide_vectorfield){
                 VectorS<3> dir = graph.positions[v_next] - graph.positions[fn.v_to];
