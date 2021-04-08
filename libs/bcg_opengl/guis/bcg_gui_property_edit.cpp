@@ -27,32 +27,46 @@ void gui_property_edit(viewer_state *state, property_container *container, const
         if(gui_property_selector(state, container, {1}, "property1", current_property_name11)){
             change = true;
             auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
-            min = MapConst(property).minCoeff();
-            max = MapConst(property).maxCoeff();
+            min = MapConst(property).cast<float>().minCoeff();
+            max = MapConst(property).cast<float>().maxCoeff();
         }
         if(gui_property_selector(state, container, {1}, "property2", current_property_name12)){
             change = true;
             auto property = container->get<bcg_scalar_t, 1>(current_property_name12);
-            min = MapConst(property).minCoeff();
-            max = MapConst(property).maxCoeff();
+            min = MapConst(property).cast<float>().minCoeff();
+            max = MapConst(property).cast<float>().maxCoeff();
         }
         ImGui::Text("min: %f", min);
         ImGui::Text("max: %f", max);
 
+        static float clamp_min = 0;
+        static float clamp_max = 0;
+        if (ImGui::Button("reset_clamp_values")) {
+            clamp_min = min;
+            clamp_max = max;
+        }
+        ImGui::InputFloat("clamp_min", &clamp_min);
+        ImGui::InputFloat("clamp_max", &clamp_max);
+        if (ImGui::Button("apply clamp")) {
+            auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
+            clamp(container, property, clamp_min, clamp_max);
+            change = true;
+        }
+
         if (ImGui::Button("apply invert")) {
             auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
-            invert(property);
+            invert(container, property);
             change = true;
         }
         if (ImGui::Button("apply abs")) {
             auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
-            abs(property);
+            abs(container, property);
             change = true;
         }
         static float sigma = 1.0;
         if (ImGui::Button("apply gaussian")) {
             auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
-            gaussian(property, sigma);
+            gaussian(container, property, sigma);
             change = true;
         }
         ImGui::SameLine();
@@ -61,7 +75,7 @@ void gui_property_edit(viewer_state *state, property_container *container, const
         static float shift_value = 0.0;
         if (ImGui::Button("apply shift")) {
             auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
-            shift(property, shift_value);
+            shift(container, property, shift_value);
             change = true;
         }
         ImGui::SameLine();
@@ -70,7 +84,7 @@ void gui_property_edit(viewer_state *state, property_container *container, const
         static float scale_value = 1.0;
         if (ImGui::Button("apply scaling")) {
             auto property = container->get<bcg_scalar_t, 1>(current_property_name11);
-            scale(property, scale_value);
+            scale(container, property, scale_value);
             change = true;
         }
         ImGui::SameLine();
@@ -80,14 +94,14 @@ void gui_property_edit(viewer_state *state, property_container *container, const
             if (ImGui::Button("apply sum")) {
                 auto property1 = container->get<bcg_scalar_t, 1>(current_property_name11);
                 auto property2 = container->get<bcg_scalar_t, 1>(current_property_name12);
-                sum(property1, property2);
+                sum(container, property1, property2);
                 change = true;
             }
 
             if (ImGui::Button("apply prod")) {
                 auto property1 = container->get<bcg_scalar_t, 1>(current_property_name11);
                 auto property2 = container->get<bcg_scalar_t, 1>(current_property_name12);
-                prod(property1, property2);
+                prod(container, property1, property2);
                 change = true;
             }
         }
@@ -115,17 +129,17 @@ void gui_property_edit(viewer_state *state, property_container *container, const
 
         if (ImGui::Button("apply invert")) {
             auto property = container->get<VectorS<3>, 3>(current_property_name31);
-            invert(property);
+            invert(container, property);
         }
         if (ImGui::Button("apply abs")) {
             auto property = container->get<VectorS<3>, 3>(current_property_name31);
-            abs(property);
+            abs(container, property);
         }
 
         static Vector<float, 3> shift_values = Vector<float, 3>::Zero();
         if (ImGui::Button("apply shift")) {
             auto property = container->get<VectorS<3>, 3>(current_property_name31);
-            shift(property, shift_values.cast<bcg_scalar_t>());
+            shift(container, property, shift_values.cast<bcg_scalar_t>());
         }
         ImGui::SameLine();
         ImGui::InputFloat3("shift_values", shift_values.data());
@@ -133,7 +147,7 @@ void gui_property_edit(viewer_state *state, property_container *container, const
         static Vector<float, 3> scale_values = Vector<float, 3>::Ones();
         if (ImGui::Button("apply scaling")) {
             auto property = container->get<VectorS<3>, 3>(current_property_name31);
-            scale(property, scale_values.cast<bcg_scalar_t>());
+            scale(container, property, scale_values.cast<bcg_scalar_t>());
         }
         ImGui::SameLine();
         ImGui::InputFloat3("scale_values", scale_values.data());
@@ -142,19 +156,18 @@ void gui_property_edit(viewer_state *state, property_container *container, const
             if (ImGui::Button("apply sum")) {
                 auto property1 = container->get<VectorS<3>, 3>(current_property_name31);
                 auto property2 = container->get<VectorS<3>, 3>(current_property_name32);
-                sum(property1, property2);
+                sum(container, property1, property2);
             }
 
             if (ImGui::Button("apply prod")) {
                 auto property1 = container->get<VectorS<3>, 3>(current_property_name31);
                 auto property2 = container->get<VectorS<3>, 3>(current_property_name32);
-                prod(property1, property2);
+                prod(container, property1, property2);
             }
         }
     }
     if(ImGui::CollapsingHeader("rename or delete")){
         edit_field(state, container, name);
-        ImGui::End();
     }
     ImGui::PopID();
 }

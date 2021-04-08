@@ -52,6 +52,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_property_container_selector.h bcg_gui_property_container_selector.cpp
         bcg_gui_property_editfield.h bcg_gui_property_editfield.cpp
         bcg_gui_property_selector.h bcg_gui_property_selector.cpp
+        bcg_gui_property_classify_max.h bcg_gui_property_classify_max.cpp
         bcg_gui_registration.h bcg_gui_registration.cpp
         bcg_gui_reload_entity.h bcg_gui_reload_entity.cpp
         bcg_gui_rendering_options.h bcg_gui_rendering_options.cpp
@@ -73,5 +74,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_exporting.h bcg_gui_exporting.cpp
         bcg_gui_parameterized_plane.h bcg_gui_parameterized_plane.cpp
         bcg_gui_property_edit.h bcg_gui_property_edit.cpp
+        bcg_gui_property_clamp.h bcg_gui_property_clamp.cpp
+        bcg_gui_segmented_jaw_alignment.h bcg_gui_segmented_jaw_alignment.cpp
         )
 

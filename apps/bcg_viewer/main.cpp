@@ -45,6 +45,7 @@
 #include "../spike/opengl/bcg_gui_mesh_normal_filtering.h"
 #include "../spike/opengl/bcg_gui_point_cloud_normal_filtering.h"
 #include "bcg_opengl/guis/bcg_gui_parameterized_plane.h"
+#include "bcg_opengl/guis/bcg_gui_segmented_jaw_alignment.h"
 
 int main() {
     using namespace bcg;
@@ -225,6 +226,9 @@ int main() {
                 state->gui.left = gui_point_cloud_normal_filtering;
             }
             ImGui::EndMenu();
+        }
+        if(ImGui::MenuItem("Segmented Jaw Alignment")){
+            state->gui.left = gui_segmented_jaw_alignment;
         }
 
         return true;

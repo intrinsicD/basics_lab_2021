@@ -4,6 +4,7 @@
 
 #include "bcg_mesh_vertex_convex_concave.h"
 #include "bcg_property_map_eigen.h"
+#include "bcg_property_utils.h"
 #include "bcg_mesh_edge_cotan.h"
 #include "tbb/tbb.h"
 
@@ -122,21 +123,17 @@ void vertex_convex_concave(halfedge_mesh &mesh,int post_smoothing_steps, bool tw
     concave.set_dirty();
 }
 
-void vertex_concave_theshold(halfedge_mesh &mesh, bcg_scalar_t theshold){
+void vertex_concave_theshold(halfedge_mesh &mesh, bcg_scalar_t threshold){
     auto concave = mesh.vertices.get<bcg_scalar_t, 1>("v_concave");
     if(concave){
-        auto concave_theshold = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_concave_theshold");
-        Map(concave_theshold) = (MapConst(concave).array() > theshold).select(VectorS<-1>::Ones(concave_theshold.size()), bcg_scalar_t(0.0));
-        concave_theshold.set_dirty();
+        classify_max(&mesh.vertices, concave, threshold);
     }
 }
 
-void vertex_convex_theshold(halfedge_mesh &mesh, bcg_scalar_t theshold){
+void vertex_convex_theshold(halfedge_mesh &mesh, bcg_scalar_t threshold){
     auto convex = mesh.vertices.get<bcg_scalar_t, 1>("v_convex");
     if(convex){
-        auto convex_theshold = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_convex_theshold");
-        Map(convex_theshold) = (MapConst(convex).array() > theshold).select(VectorS<-1>::Ones(convex_theshold.size()), bcg_scalar_t(0.0));
-        convex_theshold.set_dirty();
+        classify_max(&mesh.vertices, convex, threshold);
     }
 }
 
