@@ -5,6 +5,7 @@
 #include <queue>
 #include "bcg_mesh_connected_components.h"
 #include "geometry/bcg_property_map_eigen.h"
+#include "utils/bcg_timer.h"
 
 namespace bcg {
 
@@ -65,7 +66,7 @@ size_t mesh_connected_components_detect(halfedge_mesh &mesh) {
     auto connected_components = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_connected_component");
     connected_components.reset(0);
 
-    size_t num_connected_components = 0;
+    int num_connected_components = 0;
     size_t visited_count = 0;
 
     for (const auto &v : mesh.vertices) {
@@ -86,8 +87,11 @@ size_t mesh_connected_components_detect(halfedge_mesh &mesh) {
 
 std::vector<halfedge_mesh> mesh_connected_components_split(halfedge_mesh &mesh) {
     if (!mesh.vertices.has("v_connected_component")) {
+        Timer timer;
         mesh_connected_components_detect(mesh);
+        std::cout << "detect connected components " <<  timer.pretty_report() << "\n";
     }
+    Timer timer;
     auto connected_components = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_connected_component");
     size_t num_connected_components = MapConst(connected_components).maxCoeff() + 1;
 
@@ -120,6 +124,7 @@ std::vector<halfedge_mesh> mesh_connected_components_split(halfedge_mesh &mesh) 
 
     mesh.vertices.remove(index_map);
     mesh.vertices.remove(component_map);
+    std::cout << " split connected components " <<  timer.pretty_report() << "\n";
     return parts;
 }
 

@@ -12,7 +12,7 @@ namespace bcg {
 inline MatrixS<3, 3> matrix_exponential(const VectorS<3> &v) {
     //Rodrigues' fromula
     bcg_scalar_t theta(v.norm());
-    if (theta == 0) return MatrixS<3, 3>::Identity();
+    if (theta < scalar_eps) return MatrixS<3, 3>::Identity();
     MatrixS<3, 3> rot(cross_product_matrix((v / theta).eval()));
     return MatrixS<3, 3>::Identity() + std::sin(theta) * rot + (1.0f - std::cos(theta)) * rot * rot;
 }

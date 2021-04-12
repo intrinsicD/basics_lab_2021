@@ -52,7 +52,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                     auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
 
                     Map(merged_path).setZero();
-                    auto heuristic = vertices->get<bcg_scalar_t, 1>(current_selected_heuristic);
+                    auto heuristic = edges->get<bcg_scalar_t, 1>(current_selected_heuristic);
                     auto guide_vectorfield = vertices->get<VectorS<3>, 3>(current_selected_guide_vectorfield);
 
                     if (paths.empty()) {

@@ -734,7 +734,8 @@ void halfedge_mesh::delete_face(face_handle f) {
     }
 
     // update outgoing halfedge handles of remaining vertices
-    auto vit(vertices.begin()), vend(vertices.end());
+    //auto vit(vertices.begin()), vend(vertices.end());
+    auto vit(verts.begin()), vend(verts.end());
     for (; vit != vend; ++vit) {
         adjust_outgoing_halfedge(*vit);
     }

@@ -79,6 +79,12 @@ void gui_segmented_jaw_alignment(viewer_state *state){
                                                                      value_small,
                                                                      value_large, state->config.parallel_grain_size);
                                 edge_from_vertex_function_min(mesh, "e_dijkstra_scaling", vertex_property_original, state->config.parallel_grain_size);
+                                auto e_dijkstra_scaling = mesh.edges.get<bcg_scalar_t, 1>("e_dijkstra_scaling");
+                                if(e_dijkstra_scaling){
+                                    auto result_shift = shift(&mesh.edges, e_dijkstra_scaling, -MapConst(e_dijkstra_scaling).minCoeff());
+                                    Map(e_dijkstra_scaling) = MapConst(result_shift);
+                                    Map(e_dijkstra_scaling).array() /= MapConst(e_dijkstra_scaling).maxCoeff();
+                                }
                             } else {
                                 std::cout << "property " << result_property_name << " does not exist!\n";
                             }
