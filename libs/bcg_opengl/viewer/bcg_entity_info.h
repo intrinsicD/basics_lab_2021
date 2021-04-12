@@ -14,6 +14,7 @@ struct entity_info{
     std::string filename, entity_name;
     VectorS<3> loading_center;
     bcg_scalar_t loading_scale;
+    bool save = false;
 };
 
 }

@@ -4,6 +4,7 @@
 
 #include "bcg_keyboard_system.h"
 #include "viewer/bcg_viewer_state.h"
+#include "viewer/bcg_entity_info.h"
 
 namespace bcg {
 
@@ -32,7 +33,18 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
                                     state->keyboard.ctrl_pressed ||
                                     state->keyboard.command_pressed);
     if (state->keyboard.is_captured_by_gui) return;
-    if (state->keyboard.keys[GLFW_KEY_A]) {}
+    if (state->keyboard.keys[GLFW_KEY_A]) {
+        if(state->keyboard.ctrl_pressed){
+            auto view = state->scene.view<entity_info>();
+            state->picker.selected_entities.clear();
+            std::string message;
+            for(const auto &id: view){
+                state->picker.selected_entities[(size_t)id] = id;
+                message += " " + std::to_string(size_t(id));
+            }
+            std::cout << "selected entities " + message << "\n";
+        }
+    }
     if (state->keyboard.keys[GLFW_KEY_B]) {}
     if (state->keyboard.keys[GLFW_KEY_C]) {}
     if (state->keyboard.keys[GLFW_KEY_D]) {}
@@ -107,12 +119,16 @@ void keyboard_system::on_update(const event::internal::update &) {
      * use on_keyboard if you want to enable, disable stuff
     * */
     if (state->keyboard.keys[GLFW_KEY_A]) {
-        state->cam.model_matrix.translation() -= state->cam.right_vec() * state->time.time_delta;
+        if(state->keyboard.no_modifier){
+            state->cam.model_matrix.translation() -= state->cam.right_vec() * state->time.time_delta;
+        }
     }
     if (state->keyboard.keys[GLFW_KEY_B]) {}
     if (state->keyboard.keys[GLFW_KEY_C]) {}
     if (state->keyboard.keys[GLFW_KEY_D]) {
-        state->cam.model_matrix.translation() += state->cam.right_vec() * state->time.time_delta;
+        if(state->keyboard.no_modifier) {
+            state->cam.model_matrix.translation() += state->cam.right_vec() * state->time.time_delta;
+        }
     }
     if (state->keyboard.keys[GLFW_KEY_E]) {}
     if (state->keyboard.keys[GLFW_KEY_F]) {}
@@ -129,13 +145,17 @@ void keyboard_system::on_update(const event::internal::update &) {
     if (state->keyboard.keys[GLFW_KEY_Q]) {}
     if (state->keyboard.keys[GLFW_KEY_R]) {}
     if (state->keyboard.keys[GLFW_KEY_S]) {
-        state->cam.model_matrix.translation() += state->cam.direction_vec() * state->time.time_delta;
+        if(state->keyboard.no_modifier) {
+            state->cam.model_matrix.translation() += state->cam.direction_vec() * state->time.time_delta;
+        }
     }
     if (state->keyboard.keys[GLFW_KEY_T]) {}
     if (state->keyboard.keys[GLFW_KEY_U]) {}
     if (state->keyboard.keys[GLFW_KEY_V]) {}
     if (state->keyboard.keys[GLFW_KEY_W]) {
-        state->cam.model_matrix.translation() -= state->cam.direction_vec() * state->time.time_delta;
+        if(state->keyboard.no_modifier) {
+            state->cam.model_matrix.translation() -= state->cam.direction_vec() * state->time.time_delta;
+        }
     }
     if (state->keyboard.keys[GLFW_KEY_X]) {}
     if (state->keyboard.keys[GLFW_KEY_Y]) {}

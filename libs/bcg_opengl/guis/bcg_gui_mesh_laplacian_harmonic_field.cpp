@@ -6,6 +6,7 @@
 #include "bcg_gui_mesh_laplacian.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_selection.h"
+#include "graph/bcg_graph_harmonic_segmentation_to_path.h"
 #include "mesh/bcg_mesh_boundary.h"
 #include "math/laplacian/bcg_laplacian_harmonic_field.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
@@ -100,6 +101,20 @@ void gui_mesh_laplacian_harmonic_field(viewer_state *state){
                         color.property_name = "v_harmonic_field";
                         state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(state->picker.entity_id, color);
                     }
+                }
+            }
+            if(mesh.vertices.has("v_harmonic_field")){
+                static float iso_value1 = -0.5;
+                ImGui::InputFloat("iso_value1", &iso_value1);
+                static float iso_value2 = 0.5;
+                ImGui::InputFloat("iso_value2", &iso_value2);
+                if(ImGui::Button("Convert to path")){
+                    auto v_harmonic_field = mesh.vertices.get<bcg_scalar_t, 1>("v_harmonic_field");
+                    graph_harmonic_segmentation_to_path(mesh, v_harmonic_field, {iso_value1, iso_value2}, state->config.parallel_grain_size);
+                    auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
+                    auto &color = material.attributes[2];
+                    color.property_name = "v_path";
+                    state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(state->picker.entity_id, color);
                 }
             }
         }

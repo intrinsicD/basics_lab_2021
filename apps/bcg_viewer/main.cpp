@@ -55,11 +55,11 @@ int main() {
     viewer.state.gui.menu.show = [](viewer_state *state, gui_menu */*self*/) {
 
         if (ImGui::BeginMenu("Viewer")) {
-            if (ImGui::MenuItem("Export")) {
-                state->gui.left = gui_exporting;
-            }
             if (ImGui::MenuItem("Info")) {
                 state->gui.left = gui_viewer_state;
+            }
+            if (ImGui::MenuItem("Export")) {
+                state->gui.left = gui_exporting;
             }
             ImGui::EndMenu();
         }

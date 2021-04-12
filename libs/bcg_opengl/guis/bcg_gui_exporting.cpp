@@ -25,16 +25,16 @@ void gui_exporting_mesh(viewer_state *state) {
         auto &info = state->scene.get<entity_info>(state->picker.entity_id);
         static int mesh_format_selected = -1;
         std::string filename_mesh = info.filename;
-        if(mesh_format_selected < 0){
+        if (mesh_format_selected < 0) {
             auto formats = join(".", mesh_formats);
             auto extension = path_extension(filename_mesh);
-            for(int i = 0; i < static_cast<int>(formats.size()); ++i){
-                if(formats[i] == extension) {
+            for (int i = 0; i < static_cast<int>(formats.size()); ++i) {
+                if (formats[i] == extension) {
                     mesh_format_selected = i;
                     break;
                 }
             }
-            if(mesh_format_selected < 0){
+            if (mesh_format_selected < 0) {
                 mesh_format_selected = 0;
             }
         }
@@ -69,16 +69,16 @@ void gui_exporting_point_cloud(viewer_state *state) {
         auto &info = state->scene.get<entity_info>(state->picker.entity_id);
         static int point_cloud_format_selected = -1;
         std::string filename_point_cloud = info.filename;
-        if(point_cloud_format_selected < 0){
+        if (point_cloud_format_selected < 0) {
             auto formats = join(".", point_cloud_formats);
             auto extension = path_extension(filename_point_cloud);
-            for(int i = 0; i < static_cast<int>(formats.size()); ++i){
-                if(formats[i] == extension) {
+            for (int i = 0; i < static_cast<int>(formats.size()); ++i) {
+                if (formats[i] == extension) {
                     point_cloud_format_selected = i;
                     break;
                 }
             }
-            if(point_cloud_format_selected < 0){
+            if (point_cloud_format_selected < 0) {
                 point_cloud_format_selected = 0;
             }
         }
