@@ -82,6 +82,49 @@ void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,
                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
                                            size_t parallel_grain_size = 1024);
 
+//m-estimators
+
+void mesh_denoising_vertex_update_naive(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfedge_mesh &mesh, bcg_scalar_t sigma_p,
+                                                                           bcg_scalar_t sigma_n,
+                                                                           size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_mesh &mesh,
+                                                                          property<bcg_scalar_t, 1> sigma_p,
+                                                                          property<bcg_scalar_t, 1> sigma_n,
+                                                                          size_t parallel_grain_size = 1024);
+
+void
+mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfedge_mesh &mesh, const MatrixS<3, 3> &sigma_p,
+                                                                      const MatrixS<3, 3> &sigma_n,
+                                                                      size_t parallel_grain_size = 1024);
+
+void
+mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_mesh &mesh,
+                                                                      property<MatrixS<3, 3>, 1> sigma_p,
+                                                                      property<MatrixS<3, 3>, 1> sigma_n,
+                                                                      size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_triangle_quadric(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_probabilistic_triangle_quadric_global_sigma(halfedge_mesh &mesh, bcg_scalar_t sigma_p,
+                                                                              size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(halfedge_mesh &mesh,
+                                                                             property<bcg_scalar_t, 1> sigma_p,
+                                                                             size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_probabilistic_triangle_quadric_global_sigma(halfedge_mesh &mesh,
+                                                                              const MatrixS<3, 3> &sigma_p,
+                                                                              size_t parallel_grain_size = 1024);
+
+void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(halfedge_mesh &mesh,
+                                                                             property<MatrixS<3, 3>, 1> sigma_p,
+                                                                             size_t parallel_grain_size = 1024);
+
 }
 
 #endif //BCG_GRAPHICS_BCG_MESH_NORMAL_FILTERING_ROBUST_STATISTICS_H
