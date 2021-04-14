@@ -4,6 +4,7 @@
 
 #include "bcg_gui_mesh_robust_normal_filtering.h"
 #include "bcg_gui_point_cloud_vertex_noise.h"
+#include "bcg_gui_mesh_offset_mesh.h"
 #include "mesh/bcg_mesh_volume.h"
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_library/geometry/mesh/bcg_mesh_normal_filtering_robust_statistics.h"
@@ -139,6 +140,8 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
     }
 
     gui_point_cloud_vertex_noise(state);
+    ImGui::Separator();
+    gui_mesh_offset_mesh(state);
 }
 
 }

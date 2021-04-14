@@ -34,6 +34,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_vertex_convex_concave.h bcg_gui_mesh_vertex_convex_concave.cpp
         bcg_gui_mesh_vertex_normals.h bcg_gui_mesh_vertex_normals.cpp
         bcg_gui_mesh_vertex_extremal_values.h bcg_gui_mesh_vertex_extremal_values.cpp
+        bcg_gui_mesh_offset_mesh.h bcg_gui_mesh_offset_mesh.cpp
         bcg_gui_ogl_buffer.h bcg_gui_ogl_buffer.cpp
         bcg_gui_ogl_shape.h bcg_gui_ogl_shape.cpp
         bcg_gui_point_cloud.h bcg_gui_point_cloud.cpp

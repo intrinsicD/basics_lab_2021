@@ -48,13 +48,13 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
 
                         quadric Q_total;
                         for (const auto &fv : mesh.get_faces(v)) {
-/*                        std::vector<VectorS<3>> V;
-                        for (const auto vf : mesh.get_vertices(fv)) {
-                            V.push_back(positions[vf]);
-                        }
-                        quadric Q;
-                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
-                        Q_total += Q;*/
+/*                            std::vector<VectorS<3>> V;
+                            for (const auto vf : mesh.get_vertices(fv)) {
+                                V.push_back(positions[vf]);
+                            }
+                            quadric Q;
+                            Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
+                            Q_total += Q;*/
                             quadric Q;
                             Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
                                                           sigma_n);
@@ -778,7 +778,8 @@ void mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfed
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
                         quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p[fv], sigma_n[fv]);
+                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p[fv],
+                                                      sigma_n[fv]);
                         Q_total += Q;
                     }
 
@@ -834,9 +835,9 @@ mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfedge_m
 
 void
 mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_mesh &mesh,
-                                                                      property<MatrixS<3, 3>, 1> sigma_p,
-                                                                      property<MatrixS<3, 3>, 1> sigma_n,
-                                                                      size_t parallel_grain_size) {
+                                                                     property<MatrixS<3, 3>, 1> sigma_p,
+                                                                     property<MatrixS<3, 3>, 1> sigma_n,
+                                                                     size_t parallel_grain_size) {
     auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
     auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
@@ -851,7 +852,8 @@ mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_me
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
                         quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p[fv], sigma_n[fv]);
+                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p[fv],
+                                                      sigma_n[fv]);
                         Q_total += Q;
                     }
 
@@ -1050,7 +1052,8 @@ void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(hal
                             V.push_back(positions[vf]);
                         }
                         quadric Q;
-                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[Vs[0]], sigma_p[Vs[1]], sigma_p[Vs[2]]);
+                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[Vs[0]], sigma_p[Vs[1]],
+                                                         sigma_p[Vs[2]]);
                         Q_total += Q;
                     }
 
