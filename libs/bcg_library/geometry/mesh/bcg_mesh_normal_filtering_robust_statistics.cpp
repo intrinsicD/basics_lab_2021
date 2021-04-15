@@ -36,7 +36,6 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                          size_t parallel_grain_size) {
     auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
     auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
 
     if (quadric_update) {
@@ -47,6 +46,7 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                         auto v = vertex_handle(i);
 
                         quadric Q_total;
+                        bcg_scalar_t sum_weights = 0;
                         for (const auto &fv : mesh.get_faces(v)) {
 /*                            std::vector<VectorS<3>> V;
                             for (const auto vf : mesh.get_vertices(fv)) {
@@ -58,12 +58,15 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                             quadric Q;
                             Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
                                                           sigma_n);
+
                             Q_total += Q;
+                            sum_weights += 1.0;
                         }
 
                         if (mesh.is_boundary(v)) {
-                            VectorS<3> delta = Q_total.minimizer() - positions[v];
-                            new_positions[v] = positions[v] + Q_total.A() * delta * std::exp(-sigma_n);
+                            VectorS<3> delta = Q_total.A() * (Q_total.minimizer() - positions[v]);
+                            bcg_scalar_t len = delta.norm();
+                            new_positions[v] = positions[v] + delta * std::exp(-sigma_n) * std::exp(-len);
                         } else {
                             new_positions[v] = Q_total.minimizer();
                         }
@@ -81,7 +84,8 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                         bcg_scalar_t sum_weights = 0;
                         for (const auto &fv : mesh.get_faces(v)) {
                             VectorS<3> PC = face_center(mesh, fv) - positions[v];
-                            bcg_scalar_t weight = face_area(mesh, fv);
+                            bcg_scalar_t weight = 1;
+                            //bcg_scalar_t weight = face_area(mesh, fv);
                             sum_weights += weight;
                             delta += weight * PC.dot(f_normals_filtered[fv]) * f_normals_filtered[fv];
                         }
@@ -96,7 +100,6 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
     face_normals(mesh, parallel_grain_size);
     vertex_normals(mesh, vertex_normal_area_angle, parallel_grain_size);
     positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
 }
 
 void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
@@ -338,7 +341,7 @@ void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto e = edge_handle(i);
-                    l_avg = l_avg + mesh.get_length(e) / mesh.edges.size();
+                    l_avg = l_avg + mesh.get_length(e) / bcg_scalar_t(mesh.edges.size());
                 }
             }
     );
@@ -420,7 +423,8 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                             auto oh = mesh.get_opposite(hf);
                             if (!mesh.is_boundary(oh)) {
                                 auto ff = mesh.get_face(oh);
-                                bcg_scalar_t weight = face_area(mesh, ff);
+                                //bcg_scalar_t weight = face_area(mesh, ff);
+                                bcg_scalar_t weight = 1.0;
                                 quadrics_avg[f] += quadrics[ff] * weight;
                                 weight_sum += weight;
                             }
@@ -444,7 +448,9 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                     }
 
                     if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
+                        VectorS<3> diff = Q_total.A() * (Q_total.minimizer() - positions[v]);
+                        bcg_scalar_t len = diff.norm();
+                        new_positions[v] = positions[v] +  diff * std::exp(-sigma_n) * std::exp(-len);
                     } else {
                         new_positions[v] = Q_total.minimizer();
                     }
