@@ -110,6 +110,7 @@ void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
 
     bcg_scalar_t sigma_g_squared = sigma_g * sigma_g;
+    //TODO change this!
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
