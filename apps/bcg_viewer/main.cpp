@@ -36,6 +36,8 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_smoothing.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_robust_normal_filtering.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_extremal_values.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_connected_components.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_projected_distances.h"
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
@@ -180,6 +182,12 @@ int main() {
             if (ImGui::MenuItem("Dijkstra")) {
                 state->gui.left = gui_graph_dijkstra;
             }
+            if (ImGui::MenuItem("Connected Components")) {
+                state->gui.left = gui_mesh_connected_components;
+            }
+            if (ImGui::MenuItem("Projected Distances")) {
+                state->gui.left = gui_mesh_projected_distances;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Implicit")) {
@@ -229,6 +237,13 @@ int main() {
         }
         if(ImGui::MenuItem("Segmented Jaw Alignment")){
             state->gui.left = gui_segmented_jaw_alignment;
+        }
+        static bool show_demo = false;
+        if(ImGui::MenuItem("Demo")){
+            show_demo = true;
+        }
+        if(show_demo){
+            ImGui::ShowDemoWindow(&show_demo);
         }
 
         return true;

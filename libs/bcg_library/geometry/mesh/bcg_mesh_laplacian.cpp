@@ -100,7 +100,7 @@ void vertex_from_edges(halfedge_mesh &mesh, property<bcg_scalar_t, 1> e_weight, 
     vweight.set_dirty();
 }
 
-void vertex_uniform(halfedge_mesh &mesh, size_t parallel_grain_size){
+void vertex_uniform(halfedge_mesh &mesh, size_t parallel_grain_size) {
     property<bcg_scalar_t, 1> vweight = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_laplacian_uniform");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
@@ -136,8 +136,7 @@ void vertex_fujuwara(halfedge_mesh &mesh, size_t parallel_grain_size) {
 }
 
 std::vector<Eigen::Triplet<bcg_scalar_t>>
-compute_vertex_weights(halfedge_mesh &mesh, MeshLaplacianMass m_type, property<bcg_scalar_t, 1> e_scaling,
-                       size_t parallel_grain_size) {
+compute_vertex_weights(halfedge_mesh &mesh, MeshLaplacianMass m_type, size_t parallel_grain_size) {
     property<bcg_scalar_t, 1> eweight = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_laplacian_weight");
     property<bcg_scalar_t, 1> vweight;
     switch (m_type) {
@@ -197,11 +196,11 @@ mesh_laplacian build_laplacian(halfedge_mesh &mesh, MeshLaplacianStiffness s_typ
                                size_t parallel_grain_size,
                                std::string edge_scaling_property_name) {
     property<bcg_scalar_t, 1> e_scaling;
-    if(mesh.edges.has(edge_scaling_property_name)){
+    if (mesh.edges.has(edge_scaling_property_name)) {
         e_scaling = mesh.edges.get<bcg_scalar_t, 1>(edge_scaling_property_name);
     }
     auto e_coeffs = compute_edge_weights(mesh, s_type, e_scaling, parallel_grain_size);
-    auto v_coeffs = compute_vertex_weights(mesh, m_type, e_scaling, parallel_grain_size);
+    auto v_coeffs = compute_vertex_weights(mesh, m_type, parallel_grain_size);
 
     auto N = mesh.vertices.size();
 

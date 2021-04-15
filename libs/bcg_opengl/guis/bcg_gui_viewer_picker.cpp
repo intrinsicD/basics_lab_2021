@@ -3,6 +3,7 @@
 //
 
 #include "bcg_gui_viewer_picker.h"
+#include "bcg_gui_selected_entities.h"
 #include "viewer/bcg_viewer_state.h"
 
 namespace bcg {
@@ -55,6 +56,7 @@ void gui_viewer_picker(viewer_state *state) {
             ss << state->picker.view_space_point.transpose();
             draw_label(&state->window, "view_space_point", ss.str());
             ImGui::Separator();
+            gui_selected_entities(state);
         }
     }
 

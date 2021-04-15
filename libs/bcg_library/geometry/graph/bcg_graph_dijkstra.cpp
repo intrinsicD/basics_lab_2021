@@ -146,12 +146,18 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
         }
         v_shortest_path[v] = 1;
         result.vertices.push_back(v);
-        result.edges.push_back(graph.get_edge(next));
+        auto e = graph.get_edge(next);
+        if(graph.is_valid(e)){
+            result.edges.push_back(e);
+        }
         v = graph.get_to_vertex(next);
         ++count;
     } while (v != v_start);
     result.vertices.push_back(v_start);
-    result.edges.push_back(graph.get_edge(next));
+    auto e = graph.get_edge(next);
+    if(graph.is_valid(e)){
+        result.edges.push_back(e);
+    }
     return result;
 }
 

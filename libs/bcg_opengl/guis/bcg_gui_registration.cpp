@@ -17,11 +17,14 @@ void gui_registration(viewer_state *state) {
     static int max_iters = 10;
     static entt::entity source_id = entt::null;
     static entt::entity target_id = entt::null;
+    static bool multiple_sources = false;
+
     draw_combobox(&state->window, "Method", e, names);
     if (source_id != entt::null) {
         ImGui::LabelText("source_id", "%s", std::to_string(size_t(source_id)).c_str());
     }
     if (target_id != entt::null) {
+        multiple_sources = !state->picker.selected_entities.empty();
         ImGui::LabelText("target_id", "%s", std::to_string(size_t(target_id)).c_str());
     }
     if (ImGui::Button("set source")) {
@@ -35,7 +38,14 @@ void gui_registration(viewer_state *state) {
     ImGui::InputInt("max_iters", &max_iters);
     ImGui::Separator();
     if (ImGui::Button("align step")) {
-        if (source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)) {
+        if(multiple_sources && state->scene.valid(target_id)){
+            for(const auto &item : state->picker.selected_entities){
+                if(item.second == target_id) continue;
+                state->dispatcher.trigger<event::registration::align_step>(item.second, target_id,
+                                                                           static_cast<RegistrationMethod>(e));
+            }
+
+        }else if (source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)) {
             state->dispatcher.trigger<event::registration::align_step>(source_id, target_id,
                                                                        static_cast<RegistrationMethod>(e));
         }

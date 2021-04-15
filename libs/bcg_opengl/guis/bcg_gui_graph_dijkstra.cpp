@@ -86,6 +86,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                         merged_path_edges.reset(0);
                         for (const auto &path : paths) {
                             for (const auto &e : path.edges) {
+
                                 merged_path_edges[e] = 1;
                             }
                         }

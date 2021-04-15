@@ -85,7 +85,7 @@ void hierarchy_system::on_update(const event::internal::update &){
 
 void hierarchy_system::on_destroy(const event::internal::destroy &event){
     if(state->scene.valid(event.id) && state->scene.all_of<entity_hierarchy>(event.id)){
-        auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
+        auto hierarchy = state->scene.get<entity_hierarchy>(event.id);
         if(!hierarchy.children.empty()){
             for(auto &child : hierarchy.children){
                 state->dispatcher.trigger<event::internal::destroy>(child.second);

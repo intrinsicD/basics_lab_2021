@@ -35,6 +35,8 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_vertex_normals.h bcg_gui_mesh_vertex_normals.cpp
         bcg_gui_mesh_vertex_extremal_values.h bcg_gui_mesh_vertex_extremal_values.cpp
         bcg_gui_mesh_offset_mesh.h bcg_gui_mesh_offset_mesh.cpp
+        bcg_gui_mesh_connected_components.h bcg_gui_mesh_connected_components.cpp
+        bcg_gui_mesh_projected_distances.h bcg_gui_mesh_projected_distances.cpp
         bcg_gui_ogl_buffer.h bcg_gui_ogl_buffer.cpp
         bcg_gui_ogl_shape.h bcg_gui_ogl_shape.cpp
         bcg_gui_point_cloud.h bcg_gui_point_cloud.cpp
@@ -76,6 +78,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_parameterized_plane.h bcg_gui_parameterized_plane.cpp
         bcg_gui_property_edit.h bcg_gui_property_edit.cpp
         bcg_gui_property_clamp.h bcg_gui_property_clamp.cpp
+        bcg_gui_selected_entities.h bcg_gui_selected_entities.cpp
         bcg_gui_segmented_jaw_alignment.h bcg_gui_segmented_jaw_alignment.cpp
         )
 
