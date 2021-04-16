@@ -9,12 +9,15 @@
 #include "bcg_mesh_vertex_normals.h"
 #include "bcg_property_map_eigen.h"
 #include "bcg_mesh_curvature_taubin.h"
-#include "geometry/quadric/bcg_quadric.h"
+//#include "geometry/quadric/bcg_quadric.h"
 #include "math/vector/bcg_vector_median_filter_directional.h"
 #include "math/bcg_m_estimators.h"
+#include "math/bcg_probabilistic_quadric.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
+
+using quadric = pq::quadric<pq::math<bcg_scalar_t, VectorS<3>, VectorS<3>, MatrixS<3, 3>>>;
 
 std::vector<std::string> normal_filtering_names() {
     std::vector<std::string> names(static_cast<int>(NormalFilteringType::__last__));
@@ -48,25 +51,18 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                         quadric Q_total;
                         bcg_scalar_t sum_weights = 0;
                         for (const auto &fv : mesh.get_faces(v)) {
-/*                            std::vector<VectorS<3>> V;
+                            std::vector<VectorS<3>> V;
                             for (const auto vf : mesh.get_vertices(fv)) {
                                 V.push_back(positions[vf]);
                             }
-                            quadric Q;
-                            Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
-                            Q_total += Q;*/
-                            quadric Q;
-                            Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
-                                                          sigma_n);
-
-                            Q_total += Q;
-                            sum_weights += 1.0;
+                            //Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
+                            Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p, sigma_n);
                         }
 
                         if (mesh.is_boundary(v)) {
                             VectorS<3> delta = Q_total.A() * (Q_total.minimizer() - positions[v]);
-                            bcg_scalar_t len = delta.norm();
-                            new_positions[v] = positions[v] + delta * std::exp(-sigma_n) * std::exp(-len);
+                            new_positions[v] = positions[v] + delta * std::exp(-sigma_p) * std::exp(-sigma_n) *
+                                                              std::exp(-delta.norm());
                         } else {
                             new_positions[v] = Q_total.minimizer();
                         }
@@ -405,8 +401,9 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                     for (const auto vf : mesh.get_vertices(f)) {
                         V.push_back(positions[vf]);
                     }
-                    quadrics[f].probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
-                    //quadrics[f].probabilistic_plane_quadric(face_center(mesh, f), face_normal(mesh, f), sigma_p, sigma_n);
+                    quadrics[f] = quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
+                    //quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), face_normal(mesh, f), sigma_p, sigma_n);
+
                 }
             }
     );
@@ -418,14 +415,15 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        bcg_scalar_t weight_sum = face_area(mesh, f);
+                        //bcg_scalar_t weight_sum = face_area(mesh, f);
+                        bcg_scalar_t weight_sum = 1;
                         quadrics_avg[f] = quadrics[f] * weight_sum;
                         for (const auto hf : mesh.get_halfedges(f)) {
                             auto oh = mesh.get_opposite(hf);
                             if (!mesh.is_boundary(oh)) {
                                 auto ff = mesh.get_face(oh);
                                 //bcg_scalar_t weight = face_area(mesh, ff);
-                                bcg_scalar_t weight = 1.0;
+                                bcg_scalar_t weight = 1;
                                 quadrics_avg[f] += quadrics[ff] * weight;
                                 weight_sum += weight;
                             }
@@ -449,9 +447,9 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                     }
 
                     if (mesh.is_boundary(v)) {
-                        VectorS<3> diff = Q_total.A() * (Q_total.minimizer() - positions[v]);
-                        bcg_scalar_t len = diff.norm();
-                        new_positions[v] = positions[v] +  diff * std::exp(-sigma_n) * std::exp(-len);
+                        VectorS<3> delta = Q_total.A() * (Q_total.minimizer() - positions[v]);
+                        new_positions[v] = positions[v] +
+                                           delta * std::exp(-sigma_p) * std::exp(-sigma_n) * std::exp(-delta.norm());
                     } else {
                         new_positions[v] = Q_total.minimizer();
                     }
@@ -714,9 +712,7 @@ void mesh_denoising_vertex_update_plane_quadric(halfedge_mesh &mesh, size_t para
 
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
-                        quadric Q;
-                        Q.plane_quadric(face_center(mesh, fv), f_normals_filtered[fv]);
-                        Q_total += Q;
+                        Q_total += quadric::plane_quadric(face_center(mesh, fv), f_normals_filtered[fv]);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -748,9 +744,8 @@ void mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfe
 
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
-                        quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p, sigma_n);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
+                                                                 sigma_n);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -784,10 +779,9 @@ void mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfed
 
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
-                        quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p[fv],
-                                                      sigma_n[fv]);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv],
+                                                                 sigma_p[fv],
+                                                                 sigma_n[fv]);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -821,9 +815,8 @@ mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfedge_m
 
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
-                        quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p, sigma_n);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
+                                                                 sigma_n);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -858,10 +851,9 @@ mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_me
 
                     quadric Q_total;
                     for (const auto &fv : mesh.get_faces(v)) {
-                        quadric Q;
-                        Q.probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p[fv],
-                                                      sigma_n[fv]);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv],
+                                                                 sigma_p[fv],
+                                                                 sigma_n[fv]);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -897,9 +889,7 @@ void mesh_denoising_vertex_update_triangle_quadric(halfedge_mesh &mesh, size_t p
                         for (const auto vf : mesh.get_vertices(fv)) {
                             V.push_back(positions[vf]);
                         }
-                        quadric Q;
-                        Q.triangle_quadric(V[0], V[1], V[2]);
-                        Q_total += Q;
+                        Q_total += quadric::triangle_quadric(V[0], V[1], V[2]);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -936,9 +926,7 @@ void mesh_denoising_vertex_update_probabilistic_triangle_quadric_global_sigma(ha
                         for (const auto vf : mesh.get_vertices(fv)) {
                             V.push_back(positions[vf]);
                         }
-                        quadric Q;
-                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -976,9 +964,7 @@ void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(hal
                         for (const auto vf : mesh.get_vertices(fv)) {
                             V.push_back(positions[vf]);
                         }
-                        quadric Q;
-                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[fv]);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[fv]);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -1010,15 +996,12 @@ void mesh_denoising_vertex_update_probabilistic_triangle_quadric_global_sigma(ha
                     auto v = vertex_handle(i);
 
                     quadric Q_total;
-
                     for (const auto &fv : mesh.get_faces(v)) {
                         std::vector<VectorS<3>> V;
                         for (const auto vf : mesh.get_vertices(fv)) {
                             V.push_back(positions[vf]);
                         }
-                        quadric Q;
-                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p, sigma_p, sigma_p);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p, sigma_p, sigma_p);
                     }
 
                     if (mesh.is_boundary(v)) {
@@ -1050,7 +1033,6 @@ void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(hal
                     auto v = vertex_handle(i);
 
                     quadric Q_total;
-
                     for (const auto &fv : mesh.get_faces(v)) {
                         std::vector<VectorS<3>> V;
                         std::vector<vertex_handle> Vs;
@@ -1058,10 +1040,8 @@ void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(hal
                             Vs.push_back(vf);
                             V.push_back(positions[vf]);
                         }
-                        quadric Q;
-                        Q.probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[Vs[0]], sigma_p[Vs[1]],
-                                                         sigma_p[Vs[2]]);
-                        Q_total += Q;
+                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[Vs[0]], sigma_p[Vs[1]],
+                                                                    sigma_p[Vs[2]]);
                     }
 
                     if (mesh.is_boundary(v)) {

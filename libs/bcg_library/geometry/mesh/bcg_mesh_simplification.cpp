@@ -7,9 +7,11 @@
 #include "bcg_mesh_face_normals.h"
 #include "distance_query/bcg_distance_triangle_point.h"
 #include "utils/bcg_heap.h"
-#include "geometry/quadric/bcg_quadric.h"
+#include "math/bcg_probabilistic_quadric.h"
 
 namespace bcg {
+
+using quadric = pq::quadric<pq::math<bcg_scalar_t, VectorS<3>, VectorS<3>, MatrixS<3, 3>>>;
 
 struct normal_cone {
     normal_cone() : angle(0.0) {}
@@ -246,13 +248,16 @@ simplification::simplification(halfedge_mesh &mesh, bcg_scalar_t aspect_ratio,
 
     // initialize quadrics
     for (const auto v : mesh.vertices) {
-        vquadric[v].clear();
+        vquadric[v] = quadric();
 
         if (!mesh.is_isolated(v)) {
-            quadric q;
             for (const auto f : mesh.get_faces(v)) {
-                q.probabilistic_plane_quadric(vpoint[v], fnormal[f], 0, 1);
-                vquadric[v] += q;
+                //vquadric[v] += quadric::probabilistic_plane_quadric(vpoint[v], fnormal[f], 1, 1);
+                std::vector<VectorS<3>> V;
+                for (const auto vf : mesh.get_vertices(f)) {
+                    V.push_back(vpoint[vf]);
+                }
+                vquadric[v] += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], 1);
             }
         }
     }
@@ -462,7 +467,7 @@ bool simplification::is_collapse_legal(const collapse_data &cd) {
     }
 
     // check for flipping normals
-    if (normal_deviation == 0.0) {
+    if (normal_deviation < scalar_eps) {
         vpoint[cd.v0] = p1;
         for (const auto f : mesh.get_faces(cd.v0)) {
             if (f != cd.fl && f != cd.fr) {
