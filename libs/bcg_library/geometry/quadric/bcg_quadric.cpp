@@ -87,72 +87,76 @@ MatrixS<3, 3> cross_interference_matrix(const MatrixS<3, 3> &A, const MatrixS<3,
 
 quadric::quadric() : m_A00(0), m_A01(0), m_A02(0), m_A11(0), m_A12(0), m_A22(0), m_b0(0), m_b1(0), m_b2(0), m_c(0) {}
 
-void quadric::from_coefficients(const MatrixS<3, 3> &A, const VectorS<3> &b, bcg_scalar_t c) {
-    m_A00 = A(0, 0);
-    m_A01 = A(0, 1);
-    m_A02 = A(0, 2);
-    m_A11 = A(1, 1);
-    m_A12 = A(1, 2);
-    m_A22 = A(2, 2);
-    m_b0 = b(0);
-    m_b1 = b(1);
-    m_b2 = b(2);
-    m_c = c;
+quadric quadric::from_coefficients(const MatrixS<3, 3> &A, const VectorS<3> &b, bcg_scalar_t c) {
+    quadric q;
+    q.m_A00 = A(0, 0);
+    q.m_A01 = A(0, 1);
+    q.m_A02 = A(0, 2);
+    q.m_A11 = A(1, 1);
+    q.m_A12 = A(1, 2);
+    q.m_A22 = A(2, 2);
+    q.m_b0 = b(0);
+    q.m_b1 = b(1);
+    q.m_b2 = b(2);
+    q.m_c = c;
+    return q;
 }
 
-void quadric::from_coefficients(bcg_scalar_t A00, bcg_scalar_t A01, bcg_scalar_t A02, bcg_scalar_t A11, bcg_scalar_t A12,
+quadric quadric::from_coefficients(bcg_scalar_t A00, bcg_scalar_t A01, bcg_scalar_t A02, bcg_scalar_t A11, bcg_scalar_t A12,
                        bcg_scalar_t A22, bcg_scalar_t b0, bcg_scalar_t b1,
                        bcg_scalar_t b2, bcg_scalar_t c) {
-    m_A00 = A00;
-    m_A01 = A01;
-    m_A02 = A02;
-    m_A11 = A11;
-    m_A12 = A12;
-    m_A22 = A22;
-    m_b0 = b0;
-    m_b1 = b1;
-    m_b2 = b2;
-    m_c = c;
+    quadric q;
+    q.m_A00 = A00;
+    q.m_A01 = A01;
+    q.m_A02 = A02;
+    q.m_A11 = A11;
+    q.m_A12 = A12;
+    q.m_A22 = A22;
+    q.m_b0 = b0;
+    q.m_b1 = b1;
+    q.m_b2 = b2;
+    q.m_c = c;
+    return q;
 }
 
-void quadric::point_quadric(const VectorS<3> &p) {
-    from_coefficients(MatrixS<3, 3>::Identity(), p, p.dot(p));
+quadric quadric::point_quadric(const VectorS<3> &p) {
+    return from_coefficients(MatrixS<3, 3>::Identity(), p, p.dot(p));
 }
 
-void quadric::plane_quadric(const VectorS<3> &p, const VectorS<3> &n) {
+quadric quadric::plane_quadric(const VectorS<3> &p, const VectorS<3> &n) {
     bcg_scalar_t d = p.dot(n);
-    from_coefficients(n * n.transpose(), n * d, d * d);
+    return from_coefficients(n * n.transpose(), n * d, d * d);
 }
 
-void quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const VectorS<3> &mean_n, bcg_scalar_t stddev_p,
+quadric quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const VectorS<3> &mean_n, bcg_scalar_t stddev_p,
                                  bcg_scalar_t stddev_n) {
     bcg_scalar_t sn2 = stddev_n * stddev_n;
     bcg_scalar_t sp2 = stddev_p * stddev_p;
     bcg_scalar_t d = mean_p.dot(mean_n);
 
-    from_coefficients(mean_n * mean_n.transpose() + MatrixS<3, 3>::Identity() * sn2,
+    return from_coefficients(mean_n * mean_n.transpose() + MatrixS<3, 3>::Identity() * sn2,
                       mean_n * d + mean_p * sn2,
                       d * d + sn2 * mean_p.dot(mean_p) + sp2 * mean_n.dot(mean_n) + 3 * sp2 * sn2);
 }
 
-void quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const VectorS<3> &mean_n,
+quadric quadric::probabilistic_plane_quadric(const VectorS<3> &mean_p, const VectorS<3> &mean_n,
                                  const MatrixS<3, 3> &sigma_p, const MatrixS<3, 3> &sigma_n) {
     bcg_scalar_t d = mean_p.dot(mean_n);
 
-    from_coefficients(mean_n * mean_n.transpose() + sigma_n,
+    return from_coefficients(mean_n * mean_n.transpose() + sigma_n,
                       mean_n * d + sigma_n * mean_p,
                       d * d + mean_p.dot(sigma_n * mean_p) + mean_n.dot(sigma_p * mean_n) +
                       (sigma_n * sigma_p).trace());
 }
 
-void quadric::triangle_quadric(const VectorS<3> &p, const VectorS<3> &q, const VectorS<3> &r) {
+quadric quadric::triangle_quadric(const VectorS<3> &p, const VectorS<3> &q, const VectorS<3> &r) {
     VectorS<3> pxq = p.cross(q);
     VectorS<3> xsum = pxq + q.cross(r) + r.cross(p);
     bcg_scalar_t det = pxq.dot(r);
-    from_coefficients(xsum * xsum.transpose(), xsum * det, det * det);
+    return from_coefficients(xsum * xsum.transpose(), xsum * det, det * det);
 }
 
-void
+quadric
 quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q, const VectorS<3> &r,
                                bcg_scalar_t stddev) {
     bcg_scalar_t sigma = stddev * stddev;
@@ -191,10 +195,10 @@ quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q
     c += ss2 * (p.dot(p) + q.dot(q) + r.dot(r)); // 3x a^T Ci[S_b, S_c] a
     c += ss6 * sigma; // Tr[S_r Ci[S_p, S_q]]
 
-    from_coefficients(A, b, c);
+    return from_coefficients(A, b, c);
 }
 
-void
+quadric
 quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q, const VectorS<3> &r,
                                const MatrixS<3, 3> &sigma_p, const MatrixS<3, 3> &sigma_q,
                                const MatrixS<3, 3> &sigma_r) {
@@ -248,7 +252,7 @@ quadric::probabilistic_triangle_quadric(const VectorS<3> &p, const VectorS<3> &q
 
     c += (sigma_r * ci_pq).trace();
 
-    from_coefficients(A, b, c);
+    return from_coefficients(A, b, c);
 }
 
 [[nodiscard]] MatrixS<3, 3> quadric::A() const {

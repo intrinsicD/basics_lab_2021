@@ -7,9 +7,11 @@
 
 #include "bcg_point_cloud.h"
 #include "kdtree/bcg_kdtree.h"
-#include "quadric/bcg_quadric.h"
+#include "math/bcg_probabilistic_quadric.h"
 
 namespace bcg {
+
+using quadric = pq::quadric<pq::math<bcg_scalar_t, VectorS<3>, VectorS<3>, MatrixS<3, 3>>>;
 
 enum class PointCloudQuadricTypes{
     point,

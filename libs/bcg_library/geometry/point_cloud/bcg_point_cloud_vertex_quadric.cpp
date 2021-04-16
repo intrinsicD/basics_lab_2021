@@ -19,24 +19,18 @@ std::vector<std::string> quadric_names(){
 
 quadric point_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &,
                       property<VectorS<3>, 3> ) {
-    quadric Q;
-    Q.point_quadric(positions[v]);
-    return Q;
+    return quadric::point_quadric(positions[v]);
 }
 
 quadric plane_quadric(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &,
                       property<VectorS<3>, 3> normals) {
-    quadric Q;
-    Q.plane_quadric(positions[v], normals[v]);
-    return Q;
+    return quadric::plane_quadric(positions[v], normals[v]);
 }
 
 quadric
 probabilistic_plane_quadric_isotropic(vertex_handle v, property<VectorS<3>, 3> positions, const neighbors_query &,
                                       property<VectorS<3>, 3> normals) {
-    quadric Q;
-    Q.probabilistic_plane_quadric(positions[v], normals[v], 0, 1);
-    return Q;
+    return quadric::probabilistic_plane_quadric(positions[v], normals[v], 0,1);
 }
 
 quadric probabilistic_plane_quadric_anisotropic(vertex_handle v, property<VectorS<3>, 3> positions,
@@ -46,15 +40,12 @@ quadric probabilistic_plane_quadric_anisotropic(vertex_handle v, property<Vector
     for (const auto &idx : result.indices) {
         VectorS<3> dp = positions[idx] - positions[v];
         cov_p += dp * dp.transpose();
-        VectorS<3> dn = normals[idx];
+        VectorS<3> dn = normals[idx] - normals[v];
         cov_n += dn * dn.transpose();
     }
     cov_p /= (result.indices.size() - 1);
     cov_n /= (result.indices.size() - 1);
-
-    quadric Q;
-    Q.probabilistic_plane_quadric(positions[v], normals[v], cov_p, cov_n);
-    return Q;
+    return quadric::probabilistic_plane_quadric(positions[v], normals[v], cov_p, cov_n);
 }
 
 void point_cloud_vertex_quadric_knn(vertex_container *vertices,
