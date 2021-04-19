@@ -9,7 +9,7 @@
 namespace bcg{
 
 bcg_scalar_t face_area(halfedge_mesh &mesh, face_handle f){
-    return face_area_vector(mesh, f).norm();
+    return std::max(face_area_vector(mesh, f).norm(), scalar_eps);
 }
 
 void face_areas(halfedge_mesh &mesh, size_t parallel_grain_size){

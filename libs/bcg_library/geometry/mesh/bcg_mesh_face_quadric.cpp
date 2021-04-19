@@ -6,6 +6,7 @@
 #include "bcg_mesh_face_centers.h"
 #include "bcg_mesh_face_areas.h"
 #include "bcg_mesh_face_normals.h"
+#include "bcg_mesh_vertex_area_voronoi.h"
 #include "bcg_property_map_eigen.h"
 #include "tbb/tbb.h"
 
@@ -18,13 +19,13 @@ std::vector<std::string> mesh_face_quadric_type_names() {
     names[static_cast<int>(MeshFaceQuadricType::plane)] = "plane";
     names[static_cast<int>(MeshFaceQuadricType::triangle)] = "triangle";
     names[static_cast<int>(MeshFaceQuadricType::global_isotropic_probabilistic_plane)] = "global_isotropic_probabilistic_plane";
-    names[static_cast<int>(MeshFaceQuadricType::local_isotropic_probabilistic_plane)] = "local_isotropic_probabilistic_plane";
-    names[static_cast<int>(MeshFaceQuadricType::global_isotropic_pobabilistic_triangle)] = "global_isotropic_pobabilistic_triangle";
-    names[static_cast<int>(MeshFaceQuadricType::local_isotropic_pobabilistic_triangle)] = "local_isotropic_pobabilistic_triangle";
     names[static_cast<int>(MeshFaceQuadricType::global_anisotropic_probabilistic_plane)] = "global_anisotropic_probabilistic_plane";
+    names[static_cast<int>(MeshFaceQuadricType::global_isotropic_probabilistic_triangle)] = "global_isotropic_probabilistic_triangle";
+    names[static_cast<int>(MeshFaceQuadricType::global_anisotropic_probabilistic_triangle)] = "global_anisotropic_probabilistic_triangle";
+    names[static_cast<int>(MeshFaceQuadricType::local_isotropic_probabilistic_plane)] = "local_isotropic_probabilistic_plane";
     names[static_cast<int>(MeshFaceQuadricType::local_anisotropic_probabilistic_plane)] = "local_anisotropic_probabilistic_plane";
-    names[static_cast<int>(MeshFaceQuadricType::global_anisotropic_pobabilistic_triangle)] = "global_anisotropic_pobabilistic_triangle";
-    names[static_cast<int>(MeshFaceQuadricType::local_anisotropic_pobabilistic_triangle)] = "local_anisotropic_pobabilistic_triangle";
+    names[static_cast<int>(MeshFaceQuadricType::local_isotropic_probabilistic_triangle)] = "local_isotropic_probabilistic_triangle";
+    names[static_cast<int>(MeshFaceQuadricType::local_anisotropic_probabilistic_triangle)] = "local_anisotropic_probabilistic_triangle";
     return names;
 }
 
@@ -182,8 +183,8 @@ void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        MatrixS<3, 3> P = MatrixS<3, 3>::Zero();
-                        bcg_scalar_t sum_weights = 0;
+                        MatrixS<3, 3> P = MatrixS<3, 3>::Identity() * scalar_eps;
+                        bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
                             VectorS<3> diff = mesh.positions[vf] - face_center(mesh, f);
                             P += diff * diff.transpose();
@@ -207,8 +208,8 @@ void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
                         VectorS<3> fnormal = face_normal(mesh, f);
-                        MatrixS<3, 3>N = MatrixS<3, 3>::Zero();
-                        bcg_scalar_t sum_weights = 1;
+                        MatrixS<3, 3>N = MatrixS<3, 3>::Identity() * scalar_eps;
+                        bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
                             VectorS<3> diff = normals[vf] - fnormal;
                             N += diff * diff.transpose();
@@ -259,8 +260,8 @@ void mesh_face_probabilistic_triangle_quadric_isotropic(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        MatrixS<3, 3> P = MatrixS<3, 3>::Zero();
-                        bcg_scalar_t sum_weights = 0;
+                        MatrixS<3, 3> P = MatrixS<3, 3>::Identity() * scalar_eps;
+                        bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
                             VectorS<3> diff = mesh.positions[vf] - face_center(mesh, f);
                             P += diff * diff.transpose();
@@ -303,8 +304,8 @@ void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        MatrixS<3, 3> P = MatrixS<3, 3>::Zero();
-                        bcg_scalar_t sum_weights = 0;
+                        MatrixS<3, 3> P = MatrixS<3, 3>::Identity() * scalar_eps;
+                        bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
                             VectorS<3> diff = mesh.positions[vf] - face_center(mesh, f);
                             P += diff * diff.transpose();
@@ -326,8 +327,8 @@ void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
                         VectorS<3> fnormal = face_normal(mesh, f);
-                        MatrixS<3, 3>N = MatrixS<3, 3>::Zero();
-                        bcg_scalar_t sum_weights = 1;
+                        MatrixS<3, 3>N = MatrixS<3, 3>::Identity() * scalar_eps;
+                        bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
                             VectorS<3> diff = normals[vf] - fnormal;
                             N += diff * diff.transpose();
@@ -376,10 +377,11 @@ void mesh_face_probabilistic_triangle_quadric_anisotropic(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        MatrixS<3, 3> P = MatrixS<3, 3>::Zero();
-                        bcg_scalar_t sum_weights = 0;
+                        MatrixS<3, 3> P = MatrixS<3, 3>::Identity();
+                        VectorS<3> f_center = face_center(mesh, f);
+                        bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            VectorS<3> diff = mesh.positions[vf] - face_center(mesh, f);
+                            VectorS<3> diff = mesh.positions[vf] - f_center;
                             P += diff * diff.transpose();
                             sum_weights += 1.0;
                         }
@@ -483,7 +485,7 @@ void mesh_face_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1> q
                             if (params.use_distance_weighting) {
                                 weight *= std::exp(-(face_center(mesh, ff) - c_i).norm());
                             }
-                            quadric_sum[f] += quadric_last[f] * weight;
+                            quadric_sum[f] += quadric_last[ff] * weight;
                         }
                     }
                 }
@@ -509,9 +511,9 @@ void mesh_face_quadric_neighbors_avg(halfedge_mesh &mesh, property<quadric, 1> q
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
                     bcg_scalar_t weight = 1.0;
-                    if (params.use_area_weighting) {
+/*                    if (params.use_area_weighting) {
                         weight *= face_area(mesh, f);
-                    }
+                    }*/
                     VectorS<3> n_i = face_normal(mesh, f);
                     VectorS<3> c_i = face_center(mesh, f);
                     bcg_scalar_t sum_weight = weight;
@@ -530,7 +532,7 @@ void mesh_face_quadric_neighbors_avg(halfedge_mesh &mesh, property<quadric, 1> q
                             if (params.use_distance_weighting) {
                                 weight *= std::exp(-(face_center(mesh, ff) - c_i).norm());
                             }
-                            quadric_avg[f] += quadric_last[f] * weight;
+                            quadric_avg[f] += quadric_last[ff] * weight;
                             sum_weight += weight;
                         }
                     }
@@ -558,9 +560,13 @@ void mesh_face_quadric_neighbors_sum_to_vertices(halfedge_mesh &mesh, property<q
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
-                    quadric_sum[v] = quadric();
+                    bcg_scalar_t weight = 1.0;
+/*                    if (params.use_area_weighting) {
+                        weight += vertex_voronoi_area(mesh, v);
+                    }*/
+                    quadric_sum[v] = quadric::plane_quadric(mesh.positions[v], normals[v]) * weight;
                     for (const auto fv : mesh.get_faces(v)) {
-                        bcg_scalar_t weight = 1.0;
+                        weight = 1.0;
                         if (params.use_area_weighting) {
                             weight *= face_area(mesh, fv);
                         }
@@ -586,7 +592,7 @@ void mesh_face_quadric_neighbors_avg_to_vertices(halfedge_mesh &mesh, property<q
         std::cout << "Please compute face quadrics first!" << "\n";
         return;
     }
-    if(quadrics.name() == "v_quadric_sum"){
+    if(quadrics.name() == "v_quadric_avg"){
         std::cout << "Face Quadrics name should not be equal to: v_quadric_avg" << "\n";
         return;
     }
@@ -597,18 +603,22 @@ void mesh_face_quadric_neighbors_avg_to_vertices(halfedge_mesh &mesh, property<q
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
-                    quadric_avg[v] = quadric();
-                    bcg_scalar_t sum_weights = 0.0;
+                    bcg_scalar_t weight = 1.0;
+/*                    if (params.use_area_weighting) {
+                        weight *= vertex_voronoi_area(mesh, v);
+                    }*/
+                    quadric_avg[v] = quadric::plane_quadric(mesh.positions[v], normals[v]) * weight;
+                    bcg_scalar_t sum_weights = weight;
                     for (const auto fv : mesh.get_faces(v)) {
-                        bcg_scalar_t weight = 1.0;
+                        weight = 1.0;
                         if (params.use_area_weighting) {
-                            weight *= face_area(mesh, fv);
+                            weight += face_area(mesh, fv);
                         }
                         if (params.use_normal_weighting) {
-                            weight *= std::exp(-(face_normal(mesh, fv) - normals[v]).norm());
+                            weight += std::exp(-(face_normal(mesh, fv) - normals[v]).norm());
                         }
                         if (params.use_distance_weighting) {
-                            weight *= std::exp(-(face_center(mesh, fv) - mesh.positions[v]).norm());
+                            weight += std::exp(-(face_center(mesh, fv) - mesh.positions[v]).norm());
                         }
                         quadric_avg[v] += quadrics[fv] * weight;
                         sum_weights += weight;

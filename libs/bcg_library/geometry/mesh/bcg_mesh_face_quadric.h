@@ -17,12 +17,12 @@ enum class MeshFaceQuadricType {
     triangle,
     global_isotropic_probabilistic_plane,
     global_anisotropic_probabilistic_plane,
-    global_isotropic_pobabilistic_triangle,
-    global_anisotropic_pobabilistic_triangle,
+    global_isotropic_probabilistic_triangle,
+    global_anisotropic_probabilistic_triangle,
     local_isotropic_probabilistic_plane,
     local_anisotropic_probabilistic_plane,
-    local_isotropic_pobabilistic_triangle,
-    local_anisotropic_pobabilistic_triangle,
+    local_isotropic_probabilistic_triangle,
+    local_anisotropic_probabilistic_triangle,
     __last__
 };
 

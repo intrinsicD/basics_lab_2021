@@ -34,11 +34,10 @@ void mesh_vertex_point_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) 
     );
 }
 
-void mesh_vertex_plane_quadric(halfedge_mesh &mesh, property<VectorS<3>, 3> normals, size_t parallel_grain_size) {
+void mesh_vertex_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    if (!normals) {
-        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    }
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -51,13 +50,11 @@ void mesh_vertex_plane_quadric(halfedge_mesh &mesh, property<VectorS<3>, 3> norm
 }
 
 //global isotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
-                                                       property<VectorS<3>, 3> normals, bcg_scalar_t sigma_p,
+void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, bcg_scalar_t sigma_p,
                                                        bcg_scalar_t sigma_n, size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    if (!normals) {
-        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    }
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -71,13 +68,12 @@ void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
 
 //global anisotropic sigmas
 void
-mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals, const MatrixS
-        <3, 3> &sigma_p, const MatrixS<3, 3> &sigma_n,
+mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, const MatrixS<3, 3> &sigma_p,
+                                                    const MatrixS<3, 3> &sigma_n,
                                                     size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    if (!normals) {
-        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    }
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -91,13 +87,11 @@ mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, propert
 
 //local isotropic sigmas
 void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
-                                                       property<VectorS<3>, 3> normals,
                                                        property<bcg_scalar_t, 1> sigma_p,
                                                        property<bcg_scalar_t, 1> sigma_n, size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    if (!normals) {
-        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    }
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+
     if (!sigma_p) {
         sigma_p = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_position_isotropic_variance");
         tbb::parallel_for(
@@ -128,7 +122,7 @@ void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto v = vertex_handle(i);
-                        MatrixS<3, 3>N = MatrixS<3, 3>::Zero();
+                        MatrixS<3, 3> N = MatrixS<3, 3>::Zero();
                         bcg_scalar_t sum_weights = 1;
                         for (const auto &vv : mesh.halfedge_graph::get_vertices(v)) {
                             VectorS<3> diff = normals[vv] - normals[v];
@@ -158,14 +152,12 @@ void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
 
 //local anisotropic sigmas
 void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
-                                                         property<VectorS<3>, 3> normals,
                                                          property<MatrixS<3, 3>, 1> sigma_p,
                                                          property<MatrixS<3, 3>, 1> sigma_n,
                                                          size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    if (!normals) {
-        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    }
+    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+
     if (!sigma_p) {
         sigma_p = mesh.vertices.get_or_add<MatrixS<3, 3>, 1>("v_position_isotropic_variance");
         tbb::parallel_for(
@@ -194,7 +186,7 @@ void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto v = vertex_handle(i);
-                        MatrixS<3, 3>N = MatrixS<3, 3>::Zero();
+                        MatrixS<3, 3> N = MatrixS<3, 3>::Zero();
                         bcg_scalar_t sum_weights = 0;
                         for (const auto &vv : mesh.halfedge_graph::get_vertices(v)) {
                             VectorS<3> diff = normals[vv] - normals[v];
@@ -249,7 +241,7 @@ void mesh_vertex_quadric_minimizer(halfedge_mesh &mesh, property<quadric, 1> qua
     }
     auto quadric_minimizer = mesh.vertices.get_or_add<VectorS<3>, 3>("v_quadric_minimizer");
     auto old_positions = mesh.vertices.get<VectorS<3>, 3>("v_position_old");
-    if(!old_positions){
+    if (!old_positions) {
         old_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_position_old");
         Map(old_positions) = MapConst(mesh.positions);
     }
@@ -262,7 +254,7 @@ void mesh_vertex_quadric_minimizer(halfedge_mesh &mesh, property<quadric, 1> qua
                 }
             }
     );
-    if(old_positions){
+    if (old_positions) {
         Map(mesh.positions) = MapConst(quadric_minimizer);
         vertex_normals(mesh, vertex_normal_area_angle, parallel_grain_size);
         mesh.positions.set_dirty();
@@ -271,7 +263,8 @@ void mesh_vertex_quadric_minimizer(halfedge_mesh &mesh, property<quadric, 1> qua
 }
 
 
-void mesh_vertex_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1> quadrics, Params params, size_t parallel_grain_size) {
+void mesh_vertex_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1> quadrics, Params params,
+                                       size_t parallel_grain_size) {
     if (!quadrics) {
         std::cout << "Please compute vertex quadrics first!" << "\n";
         return;
@@ -281,7 +274,7 @@ void mesh_vertex_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1>
     auto quadric_sum = mesh.vertices.get_or_add<quadric, 1>("v_quadric_sum");
 
     property<VectorS<3>, 3> normals;
-    if(params.use_normal_weighting){
+    if (params.use_normal_weighting) {
         normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
     }
     tbb::parallel_for(
@@ -290,19 +283,19 @@ void mesh_vertex_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1>
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     bcg_scalar_t weight = 1.0;
-                    if(params.use_area_weighting){
+                    if (params.use_area_weighting) {
                         weight *= vertex_voronoi_area(mesh, v);
                     }
                     quadric_sum[v] = quadric_last[v] * weight;
                     for (const auto &vv : mesh.halfedge_graph::get_vertices(v)) {
                         weight = 1.0;
-                        if(params.use_normal_weighting){
-                            weight *= std::exp(- (normals[vv] - normals[v]).norm());
+                        if (params.use_normal_weighting) {
+                            weight *= std::exp(-(normals[vv] - normals[v]).norm());
                         }
-                        if(params.use_area_weighting){
+                        if (params.use_area_weighting) {
                             weight *= vertex_voronoi_area(mesh, vv);
                         }
-                        if(params.use_distance_weighting){
+                        if (params.use_distance_weighting) {
                             weight *= std::exp(-(mesh.positions[vv] - mesh.positions[v]).norm());
                         }
                         quadric_sum[v] += quadric_last[vv] * weight;
@@ -313,7 +306,8 @@ void mesh_vertex_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1>
     quadric_sum.set_dirty();
 }
 
-void mesh_vertex_quadric_neighbors_avg(halfedge_mesh &mesh, property<quadric, 1> quadrics, Params params, size_t parallel_grain_size) {
+void mesh_vertex_quadric_neighbors_avg(halfedge_mesh &mesh, property<quadric, 1> quadrics, Params params,
+                                       size_t parallel_grain_size) {
     if (!quadrics) {
         std::cout << "Please compute vertex quadrics first!" << "\n";
         return;
@@ -322,7 +316,7 @@ void mesh_vertex_quadric_neighbors_avg(halfedge_mesh &mesh, property<quadric, 1>
     Map(quadric_last) = MapConst(quadrics);
     auto quadric_avg = mesh.vertices.get_or_add<quadric, 1>("v_quadric_avg");
     property<VectorS<3>, 3> normals;
-    if(params.use_normal_weighting){
+    if (params.use_normal_weighting) {
         normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
     }
     tbb::parallel_for(
@@ -331,20 +325,20 @@ void mesh_vertex_quadric_neighbors_avg(halfedge_mesh &mesh, property<quadric, 1>
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto v = vertex_handle(i);
                     bcg_scalar_t weight = 1.0;
-                    if(params.use_area_weighting){
+                    if (params.use_area_weighting) {
                         weight *= vertex_voronoi_area(mesh, v);
                     }
                     quadric_avg[v] = quadric_last[v] * weight;
                     bcg_scalar_t sum_weights = weight;
                     for (const auto &vv : mesh.halfedge_graph::get_vertices(v)) {
                         weight = 1.0;
-                        if(params.use_normal_weighting){
-                            weight *= std::exp(- (normals[vv] - normals[v]).norm());
+                        if (params.use_normal_weighting) {
+                            weight *= std::exp(-(normals[vv] - normals[v]).norm());
                         }
-                        if(params.use_area_weighting){
+                        if (params.use_area_weighting) {
                             weight *= vertex_voronoi_area(mesh, vv);
                         }
-                        if(params.use_distance_weighting){
+                        if (params.use_distance_weighting) {
                             weight *= std::exp(-(mesh.positions[vv] - mesh.positions[v]).norm());
                         }
 
