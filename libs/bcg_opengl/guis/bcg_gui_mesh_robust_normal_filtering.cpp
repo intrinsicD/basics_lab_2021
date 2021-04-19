@@ -4,6 +4,7 @@
 
 #include "bcg_gui_mesh_robust_normal_filtering.h"
 #include "bcg_gui_point_cloud_vertex_noise.h"
+#include "mesh/bcg_mesh_vertex_normals.h"
 #include "bcg_gui_mesh_offset_mesh.h"
 #include "mesh/bcg_mesh_volume.h"
 #include "viewer/bcg_viewer_state.h"
@@ -139,7 +140,14 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
         }
     }
 
-    gui_point_cloud_vertex_noise(state);
+    if(gui_point_cloud_vertex_noise(state)){
+        auto id = state->picker.entity_id;
+        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+            auto &mesh = state->scene.get<halfedge_mesh>(id);
+            vertex_normals(mesh, vertex_normal_area_angle, state->config.parallel_grain_size);
+        }
+
+    }
     ImGui::Separator();
     gui_mesh_offset_mesh(state);
 }

@@ -9,9 +9,10 @@
 
 namespace bcg{
 
-void gui_point_cloud_vertex_noise(viewer_state *state){
+bool gui_point_cloud_vertex_noise(viewer_state *state){
     static bcg_scalar_t noise_level = 1;
     draw_input(&state->window, "noise level %diag aabb", noise_level);
+    bool changed = false;
     if(ImGui::Button("Add noise")){
         auto id = state->picker.entity_id;
         if(state->scene.valid(id)){
@@ -19,11 +20,13 @@ void gui_point_cloud_vertex_noise(viewer_state *state){
             if(vertices){
                 auto &aabb = state->scene.get<aligned_box3>(id);
                 point_cloud_vertex_noise(vertices, aabb, noise_level, state->config.parallel_grain_size);
+                changed = true;
             }
         }
     }
     ImGui::Separator();
     gui_reload_entity(state);
+    return changed;
 }
 
 }

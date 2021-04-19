@@ -9,7 +9,7 @@ namespace bcg{
 
 struct viewer_state;
 
-void gui_point_cloud_vertex_noise(viewer_state *state);
+bool gui_point_cloud_vertex_noise(viewer_state *state);
 
 }
 

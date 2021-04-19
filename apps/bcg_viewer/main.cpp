@@ -36,6 +36,8 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_smoothing.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_robust_normal_filtering.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_vertex_extremal_values.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_vertex_quadrics.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_face_quadrics.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_connected_components.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_projected_distances.h"
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
@@ -187,6 +189,15 @@ int main() {
             }
             if (ImGui::MenuItem("Projected Distances")) {
                 state->gui.left = gui_mesh_projected_distances;
+            }
+            if(ImGui::BeginMenu("Quadrics")){
+                if (ImGui::MenuItem("Vertices")) {
+                    state->gui.left = gui_mesh_vertex_quadrics;
+                }
+                if (ImGui::MenuItem("Faces")) {
+                    state->gui.left = gui_mesh_face_quadrics;
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndMenu();
         }

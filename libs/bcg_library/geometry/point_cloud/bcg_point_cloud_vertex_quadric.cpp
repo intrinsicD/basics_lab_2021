@@ -56,6 +56,7 @@ void point_cloud_vertex_quadric_knn(vertex_container *vertices,
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
     auto normals = vertices->get<VectorS<3>, 3>("v_normal");
     auto quadrics = vertices->get_or_add<quadric, 1>("v_quadric");
+    auto coeff_c = vertices->get_or_add<bcg_scalar_t, 1>("v_quadric_c");
     auto neighbors = vertices->get_or_add<neighbors_query, 1>("v_neighbors");
     if(!normals){
         normals = vertices->get<VectorS<3>, 3>("v_pca_normal");
@@ -68,9 +69,11 @@ void point_cloud_vertex_quadric_knn(vertex_container *vertices,
                     auto result = index.query_knn(positions[v], num_closest);
                     neighbors[v] = result;
                     quadrics[v] = method(v, positions, result, normals);
+                    coeff_c[v] = quadrics[v].c;
                 }
             }
     );
+    coeff_c.set_dirty();
 }
 
 void point_cloud_vertex_quadric_radius(vertex_container *vertices,
@@ -81,6 +84,7 @@ void point_cloud_vertex_quadric_radius(vertex_container *vertices,
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
     auto normals = vertices->get<VectorS<3>, 3>("v_normal");
     auto quadrics = vertices->get_or_add<quadric, 1>("v_quadric");
+    auto coeff_c = vertices->get_or_add<bcg_scalar_t, 1>("v_quadric_c");
     auto neighbors = vertices->get_or_add<neighbors_query, 1>("v_neighbors");
     if(!normals){
         normals = vertices->get<VectorS<3>, 3>("v_pca_normal");
@@ -97,6 +101,7 @@ void point_cloud_vertex_quadric_radius(vertex_container *vertices,
                 }
             }
     );
+    coeff_c.set_dirty();
 }
 
 void point_cloud_vertex_quadric_collect_neighbors(vertex_container *vertices, size_t parallel_grain_size){
@@ -106,7 +111,7 @@ void point_cloud_vertex_quadric_collect_neighbors(vertex_container *vertices, si
     auto quadrics = vertices->get<quadric, 1>("v_quadric");
     auto quadric_sums = vertices->get_or_add<quadric, 1>("v_quadric_sum");
     auto neighbors = vertices->get<neighbors_query, 1>("v_neighbors");
-
+    auto coeff_c = vertices->get_or_add<bcg_scalar_t, 1>("v_quadric_c");
     if(!neighbors || !quadrics) {
         std::cout << "Please compute the quadrics and neighborhoods first!\n";
         return;
@@ -124,9 +129,11 @@ void point_cloud_vertex_quadric_collect_neighbors(vertex_container *vertices, si
                     quadric_sums[v] = Q;
                     quadrics_error[v] = Q(positions[v]);
                     quadrics_minimizer[v] = Q.minimizer();
+                    coeff_c[v] = Q.c;
                 }
             }
     );
+    coeff_c.set_dirty();
     vertices->remove(neighbors);
 }
 

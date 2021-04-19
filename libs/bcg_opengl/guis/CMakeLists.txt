@@ -22,6 +22,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_curvature_taubin.h bcg_gui_mesh_curvature_taubin.cpp
         bcg_gui_mesh_dihedral_angle.h bcg_gui_mesh_dihedral_angle.cpp
         bcg_gui_mesh_face_normals.h bcg_gui_mesh_face_normals.cpp
+        bcg_gui_mesh_face_quadrics.h bcg_gui_mesh_face_quadrics.cpp
         bcg_gui_mesh_features.h bcg_gui_mesh_features.cpp
         bcg_gui_mesh_laplacian.h bcg_gui_mesh_laplacian.cpp
         bcg_gui_mesh_laplacian_harmonic_field.h bcg_gui_mesh_laplacian_harmonic_field.cpp
@@ -34,6 +35,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_vertex_convex_concave.h bcg_gui_mesh_vertex_convex_concave.cpp
         bcg_gui_mesh_vertex_normals.h bcg_gui_mesh_vertex_normals.cpp
         bcg_gui_mesh_vertex_extremal_values.h bcg_gui_mesh_vertex_extremal_values.cpp
+        bcg_gui_mesh_vertex_quadrics.h bcg_gui_mesh_vertex_quadrics.cpp
         bcg_gui_mesh_offset_mesh.h bcg_gui_mesh_offset_mesh.cpp
         bcg_gui_mesh_connected_components.h bcg_gui_mesh_connected_components.cpp
         bcg_gui_mesh_projected_distances.h bcg_gui_mesh_projected_distances.cpp

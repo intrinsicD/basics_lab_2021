@@ -16,6 +16,7 @@ target_sources(bcg_graphics PRIVATE
         bcg_mesh_face_centers.h bcg_mesh_face_centers.cpp
         bcg_mesh_face_gradient.h bcg_mesh_face_gradient.cpp
         bcg_mesh_face_normals.h bcg_mesh_face_normals.cpp
+        bcg_mesh_face_quadric.h bcg_mesh_face_quadric.cpp
         bcg_mesh_factory.h bcg_mesh_factory.cpp
         bcg_mesh_features.h bcg_mesh_features.cpp
         bcg_mesh_laplacian.h bcg_mesh_laplacian.cpp
@@ -36,6 +37,7 @@ target_sources(bcg_graphics PRIVATE
         bcg_mesh_vertex_normals.h bcg_mesh_vertex_normals.cpp
         bcg_mesh_vertex_valences.h bcg_mesh_vertex_valences.cpp
         bcg_mesh_vertex_extremal_values.h bcg_mesh_vertex_extremal_values.cpp
+        bcg_mesh_vertex_quadric.h bcg_mesh_vertex_quadric.cpp
         bcg_mesh_volume.h bcg_mesh_volume.cpp
         bcg_mesh_offset_mesh.h bcg_mesh_offset_mesh.cpp
         bcg_mesh_projected_distances.h bcg_mesh_projected_distances.cpp
