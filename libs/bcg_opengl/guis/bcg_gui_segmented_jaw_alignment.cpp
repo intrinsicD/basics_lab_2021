@@ -154,8 +154,9 @@ void gui_segmented_jaw_alignment(viewer_state *state){
                 }
             }
             if(ImGui::Button("Add selection to teeth")){
-                if(state->scene.valid(state->picker.entity_id)){
-                    source_teeth.emplace_back(state->picker.entity_id, true);
+                source_teeth.clear();
+                for(const auto &item : state->picker.selected_entities){
+                    source_teeth.emplace_back(item.second, true);
                 }
             }
             if(ImGui::Button("Clear Teeth")){
