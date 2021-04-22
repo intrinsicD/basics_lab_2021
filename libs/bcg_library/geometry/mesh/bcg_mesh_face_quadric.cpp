@@ -26,6 +26,7 @@ std::vector<std::string> mesh_face_quadric_type_names() {
     names[static_cast<int>(MeshFaceQuadricType::local_anisotropic_probabilistic_plane)] = "local_anisotropic_probabilistic_plane";
     names[static_cast<int>(MeshFaceQuadricType::local_isotropic_probabilistic_triangle)] = "local_isotropic_probabilistic_triangle";
     names[static_cast<int>(MeshFaceQuadricType::local_anisotropic_probabilistic_triangle)] = "local_anisotropic_probabilistic_triangle";
+    names.push_back("");
     return names;
 }
 
@@ -36,20 +37,52 @@ void mesh_face_point_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
-                    quadrics[f] = quadric::point_quadric(face_center(mesh, f));
+
+                    if (mesh.is_boundary(f)) {
+                        VectorS<3> boundary_mean = VectorS<3>::Zero();
+                        bcg_scalar_t count = 0.0;
+                        for (const auto &vf : mesh.get_vertices(f)) {
+                            if(mesh.is_boundary(vf)){
+                                boundary_mean += mesh.positions[vf];
+                                count += 1.0;
+                            }
+                        }
+                        boundary_mean /= count;
+                        quadrics[f] = quadric::point_quadric(boundary_mean);
+                    } else {
+                        quadrics[f] = quadric::point_quadric(face_center(mesh, f));
+                    }
                 }
             }
     );
 }
 
-void mesh_face_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
+void mesh_face_plane_quadric(halfedge_mesh &mesh, property<VectorS<3>, 3> normals, size_t parallel_grain_size) {
     auto quadrics = mesh.faces.get_or_add<quadric, 1>("f_quadric");
+    if (!normals) {
+        face_normals(mesh, parallel_grain_size);
+        normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
+    }
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     auto f = face_handle(i);
-                    quadrics[f] = quadric::plane_quadric(face_center(mesh, f), face_normal(mesh, f));
+
+                    if (mesh.is_boundary(f)) {
+                        VectorS<3> boundary_mean = VectorS<3>::Zero();
+                        bcg_scalar_t count = 0.0;
+                        for (const auto &vf : mesh.get_vertices(f)) {
+                            if(mesh.is_boundary(vf)){
+                                boundary_mean += mesh.positions[vf];
+                                count += 1.0;
+                            }
+                        }
+                        boundary_mean /= count;
+                        quadrics[f] = quadric::plane_quadric(boundary_mean, normals[f]);
+                    } else {
+                        quadrics[f] = quadric::plane_quadric(face_center(mesh, f), normals[f]);
+                    }
                 }
             }
     );
@@ -74,9 +107,14 @@ mesh_face_triangle_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
 }
 
 //global isotropic sigmas
-void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
+                                                     bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                      size_t parallel_grain_size) {
     auto quadrics = mesh.faces.get_or_add<quadric, 1>("f_quadric");
+    if (!normals) {
+        face_normals(mesh, parallel_grain_size);
+        normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
+    }
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -86,15 +124,17 @@ void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, bcg_sc
                         VectorS<3> boundary_mean = VectorS<3>::Zero();
                         bcg_scalar_t count = 0.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            boundary_mean += mesh.positions[vf];
-                            count += 1.0;
+                            if(mesh.is_boundary(vf)){
+                                boundary_mean += mesh.positions[vf];
+                                count += 1.0;
+                            }
                         }
                         boundary_mean /= count;
-                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, face_normal(mesh, f), sigma_p,
+                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, normals[f], sigma_p,
                                                                            sigma_n);
                     } else {
-                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), face_normal(mesh, f),
-                                                                           sigma_p, sigma_n);
+                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f),
+                                                                           normals[f], sigma_p, sigma_n);
                     }
                 }
             }
@@ -102,10 +142,14 @@ void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, bcg_sc
 }
 
 //global anisotropic sigmas
-void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
+void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                        const MatrixS<3, 3> &sigma_p, const MatrixS<3, 3> &sigma_n,
                                                        size_t parallel_grain_size) {
     auto quadrics = mesh.faces.get_or_add<quadric, 1>("f_quadric");
+    if(!normals){
+        face_normals(mesh, parallel_grain_size);
+        normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
+    }
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -115,14 +159,16 @@ void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
                         VectorS<3> boundary_mean = VectorS<3>::Zero();
                         bcg_scalar_t count = 0.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            boundary_mean += mesh.positions[vf];
-                            count += 1.0;
+                            if(mesh.is_boundary(vf)){
+                                boundary_mean += mesh.positions[vf];
+                                count += 1.0;
+                            }
                         }
                         boundary_mean /= count;
-                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, face_normal(mesh, f), sigma_p,
+                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, normals[f], sigma_p,
                                                                            sigma_n);
                     } else {
-                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), face_normal(mesh, f),
+                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), normals[f],
                                                                            sigma_p, sigma_n);
                     }
                 }
@@ -171,11 +217,15 @@ void mesh_face_probabilistic_triangle_quadric_anisotropic(halfedge_mesh &mesh,
 }
 
 //local isotropic sigmas
-void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
+void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                      property<bcg_scalar_t, 1> sigma_p,
                                                      property<bcg_scalar_t, 1> sigma_n,
                                                      size_t parallel_grain_size) {
     auto quadrics = mesh.faces.get_or_add<quadric, 1>("f_quadric");
+    if(!normals){
+        face_normals(mesh, parallel_grain_size);
+        normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
+    }
     if (!sigma_p) {
         sigma_p = mesh.faces.get_or_add<bcg_scalar_t, 1>("f_position_isotropic_variance");
         tbb::parallel_for(
@@ -200,18 +250,17 @@ void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
         std::cout << "estimated sigma_p from face positions!\n";
     }
     if (!sigma_n) {
-        auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+        auto vnormals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
         sigma_n = mesh.faces.get_or_add<bcg_scalar_t, 1>("f_normal_isotropic_variance");
         tbb::parallel_for(
                 tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        VectorS<3> fnormal = face_normal(mesh, f);
-                        MatrixS<3, 3>N = MatrixS<3, 3>::Identity() * scalar_eps;
+                        MatrixS<3, 3> N = MatrixS<3, 3>::Identity() * scalar_eps;
                         bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            VectorS<3> diff = normals[vf] - fnormal;
+                            VectorS<3> diff = vnormals[vf] - normals[f];
                             N += diff * diff.transpose();
                             sum_weights += 1.0;
                         }
@@ -233,14 +282,16 @@ void mesh_face_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
                         VectorS<3> boundary_mean = VectorS<3>::Zero();
                         bcg_scalar_t count = 0.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            boundary_mean += mesh.positions[vf];
-                            count += 1.0;
+                            if(mesh.is_boundary(vf)){
+                                boundary_mean += mesh.positions[vf];
+                                count += 1.0;
+                            }
                         }
                         boundary_mean /= count;
-                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, face_normal(mesh, f),
+                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, normals[f],
                                                                            sigma_p[f], sigma_n[f]);
                     } else {
-                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), face_normal(mesh, f),
+                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), normals[f],
                                                                            sigma_p[f], sigma_n[f]);
                     }
                 }
@@ -292,11 +343,15 @@ void mesh_face_probabilistic_triangle_quadric_isotropic(halfedge_mesh &mesh,
 }
 
 //local anisotropic sigmas
-void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
+void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                        property<MatrixS<3, 3>, 1> sigma_p,
                                                        property<MatrixS<3, 3>, 1> sigma_n,
                                                        size_t parallel_grain_size) {
     auto quadrics = mesh.faces.get_or_add<quadric, 1>("f_quadric");
+    if(!normals){
+        face_normals(mesh, parallel_grain_size);
+        normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
+    }
     if (!sigma_p) {
         sigma_p = mesh.faces.get_or_add<MatrixS<3, 3>, 1>("f_position_anisotropic_variance");
         tbb::parallel_for(
@@ -319,18 +374,17 @@ void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
         std::cout << "estimated sigma_p from face positions!\n";
     }
     if (!sigma_n) {
-        auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+        auto vnormals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
         sigma_n = mesh.faces.get_or_add<MatrixS<3, 3>, 1>("f_normal_anisotropic_variance");
         tbb::parallel_for(
                 tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
                 [&](const tbb::blocked_range<uint32_t> &range) {
                     for (uint32_t i = range.begin(); i != range.end(); ++i) {
                         auto f = face_handle(i);
-                        VectorS<3> fnormal = face_normal(mesh, f);
-                        MatrixS<3, 3>N = MatrixS<3, 3>::Identity() * scalar_eps;
+                        MatrixS<3, 3> N = MatrixS<3, 3>::Identity() * scalar_eps;
                         bcg_scalar_t sum_weights = 1.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            VectorS<3> diff = normals[vf] - fnormal;
+                            VectorS<3> diff = vnormals[vf] - normals[f];
                             N += diff * diff.transpose();
                             sum_weights += 1.0;
                         }
@@ -350,15 +404,18 @@ void mesh_face_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
                         VectorS<3> boundary_mean = VectorS<3>::Zero();
                         bcg_scalar_t count = 0.0;
                         for (const auto &vf : mesh.get_vertices(f)) {
-                            boundary_mean += mesh.positions[vf];
-                            count += 1.0;
+                            if(mesh.is_boundary(vf)){
+                                boundary_mean += mesh.positions[vf];
+                                count += 1.0;
+                            }
                         }
                         boundary_mean /= count;
-                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, face_normal(mesh, f),
+                        quadrics[f] = quadric::probabilistic_plane_quadric(boundary_mean, normals[f],
                                                                            sigma_p[f], sigma_n[f]);
                     } else {
-                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f), face_normal(mesh, f),
-                                                                           sigma_p[f], sigma_n[f]);
+                        quadrics[f] = quadric::probabilistic_plane_quadric(face_center(mesh, f),
+                                                                           normals[f],sigma_p[f],
+                                                                           sigma_n[f]);
                     }
                 }
             }
@@ -549,7 +606,7 @@ void mesh_face_quadric_neighbors_sum_to_vertices(halfedge_mesh &mesh, property<q
         std::cout << "Please compute face quadrics first!" << "\n";
         return;
     }
-    if(quadrics.name() == "v_quadric_sum"){
+    if (quadrics.name() == "v_quadric_sum") {
         std::cout << "Face Quadrics name should not be equal to: v_quadric_sum" << "\n";
         return;
     }
@@ -592,11 +649,11 @@ void mesh_face_quadric_neighbors_avg_to_vertices(halfedge_mesh &mesh, property<q
         std::cout << "Please compute face quadrics first!" << "\n";
         return;
     }
-    if(quadrics.name() == "v_quadric_avg"){
+    if (quadrics.name() == "v_quadric_avg") {
         std::cout << "Face Quadrics name should not be equal to: v_quadric_avg" << "\n";
         return;
     }
-    auto quadric_avg= mesh.vertices.get_or_add<quadric, 1>("v_quadric_avg");
+    auto quadric_avg = mesh.vertices.get_or_add<quadric, 1>("v_quadric_avg");
     auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),

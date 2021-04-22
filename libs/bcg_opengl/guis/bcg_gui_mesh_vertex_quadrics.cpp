@@ -62,6 +62,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
     if (ImGui::Button("Compute Vertex Quadrics")) {
         if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
+            auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
             selected_quadrics = "v_quadric";
             switch (static_cast<MeshVertexQuadricType>(selected_type)) {
                 case MeshVertexQuadricType::point : {
@@ -69,11 +70,11 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshVertexQuadricType::plane : {
-                    mesh_vertex_plane_quadric(mesh, state->config.parallel_grain_size);
+                    mesh_vertex_plane_quadric(mesh, normals, state->config.parallel_grain_size);
                     break;
                 }
                 case MeshVertexQuadricType::local_isotropic_probabilistic_plane : {
-                    mesh_vertex_probabilistic_plane_quadric_isotropic(mesh,
+                    mesh_vertex_probabilistic_plane_quadric_isotropic(mesh, normals,
                                                                       mesh.vertices.get<bcg_scalar_t, 1>(
                                                                               selected_local_sigma_p),
                                                                       mesh.vertices.get<bcg_scalar_t, 1>(
@@ -82,12 +83,13 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshVertexQuadricType::global_isotropic_probabilistic_plane : {
-                    mesh_vertex_probabilistic_plane_quadric_isotropic(mesh, isotropic_sigma_p, isotropic_sigma_n,
+                    mesh_vertex_probabilistic_plane_quadric_isotropic(mesh, normals, isotropic_sigma_p,
+                                                                      isotropic_sigma_n,
                                                                       state->config.parallel_grain_size);
                     break;
                 }
                 case MeshVertexQuadricType::local_anisotropic_probabilistic_plane : {
-                    mesh_vertex_probabilistic_plane_quadric_anisotropic(mesh,
+                    mesh_vertex_probabilistic_plane_quadric_anisotropic(mesh, normals,
                                                                         mesh.vertices.get<MatrixS<3, 3>, 1>(
                                                                                 selected_local_sigma_p),
                                                                         mesh.vertices.get<MatrixS<3, 3>, 1>(
@@ -96,7 +98,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshVertexQuadricType::global_anisotropic_probabilistic_plane : {
-                    mesh_vertex_probabilistic_plane_quadric_anisotropic(mesh, anisotropic_sigma_p.asDiagonal(),
+                    mesh_vertex_probabilistic_plane_quadric_anisotropic(mesh, normals, anisotropic_sigma_p.asDiagonal(),
                                                                         anisotropic_sigma_n.asDiagonal(),
                                                                         state->config.parallel_grain_size);
                     break;

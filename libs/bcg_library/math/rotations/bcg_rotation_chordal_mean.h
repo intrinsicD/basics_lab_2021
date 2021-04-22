@@ -10,10 +10,10 @@
 
 namespace bcg {
 
-struct chrodal_mean_so3 {
-    chrodal_mean_so3(bool closed_form, bool outlier_reject);
+struct chordal_mean_so3 {
+    chordal_mean_so3(bool closed_form, bool outlier_reject);
 
-    chrodal_mean_so3(std::vector<bcg_scalar_t> weights, bool closed_form, bool outlier_reject);
+    chordal_mean_so3(std::vector<bcg_scalar_t> weights, bool closed_form, bool outlier_reject);
 
     MatrixS<3, 3> closed_form(const std::vector<MatrixS<3, 3>> &rotations);
 

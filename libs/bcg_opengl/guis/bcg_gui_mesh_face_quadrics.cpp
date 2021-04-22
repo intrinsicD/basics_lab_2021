@@ -8,6 +8,7 @@
 #include "mesh/bcg_mesh_face_quadric.h"
 #include "mesh/bcg_mesh_vertex_quadric.h"
 #include "mesh/bcg_mesh_vertex_normals.h"
+#include "mesh/bcg_mesh_face_normals.h"
 #include "viewer/bcg_viewer_state.h"
 #include "utils/bcg_string_utils.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
@@ -32,7 +33,7 @@ void gui_mesh_face_quadrics(viewer_state *state) {
     static std::string selected_quadrics_faces;
     static std::string selected_quadrics_vertices;
 
-    if(contains(type_names[selected_type], "probabilistic")){
+    if (contains(type_names[selected_type], "probabilistic")) {
         if (contains(type_names[selected_type], "anisotropic")) {
             if (contains(type_names[selected_type], "local")) {
                 auto id = state->picker.entity_id;
@@ -42,8 +43,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                     if (contains(type_names[selected_type], "triangle")) {
 
                     } else {
-                        gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_n",
-                                              selected_local_sigma_n);
+                        gui_property_selector(state, state->get_vertices(id), {1},
+                                              "selected_local_sigma_n", selected_local_sigma_n);
                     }
                 }
             } else {
@@ -64,8 +65,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                     if (contains(type_names[selected_type], "triangle")) {
 
                     } else {
-                        gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_n",
-                                              selected_local_sigma_n);
+                        gui_property_selector(state, state->get_vertices(id), {1},
+                                              "selected_local_sigma_n", selected_local_sigma_n);
                     }
                 }
             } else {
@@ -83,6 +84,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
     if (ImGui::Button("Compute Face Quadrics")) {
         if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
+            face_normals(mesh, state->config.parallel_grain_size);
+            auto normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
             selected_quadrics_faces = "f_quadric";
             switch (static_cast<MeshFaceQuadricType>(selected_type)) {
                 case MeshFaceQuadricType::point : {
@@ -90,7 +93,7 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshFaceQuadricType::plane : {
-                    mesh_face_plane_quadric(mesh, state->config.parallel_grain_size);
+                    mesh_face_plane_quadric(mesh, normals, state->config.parallel_grain_size);
                     break;
                 }
                 case MeshFaceQuadricType::triangle : {
@@ -98,7 +101,7 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshFaceQuadricType::local_isotropic_probabilistic_plane : {
-                    mesh_face_probabilistic_plane_quadric_isotropic(mesh,
+                    mesh_face_probabilistic_plane_quadric_isotropic(mesh, normals,
                                                                     mesh.faces.get<bcg_scalar_t, 1>(
                                                                             selected_local_sigma_p),
                                                                     mesh.faces.get<bcg_scalar_t, 1>(
@@ -107,12 +110,13 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshFaceQuadricType::global_isotropic_probabilistic_plane : {
-                    mesh_face_probabilistic_plane_quadric_isotropic(mesh, isotropic_sigma_p, isotropic_sigma_n,
+                    mesh_face_probabilistic_plane_quadric_isotropic(mesh, normals, isotropic_sigma_p,
+                                                                    isotropic_sigma_n,
                                                                     state->config.parallel_grain_size);
                     break;
                 }
                 case MeshFaceQuadricType::local_anisotropic_probabilistic_plane : {
-                    mesh_face_probabilistic_plane_quadric_anisotropic(mesh,
+                    mesh_face_probabilistic_plane_quadric_anisotropic(mesh, normals,
                                                                       mesh.faces.get<MatrixS<3, 3>, 1>(
                                                                               selected_local_sigma_p),
                                                                       mesh.faces.get<MatrixS<3, 3>, 1>(
@@ -121,7 +125,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                     break;
                 }
                 case MeshFaceQuadricType::global_anisotropic_probabilistic_plane : {
-                    mesh_face_probabilistic_plane_quadric_anisotropic(mesh, anisotropic_sigma_p.asDiagonal(),
+                    mesh_face_probabilistic_plane_quadric_anisotropic(mesh, normals,
+                                                                      anisotropic_sigma_p.asDiagonal(),
                                                                       anisotropic_sigma_n.asDiagonal(),
                                                                       state->config.parallel_grain_size);
                     break;
@@ -160,7 +165,7 @@ void gui_mesh_face_quadrics(viewer_state *state) {
         }
     }
 
-    if(!selected_quadrics_faces.empty()){
+    if (!selected_quadrics_faces.empty()) {
         ImGui::Separator();
         gui_property_selector(state, state->get_faces(id), {1}, "selected_quadrics_faces",
                               selected_quadrics_faces);
@@ -176,7 +181,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                 auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
                 auto &color = material.attributes[2];
                 color.property_name = "f_quadric_error";
-                state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(state->picker.entity_id, color);
+                state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(state->picker.entity_id,
+                                                                                          color);
             }
         }
         ImGui::SameLine();
@@ -184,7 +190,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
             if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 if (selected_quadrics_vertices == "v_quadric_avg" || selected_quadrics_vertices == "v_quadric_sum") {
-                    mesh_vertex_quadric_minimizer(mesh, mesh.vertices.get<quadric, 1>(selected_quadrics_vertices),
+                    mesh_vertex_quadric_minimizer(mesh,
+                                                  mesh.vertices.get<quadric, 1>(selected_quadrics_vertices),
                                                   state->config.parallel_grain_size);
                 } else {
                     mesh_face_quadric_minimizer(mesh, mesh.faces.get<quadric, 1>(selected_quadrics_faces),
@@ -211,8 +218,8 @@ void gui_mesh_face_quadrics(viewer_state *state) {
             if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
 
-                mesh_face_quadric_neighbors_sum(mesh, mesh.faces.get<quadric, 1>(selected_quadrics_faces), params,
-                                                state->config.parallel_grain_size);
+                mesh_face_quadric_neighbors_sum(mesh, mesh.faces.get<quadric, 1>(selected_quadrics_faces),
+                                                params, state->config.parallel_grain_size);
                 selected_quadrics_faces = "f_quadric_sum";
             }
         }
@@ -222,8 +229,7 @@ void gui_mesh_face_quadrics(viewer_state *state) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
 
                 mesh_face_quadric_neighbors_avg(mesh, mesh.faces.get<quadric, 1>(selected_quadrics_faces),
-                                                params,
-                                                state->config.parallel_grain_size);
+                                                params, state->config.parallel_grain_size);
                 selected_quadrics_faces = "f_quadric_avg";
             }
         }
@@ -231,9 +237,9 @@ void gui_mesh_face_quadrics(viewer_state *state) {
             if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
 
-                mesh_face_quadric_neighbors_sum_to_vertices(mesh, mesh.faces.get<quadric, 1>(selected_quadrics_faces),
-                                                            params,
-                                                            state->config.parallel_grain_size);
+                mesh_face_quadric_neighbors_sum_to_vertices(mesh,
+                                                            mesh.faces.get<quadric, 1>(selected_quadrics_faces),
+                                                            params, state->config.parallel_grain_size);
                 selected_quadrics_vertices = "v_quadric_sum";
             }
         }
@@ -242,9 +248,9 @@ void gui_mesh_face_quadrics(viewer_state *state) {
             if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
 
-                mesh_face_quadric_neighbors_avg_to_vertices(mesh, mesh.faces.get<quadric, 1>(selected_quadrics_faces),
-                                                            params,
-                                                            state->config.parallel_grain_size);
+                mesh_face_quadric_neighbors_avg_to_vertices(mesh,
+                                                            mesh.faces.get<quadric, 1>(selected_quadrics_faces),
+                                                            params, state->config.parallel_grain_size);
                 selected_quadrics_vertices = "v_quadric_avg";
             }
         }

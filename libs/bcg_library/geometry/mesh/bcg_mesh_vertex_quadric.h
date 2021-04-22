@@ -10,7 +10,7 @@
 
 namespace bcg {
 
-enum class MeshVertexQuadricType{
+enum class MeshVertexQuadricType {
     point,
     plane,
     global_isotropic_probabilistic_plane,
@@ -24,25 +24,26 @@ std::vector<std::string> mesh_vertex_quadric_type_names();
 
 void mesh_vertex_point_quadric(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
 
-void mesh_vertex_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size = 1024);
+void mesh_vertex_plane_quadric(halfedge_mesh &mesh, property<VectorS<3>, 3> normals, size_t parallel_grain_size = 1024);
 
 //global isotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,                                                        bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
+void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
+                                                       bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
                                                        size_t parallel_grain_size = 1024);
 
 //global anisotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
+void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                          const MatrixS<3, 3> &sigma_p, const MatrixS<3, 3> &sigma_n,
                                                          size_t parallel_grain_size = 1024);
 
 //local isotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
+void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                        property<bcg_scalar_t, 1> sigma_p,
                                                        property<bcg_scalar_t, 1> sigma_n,
                                                        size_t parallel_grain_size = 1024);
 
 //local anisotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
+void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                          property<MatrixS<3, 3>, 1> sigma_p,
                                                          property<MatrixS<3, 3>, 1> sigma_n,
                                                          size_t parallel_grain_size = 1024);
@@ -57,11 +58,12 @@ void mesh_vertex_quadric_error(halfedge_mesh &mesh, property<quadric, 1> quadric
 void mesh_vertex_quadric_minimizer(halfedge_mesh &mesh, property<quadric, 1> quadrics,
                                    size_t parallel_grain_size = 1024);
 
-struct Params{
+struct Params {
     bool use_area_weighting = false;
     bool use_normal_weighting = false;
     bool use_distance_weighting = false;
 };
+
 void mesh_vertex_quadric_neighbors_sum(halfedge_mesh &mesh, property<quadric, 1> quadrics, Params params = Params(),
                                        size_t parallel_grain_size = 1024);
 

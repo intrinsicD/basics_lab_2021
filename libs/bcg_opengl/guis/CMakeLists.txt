@@ -82,5 +82,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_property_clamp.h bcg_gui_property_clamp.cpp
         bcg_gui_selected_entities.h bcg_gui_selected_entities.cpp
         bcg_gui_segmented_jaw_alignment.h bcg_gui_segmented_jaw_alignment.cpp
+        bcg_gui_rotation_averaging.h bcg_gui_rotation_averaging.cpp
+        bcg_gui_rotation_averaging_chordal_mean.h bcg_gui_rotation_averaging_chordal_mean.cpp
         )
 

@@ -18,6 +18,7 @@ std::vector<std::string> mesh_vertex_quadric_type_names() {
     names[static_cast<int>(MeshVertexQuadricType::global_anisotropic_probabilistic_plane)] = "global_anisotropic_probabilistic_plane";
     names[static_cast<int>(MeshVertexQuadricType::local_isotropic_probabilistic_plane)] = "local_isotropic_probabilistic_plane";
     names[static_cast<int>(MeshVertexQuadricType::local_anisotropic_probabilistic_plane)] = "local_anisotropic_probabilistic_plane";
+    names.push_back("");
     return names;
 }
 
@@ -34,9 +35,11 @@ void mesh_vertex_point_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) 
     );
 }
 
-void mesh_vertex_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
+void mesh_vertex_plane_quadric(halfedge_mesh &mesh, property<VectorS<3>, 3> normals, size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    if (!normals) {
+        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    }
 
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
@@ -50,10 +53,13 @@ void mesh_vertex_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) 
 }
 
 //global isotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, bcg_scalar_t sigma_p,
+void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
+                                                       bcg_scalar_t sigma_p,
                                                        bcg_scalar_t sigma_n, size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    if (!normals) {
+        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    }
 
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
@@ -68,11 +74,13 @@ void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, bcg_
 
 //global anisotropic sigmas
 void
-mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, const MatrixS<3, 3> &sigma_p,
-                                                    const MatrixS<3, 3> &sigma_n,
+mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
+                                                    const MatrixS<3, 3> &sigma_p, const MatrixS<3, 3> &sigma_n,
                                                     size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    if (!normals) {
+        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    }
 
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
@@ -86,11 +94,13 @@ mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, const M
 }
 
 //local isotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
+void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                        property<bcg_scalar_t, 1> sigma_p,
                                                        property<bcg_scalar_t, 1> sigma_n, size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    if (!normals) {
+        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    }
 
     if (!sigma_p) {
         sigma_p = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_position_isotropic_variance");
@@ -151,12 +161,14 @@ void mesh_vertex_probabilistic_plane_quadric_isotropic(halfedge_mesh &mesh,
 }
 
 //local anisotropic sigmas
-void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh,
+void mesh_vertex_probabilistic_plane_quadric_anisotropic(halfedge_mesh &mesh, property<VectorS<3>, 3> normals,
                                                          property<MatrixS<3, 3>, 1> sigma_p,
                                                          property<MatrixS<3, 3>, 1> sigma_n,
                                                          size_t parallel_grain_size) {
     auto quadrics = mesh.vertices.get_or_add<quadric, 1>("v_quadric");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    if (!normals) {
+        normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
+    }
 
     if (!sigma_p) {
         sigma_p = mesh.vertices.get_or_add<MatrixS<3, 3>, 1>("v_position_isotropic_variance");

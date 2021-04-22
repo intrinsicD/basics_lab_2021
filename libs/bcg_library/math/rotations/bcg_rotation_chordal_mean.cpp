@@ -10,13 +10,13 @@
 
 namespace bcg {
 
-chrodal_mean_so3::chrodal_mean_so3(bool closed_form, bool outlier_reject) : m_closed_form(closed_form),
+chordal_mean_so3::chordal_mean_so3(bool closed_form, bool outlier_reject) : m_closed_form(closed_form),
                                                                             m_outlier_reject(outlier_reject) {}
 
-chrodal_mean_so3::chrodal_mean_so3(std::vector<bcg_scalar_t> weights, bool closed_form, bool outlier_reject)
+chordal_mean_so3::chordal_mean_so3(std::vector<bcg_scalar_t> weights, bool closed_form, bool outlier_reject)
         : m_closed_form(closed_form), m_outlier_reject(outlier_reject), m_weights(std::move(weights)) {}
 
-MatrixS<3, 3> chrodal_mean_so3::closed_form(const std::vector<MatrixS<3, 3>> &rotations) {
+MatrixS<3, 3> chordal_mean_so3::closed_form(const std::vector<MatrixS<3, 3>> &rotations) {
     if (m_weights.empty()) {
         m_weights = std::vector<bcg_scalar_t>(rotations.size(), 1);
     }
@@ -65,7 +65,7 @@ MatrixS<3, 3> chrodal_mean_so3::closed_form(const std::vector<MatrixS<3, 3>> &ro
     return project_on_so(A, true).transpose();
 }
 
-MatrixS<3, 3> chrodal_mean_so3::operator()(const std::vector<MatrixS<3, 3>> &rotations) {
+MatrixS<3, 3> chordal_mean_so3::operator()(const std::vector<MatrixS<3, 3>> &rotations) {
     if (m_closed_form) {
         return closed_form(rotations);
     } else {

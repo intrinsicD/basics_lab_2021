@@ -5,6 +5,7 @@
 #include "geometry/bcg_property.h"
 #include "bcg_mesh_vertex_normals.h"
 #include "bcg_mesh_face_normals.h"
+#include "bcg_mesh_face_areas.h"
 #include "bcg_mesh_face_area_vector.h"
 #include "math/vector/bcg_vector_angle.h"
 #include "tbb/tbb.h"
@@ -39,12 +40,26 @@ VectorS<3> vertex_normal_angle(halfedge_mesh &mesh, vertex_handle v) {
     return n.normalized();
 }
 
+
 VectorS<3> vertex_normal_area_angle(halfedge_mesh &mesh, vertex_handle v) {
     VectorS<3> n(zero3s);
     for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
         if (mesh.is_boundary(h)) continue;
         auto hr = mesh.rotate_ccw(h);
         n += face_area_vector(mesh, mesh.get_face(h)) *
+             vector_angle<3>(mesh.positions[mesh.get_to_vertex(h)] - mesh.positions[v],
+                             mesh.positions[mesh.get_to_vertex(hr)] - mesh.positions[v]);
+    }
+    return n.normalized();
+}
+
+VectorS<3> vertex_normal_area_angle(halfedge_mesh &mesh, property<VectorS<3>, 3> f_normals, vertex_handle v) {
+    VectorS<3> n(zero3s);
+    for (const auto h : mesh.halfedge_graph::get_halfedges(v)) {
+        if (mesh.is_boundary(h)) continue;
+        auto hr = mesh.rotate_ccw(h);
+        auto f = mesh.get_face(h);
+        n += face_area(mesh, f) * f_normals[f] *
              vector_angle<3>(mesh.positions[mesh.get_to_vertex(h)] - mesh.positions[v],
                              mesh.positions[mesh.get_to_vertex(hr)] - mesh.positions[v]);
     }
@@ -60,6 +75,22 @@ void vertex_normals(halfedge_mesh &mesh, std::function<VectorS<3>(halfedge_mesh 
             [&](const tbb::blocked_range<uint32_t> &range) {
                 for (uint32_t i = range.begin(); i != range.end(); ++i) {
                     normals[i] = method(mesh, i);
+                }
+            }
+    );
+    normals.set_dirty();
+}
+
+void vertex_normals(halfedge_mesh &mesh, property<VectorS<3>, 3> f_normals,
+                    size_t parallel_grain_size) {
+    auto normals = mesh.vertices.get_or_add<VectorS<3>, 3>("v_normal");
+
+    tbb::parallel_for(
+            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+            [&](const tbb::blocked_range<uint32_t> &range) {
+                for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                    auto v = vertex_handle(i);
+                    normals[i] = vertex_normal_area_angle(mesh, f_normals, v);
                 }
             }
     );

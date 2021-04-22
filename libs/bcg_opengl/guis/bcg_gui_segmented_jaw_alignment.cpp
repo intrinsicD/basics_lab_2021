@@ -16,6 +16,7 @@
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
+#include "math/rotations/bcg_rotation_chordal_mean.h"
 
 namespace bcg{
 
@@ -92,6 +93,8 @@ void gui_segmented_jaw_alignment(viewer_state *state){
                     }
                 }
             }
+
+
             if(ImGui::CollapsingHeader("Harmonic Segmentation")){
                 if(compute_edge_scaling){
                     if(!computed_property_name.empty()){
@@ -126,8 +129,86 @@ void gui_segmented_jaw_alignment(viewer_state *state){
                 }
             }
         }
+        struct Tooth{
+            Tooth(entt::entity id, bool selected) : entity_id(id), selected(selected) {}
+            entt::entity entity_id;
+            bool selected = true;
+        };
+        static std::vector<Tooth> source_teeth;
+        static entt::entity source_jaw, source, target;
+        static bool hide_jaw = false;
         if(ImGui::CollapsingHeader("Compute Alignment")){
+            if(ImGui::Button("Set selected as Source")){
+                if(state->scene.valid(state->picker.entity_id)){
+                    source = state->picker.entity_id;
+                }
+            }
+            if(ImGui::Button("Set selected as Target")){
+                if(state->scene.valid(state->picker.entity_id)){
+                    target = state->picker.entity_id;
+                }
+            }
+            if(ImGui::Button("Set selected as Source Jaw")){
+                if(state->scene.valid(state->picker.entity_id)){
+                    source_jaw = state->picker.entity_id;
+                }
+            }
+            if(ImGui::Button("Add selection to teeth")){
+                if(state->scene.valid(state->picker.entity_id)){
+                    source_teeth.emplace_back(state->picker.entity_id, true);
+                }
+            }
+            if(ImGui::Button("Clear Teeth")){
+                source_teeth.clear();
+            }
+            if(state->scene.valid(source)){
+                ImGui::LabelText("source ", "%d", int(source));
+            }
+            if(state->scene.valid(source_jaw)){
+                ImGui::LabelText("Jaw", "%d", int(source_jaw));
+                ImGui::SameLine();
+                if(ImGui::Checkbox("Hide Jaw", &hide_jaw)){
+                    if(hide_jaw){
+                        state->scene.remove<event::mesh_renderer::enqueue>(source_jaw);
+                    }else{
+                        state->scene.emplace<event::mesh_renderer::enqueue>(source_jaw);
+                    }
+                }
+            }
+            if(state->scene.valid(target)){
+                ImGui::LabelText("Target ", "%d", int(target));
+            }
 
+            for(auto &tooth: source_teeth){
+                ImGui::Checkbox(("tooth " + std::to_string(int(tooth.entity_id))).c_str(), &tooth.selected);
+            }
+            static int selected_registration_method;
+            static auto registration_methods = registration_names();
+            registration_methods.resize(2);
+            draw_combobox(&state->window, "Registration Method", selected_registration_method, registration_methods);
+
+            if(ImGui::Button("Compute Alignment Step")){
+                for(const auto &tooth : source_teeth){
+                    state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target, static_cast<RegistrationMethod>(selected_registration_method));
+                }
+                chordal_mean_so3 mean(true, true);
+                std::vector<MatrixS<3, 3>> rotations;
+                VectorS<3> position = VectorS<3>::Zero();
+                int count = 0;
+                for(const auto &tooth : source_teeth){
+                    if(tooth.selected){
+                        auto model = state->scene.get<Transform>(tooth.entity_id);
+                        rotations.emplace_back(model.linear());
+                        position += model.translation();
+                        ++count;
+                    }
+                }
+                position /= bcg_scalar_t(count);
+                MatrixS<3, 3> result = mean(rotations);
+                auto &source_model = state->scene.get<Transform>(source);
+                source_model.linear() = result;
+                source_model.translation() = position;
+            }
         }
     }
 }

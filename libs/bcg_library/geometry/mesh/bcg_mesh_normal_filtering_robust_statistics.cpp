@@ -19,7 +19,7 @@ namespace bcg {
 
 using quadric = pq::quadric<pq::math<bcg_scalar_t, VectorS<3>, VectorS<3>, MatrixS<3, 3>>>;
 
-std::vector<std::string> normal_filtering_names() {
+std::vector<std::string> mesh_normal_filtering_type_names() {
     std::vector<std::string> names(static_cast<int>(NormalFilteringType::__last__));
     names[static_cast<int>(NormalFilteringType::unilateral_belyaev_ohtake)] = "unilateral_belyaev_ohtake";
     names[static_cast<int>(NormalFilteringType::unilateral_yagou_mean)] = "unilateral_yagou_mean";
@@ -33,6 +33,36 @@ std::vector<std::string> normal_filtering_names() {
     names[static_cast<int>(NormalFilteringType::bilateral_zhang)] = "bilateral_zhang";
     names[static_cast<int>(NormalFilteringType::bilateral_yadav)] = "bilateral_yadav";
     return names;
+}
+
+void
+mesh_normal_ohtake_vertex_update(halfedge_mesh &mesh, property<VectorS<3>, 3> normals, size_t parallel_grain_size) {
+    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
+    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
+
+    tbb::parallel_for(
+            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
+            [&](const tbb::blocked_range<uint32_t> &range) {
+                for (uint32_t i = range.begin(); i != range.end(); ++i) {
+                    auto v = vertex_handle(i);
+
+                    VectorS<3> delta = VectorS<3>::Zero();
+                    bcg_scalar_t sum_weights = 0;
+                    for (const auto &fv : mesh.get_faces(v)) {
+                        VectorS<3> PC = face_center(mesh, fv) - positions[v];
+                        bcg_scalar_t weight = 1.0;
+                        sum_weights += weight;
+                        delta += weight * PC.dot(normals[fv]) * normals[fv];
+                    }
+                    delta /= sum_weights;
+                    new_positions[v] = positions[v] + delta;
+                }
+            }
+    );
+
+
+    Map(positions) = MapConst(new_positions);
+    positions.set_dirty();
 }
 
 void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool quadric_update,
@@ -56,24 +86,19 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                             for (const auto vf : mesh.get_vertices(fv)) {
                                 V.push_back(positions[vf]);
                             }
-                            //Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
-                            if(mesh.is_boundary(v)){
-                                Q_total += quadric::probabilistic_plane_quadric(mesh.positions[v], f_normals_filtered[fv], sigma_p, sigma_n);
-                            }else{
-                                Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p, sigma_n);
+                            if (mesh.is_boundary(v)) {
+                                Q_total += quadric::probabilistic_plane_quadric(mesh.positions[v],
+                                                                                f_normals_filtered[fv], sigma_p,
+                                                                                sigma_n);
+                            } else {
+                                Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv),
+                                                                                f_normals_filtered[fv], sigma_p,
+                                                                                sigma_n);
                             }
                             sum_weights += 1.0;
                         }
 
                         Q_total /= sum_weights;
-
-                        /*if (mesh.is_boundary(v)) {
-                            VectorS<3> delta = Q_total.A() * (Q_total.minimizer() - positions[v]);
-                            new_positions[v] = positions[v] + delta * std::exp(-sigma_p) * std::exp(-sigma_n) *
-                                                              std::exp(-delta.norm());
-                        } else {
-                            new_positions[v] = Q_total.minimizer();
-                        }*/
                         new_positions[v] = Q_total.minimizer();
                     }
                 }
@@ -90,7 +115,6 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
                         for (const auto &fv : mesh.get_faces(v)) {
                             VectorS<3> PC = face_center(mesh, fv) - positions[v];
                             bcg_scalar_t weight = 1.0;
-                            //bcg_scalar_t weight = face_area(mesh, fv);
                             sum_weights += weight;
                             delta += weight * PC.dot(f_normals_filtered[fv]) * f_normals_filtered[fv];
                         }
@@ -107,11 +131,8 @@ void mesh_postprocessing(halfedge_mesh &mesh, bcg_scalar_t sigma_p, bcg_scalar_t
     positions.set_dirty();
 }
 
-void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
-                                                     bcg_scalar_t sigma_g,
-                                                     bcg_scalar_t sigma_p, bcg_scalar_t sigma_n,
-                                                     bool use_quadric_update,
-                                                     size_t parallel_grain_size) {
+void
+mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
 
     bcg_scalar_t sigma_g_squared = sigma_g * sigma_g;
@@ -142,14 +163,9 @@ void mesh_normal_unilateral_filtering_belyaev_ohtake(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh,
-                                                 bcg_scalar_t,
-                                                 bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                                 size_t parallel_grain_size) {
+void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh, bcg_scalar_t, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
 
     tbb::parallel_for(
@@ -169,15 +185,10 @@ void mesh_normal_unilateral_filtering_yagou_mean(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
-                                                   bcg_scalar_t sigma_g,
-                                                   bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                                   size_t parallel_grain_size) {
-
+void
+mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
 
     tbb::parallel_for(
@@ -210,15 +221,9 @@ void mesh_normal_unilateral_filtering_yagou_median(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_unilateral_filtering_yadav(halfedge_mesh &mesh,
-                                            bcg_scalar_t sigma_g,
-                                            bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                            size_t parallel_grain_size) {
-
+void mesh_normal_unilateral_filtering_yadav(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
 
     tbb::parallel_for(
@@ -245,14 +250,9 @@ void mesh_normal_unilateral_filtering_yadav(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_unilateral_filtering_shen(halfedge_mesh &mesh,
-                                           bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                           size_t parallel_grain_size) {
+void mesh_normal_unilateral_filtering_shen(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
 
     bcg_scalar_t sigma_g_squared = sigma_g * sigma_g;
@@ -288,22 +288,14 @@ void mesh_normal_unilateral_filtering_shen(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_unilateral_filtering_tasdizen(halfedge_mesh &mesh,
-                                               bcg_scalar_t sigma_g,
-                                               bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                               size_t parallel_grain_size) {
-
+void mesh_normal_unilateral_filtering_tasdizen(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
-
     mesh_curvature_taubin(mesh, 1, true, parallel_grain_size);
-
     auto gauss_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_mesh_curv_gauss");
-
     bcg_scalar_t sigma_g_squared = sigma_g * sigma_g;
+
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.faces.size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -325,19 +317,11 @@ void mesh_normal_unilateral_filtering_tasdizen(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
-                                             bcg_scalar_t sigma_g,
-                                             bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                             size_t parallel_grain_size) {
-
+void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
-
     mesh_curvature_taubin(mesh, 1, true, parallel_grain_size);
-
     auto max_curvature = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_mesh_curv_max");
 
     tbb::atomic<bcg_scalar_t> l_avg = 0;
@@ -386,8 +370,6 @@ void mesh_normal_unilateral_filtering_centin(halfedge_mesh &mesh,
                 }
             }
     );
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
 
@@ -457,13 +439,6 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
                         sum_weights += 1.0;
                     }
                     Q_total /= sum_weights;
-                    /*if (mesh.is_boundary(v)) {
-                        VectorS<3> delta = Q_total.A() * (Q_total.minimizer() - positions[v]);
-                        new_positions[v] = positions[v] +
-                                           delta * std::exp(-sigma_p) * std::exp(-sigma_n) * std::exp(-delta.norm());
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }*/
                     new_positions[v] = Q_total.minimizer();
                 }
             }
@@ -476,10 +451,7 @@ void mesh_normal_unilateral_filtering_probabilistic_quadric(halfedge_mesh &mesh,
     vertex_normals(mesh, vertex_normal_area_angle, parallel_grain_size);
 }
 
-void mesh_normal_bilateral_filtering_zheng(halfedge_mesh &mesh,
-                                           bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                           size_t parallel_grain_size) {
+void mesh_normal_bilateral_filtering_zheng(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     face_normals(mesh, parallel_grain_size);
     auto f_normals = mesh.faces.get<VectorS<3>, 3>("f_normal");
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
@@ -530,18 +502,12 @@ void mesh_normal_bilateral_filtering_zheng(halfedge_mesh &mesh,
             }
     );
     e_g.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_bilateral_filtering_zhang(halfedge_mesh &mesh,
-                                           bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                           size_t parallel_grain_size) {
-
+void mesh_normal_bilateral_filtering_zhang(halfedge_mesh &mesh, bcg_scalar_t sigma_g, size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
     auto e_g = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_normal_filtering_g");
     auto fd = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_face_distance_squared");
-
     tbb::atomic<bcg_scalar_t> fd_avg = 0;
 
     tbb::parallel_for(
@@ -610,13 +576,9 @@ void mesh_normal_bilateral_filtering_zhang(halfedge_mesh &mesh,
             }
     );
     e_g.set_dirty();
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
-void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,
-                                           bcg_scalar_t sigma_g,
-                                           bcg_scalar_t sigma_p, bcg_scalar_t sigma_n, bool use_quadric_update,
-                                           size_t parallel_grain_size) {
+void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,bcg_scalar_t sigma_g,size_t parallel_grain_size) {
     auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered", VectorS<3>::Zero());
     auto e_g = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_normal_filtering_g");
     auto fd = mesh.edges.get_or_add<bcg_scalar_t, 1>("e_face_distance");
@@ -669,8 +631,6 @@ void mesh_normal_bilateral_filtering_yadav(halfedge_mesh &mesh,
     );
 
     e_g.set_dirty();
-
-    mesh_postprocessing(mesh, sigma_p, sigma_n, use_quadric_update, parallel_grain_size);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -709,365 +669,6 @@ void mesh_denoising_vertex_update_naive(halfedge_mesh &mesh, size_t parallel_gra
     positions.set_dirty();
     mesh.faces.remove(f_normals_filtered);
     postprocessing(mesh, parallel_grain_size);
-}
-
-void mesh_denoising_vertex_update_plane_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        Q_total += quadric::plane_quadric(face_center(mesh, fv), f_normals_filtered[fv]);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfedge_mesh &mesh, bcg_scalar_t sigma_p,
-                                                                           bcg_scalar_t sigma_n,
-                                                                           size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_position_new");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
-                                                                 sigma_n);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_mesh &mesh,
-                                                                          property<bcg_scalar_t, 1> sigma_p,
-                                                                          property<bcg_scalar_t, 1> sigma_n,
-                                                                          size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv],
-                                                                 sigma_p[fv],
-                                                                 sigma_n[fv]);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void
-mesh_denoising_vertex_update_probabilistic_plane_quadric_global_sigma(halfedge_mesh &mesh, const MatrixS<3, 3> &sigma_p,
-                                                                      const MatrixS<3, 3> &sigma_n,
-                                                                      size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv], sigma_p,
-                                                                 sigma_n);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void
-mesh_denoising_vertex_update_probabilistic_plane_quadric_local_sigma(halfedge_mesh &mesh,
-                                                                     property<MatrixS<3, 3>, 1> sigma_p,
-                                                                     property<MatrixS<3, 3>, 1> sigma_n,
-                                                                     size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        Q_total += quadric::probabilistic_plane_quadric(face_center(mesh, fv), f_normals_filtered[fv],
-                                                                 sigma_p[fv],
-                                                                 sigma_n[fv]);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_triangle_quadric(halfedge_mesh &mesh, size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        std::vector<VectorS<3>> V;
-                        for (const auto vf : mesh.get_vertices(fv)) {
-                            V.push_back(positions[vf]);
-                        }
-                        Q_total += quadric::triangle_quadric(V[0], V[1], V[2]);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_probabilistic_triangle_quadric_global_sigma(halfedge_mesh &mesh, bcg_scalar_t sigma_p,
-                                                                              size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        std::vector<VectorS<3>> V;
-                        for (const auto vf : mesh.get_vertices(fv)) {
-                            V.push_back(positions[vf]);
-                        }
-                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(halfedge_mesh &mesh,
-                                                                             property<bcg_scalar_t, 1> sigma_p,
-                                                                             size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        std::vector<VectorS<3>> V;
-                        for (const auto vf : mesh.get_vertices(fv)) {
-                            V.push_back(positions[vf]);
-                        }
-                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[fv]);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_probabilistic_triangle_quadric_global_sigma(halfedge_mesh &mesh,
-                                                                              const MatrixS<3, 3> &sigma_p,
-                                                                              size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        std::vector<VectorS<3>> V;
-                        for (const auto vf : mesh.get_vertices(fv)) {
-                            V.push_back(positions[vf]);
-                        }
-                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p, sigma_p, sigma_p);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
-}
-
-void mesh_denoising_vertex_update_probabilistic_triangle_quadric_local_sigma(halfedge_mesh &mesh,
-                                                                             property<MatrixS<3, 3>, 1> sigma_p,
-                                                                             size_t parallel_grain_size) {
-    auto positions = mesh.vertices.get<VectorS<3>, 3>("v_position");
-    auto new_positions = mesh.vertices.get_or_add<VectorS<3>, 3>("v_new_position");
-    auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
-    auto f_normals_filtered = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal_filtered");
-
-    tbb::parallel_for(
-            tbb::blocked_range<uint32_t>(0u, (uint32_t) mesh.vertices.size(), parallel_grain_size),
-            [&](const tbb::blocked_range<uint32_t> &range) {
-                for (uint32_t i = range.begin(); i != range.end(); ++i) {
-                    auto v = vertex_handle(i);
-
-                    quadric Q_total;
-                    for (const auto &fv : mesh.get_faces(v)) {
-                        std::vector<VectorS<3>> V;
-                        std::vector<vertex_handle> Vs;
-                        for (const auto vf : mesh.get_vertices(fv)) {
-                            Vs.push_back(vf);
-                            V.push_back(positions[vf]);
-                        }
-                        Q_total += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], sigma_p[Vs[0]], sigma_p[Vs[1]],
-                                                                    sigma_p[Vs[2]]);
-                    }
-
-                    if (mesh.is_boundary(v)) {
-                        new_positions[v] = positions[v] + Q_total.A() * (Q_total.minimizer() - positions[v]);
-                    } else {
-                        new_positions[v] = Q_total.minimizer();
-                    }
-                }
-            }
-    );
-    Map(positions) = MapConst(new_positions);
-    postprocessing(mesh, parallel_grain_size);
-    positions.set_dirty();
-    mesh.faces.remove(f_normals_filtered);
 }
 
 }
