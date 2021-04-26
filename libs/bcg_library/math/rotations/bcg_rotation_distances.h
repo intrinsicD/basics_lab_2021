@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_ROTATION_DISTANCES_H
 
 #include "bcg_rotation_matrix_logarithm.h"
+#include "math/bcg_math_safe_tigonometric_functions.h"
 #include "math/bcg_linalg.h"
 
 namespace bcg {

@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_VECTOR_ANGLE_H
 
 #include "bcg_vector_cos.h"
+#include "math/bcg_math_safe_tigonometric_functions.h"
 
 namespace bcg {
 

@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_TRIANGLE_METRIC_H
 #define BCG_GRAPHICS_BCG_TRIANGLE_METRIC_H
 
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_safe_tigonometric_functions.h"
 
 namespace bcg {
 

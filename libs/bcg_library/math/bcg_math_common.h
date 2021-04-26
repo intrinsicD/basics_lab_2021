@@ -24,25 +24,6 @@ BCG_MAYBE_UNUSED inline constexpr auto scalar_max = std::numeric_limits<bcg_scal
 BCG_MAYBE_UNUSED inline constexpr auto scalar_min = std::numeric_limits<bcg_scalar_t>::lowest();
 BCG_MAYBE_UNUSED inline constexpr auto scalar_eps = std::numeric_limits<bcg_scalar_t>::epsilon();
 
-inline bcg_scalar_t safe_acos(bcg_scalar_t value) {
-    if (value > bcg_scalar_t(1)) {
-        return 0;
-    } else if (value < bcg_scalar_t(-1)) {
-        return pi;
-    } else {
-        return std::acos(value);
-    }
-}
-
-inline bcg_scalar_t safe_asin(bcg_scalar_t value) {
-    if (value > bcg_scalar_t(1)) {
-        return pi / bcg_scalar_t(2.0);
-    } else if (value < bcg_scalar_t(-1)) {
-        return pi / bcg_scalar_t(2);
-    } else {
-        return std::asin(value);
-    }
-}
 
 }
 

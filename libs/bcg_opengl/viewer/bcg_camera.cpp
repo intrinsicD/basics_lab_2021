@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "bcg_camera.h"
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_safe_tigonometric_functions.h"
 
 namespace bcg {
 

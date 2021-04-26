@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_ROTATION_MATRIX_LOGARITHM_H
 
 #include "math/bcg_linalg.h"
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_safe_tigonometric_functions.h"
 
 namespace bcg{
 
