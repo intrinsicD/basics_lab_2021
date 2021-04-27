@@ -9,7 +9,7 @@
 
 namespace bcg{
 
-void mesh_projected_distances(halfedge_mesh &source, halfedge_mesh &target, size_t parallel_grain_size = 1024);
+void mesh_projected_distances(halfedge_mesh &source, halfedge_mesh &target, const Transform &source_to_target, size_t parallel_grain_size = 1024);
 
 }
 

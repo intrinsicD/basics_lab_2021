@@ -12,19 +12,26 @@
 namespace bcg{
 
 void gui_mesh_projected_distances(viewer_state *state){
-    static entt::entity source_id;
-    static entt::entity target_id;
+    static entt::entity source_id = entt::null;
+    static entt::entity target_id = entt::null;
     if(ImGui::Button("Set Source")){
         auto id = state->picker.entity_id;
         if(state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)){
             source_id = id;
         }
     }
+    ImGui::SameLine();
     if(ImGui::Button("Set Target")){
         auto id = state->picker.entity_id;
         if(state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)){
             target_id = id;
         }
+    }
+    if(source_id != entt::null && state->scene.valid(source_id)){
+        ImGui::LabelText("Source", "%d",source_id);
+    }
+    if(target_id != entt::null && state->scene.valid(target_id)){
+        ImGui::LabelText("Target", "%d",target_id);
     }
     static float min = 0;
     static float max = 0;
@@ -32,7 +39,10 @@ void gui_mesh_projected_distances(viewer_state *state){
     if(ImGui::Button("Compute projected distances")){
         auto &source = state->scene.get<halfedge_mesh>(source_id);
         auto &target = state->scene.get<halfedge_mesh>(target_id);
-        mesh_projected_distances(source, target, state->config.parallel_grain_size);
+        auto &s_model = state->scene.get<Transform>(source_id);
+        auto &t_model = state->scene.get<Transform>(target_id);
+        Transform s_to_t = t_model.inverse() * s_model;
+        mesh_projected_distances(source, target, s_to_t, state->config.parallel_grain_size);
         auto &material = state->scene.get<material_mesh>(source_id);
         auto &color = material.attributes[2];
         color.property_name = "v_projected_distances";

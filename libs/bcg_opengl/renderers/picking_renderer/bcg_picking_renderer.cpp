@@ -174,10 +174,11 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         std::cout << "clicked on entity_id: " << (unsigned int) id << "\n";
         if(state->mouse.left && state->keyboard.ctrl_pressed && !state->keyboard.shift_pressed){
             state->picker.selected_entities.clear();
+
         }
         if(state->mouse.left && state->keyboard.ctrl_pressed && state->keyboard.shift_pressed){
             auto iter = state->picker.selected_entities.find((size_t)id);
-            if(iter != state->picker.selected_entities.end()){
+            if(iter == state->picker.selected_entities.end()){
                 state->picker.selected_entities[(size_t)id] = id;
             }else if(!state->picker.selected_entities.empty()){
                 state->picker.selected_entities.erase(iter);
