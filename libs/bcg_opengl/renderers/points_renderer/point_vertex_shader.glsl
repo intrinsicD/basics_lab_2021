@@ -42,15 +42,18 @@ void main() {
     }
     f_position = view * model * vec4(position, 1.0f);
 
+
     if(material.use_uniform_point_size){
         gl_PointSize = material.uniform_point_size;
     }else{
-        gl_PointSize = point_size * material.uniform_point_size * 2;
+        gl_PointSize = point_size * material.uniform_point_size * 2.0;
     }
 
     if(has_normals){
         f_normal = transform_normals(normal);
+        gl_PointSize *= abs(f_normal.z);
     }
+
     f_proj = proj;
     gl_Position = proj * f_position;
     //gl_Position.z *= 0.999999;

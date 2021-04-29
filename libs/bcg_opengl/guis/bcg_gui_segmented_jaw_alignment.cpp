@@ -8,6 +8,7 @@
 #include "bcg_gui_property_selector.h"
 #include "bcg_gui_property_classify_max.h"
 #include "bcg_gui_property_clamp.h"
+#include "bcg_gui_transform.h"
 #include "bcg_property_utils.h"
 #include "bcg_property_map_eigen.h"
 #include "graph/bcg_graph_edge_from_vertex_function.h"
@@ -148,6 +149,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
         static std::vector<Tooth> source_teeth;
         static entt::entity source_jaw = entt::null, source = entt::null, target = entt::null;
         static bool hide_jaw = false;
+        static Transform avg_alignment = Transform::Identity();
         if (ImGui::CollapsingHeader("Connected Components")) {
             gui_mesh_connected_components(state);
         }
@@ -215,21 +217,29 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 }
                 geodesic_median_so3 mean(true, true);
                 std::vector<MatrixS<3, 3>> rotations;
-                VectorS<3> average_position = VectorS<3>::Zero();
                 int count = 0;
+                avg_alignment.setIdentity();
                 for (const auto &tooth : source_teeth) {
                     if (tooth.selected) {
                         auto model = state->scene.get<Transform>(tooth.entity_id);
                         rotations.emplace_back(model.linear());
-                        average_position += model.translation();
+                        avg_alignment.translation() += model.translation();
                         ++count;
                     }
                 }
-                average_position /= bcg_scalar_t(count);
-                MatrixS<3, 3> average_rotation = mean(rotations);
+
+                avg_alignment.translation() /= bcg_scalar_t(count);
+                avg_alignment.linear() = mean(rotations);
                 auto &source_model = state->scene.get<Transform>(source);
-                source_model.linear() = average_rotation;
-                source_model.translation() = average_position;
+                source_model = avg_alignment;
+            }
+            if(state->scene.valid(state->picker.entity_id)){
+                auto model = state->scene.get<Transform>(state->picker.entity_id);
+                std::string name = "global_transform";
+                gui_transform(state, &model, &name);
+                Transform local = avg_alignment.inverse() * model;
+                name = "local_transform";
+                gui_transform(state, &local, &name);
             }
         }
     }

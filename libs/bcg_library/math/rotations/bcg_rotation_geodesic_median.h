@@ -23,7 +23,7 @@ struct geodesic_median_so3 {
                              bcg_scalar_t eps = scalar_eps,
                              int max_iterations = 100);
 
-private:
+public:
     bool m_robust, m_outlier_reject;
     MatrixS<3, 3> m_R;
     std::vector<bcg_scalar_t> m_weights;

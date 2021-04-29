@@ -12,6 +12,7 @@
 #include "bcg_material_mesh.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_mesh_renderer.h"
+#include "utils/bcg_string_utils.h"
 #include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 
 namespace bcg {
@@ -187,7 +188,11 @@ void mesh_renderer::on_set_vertex_color_attribute(const event::mesh_renderer::se
 
     auto &color = material.attributes[2];
     color.property_name = event.color.property_name;
-    color.buffer_name = color.property_name;
+    if(event.color.buffer_name.empty() || contains(event.color.buffer_name, "_color")){
+        color.buffer_name = color.property_name+"_color";
+    }else{
+        color.buffer_name = color.property_name;
+    }
     color.enable = true;
     color.update = true;
     material.use_uniform_color = false;

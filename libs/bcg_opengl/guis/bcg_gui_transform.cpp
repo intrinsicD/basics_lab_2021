@@ -8,9 +8,13 @@
 
 namespace bcg{
 
-void gui_transform(viewer_state *state, Transform *model){
+void gui_transform(viewer_state *state, Transform *model, const std::string *name){
     if (!model) return;
-    if (ImGui::CollapsingHeader("transform")) {
+    std::string used_name = "transform";
+    if(name != nullptr){
+        used_name = *name;
+    }
+    if (ImGui::CollapsingHeader(used_name.c_str())) {
         std::stringstream ss;
         ss << model->translation().transpose();
         draw_label(&state->window, "position", ss.str());

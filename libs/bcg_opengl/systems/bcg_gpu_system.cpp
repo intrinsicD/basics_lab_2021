@@ -51,8 +51,6 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
 
     auto *base_ptr = event.container->get_base_ptr(event.attrib.property_name);
     if (event.attrib.shader_attribute_name == "color" && base_ptr->dims() == 1) {
-/*        auto colors = renderer::map_to_colors(event.container, event.attrib.property_name, event.color_map);
-        buffer->upload(colors[0].data(), base_ptr->size(), 3, 0, true);*/
         on_update_vertex_colors_scalarfield({event.id, event.container, event.attrib, event.color_map, 0, 0});
     } else {
         if (base_ptr->void_ptr() != nullptr) {

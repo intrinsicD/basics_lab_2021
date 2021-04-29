@@ -31,7 +31,7 @@ void sphere() {
     float spec = pow(max(abs(dot(view_dir, reflect_dir)), 0.0), 5.0);
     float d2 = dot(sphere_normal.xy, sphere_normal.xy);
     float dr =  sqrt(radius * radius - d2);
-    final_color = f_color * diff + f_color * spec;
+    final_color = (f_color * diff + f_color * spec) * pow(sphere_normal.z, 20);
 
     gl_FragDepth = (gl_FragCoord.z / gl_FragCoord.w + dr *  gl_DepthRange.diff / 2.0 * f_proj[2].z) * gl_FragCoord.w;
 }
@@ -105,9 +105,9 @@ void splat() {
 }
 
 void main(){
-    //sphere();
+    sphere();
     //sphere2();
-    splat();
+    //splat();
 }
 
 

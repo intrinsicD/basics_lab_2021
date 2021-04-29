@@ -11,7 +11,7 @@ namespace bcg{
 
 struct viewer_state;
 
-void gui_transform(viewer_state *state, Transform *transform);
+void gui_transform(viewer_state *state, Transform *transform, const std::string *name = nullptr);
 
 }
 

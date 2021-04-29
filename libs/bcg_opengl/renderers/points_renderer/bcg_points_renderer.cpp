@@ -10,6 +10,7 @@
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_points.h"
 #include "renderers/bcg_attribute.h"
+#include "utils/bcg_string_utils.h"
 #include "bcg_events_points_renderer.h"
 
 namespace bcg {
@@ -173,7 +174,11 @@ void points_renderer::on_set_color_attribute(const event::points_renderer::set_c
     auto &material = state->scene.get<material_points>(event.id);
     auto &color = material.attributes[1];
     color.property_name = event.color.property_name;
-    color.buffer_name = color.property_name;
+    if(event.color.buffer_name.empty() || contains(event.color.buffer_name, "_color")){
+        color.buffer_name = color.property_name+"_color";
+    }else{
+        color.buffer_name = color.property_name;
+    }
     color.enable = true;
     color.update = true;
     material.use_uniform_color = false;
