@@ -19,6 +19,7 @@
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "math/rotations/bcg_rotation_geodesic_median.h"
+#include "math/translations/bcg_translation_mean.h"
 
 namespace bcg {
 
@@ -215,21 +216,21 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                     state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target,
                                                                                static_cast<RegistrationMethod>(selected_registration_method));
                 }
-                geodesic_median_so3 mean(true, true);
+                geodesic_median_so3 r_mean(true, true);
+                translation_mean t_mean(true);
                 std::vector<MatrixS<3, 3>> rotations;
-                int count = 0;
+                std::vector<VectorS<3>> translations;
                 avg_alignment.setIdentity();
                 for (const auto &tooth : source_teeth) {
                     if (tooth.selected) {
                         auto model = state->scene.get<Transform>(tooth.entity_id);
                         rotations.emplace_back(model.linear());
-                        avg_alignment.translation() += model.translation();
-                        ++count;
+                        translations.emplace_back(model.translation());
                     }
                 }
 
-                avg_alignment.translation() /= bcg_scalar_t(count);
-                avg_alignment.linear() = mean(rotations);
+                avg_alignment.linear() = r_mean(rotations);
+                avg_alignment.translation() = t_mean(translations);
                 auto &source_model = state->scene.get<Transform>(source);
                 source_model = avg_alignment;
             }
