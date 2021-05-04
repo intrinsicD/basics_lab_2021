@@ -9,6 +9,7 @@
 #include "bcg_property_map_eigen.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
+#include "renderers/point_rendering/hq_pbr_ufsi/bcg_hq_pbr_ufsi_renderer_events.h"
 #include "point_cloud/bcg_point_cloud_graph_builder.h"
 #include "point_cloud/bcg_point_cloud_vertex_pca.h"
 #include "point_cloud/bcg_point_cloud_curvature_taubin.h"
@@ -82,6 +83,7 @@ void point_cloud_system::on_setup(const event::point_cloud::setup &event) {
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
     state->scene.emplace_or_replace<event::picking_renderer::enqueue>(event.id);
     state->scene.emplace_or_replace<event::points_renderer::enqueue>(event.id);
+    //state->scene.emplace_or_replace<event::hq_pbr_ufsi_renderer::enqueue>(event.id);
     state->picker.entity_id = event.id;
     std::cout << pc << "\n";
 }

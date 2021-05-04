@@ -8,6 +8,12 @@ in float f_point_size;
 out vec4 final_color;
 
 uniform bool has_normals;
+uniform float near;
+uniform float far;
+uniform float top;
+uniform float bottom;
+uniform float left;
+uniform float right;
 
 void sphere() {
     float radius = 0.5;
@@ -105,9 +111,9 @@ void splat() {
 }
 
 void main(){
-    sphere();
+    //sphere();
     //sphere2();
-    //splat();
+    splat();
 }
 
 

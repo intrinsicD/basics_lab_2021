@@ -6,6 +6,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_materials.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
+#include "renderers/point_rendering/hq_pbr_ufsi/bcg_hq_pbr_ufsi_renderer_events.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
 #include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
@@ -16,6 +17,7 @@ namespace bcg{
 
 void gui_rendering_options(viewer_state *state, entt::entity id){
     bool show_points = state->scene.all_of<event::points_renderer::enqueue>(id);
+    bool show_hq_points = state->scene.all_of<event::hq_pbr_ufsi_renderer::enqueue>(id);
     bool show_edges = state->scene.all_of<event::graph_renderer::enqueue>(id);
     bool show_mesh = state->scene.all_of<event::mesh_renderer::enqueue>(id);
     bool show_vectors = state->scene.all_of<event::vectorfield_renderer::enqueue>(id);
@@ -27,6 +29,13 @@ void gui_rendering_options(viewer_state *state, entt::entity id){
                 state->scene.emplace_or_replace<event::points_renderer::enqueue>(id);
             } else {
                 state->scene.remove_if_exists<event::points_renderer::enqueue>(id);
+            }
+        }
+        if (ImGui::Checkbox("show hq_points", &show_hq_points)) {
+            if (show_hq_points) {
+                state->scene.emplace_or_replace<event::hq_pbr_ufsi_renderer::enqueue>(id);
+            } else {
+                state->scene.remove_if_exists<event::hq_pbr_ufsi_renderer::enqueue>(id);
             }
         }
         if (ImGui::Checkbox("show edges", &show_edges)) {
@@ -67,7 +76,7 @@ void gui_rendering_options(viewer_state *state, entt::entity id){
         ImGui::Separator();
     }
 
-    gui_materials(state, id, show_points, show_edges, show_mesh, show_vectors, show_curves);
+    gui_materials(state, id, show_points, show_hq_points, show_edges, show_mesh, show_vectors, show_curves);
 }
 
 }

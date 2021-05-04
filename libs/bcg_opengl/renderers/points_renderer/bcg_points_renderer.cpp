@@ -23,7 +23,8 @@ points_renderer::points_renderer(viewer_state *state) : renderer("points_rendere
     state->dispatcher.sink<event::internal::set_uniform_point_size>().connect<&points_renderer::on_set_uniform_point_size>(
             this);
     state->dispatcher.sink<event::points_renderer::enqueue>().connect<&points_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::points_renderer::setup_for_rendering>().connect<&points_renderer::on_setup_for_rendering>(this);
+    state->dispatcher.sink<event::points_renderer::setup_for_rendering>().connect<&points_renderer::on_setup_for_rendering>(
+            this);
     state->dispatcher.sink<event::points_renderer::set_position_attribute>().connect<&points_renderer::on_set_position_attribute>(
             this);
     state->dispatcher.sink<event::points_renderer::set_color_attribute>().connect<&points_renderer::on_set_color_attribute>(
@@ -59,11 +60,11 @@ void points_renderer::on_enqueue(const event::points_renderer::enqueue &event) {
         auto &material = state->scene.emplace<material_points>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
-    }else{
+    } else {
         auto &material = state->scene.get<material_points>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
-        for(auto &attribute : material.attributes){
+        for (auto &attribute : material.attributes) {
             attribute.update = false;
         }
     }
@@ -130,6 +131,12 @@ void points_renderer::on_render(const event::internal::render &) {
 
         material.uniform_size = gl_state.point_size_value;
         material.fovy = state->cam.fovy_radians();
+        material.near = state->cam.proj.n;
+        material.far = state->cam.proj.f;
+        material.top = state->cam.proj.t;
+        material.bottom = state->cam.proj.b;
+        material.left = state->cam.proj.l;
+        material.right = state->cam.proj.r;
         material.viewport = state->get_viewport().cast<float>();
         material.upload(program);
 
@@ -147,11 +154,13 @@ void points_renderer::on_end_frame(const event::internal::end_frame &) {
 
 void points_renderer::on_uniform_point_size(const event::internal::uniform_point_size &event) {
     gl_state.set_point_size(
-            std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0), state->config.max_point_size));
+            std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(gl_state.point_size_value + event.value, 1.0),
+                                   state->config.max_point_size));
 }
 
 void points_renderer::on_set_uniform_point_size(const event::internal::set_uniform_point_size &event) {
-    gl_state.set_point_size(std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(event.value, 1.0), state->config.max_point_size));
+    gl_state.set_point_size(
+            std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(event.value, 1.0), state->config.max_point_size));
 }
 
 void points_renderer::on_set_position_attribute(const event::points_renderer::set_position_attribute &event) {
@@ -174,9 +183,9 @@ void points_renderer::on_set_color_attribute(const event::points_renderer::set_c
     auto &material = state->scene.get<material_points>(event.id);
     auto &color = material.attributes[1];
     color.property_name = event.color.property_name;
-    if(event.color.buffer_name.empty() || contains(event.color.buffer_name, "_color")){
-        color.buffer_name = color.property_name+"_color";
-    }else{
+    if (event.color.buffer_name.empty() || contains(event.color.buffer_name, "_color")) {
+        color.buffer_name = color.property_name + "_color";
+    } else {
         color.buffer_name = color.property_name;
     }
     color.enable = true;
@@ -205,7 +214,7 @@ void points_renderer::on_set_point_size_attribute(const event::points_renderer::
     state->dispatcher.trigger<event::points_renderer::setup_for_rendering>(event.id);
 }
 
-void points_renderer::on_set_normal_attribute(const event::points_renderer::set_normal_attribute &event){
+void points_renderer::on_set_normal_attribute(const event::points_renderer::set_normal_attribute &event) {
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_points>(event.id);
     auto *vertices = state->get_vertices(event.id);

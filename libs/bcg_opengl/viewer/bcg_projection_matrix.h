@@ -11,6 +11,7 @@ namespace bcg{
 
 struct projection{
     MatrixS<4, 4> matrix;
+    bcg_scalar_t n, f, t, b, l, r;
 
     projection();
 

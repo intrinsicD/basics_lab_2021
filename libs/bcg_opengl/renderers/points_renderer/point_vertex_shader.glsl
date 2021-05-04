@@ -29,6 +29,12 @@ out float f_point_size;
 
 uniform bool has_normals;
 uniform float fovy;
+uniform float near;
+uniform float far;
+uniform float top;
+uniform float bottom;
+uniform float left;
+uniform float right;
 
 vec3 transform_normals(vec3 n){
     return mat3(transpose(inverse(view * model))) * n;
@@ -44,10 +50,12 @@ void main() {
 
 
     if(material.use_uniform_point_size){
-        gl_PointSize = material.uniform_point_size;
+        gl_PointSize = material.uniform_point_size * 2.0;
     }else{
         gl_PointSize = point_size * material.uniform_point_size * 2.0;
     }
+
+    gl_PointSize *= near / -f_position.z / ((top - bottom)) ;
 
     if(has_normals){
         f_normal = transform_normals(normal);
@@ -64,5 +72,11 @@ void main() {
     projFactor = projFactor * viewport[3] / 2.0;
 
     f_point_size = gl_PointSize / projFactor;
+
     //f_point_size = 1.0 / projFactor;
+
+    //gl_PointSize =  f_point_size;
+
+    //gl_PointSize = f_point_size * point_size;
+
 }

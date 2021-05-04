@@ -11,7 +11,7 @@ namespace bcg{
 
 struct viewer_state;
 
-void gui_materials(viewer_state *state, entt::entity id, bool show_points, bool show_edges, bool show_meshes, bool show_vectors, bool show_curves);
+void gui_materials(viewer_state *state, entt::entity id, bool show_points, bool show_hq_points, bool show_edges, bool show_meshes, bool show_vectors, bool show_curves);
 
 }
 

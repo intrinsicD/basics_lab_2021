@@ -76,8 +76,8 @@ glsl_program viewer_shaders::load(std::string name,
             if (program.link()) return;
         });
     }
-    programs[name] = program;
-    return programs[name];
+    programs[program.name] = program;
+    return programs[program.name];
 }
 
 glsl_shader viewer_shaders::load_shader(std::string filename, unsigned int type) const {

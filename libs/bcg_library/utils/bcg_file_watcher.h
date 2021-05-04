@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <string>
 #include "bcg_file.h"
+#include "bcg_path.h"
 
 namespace bcg {
 
@@ -34,10 +35,9 @@ namespace bcg {
 
 template<typename Lambda>
 void file_watcher::watch(const std::string& filename, Lambda cb) {
-    //auto time = std::filesystem::last_write_time(filename);
     auto time = file_stream(filename).last_write_time();
-    watched[filename] = [filename, cb, time](bool force = false) mutable {
-        //auto last_mod_time = std::filesystem::last_write_time((filename));
+    std::string name = path_filename(filename);
+    watched[name] = [filename, cb, time](bool force = false) mutable {
         auto last_mod_time = file_stream(filename).last_write_time();
         if (force || time != last_mod_time) {
             time = last_mod_time;

@@ -18,6 +18,12 @@ namespace bcg{
     }
 
     void projection::perspective(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t top, bcg_scalar_t bottom, bcg_scalar_t left, bcg_scalar_t right) {
+        n = near;
+        f = far;
+        l = left;
+        r = right;
+        t = top;
+        b = bottom;
         matrix(0, 0) = (near + near) / (right - left);
         matrix(0, 2) = (right + left) / (right - left);
         matrix(1, 1) = (near + near) / (top - bottom);
@@ -47,6 +53,12 @@ namespace bcg{
     }
 
     void projection::orthographic(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t top, bcg_scalar_t bottom, bcg_scalar_t left, bcg_scalar_t right) {
+        n = near;
+        f = far;
+        l = left;
+        r = right;
+        t = top;
+        b = bottom;
         matrix(0, 0) = 2.0 / (right - left);
         matrix(1, 1) = 2.0 / (top - bottom);
         matrix(2, 2) = -2.0 / (far - near);
