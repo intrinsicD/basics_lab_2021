@@ -5,9 +5,11 @@
 
 #include <utility>
 #include "bcg_mesh_face_normals.h"
+#include "bcg_mesh_face_centers.h"
 #include "distance_query/bcg_distance_triangle_point.h"
 #include "utils/bcg_heap.h"
 #include "math/bcg_probabilistic_quadric.h"
+#include "utils/bcg_timer.h"
 
 namespace bcg {
 
@@ -251,26 +253,29 @@ simplification::simplification(halfedge_mesh &mesh, bcg_scalar_t aspect_ratio,
         vquadric[v] = quadric();
 
         if (!mesh.is_isolated(v)) {
+            bcg_scalar_t count = 0.0;
             for (const auto f : mesh.get_faces(v)) {
-                //vquadric[v] += quadric::probabilistic_plane_quadric(vpoint[v], fnormal[f], 1, 1);
-                std::vector<VectorS<3>> V;
+                vquadric[v] += quadric::plane_quadric(face_center(mesh, f), fnormal[f]);
+/*                std::vector<VectorS<3>> V;
                 for (const auto vf : mesh.get_vertices(f)) {
                     V.push_back(vpoint[vf]);
                 }
-                vquadric[v] += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], 1);
+                vquadric[v] += quadric::probabilistic_triangle_quadric(V[0], V[1], V[2], 0.5);*/
+                count += 1.0;
             }
+            vquadric[v] /= count;
         }
     }
 
     // initialize normal cones
-    if (normal_deviation) {
+    if (normal_deviation > 0.0) {
         for (const auto f : mesh.faces) {
             normal_cones[f] = normal_cone(fnormal[f]);
         }
     }
 
     // initialize faces' point list
-    if (hausdorff_error) {
+    if (hausdorff_error > 0.0) {
         for (const auto f : mesh.faces) {
             points().swap(face_points[f]); // free mem
         }
@@ -280,6 +285,7 @@ simplification::simplification(halfedge_mesh &mesh, bcg_scalar_t aspect_ratio,
 }
 
 void simplification::simplify(unsigned int n_vertices) {
+    Timer timer;
     if (!mesh.is_triangle_mesh()) {
         mesh.triangulate();
         return;
@@ -353,9 +359,10 @@ void simplification::simplify(unsigned int n_vertices) {
     lines.vector() = mesh.get_connectivity();
     lines.set_dirty();
 
-    auto triangles = mesh.edges.get_or_add<VectorI<3>, 3>("triangles");
+    auto triangles = mesh.faces.get_or_add<VectorI<3>, 3>("triangles");
     triangles = mesh.get_triangles();
     triangles.set_dirty();
+    std::cout << "mesh simplification " << timer.pretty_report() << "\n";
 }
 
 void simplification::enqueuevertex(vertex_handle v) {
@@ -403,7 +410,6 @@ bool simplification::is_collapse_legal(const collapse_data &cd) {
     if (has_selection && !vselected[cd.v0]) {
         return false;
     }
-
 
     // test features
     if (has_features) {
@@ -456,7 +462,7 @@ bool simplification::is_collapse_legal(const collapse_data &cd) {
     const VectorS<3> p1 = vpoint[cd.v1];
 
     // check for maximum edge length
-    if (edge_length) {
+    if (edge_length > 0.0) {
         for (const auto v : mesh.halfedge_graph::get_vertices(cd.v0)) {
             if (v != cd.v1 && v != cd.vl && v != cd.vr) {
                 if ((vpoint[v] - p1).norm() > edge_length) {
@@ -517,7 +523,7 @@ bool simplification::is_collapse_legal(const collapse_data &cd) {
     }
 
     // check aspect ratio
-    if (aspect_ratio) {
+    if (aspect_ratio > 0.0) {
         bcg_scalar_t ar0(0), ar1(0);
 
         for (const auto f : mesh.get_faces(cd.v0)) {
@@ -538,7 +544,7 @@ bool simplification::is_collapse_legal(const collapse_data &cd) {
     }
 
     // check Hausdorff error
-    if (hausdorff_error) {
+    if (hausdorff_error > 0.0) {
         points p;
         bool ok;
 
@@ -588,7 +594,7 @@ void simplification::postprocess_collapse(const collapse_data &cd) {
     vquadric[cd.v1] += vquadric[cd.v0];
 
     // update normal cones
-    if (normal_deviation) {
+    if (normal_deviation > 0.0) {
         for (const auto f : mesh.get_faces(cd.v1)) {
             normal_cones[f].merge(face_normal(mesh, f));
         }
@@ -609,7 +615,7 @@ void simplification::postprocess_collapse(const collapse_data &cd) {
     }
 
     // update Hausdorff error
-    if (hausdorff_error) {
+    if (hausdorff_error > 0.0) {
         points p;
 
         // collect points to be distributed
@@ -664,9 +670,9 @@ bcg_scalar_t simplification::compute_aspect_ratio(face_handle f) const {
 
     auto fvit = mesh.get_vertices(f);
 
-    const VectorS<3> p0 = vpoint[*fvit];
-    const VectorS<3> p1 = vpoint[*(++fvit)];
-    const VectorS<3> p2 = vpoint[*(++fvit)];
+    const VectorS<3> &p0 = vpoint[*fvit];
+    const VectorS<3> &p1 = vpoint[*(++fvit)];
+    const VectorS<3> &p2 = vpoint[*(++fvit)];
 
     const VectorS<3> d0 = p0 - p1;
     const VectorS<3> d1 = p1 - p2;

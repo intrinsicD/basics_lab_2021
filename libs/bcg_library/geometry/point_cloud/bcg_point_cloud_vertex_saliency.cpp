@@ -35,12 +35,12 @@ void point_cloud_vertex_saliency(vertex_container *vertices, property<bcg_scalar
                     for (size_t j = 0; j < result.indices.size(); ++j) {
                         size_t idx = result.indices[j];
                         bcg_scalar_t distance_squared = result.distances[j] * result.distances[j];
-                        bcg_scalar_t weight_large = gaussian(distance_squared, sigma_large_squared);
+                        bcg_scalar_t weight_large = gaussian_distance(distance_squared, sigma_large_squared);
                         value_large += property[idx] * weight_large;
                         sum_weights_large += weight_large;
 
                         if(result.distances[j] < radius){
-                            bcg_scalar_t weight_small = gaussian(distance_squared, sigma_small_squared);
+                            bcg_scalar_t weight_small = gaussian_distance(distance_squared, sigma_small_squared);
                             value_small += property[idx] * weight_small;
                             sum_weights_small += weight_small;
                         }

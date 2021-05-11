@@ -33,7 +33,7 @@ void point_cloud_kernel_density_estimation_radius(vertex_container *vertices, co
     auto positions = vertices->get<VectorS<3>, 3>("v_position");
     auto kernel_density = vertices->get_or_add<bcg_scalar_t, 1>("v_kernel_density");
     bcg_scalar_t sigma_squared = radius * radius;
-    bcg_scalar_t normalizer = gaussian_normalizer(sigma_squared);
+    bcg_scalar_t normalizer = gaussian_normalizer(sigma_squared) * vertices->size();
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) vertices->size(), parallel_grain_size),
             [&](const tbb::blocked_range<uint32_t> &range) {
@@ -43,7 +43,7 @@ void point_cloud_kernel_density_estimation_radius(vertex_container *vertices, co
                     auto result = index.query_radius(positions[v], radius);
                     kernel_density[v] = 0;
                     for(const auto &distance : result.distances){
-                        kernel_density[v] += gaussian(distance * distance, sigma_squared) / (normalizer * vertices->size());
+                        kernel_density[v] += gaussian_distance(distance * distance, sigma_squared) * normalizer;
                     }
                 }
             }

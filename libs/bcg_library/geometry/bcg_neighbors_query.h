@@ -13,10 +13,16 @@ namespace bcg {
 struct neighbors_query {
     neighbors_query() = default;
 
-    neighbors_query(int k) : indices(k, 0), distances(k, 0) {}
+    explicit neighbors_query(int k) : indices(k, 0), distances(k, 0) {}
+
+    explicit neighbors_query(size_t k) : indices(k, 0), distances(k, 0) {}
 
     std::vector<bcg_index_t> indices;
     std::vector<bcg_scalar_t> distances;
+
+    size_t size() const {
+        return indices.size();
+    }
 };
 
 }
