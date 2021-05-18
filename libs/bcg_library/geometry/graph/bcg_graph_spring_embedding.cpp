@@ -20,7 +20,7 @@ void graph_random_embedding_3D(halfedge_graph &graph) {
 }
 
 VectorS<3>
-eades_forces(halfedge_graph &graph, vertex_handle v, bcg_scalar_t c_rep, bcg_scalar_t c_spring, bcg_scalar_t l) {
+edges_forces(halfedge_graph &graph, vertex_handle v, bcg_scalar_t c_rep, bcg_scalar_t c_spring, bcg_scalar_t l) {
     VectorS<3> rep_force = VectorS<3>::Zero();
     VectorS<3> spring_force = VectorS<3>::Zero();
     bcg_scalar_t rep_weight_sum = 0;
@@ -48,7 +48,7 @@ void graph_spring_embedding::iterate(halfedge_graph &graph){
     while (iterations < num_steps && max_force_magnitude > force_eps) {
         bcg_scalar_t max_force_magnitude_next = -scalar_max;
         for (const auto v : graph.vertices) {
-            spring_forces[v] = eades_forces(graph, v, repulsion_coefficient, spring_coefficient, target_edge_length);
+            spring_forces[v] = edges_forces(graph, v, repulsion_coefficient, spring_coefficient, target_edge_length);
             bcg_scalar_t spring_force_norm = spring_forces[v].norm();
             if (spring_force_norm > max_force_magnitude_next){
                 max_force_magnitude_next = spring_force_norm;

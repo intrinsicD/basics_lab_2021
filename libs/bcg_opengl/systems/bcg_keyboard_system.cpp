@@ -62,7 +62,14 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_P]) {}
     if (state->keyboard.keys[GLFW_KEY_Q]) {}
     if (state->keyboard.keys[GLFW_KEY_R]) {
-        state->cam.init(state->window.width, state->window.height);
+        if(state->keyboard.ctrl_pressed){
+            for(const auto &item : state->picker.selected_entities){
+                auto &model = state->scene.get<Transform>(item.second);
+                model.setIdentity();
+            }
+        }else{
+            state->cam.init(state->window.width, state->window.height);
+        }
     }
     if (state->keyboard.keys[GLFW_KEY_S]) {}
     if (state->keyboard.keys[GLFW_KEY_T]) {
