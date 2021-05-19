@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_STATISTICS_MEDIAN_H
 
 #include <vector>
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg{
 

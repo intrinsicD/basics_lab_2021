@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_VECTOR_COS_H
 
 #include "math/bcg_linalg.h"
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg{
 

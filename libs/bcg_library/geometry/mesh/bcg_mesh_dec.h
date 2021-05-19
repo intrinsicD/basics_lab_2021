@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_MESH_DEC_H
 #define BCG_GRAPHICS_BCG_MESH_DEC_H
 
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 #include "math/sparse_matrix/bcg_sparse_matrix.h"
 #include "bcg_mesh.h"
 

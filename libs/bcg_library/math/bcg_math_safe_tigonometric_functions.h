@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_MATH_SAFE_TIGONOMETRIC_FUNCTIONS_H
 #define BCG_GRAPHICS_BCG_MATH_SAFE_TIGONOMETRIC_FUNCTIONS_H
 
-#include "bcg_math_common.h"
+#include "bcg_math_types.h"
 
 namespace bcg{
 

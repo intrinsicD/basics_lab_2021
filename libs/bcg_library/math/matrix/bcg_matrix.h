@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_MATRIX_H
 
 #include "Eigen/Core"
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg{
 

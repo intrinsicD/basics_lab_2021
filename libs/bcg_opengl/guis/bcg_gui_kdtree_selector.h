@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_GUI_KDTREE_SELECTOR_H
 
 
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg{
 

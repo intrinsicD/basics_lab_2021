@@ -5,7 +5,7 @@ target_sources(bcg_graphics PRIVATE
         bcg_integration.h bcg_integration.cpp
         bcg_kernel_functions.h bcg_kernel_functions.cpp
         bcg_linalg.h
-        bcg_math_common.h
+        bcg_math_types.h
         bcg_math_safe_tigonometric_functions.h
         bcg_monomial_basis.h
         bcg_monomial_basis.cpp

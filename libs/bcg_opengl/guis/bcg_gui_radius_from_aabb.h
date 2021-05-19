@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_GUI_RADIUS_FROM_AABB_H
 #define BCG_GRAPHICS_BCG_GUI_RADIUS_FROM_AABB_H
 
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg{
 

@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_SPARSE_MATRIX_H
 #define BCG_GRAPHICS_BCG_SPARSE_MATRIX_H
 
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 #include "Eigen/SparseCore"
 
 namespace bcg{

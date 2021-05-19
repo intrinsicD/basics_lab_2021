@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_EVENTS_CORRESPONDENCES_H
 
 #include "entt/entt.hpp"
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg::event::correspondences{
 

@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_MONOMIAL_BASIS_H
 
 #include <vector>
-#include "bcg_math_common.h"
+#include "bcg_math_types.h"
 
 namespace bcg{
 

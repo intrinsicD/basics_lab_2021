@@ -5,7 +5,7 @@
 #ifndef BCG_GRAPHICS_BCG_M_ESTIMATORS_H
 #define BCG_GRAPHICS_BCG_M_ESTIMATORS_H
 
-#include "bcg_math_common.h"
+#include "bcg_math_types.h"
 
 namespace bcg {
 /*  M-Estimators

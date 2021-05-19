@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <string>
-#include "bcg_math_common.h"
+#include "bcg_math_types.h"
 
 namespace bcg {
 

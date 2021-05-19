@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <iostream>
-#include "bcg_math_common.h"
+#include "bcg_math_types.h"
 
 namespace bcg {
 struct polynomial {

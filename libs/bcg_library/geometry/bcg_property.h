@@ -16,7 +16,7 @@
 #include <algorithm>
 
 #include "bcg_property_eigen_trait.h"
-#include "math/bcg_math_common.h"
+#include "math/bcg_math_types.h"
 
 namespace bcg {
 

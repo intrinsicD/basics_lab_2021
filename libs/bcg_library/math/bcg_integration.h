@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_INTEGRATION_H
 
 #include <functional>
-#include "bcg_math_common.h"
+#include "bcg_math_types.h"
 
 namespace bcg{
 
