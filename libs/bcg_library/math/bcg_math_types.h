@@ -2,8 +2,8 @@
 // Created by alex on 13.10.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_MATH_COMMON_H
-#define BCG_GRAPHICS_BCG_MATH_COMMON_H
+#ifndef BCG_GRAPHICS_BCG_MATH_TYPES_H
+#define BCG_GRAPHICS_BCG_MATH_TYPES_H
 
 #include <cmath>
 #include <cstdint>
@@ -27,4 +27,4 @@ BCG_MAYBE_UNUSED inline constexpr auto scalar_eps = std::numeric_limits<bcg_scal
 
 }
 
-#endif //BCG_GRAPHICS_BCG_MATH_COMMON_H
+#endif //BCG_GRAPHICS_BCG_MATH_TYPES_H
