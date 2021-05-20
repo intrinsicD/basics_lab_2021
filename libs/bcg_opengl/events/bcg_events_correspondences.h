@@ -7,25 +7,18 @@
 
 #include "entt/entt.hpp"
 #include "math/bcg_math_types.h"
+#include "bcg_events_filter.h"
 
 namespace bcg::event::correspondences{
+
 
 struct estimate{
     entt::entity source_id, target_id;
 };
 
-namespace filter{
-struct distance{
-    entt::entity source_id, target_id;
-    bcg_scalar_t threshold;
-};
+struct filter : bcg::event::filter::correspondences{
 
-struct normal_angle{
-    entt::entity source_id, target_id;
-    bcg_scalar_t threshold;
 };
-
-}
 
 
 }

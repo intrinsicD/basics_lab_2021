@@ -3,12 +3,14 @@
 //
 
 #include "bcg_correspondences.h"
+#include <unordered_map>
 
 namespace bcg {
 
-correspondences::correspondences() : mapping(), stats(), target_id(BCG_INVALID_ID){}
+correspondences::correspondences() : correspondences(BCG_INVALID_ID) {}
 
-correspondences::correspondences(size_t target_id) : target_id(target_id) {}
+correspondences::correspondences(size_t target_id)
+        : mapping(), stats(), target_id(target_id), max_source_index(0), max_target_index(0) {}
 
 correspondences::iterator_t correspondences::begin() { return mapping.begin(); }
 
@@ -23,9 +25,44 @@ void correspondences::clear() {
     stats.clear();
 }
 
+size_t correspondences::size() const {
+    return mapping.size();
+}
+
 void correspondences::add_correspondence(size_t i, size_t j, bcg_scalar_t weight) {
     mapping.emplace_back(i, j, weight);
     stats.push(weight);
+    if(i > max_source_index){
+        max_source_index = i;
+    }
+    if(j > max_target_index){
+        max_target_index = j;
+    }
+}
+
+void correspondences::append(const correspondences &other){
+    mapping.resize( mapping.size() + other.size() ); // preallocate memory
+    mapping.insert( mapping.end(), other.begin(), other.end() );
+    max_source_index = std::max(max_source_index, other.max_source_index);
+    max_target_index = std::max(max_target_index, other.max_target_index);
+    stats += other.stats;
+}
+
+void correspondences::merge_unique(const correspondences &other){
+    std::unordered_map<bcg_index_t , Eigen::Triplet<bcg_scalar_t>> unique;
+    for(const auto &item: mapping){
+        unique[item.row()] = item;
+    }
+    for(const auto &item: other){
+        if(unique.find(item.row()) != unique.end()){
+            unique[item.row()] = item;
+        }
+    }
+
+    clear();
+    for(const auto &item : unique){
+        add_correspondence(item.second.row(), item.second.col(), item.second.value());
+    }
 }
 
 std::vector<bcg_scalar_t> correspondences::weights() const {
@@ -33,7 +70,22 @@ std::vector<bcg_scalar_t> correspondences::weights() const {
     for (size_t i = 0; i < mapping.size(); ++i) {
         values[i] = mapping[i].value();
     }
-    std::sort(values.begin(), values.end());
+    return values;
+}
+
+std::vector<bcg_index_t> correspondences::source_indices() const{
+    std::vector<bcg_index_t> values(mapping.size());
+    for (size_t i = 0; i < mapping.size(); ++i) {
+        values[i] = mapping[i].row();
+    }
+    return values;
+}
+
+std::vector<bcg_index_t> correspondences::target_indices() const{
+    std::vector<bcg_index_t> values(mapping.size());
+    for (size_t i = 0; i < mapping.size(); ++i) {
+        values[i] = mapping[i].col();
+    }
     return values;
 }
 
@@ -51,26 +103,18 @@ MatrixS<-1, -1> correspondences::dense_matrix(size_t M, size_t N) const {
     return matrix;
 }
 
-MatrixS<-1, 3> correspondences::get_source_points(property<VectorS<3>, 3> source_positions) const {
+MatrixS<-1, 3> correspondences::get_source(property<VectorS<3>, 3> property) const {
     MatrixS<-1, 3> P(MatrixS<-1, 3>::Zero(mapping.size(), 3));
     for (const auto &item : mapping) {
-        P.row(item.row()) = source_positions[item.row()];
+        P.row(item.row()) = property[item.row()];
     }
     return P;
 }
 
-MatrixS<-1, 3> correspondences::get_target_points(property<VectorS<3>, 3> target_positions) const {
+MatrixS<-1, 3> correspondences::get_target(property<VectorS<3>, 3> property) const {
     MatrixS<-1, 3> P(MatrixS<-1, 3>::Zero(mapping.size(), 3));
     for (const auto &item : mapping) {
-        P.row(item.row()) = target_positions[item.col()];
-    }
-    return P;
-}
-
-MatrixS<-1, 3> correspondences::get_target_normals(property<VectorS<3>, 3> target_normals) const {
-    MatrixS<-1, 3> P(MatrixS<-1, 3>::Zero(mapping.size(), 3));
-    for (const auto &item : mapping) {
-        P.row(item.row()) = target_normals[item.col()];
+        P.row(item.row()) = property[item.col()];
     }
     return P;
 }

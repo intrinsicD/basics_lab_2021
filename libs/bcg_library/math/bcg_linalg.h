@@ -10,6 +10,9 @@
 
 namespace bcg {
 
+template<typename Derived>
+using Ref = Eigen::DenseBase<Derived>;
+
 using Transform = Eigen::Transform<bcg_scalar_t, 3, Eigen::Affine>;
 
 using Translation = Eigen::Translation<bcg_scalar_t, 3>;

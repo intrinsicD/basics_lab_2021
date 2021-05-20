@@ -43,8 +43,8 @@ void registration_system::on_align_step(const event::registration::align_step &e
         case RegistrationMethod::rigid_icp_point2point : {
             state->dispatcher.trigger<event::correspondences::estimate>(event.source_id, event.target_id);
             auto &correspondences = state->scene.get<entity_correspondences>(event.source_id);
-            auto Y = correspondences.maps[size_t(event.target_id)].get_source_points(source_positions);
-            auto X = correspondences.maps[size_t(event.target_id)].get_target_points(target_positions);
+            auto Y = correspondences.maps[size_t(event.target_id)].get_source(source_positions);
+            auto X = correspondences.maps[size_t(event.target_id)].get_target(target_positions);
             delta = minimize_point_2_point(Y, source_model, X, target_model, state->config.parallel_grain_size);
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
             break;
@@ -53,9 +53,9 @@ void registration_system::on_align_step(const event::registration::align_step &e
             state->dispatcher.trigger<event::correspondences::estimate>(event.source_id, event.target_id);
             auto &correspondences = state->scene.get<entity_correspondences>(event.source_id);
             auto target_normals = target_vertices->get<VectorS<3>, 3>("v_normal");
-            auto Y = correspondences.maps[size_t(event.target_id)].get_source_points(source_positions);
-            auto X = correspondences.maps[size_t(event.target_id)].get_target_points(target_positions);
-            auto N = correspondences.maps[size_t(event.target_id)].get_target_normals(target_normals);
+            auto Y = correspondences.maps[size_t(event.target_id)].get_source(source_positions);
+            auto X = correspondences.maps[size_t(event.target_id)].get_target(target_positions);
+            auto N = correspondences.maps[size_t(event.target_id)].get_target(target_normals);
             delta = minimize_point_2_plane(Y, source_model, X, N, target_model, state->config.parallel_grain_size);
             reg.errors.push_back((delta.matrix() - MatrixS<4, 4>::Identity()).norm());
             break;

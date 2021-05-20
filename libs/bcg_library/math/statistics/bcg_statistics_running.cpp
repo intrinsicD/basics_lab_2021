@@ -102,7 +102,7 @@ running_stats operator+(const running_stats a, const running_stats b) {
     combined.M4 +=
             6.0 * delta2 * (double(a.n * a.n) * b.M2 + double(b.n * b.n) * a.M2) / double(combined.n * combined.n) +
             4.0 * delta * (a.n * b.M3 - b.n * a.M3) / combined.n;
-
+    combined.M5 = (a.M5 + b.M5) / 2;
     return combined;
 }
 

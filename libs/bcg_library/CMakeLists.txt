@@ -3,6 +3,7 @@ add_library(bcg_graphics STATIC)
 target_link_libraries(bcg_graphics PUBLIC tbb)
 
 add_subdirectory(color)
+add_subdirectory(filter)
 add_subdirectory(geometry)
 add_subdirectory(math)
 add_subdirectory(registration)

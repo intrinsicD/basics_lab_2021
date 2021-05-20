@@ -32,6 +32,7 @@ inline std::vector<std::string> registration_names() {
     names[static_cast<int>(RegistrationMethod::coherent_point_drift_bayes)] = "coherent_point_drift_bayes";
     return names;
 }
+
 struct registration{
     RegistrationMethod method;
     std::vector<float> errors;
