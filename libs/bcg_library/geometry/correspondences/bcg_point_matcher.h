@@ -13,6 +13,13 @@
 namespace bcg {
 
 struct point_matcher {
+    /*
+     * Make Sampler class which can be added to point matcher to sample point clouds
+     * Make Correspondence filter class which contains the {{... and ... } or ... or{... and ...}} filter sets for each batch
+     *  - so this class somehow must know about the batches
+     * Make Correspondence weighting class
+     * Filters and weights should be applied during estimation if possible or afterwards on all correspondences.
+     * */
     struct FilterKernel {
         enum class FilterType{
             identity,
