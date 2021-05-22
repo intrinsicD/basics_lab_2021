@@ -3,7 +3,6 @@ target_sources(bcg_graphics PRIVATE
         bcg_binomial_coefficient.h bcg_binomial_coefficient.cpp
         bcg_factorial.h bcg_factorial.cpp
         bcg_integration.h bcg_integration.cpp
-        bcg_kernel_functions.h bcg_kernel_functions.cpp
         bcg_linalg.h
         bcg_math_types.h
         bcg_math_safe_tigonometric_functions.h
@@ -16,6 +15,7 @@ target_sources(bcg_graphics PRIVATE
 
 
 
+add_subdirectory(kernel_functions)
 add_subdirectory(vector)
 add_subdirectory(statistics)
 add_subdirectory(sparse_matrix)

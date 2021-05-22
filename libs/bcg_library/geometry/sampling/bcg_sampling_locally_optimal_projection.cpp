@@ -3,7 +3,6 @@
 //
 
 #include "bcg_sampling_locally_optimal_projection.h"
-#include "math/bcg_kernel_functions.h"
 #include "bcg_property_map_eigen.h"
 #include "math/vector/bcg_vector_map_eigen.h"
 #include "tbb/tbb.h"

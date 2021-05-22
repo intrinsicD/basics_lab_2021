@@ -13,7 +13,6 @@ namespace bcg {
 template<typename Derived>
 Vector<typename Derived::Scalar, -1> mat_max(const Ref<Derived> &matrix, int dim, VectorI<-1> &max_indices) {
     using Scalar = typename Derived::Scalar;
-    using Index = typename Derived::Index;
 
     assert(dim == 1 || dim == 2);
 

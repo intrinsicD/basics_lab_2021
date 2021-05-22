@@ -42,22 +42,21 @@ void gui_correspondences(viewer_state *state) {
     ImGui::Separator();
     static float distance_threshold = 0;
     static float angle_threshold = 45;
-    static bool recompute_every_frame = false;
+    static bool estimate_every_frame = false;
     static std::vector<float> values;
     bool estimate_corrs = false;
     bool filter_distance = false;
     bool filter_normal_angle = false;
-    static bool estimate_every_frame = false;
     static bool filter_distance_every_frame = false;
     static bool filter_normal_angle_every_frame = false;
 
-    ImGui::Checkbox("recompute every frame", &recompute_every_frame);
-    if(recompute_every_frame){
-        ImGui::Checkbox("filter distance every frame", &filter_distance_every_frame);
-        ImGui::Checkbox("filter normal angle every frame", &filter_normal_angle_every_frame);
+    ImGui::Checkbox("estimate_every_frame", &estimate_every_frame);
+    if(estimate_every_frame){
+        ImGui::Checkbox("filter_distance_every_frame", &filter_distance_every_frame);
+        ImGui::Checkbox("filter_normal_angle_every_frame", &filter_normal_angle_every_frame);
     }
 
-    if (ImGui::Button("estimate") || recompute_every_frame) {
+    if (ImGui::Button("estimate") || estimate_every_frame) {
         estimate_corrs = true;
     }
     if (corrs != nullptr && !corrs->mapping.empty()) {
@@ -81,7 +80,7 @@ void gui_correspondences(viewer_state *state) {
         gui_vectorfields(state, vfs, source_id);
     }
 
-    if (estimate_corrs || recompute_every_frame) {
+    if (estimate_corrs || estimate_every_frame) {
         state->dispatcher.trigger<event::correspondences::estimate>(source_id, entt::entity(corrs->target_id));
         if(estimate_corrs){
             distance_threshold = corrs->stats.mean();
