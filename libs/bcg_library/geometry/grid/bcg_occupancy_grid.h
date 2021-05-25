@@ -11,7 +11,9 @@
 
 namespace bcg {
 
-struct occupancy_grid : public base_grid {
+//TODO make this N-dimensional!
+
+struct occupancy_grid : public base_grid3 {
     occupancy_grid() = default;
 
     occupancy_grid(const VectorI<3> &dims, const aligned_box3 &aabb);

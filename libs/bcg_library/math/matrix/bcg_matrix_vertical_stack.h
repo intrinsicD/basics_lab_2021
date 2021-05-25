@@ -11,7 +11,7 @@ namespace bcg{
 
 template<int M, typename Real>
 Matrix<Real, M, -1>
-horizontal_stack(const std::vector<Matrix<Real, M, -1>, Eigen::aligned_allocator<Matrix<Real, M, -1>>> &mats) {
+vertical_stack(const std::vector<Matrix<Real, M, -1>, Eigen::aligned_allocator<Matrix<Real, M, -1>>> &mats) {
     if (mats.size() == 0) throw std::logic_error("must have at least one matrix to stack");
 
     long nCols = mats[0].cols();

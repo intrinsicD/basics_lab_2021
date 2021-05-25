@@ -12,6 +12,16 @@
 namespace bcg {
 
 template<int D>
+inline VectorS<D> weighted_mean(const MatrixS<-1, D> &data, const VectorS<-1> &weights){
+    return weights.transpose() * data / weights.sum();
+}
+
+template<int D>
+inline MatrixS<D, D> weighted_cov(const MatrixS<-1, D> &source, const MatrixS<-1, D> &target, const VectorS<-1> &weights){
+    return target.transpose() * weights.asDiagonal() * source;
+}
+
+template<int D>
 inline VectorS<D> get_translation(const MatrixS<D, D> &R, const VectorS<D> &source_mean, const VectorS<D> &target_mean){
     return target_mean -  R * source_mean;
 }
