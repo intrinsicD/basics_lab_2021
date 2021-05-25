@@ -8,6 +8,7 @@ add_executable(bcg_library_test)
 target_sources(bcg_library_test PRIVATE
         bcg_map_test.cpp
         bcg_template_test.cpp
+        bcg_test_base_grid.cpp
         bcg_test_dynamic_bitset.cpp
         bcg_test_file.cpp
         bcg_test_file_watcher.cpp
