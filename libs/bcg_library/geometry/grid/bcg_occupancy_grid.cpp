@@ -4,6 +4,7 @@
 
 #include "bcg_occupancy_grid.h"
 #include "utils/bcg_stl_utils.h"
+
 #include "tbb/tbb.h"
 
 namespace bcg {
@@ -13,7 +14,7 @@ occupancy_grid::occupancy_grid(const VectorI<3> &dims, const aligned_box3 &aabb)
 }
 
 void occupancy_grid::build(property<VectorS<3>, 3> positions, const VectorI<3> &dims) {
-    build_aabb(positions);
+    build_aabb(positions.vector());
     this->dims = dims;
     for(size_t i = 0; i < positions.size(); ++i){
         mark_occupied_point(positions[i]);

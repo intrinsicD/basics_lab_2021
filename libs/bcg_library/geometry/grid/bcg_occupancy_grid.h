@@ -5,14 +5,14 @@
 #ifndef BCG_GRAPHICS_BCG_OCCUPANCY_GRID_H
 #define BCG_GRAPHICS_BCG_OCCUPANCY_GRID_H
 
-#include "bcg_base_grid.h"
+#include "bcg_base_nd_grid.h"
+#include "bcg_property.h"
 #include "utils/bcg_dynamic_bitset.h"
 #include "bcg_neighbors_query.h"
 
 namespace bcg {
 
 //TODO make this N-dimensional!
-
 struct occupancy_grid : public base_grid3 {
     occupancy_grid() = default;
 

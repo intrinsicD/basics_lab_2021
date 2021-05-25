@@ -7,7 +7,7 @@
 namespace bcg{
 
 void voxel_grid::build(property<VectorS<3>, 3> positions, const VectorI<3> &dims){
-    build_aabb(positions);
+    build_aabb(positions.vector());
     this->dims = dims;
     successor = std::vector<size_t>(positions.size());
     for(size_t i = 0; i < positions.size(); ++i){
