@@ -101,6 +101,28 @@ struct base_grid {
         return dims.prod();
     }
 
+    bool is_inside_bounds_point(const VectorS<D> &point) const{
+        for (auto i = 0; i < dims.size(); ++i) {
+            if (point[i] < aabb.min[i] || point[i] > aabb.max[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool is_inside_bounds_coord(const VectorI<D> &coord) const{
+        for (auto i = 0; i < dims.size(); ++i) {
+            if (coord[i] < 0 || coord[i] >= dims[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool is_inside_bounds_idx(size_t idx) const{
+        return idx < capacity();
+    }
+
     bool is_boundary(const VectorI<D> &coord) const {
         for (auto dim = 0; dim < dims.size(); ++dim) {
             if (coord[dim] == 0 || coord[dim] == dims[dim] - 1) return true;
@@ -127,9 +149,7 @@ struct base_grid {
     }
 
     void build_aabb(const std::vector<VectorS<D>> &positions) {
-        aabb = aligned_box<D>(positions);
-        aabb_diagonal = aabb.diagonal();
-        vsl = voxel_side_length();
+        set_aabb(aligned_box<D>(positions));
     }
 
     void set_aabb(const aligned_box<D> &aabb_){

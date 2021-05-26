@@ -15,11 +15,12 @@ inline MatrixS<M, N> project_on_so(const MatrixS<M, N> &A, bool no_reflections =
     VectorS<N> C(VectorS<N>::Ones(A.cols()));
     //take out reflections
     if (no_reflections) {
-        C(A.cols() - 1) = svd.matrixU().determinant() * svd.matrixV().transpose().determinant();
+        C(A.cols() - 1) = svd.matrixV().determinant() * svd.matrixU().transpose().determinant();
     }
 
     // R = U * V' if A = target' * source
-    return svd.matrixU() * C.asDiagonal() * svd.matrixV().transpose();
+    // R = V * U' if A = source' * target
+    return svd.matrixV() * C.asDiagonal() * svd.matrixU().transpose();
 }
 
 }

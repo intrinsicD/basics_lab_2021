@@ -29,32 +29,49 @@ void gui_sampling_grid(viewer_state *state) {
                 std::vector<VectorS<3>> samples;
                 switch (static_cast<GridSamplingType>(idx)) {
                     case GridSamplingType::first : {
-                        auto &grid = state->scene.get_or_emplace<sample_first_grid>(id, dims.cast<bcg_index_t>(), aabb);
-                        grid = sample_first_grid(dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene.get_or_emplace<sample_first_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        grid.set_aabb(aabb);
+                        grid.set_dims(dims.cast<bcg_index_t>());
+                        grid.clear();
                         grid.build(positions);
-                        samples = grid.get_occupied_sample_points();
+                        samples = grid.get_samples();
                         break;
                     }
                     case GridSamplingType::last : {
-                        auto &grid = state->scene.get_or_emplace<sample_last_grid>(id, dims.cast<bcg_index_t>(), aabb);
-                        grid = sample_last_grid(dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene.get_or_emplace<sample_last_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        grid.set_aabb(aabb);
+                        grid.set_dims(dims.cast<bcg_index_t>());
+                        grid.clear();
                         grid.build(positions);
-                        samples = grid.get_occupied_sample_points();
+                        samples = grid.get_samples();
+                        break;
+                    }
+                    case GridSamplingType::random : {
+                        auto &grid = state->scene.get_or_emplace<sample_random_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        grid.set_aabb(aabb);
+                        grid.set_dims(dims.cast<bcg_index_t>());
+                        grid.clear();
+                        grid.build(positions);
+                        samples = grid.get_samples();
                         break;
                     }
                     case GridSamplingType::closest : {
-                        auto &grid = state->scene.get_or_emplace<sample_closest_grid>(id, dims.cast<bcg_index_t>(),
+                        auto &grid = state->scene.get_or_emplace<sample_closest_grid3>(id, dims.cast<bcg_index_t>(),
                                                                                       aabb);
-                        grid = sample_closest_grid(dims.cast<bcg_index_t>(), aabb);
+                        grid.set_aabb(aabb);
+                        grid.set_dims(dims.cast<bcg_index_t>());
+                        grid.clear();
                         grid.build(positions);
-                        samples = grid.get_occupied_sample_points();
+                        samples = grid.get_samples();
                         break;
                     }
                     case GridSamplingType::mean : {
-                        auto &grid = state->scene.get_or_emplace<sample_mean_grid>(id, dims.cast<bcg_index_t>(), aabb);
-                        grid = sample_mean_grid(dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene.get_or_emplace<sample_mean_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        grid.set_aabb(aabb);
+                        grid.set_dims(dims.cast<bcg_index_t>());
+                        grid.clear();
                         grid.build(positions);
-                        samples = grid.get_occupied_sample_points();
+                        samples = grid.get_samples();
                         break;
                     }
                     case GridSamplingType::__last__ : {

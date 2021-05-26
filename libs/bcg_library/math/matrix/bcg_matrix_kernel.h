@@ -166,8 +166,8 @@ struct kernel_matrix {
                 sample_first_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
-                sampled_indices = grid.get_occupied_samples_indices();
+                auto V = grid.get_samples();
+                sampled_indices = grid.get_samples_indices();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -185,8 +185,8 @@ struct kernel_matrix {
                 sample_last_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
-                sampled_indices = grid.get_occupied_samples_indices();
+                auto V = grid.get_samples();
+                sampled_indices = grid.get_samples_indices();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -204,8 +204,8 @@ struct kernel_matrix {
                 sample_closest_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
-                sampled_indices = grid.get_occupied_samples_indices();
+                auto V = grid.get_samples();
+                sampled_indices = grid.get_samples_indices();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -223,7 +223,7 @@ struct kernel_matrix {
                 sample_mean_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
+                auto V = grid.get_samples();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -275,7 +275,7 @@ struct kernel_matrix {
                 sample_first_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
+                auto V = grid.get_samples();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -297,7 +297,7 @@ struct kernel_matrix {
                 sample_last_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
+                auto V = grid.get_samples();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -319,7 +319,7 @@ struct kernel_matrix {
                 sample_closest_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
+                auto V = grid.get_samples();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();
@@ -341,7 +341,7 @@ struct kernel_matrix {
                 sample_mean_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
-                auto V = grid.get_occupied_sample_points();
+                auto V = grid.get_samples();
                 VV.resize(V.size(), A.cols());
                 for (size_t i = 0; i < V.size(); ++i) {
                     VV.row(i) = V[i].template cast<T>();

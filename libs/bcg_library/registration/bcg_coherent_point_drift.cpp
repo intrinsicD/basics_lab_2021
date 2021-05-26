@@ -278,7 +278,7 @@ void coherent_point_drift_rigid::compute_step() {
     VectorS<3> mean_x = X.transpose() * MapConst(PT1) / N_P;
     VectorS<3> mean_y = Y.transpose() * MapConst(P1) / N_P;
     MatrixS<-1, -1> A(MapConst(PX).transpose() * Y - N_P * mean_x * mean_y.transpose());
-    R = project_on_so(A, true);
+    R = project_on_so(A, true).transpose();
     bcg_scalar_t ARtrace = (A.transpose() * R).trace();
     s = ARtrace / ((Map(P1).array() * Y.rowwise().squaredNorm().array()).sum() - N_P * mean_y.squaredNorm());
     t = mean_x - s * R * mean_y;
@@ -440,7 +440,7 @@ void coherent_point_drift_nonrigid2::compute_step(){
     VectorS<3> mean_x = X.transpose() * MapConst(PT1) / N_P;
     VectorS<3> mean_y = Y.transpose() * MapConst(P1) / N_P;
     MatrixS<-1, -1> A(MapConst(PX).transpose() * Y - N_P * mean_x * mean_y.transpose());
-    R = project_on_so(A, true);
+    R = project_on_so(A, true).transpose();
     bcg_scalar_t ARtrace = (A.transpose() * R).trace();
     s = ARtrace / ((MapConst(P1).array() * Y.rowwise().squaredNorm().array()).sum() - N_P * mean_y.squaredNorm());
     t = mean_x - s * R * mean_y;
@@ -631,7 +631,7 @@ void coherent_point_drift_bayes::compute_step() {
             (MapConst(residual).rowwise() - mean_x.transpose()).transpose() * MapConst(P1).asDiagonal() * Y_hat / N_P;
     MatrixS<-1, -1> S_YY = Y_hat.transpose() * MapConst(P1).asDiagonal() * Y_hat / N_P +
                            sigma_squared_bar * MatrixS<-1, -1>::Identity(D, D);
-    R = project_on_so(S_XY, true);
+    R = project_on_so(S_XY, true).transpose();
     s = (S_XY.transpose() * R).trace() / S_YY.trace();
     t = mean_x - s * R * mean_y;
 

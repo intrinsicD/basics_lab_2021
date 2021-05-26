@@ -62,7 +62,7 @@ MatrixS<3, 3> chordal_mean_so3::closed_form(const std::vector<MatrixS<3, 3>> &ro
         }
     }
 
-    return project_on_so(A, true).transpose();
+    return project_on_so(A, true);
 }
 
 MatrixS<3, 3> chordal_mean_so3::operator()(const std::vector<MatrixS<3, 3>> &rotations) {

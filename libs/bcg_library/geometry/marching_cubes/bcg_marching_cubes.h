@@ -12,7 +12,7 @@
 
 namespace bcg{
 
-struct marching_cubes : private occupancy_grid{
+struct marching_cubes : private occupancy_grid3{
     marching_cubes();
 
     std::function<double(const Vector<double, 3>&)> implicit_function;

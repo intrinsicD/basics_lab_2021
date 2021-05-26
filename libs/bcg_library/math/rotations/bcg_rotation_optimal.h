@@ -11,12 +11,12 @@ namespace bcg{
 
 template<int M, int N>
 inline MatrixS<N, N> optimal_rotation(const MatrixS<M, N> &source, const MatrixS<M, N> &target, bool no_reflections = true) {
-    return project_on_so<N, N>(target.transpose() * source, no_reflections);
+    return project_on_so<N, N>(source.transpose() * target, no_reflections);
 }
 
 template<int M, int N>
 inline MatrixS<N, N> optimal_rotation(const MatrixS<M, N> &source, const MatrixS<M, M> &weights, const MatrixS<M, N> &target, bool no_reflections = true) {
-    return project_on_so<N, N>(target.transpose() * weights * source, no_reflections);
+    return project_on_so<N, N>(source.transpose() * weights * target, no_reflections);
 }
 
 }
