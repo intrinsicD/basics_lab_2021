@@ -221,6 +221,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 ImGui::InputFloat("normal_angle_threshold", &normal_angle_threshold);
             }
             //TODO here print the transformations of each tooth after removing the loading transform.
+            std::unordered_map<size_t, Transform> transforms;
             if (ImGui::Button("Compute Alignment Step")) {
                 for (const auto &tooth : source_teeth) {
                     state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target,
@@ -231,12 +232,14 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 translation_mean t_mean(true);
                 std::vector<MatrixS<3, 3>> rotations;
                 std::vector<VectorS<3>> translations;
+                transforms.clear();
                 avg_alignment.setIdentity();
                 for (const auto &tooth : source_teeth) {
                     if (tooth.selected) {
                         auto loading_model = state->scene.get<entity_info>(tooth.entity_id).loading_model;
                         auto model = state->scene.get<Transform>(tooth.entity_id);
                         model = model * loading_model.inverse();
+                        transforms[size_t(tooth.entity_id)] = model;
                         rotations.emplace_back(model.linear());
                         translations.emplace_back(model.translation());
                     }
@@ -246,6 +249,25 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 avg_alignment.translation() = t_mean(translations);
                 auto &source_model = state->scene.get<Transform>(source);
                 source_model = avg_alignment;
+            }
+            if(ImGui::Button("Print transformations")){
+                auto source_info = state->scene.get<entity_info>(source);
+                std::string error = "";
+                make_directory(path_basename(source_info.filename), error);
+                if(error.empty()){
+                    for(const auto &item : transforms){
+                        file_stream fs(path_join(path_basename(source_info.filename), "Tooth" + std::to_string(item.first) + ".txt"));
+                        std::stringstream ss;
+                        ss << item.second.matrix();
+                        if(fs.save_text(ss.str())){
+                            std::cout << "file written to: " << fs.filename << "\n";
+                        }else{
+                            std::cout << "error writing file to: " << fs.filename << "\n";
+                        }
+                    }
+                }else{
+                    std::cout << error << "\n";
+                }
             }
             if(state->scene.valid(state->picker.entity_id)){
                 auto model = state->scene.get<Transform>(state->picker.entity_id);
