@@ -37,7 +37,8 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::make_triangle>().connect<&mesh_system::on_make_triangle>(this);
     state->dispatcher.sink<event::mesh::make_quad>().connect<&mesh_system::on_make_quad>(this);
     state->dispatcher.sink<event::mesh::make_box>().connect<&mesh_system::on_make_box>(this);
-    state->dispatcher.sink<event::mesh::make_parameterized_plane>().connect<&mesh_system::on_make_parameterized_plane>(this);
+    state->dispatcher.sink<event::mesh::make_parameterized_plane>().connect<&mesh_system::on_make_parameterized_plane>(
+            this);
     state->dispatcher.sink<event::mesh::boundary>().connect<&mesh_system::on_boundary>(this);
     state->dispatcher.sink<event::mesh::vertex_convex_concave>().connect<&mesh_system::on_vertex_convex_concave>(this);
     state->dispatcher.sink<event::mesh::features>().connect<&mesh_system::on_features>(this);
@@ -56,12 +57,18 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
     state->dispatcher.sink<event::mesh::remeshing::uniform>().connect<&mesh_system::on_remeshing_uniform>(this);
     state->dispatcher.sink<event::mesh::remeshing::adaptive>().connect<&mesh_system::on_remeshing_adaptive>(this);
     state->dispatcher.sink<event::mesh::statistics>().connect<&mesh_system::on_statistics>(this);
-    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing>().connect<&mesh_system::on_smoothing_explicit>(this);
-    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing_1D>().connect<&mesh_system::on_smoothing_explicit_1D>(this);
-    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing_3D>().connect<&mesh_system::on_smoothing_explicit_3D>(this);
-    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing>().connect<&mesh_system::on_smoothing_implicit>(this);
-    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_1D>().connect<&mesh_system::on_smoothing_implicit_1D>(this);
-    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_3D>().connect<&mesh_system::on_smoothing_implicit_3D>(this);
+    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing>().connect<&mesh_system::on_smoothing_explicit>(
+            this);
+    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing_1D>().connect<&mesh_system::on_smoothing_explicit_1D>(
+            this);
+    state->dispatcher.sink<event::mesh::smoothing::explicit_smoothing_3D>().connect<&mesh_system::on_smoothing_explicit_3D>(
+            this);
+    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing>().connect<&mesh_system::on_smoothing_implicit>(
+            this);
+    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_1D>().connect<&mesh_system::on_smoothing_implicit_1D>(
+            this);
+    state->dispatcher.sink<event::mesh::smoothing::implicit_smoothing_3D>().connect<&mesh_system::on_smoothing_implicit_3D>(
+            this);
     state->dispatcher.sink<event::mesh::smoothing::taubin_smoothing>().connect<&mesh_system::on_smoothing_taubin>(this);
     state->dispatcher.sink<event::mesh::vertex_normals::uniform>().connect<&mesh_system::on_vertex_normal_uniform>(
             this);
@@ -81,14 +88,22 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
     state->dispatcher.trigger<event::transform::add>(event.id);
 
     aligned_box3 aabb(mesh.positions.vector());
-    state->scene.emplace<entity_info>(event.id, event.filename, "mesh", aabb.center(), aabb.halfextent().maxCoeff());
+    Transform loading_model = Transform::Identity();
+    bcg_scalar_t scale = aabb.halfextent().maxCoeff();
+    loading_model.linear() = Scaling(scale, scale, scale);
+    loading_model.translation() = aabb.center();
 
-    if(event.normalize){
-        Map(mesh.positions) =
-                (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
+    if (event.apply_loading_model) {
+        state->scene.get<Transform>(event.id) = loading_model;
     }
 
-    if(!mesh.vertices.has("v_normal")){
+    state->scene.emplace<entity_info>(event.id, event.filename, "mesh", loading_model, aabb);
+
+    Map(mesh.positions) =
+            (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
+
+
+    if (!mesh.vertices.has("v_normal")) {
         state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
     }
     state->dispatcher.trigger<event::mesh::face::centers>(event.id);
@@ -129,7 +144,7 @@ void mesh_system::on_make_box(const event::mesh::make_box &) {
     state->dispatcher.trigger<event::mesh::setup>(id, "");
 }
 
-void mesh_system::on_make_parameterized_plane(const event::mesh::make_parameterized_plane &){
+void mesh_system::on_make_parameterized_plane(const event::mesh::make_parameterized_plane &) {
     mesh_factory factory;
 
     ParameterizedPlane3 plane;
@@ -139,7 +154,7 @@ void mesh_system::on_make_parameterized_plane(const event::mesh::make_parameteri
     state->scene.emplace<ParameterizedPlane3>(id, plane);
     state->scene.emplace<entt::tag<"parameterized_plane"_hs>>(id);
     assert(state->scene.all_of<entt::tag<"parameterized_plane"_hs>>(id));
-    state->dispatcher.trigger<event::mesh::setup>(id, "", false);
+    state->dispatcher.trigger<event::mesh::setup>(id, "");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -157,7 +172,8 @@ void mesh_system::on_vertex_convex_concave(const event::mesh::vertex_convex_conc
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    vertex_convex_concave(mesh, event.post_smoothing_steps, event.two_ring_neighborhood, state->config.parallel_grain_size);
+    vertex_convex_concave(mesh, event.post_smoothing_steps, event.two_ring_neighborhood,
+                          state->config.parallel_grain_size);
 }
 
 void mesh_system::on_features(const event::mesh::features &event) {
@@ -225,8 +241,9 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
         auto id = state->scene.create();
         state->scene.emplace<halfedge_mesh>(id, part);
 
-        std::string filename = path_join(path_dirname(info.filename), path_basename(info.filename)) + "_part_" + std::to_string(int(id)) + path_extension(info.filename);
-        state->dispatcher.trigger<event::mesh::setup>(id, filename, false);
+        std::string filename = path_join(path_dirname(info.filename), path_basename(info.filename)) + "_part_" +
+                               std::to_string(int(id)) + path_extension(info.filename);
+        state->dispatcher.trigger<event::mesh::setup>(id, filename, true);
         //state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         //state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }
@@ -288,7 +305,7 @@ void mesh_system::on_remeshing_adaptive(const event::mesh::remeshing::adaptive &
     state->dispatcher.trigger<event::spatial_index::update_indices>(event.id);
 }
 
-void mesh_system::on_statistics(const event::mesh::statistics &event){
+void mesh_system::on_statistics(const event::mesh::statistics &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
@@ -297,7 +314,7 @@ void mesh_system::on_statistics(const event::mesh::statistics &event){
     state->scene.emplace_or_replace<mesh_stats>(event.id, stats);
 }
 
-void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_smoothing &event){
+void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_smoothing &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
     if (!state->scene.all_of<mesh_laplacian>(event.id)) return;
@@ -308,7 +325,7 @@ void mesh_system::on_smoothing_explicit(const event::mesh::smoothing::explicit_s
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
-void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_smoothing &event){
+void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_smoothing &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
@@ -318,7 +335,7 @@ void mesh_system::on_smoothing_implicit(const event::mesh::smoothing::implicit_s
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
 }
 
-void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explicit_smoothing_1D &event){
+void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explicit_smoothing_1D &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
@@ -328,17 +345,17 @@ void mesh_system::on_smoothing_explicit_1D(const event::mesh::smoothing::explici
     explicit_smoothing(mesh, laplacian, p, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
 }
 
-void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event){
+void mesh_system::on_smoothing_implicit_1D(const event::mesh::smoothing::implicit_smoothing_1D &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
     auto &laplacian = state->scene.get<mesh_laplacian>(event.id);
     auto p = event.prop;
-    implicit_smoothing<bcg_scalar_t , 1>(mesh, laplacian, p, event.timestep);
+    implicit_smoothing<bcg_scalar_t, 1>(mesh, laplacian, p, event.timestep);
 }
 
-void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explicit_smoothing_3D &event){
+void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explicit_smoothing_3D &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
@@ -348,7 +365,7 @@ void mesh_system::on_smoothing_explicit_3D(const event::mesh::smoothing::explici
     explicit_smoothing(mesh, laplacian, p, event.smoothing_steps, event.timestep, state->config.parallel_grain_size);
 }
 
-void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event){
+void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implicit_smoothing_3D &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 
@@ -358,7 +375,7 @@ void mesh_system::on_smoothing_implicit_3D(const event::mesh::smoothing::implici
     implicit_smoothing(mesh, laplacian, p, event.timestep);
 }
 
-void mesh_system::on_smoothing_taubin(const event::mesh::smoothing::taubin_smoothing &event){
+void mesh_system::on_smoothing_taubin(const event::mesh::smoothing::taubin_smoothing &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
 

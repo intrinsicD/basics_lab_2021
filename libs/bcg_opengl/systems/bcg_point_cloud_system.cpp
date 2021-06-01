@@ -74,8 +74,11 @@ void point_cloud_system::on_setup(const event::point_cloud::setup &event) {
     state->dispatcher.trigger<event::transform::add>(event.id);
 
     aligned_box3 aabb(pc.positions.vector());
-    state->scene.emplace<entity_info>(event.id, event.filename, "point_cloud", aabb.center(),
-                                      aabb.halfextent().maxCoeff());
+    Transform loading_model;
+    bcg_scalar_t scale = aabb.halfextent().maxCoeff();
+    loading_model.linear() = Scaling(scale, scale, scale);
+    loading_model.translation() = aabb.center();
+    state->scene.emplace<entity_info>(event.id, event.filename, "point_cloud", loading_model, aabb);
 
     Map(pc.positions) =
             (MapConst(pc.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();

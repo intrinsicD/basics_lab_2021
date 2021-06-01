@@ -11,6 +11,7 @@
 #include "bcg_gui_transform.h"
 #include "bcg_property_utils.h"
 #include "bcg_property_map_eigen.h"
+#include "viewer/bcg_entity_info.h"
 #include "graph/bcg_graph_edge_from_vertex_function.h"
 #include "bcg_gui_mesh_laplacian_harmonic_field.h"
 #include "viewer/bcg_viewer_state.h"
@@ -219,6 +220,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
             if(filter_normals){
                 ImGui::InputFloat("normal_angle_threshold", &normal_angle_threshold);
             }
+            //TODO here print the transformations of each tooth after removing the loading transform.
             if (ImGui::Button("Compute Alignment Step")) {
                 for (const auto &tooth : source_teeth) {
                     state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target,
@@ -232,7 +234,9 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 avg_alignment.setIdentity();
                 for (const auto &tooth : source_teeth) {
                     if (tooth.selected) {
+                        auto loading_model = state->scene.get<entity_info>(tooth.entity_id).loading_model;
                         auto model = state->scene.get<Transform>(tooth.entity_id);
+                        model = model * loading_model.inverse();
                         rotations.emplace_back(model.linear());
                         translations.emplace_back(model.translation());
                     }

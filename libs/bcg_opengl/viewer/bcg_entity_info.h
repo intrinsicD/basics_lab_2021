@@ -7,14 +7,14 @@
 
 #include <string>
 #include "math/bcg_linalg.h"
+#include "geometry/aligned_box/bcg_aligned_box.h"
 
 namespace bcg{
 
 struct entity_info{
     std::string filename, entity_name;
-    VectorS<3> loading_center;
-    bcg_scalar_t loading_scale;
-    bool save = false;
+    Transform loading_model;
+    aligned_box3 loading_aabb;
 };
 
 }

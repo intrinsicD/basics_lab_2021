@@ -27,7 +27,11 @@ void graph_system::on_setup(const event::graph::setup &event){
     state->dispatcher.trigger<event::transform::add>(event.id);
 
     aligned_box3 aabb(graph.positions.vector());
-    state->scene.emplace<entity_info>(event.id, event.filename, "graph", aabb.center(), aabb.halfextent().maxCoeff());
+    Transform loading_model = Transform::Identity();
+    bcg_scalar_t scale = aabb.halfextent().maxCoeff();
+    loading_model.linear() = Scaling(scale, scale, scale);
+    loading_model.translation() = aabb.center();
+    state->scene.emplace<entity_info>(event.id, event.filename, "graph", loading_model, aabb);
 
     Map(graph.positions) =
             (MapConst(graph.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
