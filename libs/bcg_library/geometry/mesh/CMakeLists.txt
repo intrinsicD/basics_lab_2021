@@ -41,6 +41,7 @@ target_sources(bcg_graphics PRIVATE
         bcg_mesh_volume.h bcg_mesh_volume.cpp
         bcg_mesh_offset_mesh.h bcg_mesh_offset_mesh.cpp
         bcg_mesh_projected_distances.h bcg_mesh_projected_distances.cpp
+        bcg_mesh_dual.h bcg_mesh_dual.cpp
         bcg_meshio.h bcg_meshio.cpp
         bcg_mesh_split_path.h bcg_mesh_split_path.cpp
         ${RPLY_SOURCE_DIRS}/rply.c)

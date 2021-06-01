@@ -32,7 +32,6 @@ struct voxel_grid : public occupancy_grid<D> {
         for (size_t i = 0; i < num_points; ++i) {
             successor[i] = i + 1;
         }
-        successor.back() = 0;
     }
 
     void build(property<VectorS<D>, D> positions) override {

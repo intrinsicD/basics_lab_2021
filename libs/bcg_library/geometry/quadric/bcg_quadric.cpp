@@ -374,9 +374,7 @@ quadric &quadric::operator/=(bcg_scalar_t s) {
 }
 
 quadric quadric::operator-() const {
-    quadric q;
-    q.from_coefficients(-m_A00, -m_A01, -m_A02, -m_A11, -m_A12, -m_A22, -m_b0, -m_b1, -m_b2, -m_c);
-    return q;
+    return from_coefficients(-m_A00, -m_A01, -m_A02, -m_A11, -m_A12, -m_A22, -m_b0, -m_b1, -m_b2, -m_c);
 }
 
 quadric quadric::operator+(const quadric &rhs) const {

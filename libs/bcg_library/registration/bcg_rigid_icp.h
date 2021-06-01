@@ -31,11 +31,22 @@ inline MatrixS<D, D> minimize_point_2_point(const MatrixS<N, D> &source, const M
     return optimal_rotation<N, D>(source.rowwise() - source_mean.transpose(), target.rowwise() - target_mean.transpose(), true);
 }
 
+template<int N, int D>
+inline MatrixS<D, D> minimize_point_2_point(const MatrixS<N, D> &source, const MatrixS<N, D> &target, const VectorS<D> &source_mean, const VectorS<D> &target_mean, const VectorS<-1> &weights){
+    return optimal_rotation<N, D>(source.rowwise() - source_mean.transpose(), weights.asDiagonal(), target.rowwise() - target_mean.transpose(), true);
+}
+
+Transform minimize_point_2_point(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target, const Transform &target_model, const VectorS<-1> &weights, size_t parallel_grain_size = 1024);
+
 Transform minimize_point_2_point(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target, const Transform &target_model, size_t parallel_grain_size = 1024);
 
 Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const MatrixS<-1, 3> &target, const MatrixS<-1, 3> &target_normals);
 
+Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const MatrixS<-1, 3> &target, const MatrixS<-1, 3> &target_normals, const VectorS<-1> &weights);
+
 Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target, const MatrixS<-1, 3> &target_normals, const Transform &target_model, size_t parallel_grain_size = 1024);
+
+Transform minimize_point_2_plane(const MatrixS<-1, 3> &source, const Transform &source_model, const MatrixS<-1, 3> &target, const MatrixS<-1, 3> &target_normals, const Transform &target_model, const VectorS<-1> &weights, size_t parallel_grain_size = 1024);
 
 
 

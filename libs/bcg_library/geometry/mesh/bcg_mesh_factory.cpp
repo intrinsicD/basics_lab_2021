@@ -3,6 +3,7 @@
 //
 
 #include "bcg_mesh_factory.h"
+#include "bcg_mesh_dual.h"
 
 namespace bcg {
 
@@ -43,11 +44,11 @@ halfedge_mesh mesh_factory::make_quad(const quad3 &quad) {
     return mesh;
 }
 
-halfedge_mesh mesh_factory::make_parameterized_plane(){
+halfedge_mesh mesh_factory::make_parameterized_plane() {
     return make_parameterized_plane(ParameterizedPlane3());
 }
 
-halfedge_mesh mesh_factory::make_parameterized_plane(const ParameterizedPlane3 &plane){
+halfedge_mesh mesh_factory::make_parameterized_plane(const ParameterizedPlane3 &plane) {
     halfedge_mesh mesh;
 
     auto vertices = get_vertices(plane);
@@ -104,6 +105,79 @@ halfedge_mesh mesh_factory::make_icosahedron() {
     f = mesh.add_triangle(11, 9, 2);
     f = mesh.add_triangle(2, 9, 5);
     f = mesh.add_triangle(2, 7, 11);
+    return mesh;
+}
+
+halfedge_mesh mesh_factory::make_tetrahedron() {
+    halfedge_mesh mesh;
+
+    // choose coordinates on the unit sphere
+    bcg_scalar_t a = 1.0 / 3.0;
+    bcg_scalar_t b = sqrt(8.0 / 9.0);
+    bcg_scalar_t c = sqrt(2.0 / 9.0);
+    bcg_scalar_t d = sqrt(2.0 / 3.0);
+
+    // add the 4 vertices
+    auto v0 = mesh.add_vertex(VectorS<3>(0, 0, 1));
+    auto v1 = mesh.add_vertex(VectorS<3>(-c, d, -a));
+    auto v2 = mesh.add_vertex(VectorS<3>(-c, -d, -a));
+    auto v3 = mesh.add_vertex(VectorS<3>(b, 0, -a));
+
+    // add the 4 faces
+    mesh.add_triangle(v0, v1, v2);
+    mesh.add_triangle(v0, v2, v3);
+    mesh.add_triangle(v0, v3, v1);
+    mesh.add_triangle(v3, v2, v1);
+
+    return mesh;
+}
+
+halfedge_mesh mesh_factory::make_hexahedron() {
+    halfedge_mesh mesh;
+
+    // choose coordinates on the unit sphere
+    bcg_scalar_t a = 1.0 / sqrt(3.0);
+
+    // add the 8 vertices
+    auto v0 = mesh.add_vertex(VectorS<3>(-a, -a, -a));
+    auto v1 = mesh.add_vertex(VectorS<3>(a, -a, -a));
+    auto v2 = mesh.add_vertex(VectorS<3>(a, a, -a));
+    auto v3 = mesh.add_vertex(VectorS<3>(-a, a, -a));
+    auto v4 = mesh.add_vertex(VectorS<3>(-a, -a, a));
+    auto v5 = mesh.add_vertex(VectorS<3>(a, -a, a));
+    auto v6 = mesh.add_vertex(VectorS<3>(a, a, a));
+    auto v7 = mesh.add_vertex(VectorS<3>(-a, a, a));
+
+    // add the 6 faces
+    mesh.add_quad(v3, v2, v1, v0);
+    mesh.add_quad(v2, v6, v5, v1);
+    mesh.add_quad(v5, v6, v7, v4);
+    mesh.add_quad(v0, v4, v7, v3);
+    mesh.add_quad(v3, v7, v6, v2);
+    mesh.add_quad(v1, v5, v4, v0);
+
+    return mesh;
+}
+
+void project_to_unit_sphere(halfedge_mesh &mesh) {
+    for (auto v : mesh.vertices) {
+        auto p = mesh.positions[v];
+        auto n = p.norm();
+        mesh.positions[v] = (1.0 / n) * p;
+    }
+}
+
+halfedge_mesh mesh_factory::make_octahedron() {
+    auto mesh = make_hexahedron();
+    mesh_dual(mesh);
+    project_to_unit_sphere(mesh);
+    return mesh;
+}
+
+halfedge_mesh mesh_factory::make_dodecahedron(){
+    auto mesh = make_icosahedron();
+    mesh_dual(mesh);
+    project_to_unit_sphere(mesh);
     return mesh;
 }
 

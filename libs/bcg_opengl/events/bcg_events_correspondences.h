@@ -16,6 +16,12 @@ struct estimate{
     entt::entity source_id, target_id;
 };
 
+struct estimate_and_filter{
+    entt::entity source_id, target_id;
+    bool filter_distances, filter_normal_angle;
+    bcg_scalar_t distance_threshold, normal_threshold;
+};
+
 struct filter : bcg::event::filter::correspondences{
 
 };

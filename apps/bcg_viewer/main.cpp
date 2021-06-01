@@ -41,6 +41,7 @@
 #include "bcg_opengl/guis/bcg_gui_mesh_face_quadrics.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_connected_components.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_projected_distances.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_factory.h"
 #include "bcg_opengl/guis/bcg_gui_correspondences.h"
 #include "bcg_opengl/guis/bcg_gui_registration.h"
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
@@ -150,6 +151,9 @@ int main() {
             }
             if (ImGui::MenuItem("Features")) {
                 state->gui.left = gui_mesh_features;
+            }
+            if (ImGui::MenuItem("Factory")) {
+                state->gui.left = gui_mesh_factory;
             }
             if (ImGui::MenuItem("Subdivision")) {
                 state->gui.left = gui_mesh_subdivision;

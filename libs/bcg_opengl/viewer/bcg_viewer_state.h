@@ -160,7 +160,7 @@ struct viewer_picker {
         vertices,
         edges,
         faces
-    }mode;
+    }mode = Mode::disabled;
 
     bool valid = false;
     entt::entity entity_id;

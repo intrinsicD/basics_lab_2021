@@ -9,8 +9,22 @@
 #include "bcg_gui_vectorfields.h"
 #include "renderers/vectorfield_renderer/bcg_events_vectorfield_renderer.h"
 #include "math/vector/bcg_vector_map_eigen.h"
+#include "bcg_gui_statistics.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 
 namespace bcg {
+
+void gui_correspondence_stats(viewer_state *state, const correspondences &corrs){
+    ImGui::LabelText("target_id", "%zu",corrs.target_id);
+    ImGui::LabelText("num_corrs", "%zu", corrs.mapping.size());
+    ImGui::LabelText("max_source_index", "%zu", corrs.max_source_index);
+    ImGui::LabelText("max_target_index", "%zu", corrs.max_target_index);
+    ImGui::Separator();
+    std::vector<float> values(corrs.mapping.size());
+    Map(values) = MapConst(corrs.weights()).cast<float>();
+    std::sort(values.begin(), values.end());
+    gui_statistics(state, &corrs.stats, &values);
+}
 
 void gui_correspondences(viewer_state *state) {
     static correspondences *corrs;
@@ -43,7 +57,6 @@ void gui_correspondences(viewer_state *state) {
     static float distance_threshold = 0;
     static float angle_threshold = 45;
     static bool estimate_every_frame = false;
-    static std::vector<float> values;
     bool estimate_corrs = false;
     bool filter_distance = false;
     bool filter_normal_angle = false;
@@ -62,10 +75,6 @@ void gui_correspondences(viewer_state *state) {
     if (corrs != nullptr && !corrs->mapping.empty()) {
         ImGui::Separator();
 
-        if (ImGui::CollapsingHeader("statistics")) {
-            gui_statistics(state, &corrs->stats, &values);
-            ImGui::Separator();
-        }
         ImGui::InputFloat("threshold dist", &distance_threshold);
         ImGui::SameLine();
         if (ImGui::Button("filter distance")) {
@@ -86,7 +95,6 @@ void gui_correspondences(viewer_state *state) {
             distance_threshold = corrs->stats.mean();
         }
         state->dispatcher.trigger<event::vectorfield_renderer::set_vertex_vectorfield>(source_id, "v_corrs_vector");
-        Map(values) = MapConst(corrs->weights()).cast<float>();
     }
 
     if (filter_distance || filter_distance_every_frame) {
@@ -94,7 +102,6 @@ void gui_correspondences(viewer_state *state) {
             state->dispatcher.trigger<event::correspondences::filter::distance>(source_id,
                                                                                 entt::entity(corrs->target_id),
                                                                                 distance_threshold);
-            Map(values) = MapConst(corrs->weights()).cast<float>();
         }
     }
 
@@ -103,8 +110,12 @@ void gui_correspondences(viewer_state *state) {
             state->dispatcher.trigger<event::correspondences::filter::normal_angle>(source_id,
                                                                                     entt::entity(corrs->target_id),
                                                                                     angle_threshold);
-            Map(values) = MapConst(corrs->weights()).cast<float>();
         }
+    }
+
+    if (corrs != nullptr && !corrs->mapping.empty() && ImGui::CollapsingHeader("statistics")) {
+        gui_correspondence_stats(state, *corrs);
+        ImGui::Separator();
     }
 
 }

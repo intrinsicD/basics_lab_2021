@@ -8,6 +8,8 @@
 #include "bcg_gui_kernel_matrix.h"
 #include "registration/bcg_registration.h"
 #include "registration/bcg_coherent_point_drift.h"
+#include "bcg_gui_vectorfields.h"
+#include "bcg_gui_correspondences.h"
 
 namespace bcg {
 
@@ -37,17 +39,33 @@ void gui_registration(viewer_state *state) {
     ImGui::Separator();
     ImGui::InputInt("max_iters", &max_iters);
     ImGui::Separator();
+    static bool filter_normals = false;
+    static bool filter_distances = false;
+    static float distance_threshold = 0.1;
+    static float normal_angle_threshold = 45;
+    ImGui::Checkbox("filter normals", &filter_normals);
+    if(filter_normals){
+        ImGui::InputFloat("normal angle threshold", &normal_angle_threshold);
+    }
+    ImGui::Checkbox("filter distances", &filter_distances);
+    if(filter_normals){
+        ImGui::InputFloat("distance threshold", &distance_threshold);
+    }
+    static bool weight = false;
+    ImGui::Checkbox("weight", &weight);
     if (ImGui::Button("align step")) {
         if(multiple_sources && state->scene.valid(target_id)){
             for(const auto &item : state->picker.selected_entities){
                 if(item.second == target_id) continue;
                 state->dispatcher.trigger<event::registration::align_step>(item.second, target_id,
-                                                                           static_cast<RegistrationMethod>(e));
+                                                                           static_cast<RegistrationMethod>(e),
+                                                                           filter_distances, filter_normals, distance_threshold, normal_angle_threshold, weight);
             }
 
         }else if (source_id != target_id && state->scene.valid(source_id) && state->scene.valid(target_id)) {
             state->dispatcher.trigger<event::registration::align_step>(source_id, target_id,
-                                                                       static_cast<RegistrationMethod>(e));
+                                                                       static_cast<RegistrationMethod>(e),
+                                                                       filter_distances, filter_normals, distance_threshold, normal_angle_threshold, weight);
         }
 
     }
@@ -70,7 +88,9 @@ void gui_registration(viewer_state *state) {
     if (state->scene.valid(source_id) && state->scene.all_of<registration>(source_id)) {
         ImGui::Separator();
         auto &reg = state->scene.get<registration>(source_id);
-        draw_histogram(&state->window, "errors", reg.errors);
+        if(!reg.errors.empty()){
+            draw_histogram(&state->window, "errors", reg.errors, MapConst(reg.errors).minCoeff(), MapConst(reg.errors).maxCoeff());
+        }
     }
 
     static auto names_softmatching = softmatching_type_names();
@@ -88,9 +108,24 @@ void gui_registration(viewer_state *state) {
     if (state->scene.valid(source_id) && ImGui::CollapsingHeader("Info")) {
         switch (static_cast<RegistrationMethod>(e)) {
             case RegistrationMethod::rigid_icp_point2point : {
+                if(state->scene.all_of<entity_correspondences>(source_id)){
+                    auto &correspondences = state->scene.get<entity_correspondences>(source_id);
+                    if(correspondences.maps.find(size_t(target_id)) != correspondences.maps.end()){
+                        auto &map = correspondences.maps[size_t(target_id)];
+                        gui_correspondence_stats(state, map);
+                    }
+                }
+
                 break;
             }
             case RegistrationMethod::rigid_icp_point2plane : {
+                if(state->scene.all_of<entity_correspondences>(source_id)){
+                    auto &correspondences = state->scene.get<entity_correspondences>(source_id);
+                    if(correspondences.maps.find(size_t(target_id)) != correspondences.maps.end()){
+                        auto &map = correspondences.maps[size_t(target_id)];
+                        gui_correspondence_stats(state, map);
+                    }
+                }
                 break;
             }
             case RegistrationMethod::coherent_point_drift_rigid : {

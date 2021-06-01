@@ -220,7 +220,7 @@ struct kernel_matrix {
                     aabb.grow(A.row(i).template cast<bcg_scalar_t>());
                     Union[i] = A.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_mean_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
+                sample_medioid_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_samples();
@@ -338,7 +338,7 @@ struct kernel_matrix {
                     aabb.grow(B.row(i).template cast<bcg_scalar_t>());
                     Union[i + A.rows()] = B.row(i).template cast<bcg_scalar_t>();
                 }
-                sample_mean_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
+                sample_medioid_grid grid(VectorI<3>(num_samples, num_samples, num_samples), aabb);
                 grid.build(Union);
 
                 auto V = grid.get_samples();

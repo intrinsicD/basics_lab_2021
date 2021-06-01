@@ -190,7 +190,7 @@ void draw_progressbar(viewer_window *win, const char *lbl, float fraction);
 void draw_progressbar(viewer_window *win, const char *lbl, int current, int total);
 
 void draw_histogram(
-        viewer_window *win, const char *lbl, const std::vector<float> &values);
+        viewer_window *win, const char *lbl, const std::vector<float> &values, float min = scalar_min, float max = scalar_max);
 
 void draw_histogram(
         viewer_window *win, const char *lbl, const std::vector<Vector<float, 2>>

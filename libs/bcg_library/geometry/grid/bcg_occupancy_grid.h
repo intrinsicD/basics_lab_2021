@@ -100,7 +100,9 @@ struct occupancy_grid : public base_grid<D> {
 template<int D>
 void traverse(occupancy_grid<D> &grid, const std::function<bool(size_t, occupancy_grid<D> &)> &function){
     for (size_t i = 0; i < grid.capacity(); ++i) {
-        function(i, grid);
+        if(grid.is_occupied_idx(i)){
+            function(i, grid);
+        }
     }
 }
 

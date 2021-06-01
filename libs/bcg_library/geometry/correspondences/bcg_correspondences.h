@@ -29,13 +29,13 @@ struct correspondences {
 
     iterator_t end();
 
-    const_iterator_t begin() const;
+    [[nodiscard]] const_iterator_t begin() const;
 
-    const_iterator_t end() const;
+    [[nodiscard]] const_iterator_t end() const;
 
     void clear();
 
-    size_t size() const;
+    [[nodiscard]] size_t size() const;
 
     void append(const correspondences &other);
 

@@ -13,7 +13,7 @@ factorial::factorial(unsigned int n) {
 }
 
 factorial::~factorial(){
-    clear();
+
 }
 
 unsigned int factorial::operator()(int n) {

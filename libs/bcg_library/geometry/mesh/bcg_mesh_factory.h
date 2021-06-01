@@ -29,6 +29,14 @@ namespace bcg{
 
         halfedge_mesh make_icosahedron();
 
+        halfedge_mesh make_tetrahedron();
+
+        halfedge_mesh make_hexahedron();
+
+        halfedge_mesh make_octahedron();
+
+        halfedge_mesh make_dodecahedron();
+
         halfedge_mesh make_box();
 
         halfedge_mesh make_box(const aligned_box3 &aabb);

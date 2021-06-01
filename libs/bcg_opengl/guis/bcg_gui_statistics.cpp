@@ -4,10 +4,11 @@
 
 #include "bcg_gui_statistics.h"
 #include "viewer/bcg_viewer_state.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 
 namespace bcg{
 
-void gui_statistics(viewer_state *state, running_stats *stats, const std::vector<float> *values){
+void gui_statistics(viewer_state *state, const running_stats *stats, const std::vector<float> *values){
     if(!stats) return;
 
     ImGui::LabelText("num values", "%s", std::to_string(stats->size()).c_str());
@@ -20,8 +21,8 @@ void gui_statistics(viewer_state *state, running_stats *stats, const std::vector
     ImGui::LabelText("kurtosis", "%s", std::to_string(stats->kurtosis()).c_str());
     ImGui::LabelText("median", "%s", std::to_string(stats->median()).c_str());
 
-    if(values && !values->empty()){
-        draw_histogram(&state->window, "values", *values);
+    if(values != nullptr && !values->empty()){
+        draw_histogram(&state->window, "values", *values, MapConst(*values).minCoeff(), MapConst(*values).maxCoeff());
     }
 }
 

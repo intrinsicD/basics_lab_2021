@@ -32,7 +32,7 @@ struct material_mesh : public material{
     float uniform_alpha = 1;
 
     colormap::base_colormap color_map = colormap::jet();
-    int width;
+    int width = 1;
 
     ogl_texture &face_colors(){
         return textures[0];

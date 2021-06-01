@@ -179,7 +179,7 @@ void point_cloud_normal_filtering_robust_statistics_knn(vertex_container *vertic
                         auto v = vertex_handle(i);
 
                         quadric Q_total;
-                        //Q_total.probabilistic_plane_quadric(positions[v], v_normals_filtered[v], sigma_p, sigma_n);
+                        //Q_total = quadric::probabilistic_plane_quadric(positions[v], v_normals_filtered[v], sigma_p, sigma_n);
                         auto result = index.query_knn(positions[v], num_closest);
                         bcg_scalar_t radius = MapConst(result.distances).maxCoeff() * 10;
                         bcg_scalar_t sum_weights = 0;
@@ -190,8 +190,7 @@ void point_cloud_normal_filtering_robust_statistics_knn(vertex_container *vertic
                                 bcg_scalar_t normalizer = std::max(distance, scalar_eps);
                                 bcg_scalar_t weight =
                                         std::exp(-distance * distance / (radius * radius / 16)) / normalizer;
-                                quadric Q;
-                                Q.probabilistic_plane_quadric(positions[idx], v_normals_filtered[idx], sigma_p,
+                                quadric Q = quadric::probabilistic_plane_quadric(positions[idx], v_normals_filtered[idx], sigma_p,
                                                               sigma_n);
                                 Q_total += Q * weight;
                                 sum_weights += weight;
@@ -324,7 +323,7 @@ void point_cloud_normal_filtering_robust_statistics_radius(vertex_container *ver
                     }
                     pcas[v] = point_cloud_vertex_pca_least_squares_svd(MapConst(V), positions[v], false);
                     normals[v] = pcas[v].directions.col(2);
-                    quadrics[v].probabilistic_plane_quadric(positions[v], normals[v], sigma_p, sigma_n);
+                    quadrics[v] = quadric::probabilistic_plane_quadric(positions[v], normals[v], sigma_p, sigma_n);
                 }
             }
     );

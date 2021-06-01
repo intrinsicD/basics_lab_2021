@@ -533,9 +533,9 @@ void draw_histogram(
 }
 
 void draw_histogram(
-        viewer_window *, const char *lbl, const std::vector<float> &values) {
+        viewer_window *, const char *lbl, const std::vector<float> &values, float min, float max) {
     ImGui::PlotHistogram(lbl, values.data(), (int) values.size(), 0, nullptr,
-                         scalar_max, scalar_max, {0, 0}, 4);
+                         min, max, {0, 0}, 4);
 }
 
 void draw_histogram(

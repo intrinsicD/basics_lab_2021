@@ -7,12 +7,15 @@
 #include "kdtree/bcg_kdtree.h"
 #include "correspondences/bcg_correspondences.h"
 #include "math/vector/bcg_vector_cos.h"
+#include "math/vector/bcg_vector_map_eigen.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
 
 correspondence_system::correspondence_system(viewer_state *state) : system("correspondence_system", state) {
     state->dispatcher.sink<event::correspondences::estimate>().connect<&correspondence_system::on_correspondences_estiamte>(
+            this);
+    state->dispatcher.sink<event::correspondences::estimate_and_filter>().connect<&correspondence_system::on_correspondences_estiamte_and_filter>(
             this);
     state->dispatcher.sink<event::correspondences::filter::distance>().connect<&correspondence_system::on_correspondences_filter_distance>(
             this);
@@ -50,8 +53,10 @@ void correspondence_system::on_correspondences_estiamte(const event::corresponde
         state->scene.emplace<entity_correspondences>(event.source_id);
     }
     auto &corrs = state->scene.get<entity_correspondences>(event.source_id);
+
     corrs.maps[size_t(event.target_id)].clear();
     corrs.maps[size_t(event.target_id)].mapping.resize(src->size());
+    corrs.maps[size_t(event.target_id)].target_id = size_t(event.target_id);
 
     tbb::parallel_for(
             tbb::blocked_range<uint32_t>(0u, (uint32_t) src->size(), state->config.parallel_grain_size),
@@ -79,6 +84,17 @@ void correspondence_system::on_correspondences_estiamte(const event::corresponde
     corrs_distance.set_dirty();
     corrs_vector.set_dirty();
     corrs_valid.set_dirty();
+}
+
+
+void correspondence_system::on_correspondences_estiamte_and_filter(const event::correspondences::estimate_and_filter &event){
+    state->dispatcher.trigger<event::correspondences::estimate>(event.source_id, event.target_id);
+    if(event.filter_normal_angle){
+        state->dispatcher.trigger<event::correspondences::filter::normal_angle>(event.source_id, event.target_id, event.normal_threshold);
+    }
+    if(event.filter_distances){
+        state->dispatcher.trigger<event::correspondences::filter::distance>(event.source_id, event.target_id, event.distance_threshold);
+    }
 }
 
 void correspondence_system::on_correspondences_filter_distance(const event::correspondences::filter::distance &event) {
@@ -114,6 +130,9 @@ void correspondence_system::on_correspondences_filter_distance(const event::corr
     correspondences filtered_corrs;
     filtered_corrs.mapping.resize(mapping.size());
     std::copy(mapping.begin(), mapping.end(), filtered_corrs.mapping.begin());
+    filtered_corrs.target_id = map.target_id;
+    filtered_corrs.max_source_index = MapConst(filtered_corrs.source_indices()).maxCoeff();
+    filtered_corrs.max_target_index = MapConst(filtered_corrs.target_indices()).maxCoeff();
     map = filtered_corrs;
 
     corrs.maps[size_t(event.target_id)].stats.clear();
@@ -166,8 +185,9 @@ void correspondence_system::on_correspondences_filter_normal_angle(
                     if (cos < 0 || std::acos(cos) > event.threshold) {
                         corrs_valid[item.row()] = false;
                         corrs_vector[item.row()].setZero();
+                    }else{
+                        mapping.push_back(item);
                     }
-                    mapping.push_back(item);
                 }
             }
     );
@@ -175,7 +195,11 @@ void correspondence_system::on_correspondences_filter_normal_angle(
     correspondences filtered_corrs;
     filtered_corrs.mapping.resize(mapping.size());
     std::copy(mapping.begin(), mapping.end(), filtered_corrs.mapping.begin());
+    filtered_corrs.target_id = map.target_id;
+    filtered_corrs.max_source_index = MapConst(filtered_corrs.source_indices()).maxCoeff();
+    filtered_corrs.max_target_index = MapConst(filtered_corrs.target_indices()).maxCoeff();
     map = filtered_corrs;
+
 
     auto corrs_distance = src->get<bcg_scalar_t, 1>("v_corrs_distance");
     corrs.maps[size_t(event.target_id)].stats.clear();

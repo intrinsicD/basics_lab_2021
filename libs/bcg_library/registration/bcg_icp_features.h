@@ -44,12 +44,11 @@ struct FeatureBatch {
 
     bool operator!=(const FeatureBatch &other) const;
 
-    void build(const vertex_container &container, bool with_index = true);
+    void build(const vertex_container &container);
 
     std::string batch_name;
     std::unordered_map<std::string, Feature> batch;
     MatrixS<-1, -1> batch_embedding;
-    std::unique_ptr<kdtree_matrix<bcg_scalar_t>> index;
 };
 
 struct Features {
@@ -65,7 +64,7 @@ struct Features {
 
     bool has_batch(const std::string &batch_name) const;
 
-    void build(const vertex_container &container, bool with_indices = true);
+    void build(const vertex_container &container);
 
     std::unordered_map<std::string, FeatureBatch> batches;
 };

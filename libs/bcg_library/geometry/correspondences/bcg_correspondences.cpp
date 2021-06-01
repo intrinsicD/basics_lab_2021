@@ -105,16 +105,16 @@ MatrixS<-1, -1> correspondences::dense_matrix(size_t M, size_t N) const {
 
 MatrixS<-1, 3> correspondences::get_source(property<VectorS<3>, 3> property) const {
     MatrixS<-1, 3> P(MatrixS<-1, 3>::Zero(mapping.size(), 3));
-    for (const auto &item : mapping) {
-        P.row(item.row()) = property[item.row()];
+    for (long i = 0; i < mapping.size(); ++i) {
+        P.row(i) = property[mapping[i].row()];
     }
     return P;
 }
 
 MatrixS<-1, 3> correspondences::get_target(property<VectorS<3>, 3> property) const {
     MatrixS<-1, 3> P(MatrixS<-1, 3>::Zero(mapping.size(), 3));
-    for (const auto &item : mapping) {
-        P.row(item.row()) = property[item.col()];
+    for (long i = 0; i < mapping.size(); ++i) {
+        P.row(i) = property[mapping[i].col()];
     }
     return P;
 }

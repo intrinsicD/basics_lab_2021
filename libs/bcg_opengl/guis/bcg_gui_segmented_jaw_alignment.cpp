@@ -211,10 +211,19 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
             ImGui::Separator();
             draw_combobox(&state->window, "Registration Method", selected_registration_method, registration_methods);
 
+            static bool filter_normals = true;
+            static float normal_angle_threshold = 20;
+            ImGui::Checkbox("filter normals", &filter_normals);
+            static bool weight = true;
+            ImGui::Checkbox("weight", &weight);
+            if(filter_normals){
+                ImGui::InputFloat("normal_angle_threshold", &normal_angle_threshold);
+            }
             if (ImGui::Button("Compute Alignment Step")) {
                 for (const auto &tooth : source_teeth) {
                     state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target,
-                                                                               static_cast<RegistrationMethod>(selected_registration_method));
+                                                                               static_cast<RegistrationMethod>(selected_registration_method),
+                                                                               false, filter_normals, 0.0, normal_angle_threshold, weight);
                 }
                 geodesic_median_so3 r_mean(true, true);
                 translation_mean t_mean(true);

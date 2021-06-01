@@ -65,8 +65,8 @@ void gui_sampling_grid(viewer_state *state) {
                         samples = grid.get_samples();
                         break;
                     }
-                    case GridSamplingType::mean : {
-                        auto &grid = state->scene.get_or_emplace<sample_mean_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                    case GridSamplingType::medioid : {
+                        auto &grid = state->scene.get_or_emplace<sample_medioid_grid3>(id, dims.cast<bcg_index_t>(), aabb);
                         grid.set_aabb(aabb);
                         grid.set_dims(dims.cast<bcg_index_t>());
                         grid.clear();

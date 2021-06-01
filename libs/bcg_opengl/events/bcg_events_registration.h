@@ -11,6 +11,9 @@ namespace bcg::event::registration{
 struct align_step{
     entt::entity source_id, target_id;
     RegistrationMethod method;
+    bool filter_distance = false, filter_normal_angle = false;
+    bcg_scalar_t distance_threshold = 0, normal_threshold = 0;
+    bool weight = false;
 };
 struct align_converge{
     entt::entity source_id, target_id;

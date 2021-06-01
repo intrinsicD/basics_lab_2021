@@ -17,7 +17,7 @@ enum class GridSamplingType {
     last,
     random,
     closest,
-    mean,
+    medioid,
     __last__
 };
 
@@ -27,7 +27,7 @@ inline std::vector<std::string> grid_sampling_type_names() {
     names[static_cast<int>(GridSamplingType::last)] = "last";
     names[static_cast<int>(GridSamplingType::random)] = "random";
     names[static_cast<int>(GridSamplingType::closest)] = "closest";
-    names[static_cast<int>(GridSamplingType::mean)] = "mean";
+    names[static_cast<int>(GridSamplingType::medioid)] = "medioid";
     return names;
 }
 
@@ -41,7 +41,24 @@ struct sampling_grid : public voxel_grid<D> {
 
     [[nodiscard]] virtual std::vector<size_t> get_samples_indices() const = 0;
 
-    virtual std::vector<VectorS<D>> get_samples() const = 0;
+    virtual std::vector<VectorS<D>> get_samples() const{
+        std::vector<VectorS<D>> samples;
+        samples.reserve(this->num_occupied_voxel());
+        auto indices = get_samples_indices();
+        for (const auto &idx: indices) {
+            samples.push_back(this->ref_positions[idx]);
+        }
+        return samples;
+    }
+
+    [[nodiscard]] std::vector<VectorS<3>> get_voxel_centers() const {
+        std::vector<VectorS<D>> samples;
+        samples.reserve(this->num_occupied_voxel());
+        for (const auto &item: this->storage) {
+            samples.push_back(this->idx_to_voxel_center(item.first));
+        }
+        return samples;
+    }
 };
 
 template<int D>
@@ -124,27 +141,16 @@ struct sample_random_grid : public sampling_grid<D> {
     [[nodiscard]] std::vector<size_t> get_samples_indices() const override {
         std::vector<size_t> indices;
         indices.reserve(this->num_occupied_voxel());
-        traverse(*this, [&indices, this](size_t, const voxel &vox) {
-            size_t i = rand() % vox.size;
-            size_t current_idx = vox.v_start;
-            while (i > 0) {
+        traverse(*this, [&indices, this](size_t, const voxel &item) {
+            size_t rand_steps = rand() % item.size;
+            vertex_handle current_idx = item.v_start;
+            for (size_t i = 0; i < rand_steps; ++i) {
                 current_idx = this->successor[current_idx];
-                --i;
             }
             indices.emplace_back(current_idx);
             return true;
         });
         return indices;
-    }
-
-    std::vector<VectorS<D>> get_samples() const override {
-        std::vector<VectorS<D>> samples;
-        samples.reserve(this->num_occupied_voxel());
-        auto indices = get_samples_indices();
-        for (const auto &idx: indices) {
-            samples.push_back(this->ref_positions[idx]);
-        }
-        return samples;
     }
 };
 
@@ -161,60 +167,51 @@ struct sample_closest_grid : public sampling_grid<D> {
     [[nodiscard]] std::vector<size_t> get_samples_indices() const override {
         std::vector<size_t> indices;
         indices.reserve(this->num_occupied_voxel());
-        traverse(*this, [&indices, this](size_t idx, const voxel &vox) {
+        traverse(*this, [&indices, this](size_t idx, const voxel &item) {
             VectorS<D> center = this->idx_to_voxel_center(idx);
             bcg_scalar_t current_min_dist = scalar_max;
-            size_t current_min_idx = vox.v_start;
-            size_t current_idx = vox.v_start;
-            while (current_idx != vox.v_end) {
+            size_t current_min_idx = item.v_start;
+            vertex_handle current_idx = item.v_start;
+            for (size_t i = 0; i < item.size; ++i) {
                 bcg_scalar_t dist = (this->ref_positions[current_idx] - center).squaredNorm();
                 if (dist < current_min_dist) {
                     current_min_idx = current_idx;
                 }
                 current_idx = this->successor[current_idx];
             }
+
             indices.emplace_back(current_min_idx);
             return true;
         });
         return indices;
     }
-
-    [[nodiscard]] std::vector<VectorS<3>> get_samples() const override {
-        std::vector<VectorS<D>> samples;
-        samples.reserve(this->num_occupied_voxel());
-        auto indices = get_samples_indices();
-        for (const auto &idx: indices) {
-            samples.push_back(this->ref_positions[idx]);
-        }
-        return samples;
-    }
 };
 
 template<int D>
-struct sample_mean_grid : public sampling_grid<D> {
-    sample_mean_grid() = default;
+struct sample_medioid_grid : public sampling_grid<D> {
+    sample_medioid_grid() = default;
 
-    sample_mean_grid(const VectorI<D> &dims, const aligned_box<D> &aabb) : sampling_grid<D>(dims, aabb) {
+    sample_medioid_grid(const VectorI<D> &dims, const aligned_box<D> &aabb) : sampling_grid<D>(dims, aabb) {
 
     }
 
-    ~sample_mean_grid() override = default;
+    ~sample_medioid_grid() override = default;
 
     //returns medioid_indices
     [[nodiscard]] std::vector<size_t> get_samples_indices() const override {
         std::vector<size_t> indices;
         indices.reserve(this->num_occupied_voxel());
-        traverse(*this, [&indices, this](size_t, const voxel &vox) {
+        traverse(*this, [&indices, this](size_t, const voxel &item) {
             VectorS<D> mean = VectorS<D>::Zero();
-            size_t current_idx = vox.v_start;
-            while (current_idx != vox.v_end) {
-                mean += this->ref_positions[current_idx] / vox.size;
+            vertex_handle current_idx = item.v_start;
+            for (size_t i = 0; i < item.size; ++i) {
+                mean += this->ref_positions[current_idx] / item.size;
                 current_idx = this->successor[current_idx];
             }
             bcg_scalar_t current_min_dist = scalar_max;
-            size_t current_min_idx = vox.v_start;
-            current_idx = vox.v_start;
-            while (current_idx != vox.v_end) {
+            size_t current_min_idx = item.v_start;
+            current_idx = item.v_start;
+            for (size_t i = 0; i < item.size; ++i) {
                 bcg_scalar_t dist = (this->ref_positions[current_idx] - mean).squaredNorm();
                 if (dist < current_min_dist) {
                     current_min_idx = current_idx;
@@ -225,24 +222,6 @@ struct sample_mean_grid : public sampling_grid<D> {
             return true;
         });
         return indices;
-    }
-
-    //return actual medians
-    [[nodiscard]] std::vector<VectorS<3>> get_samples() const override {
-        std::vector<VectorS<D>> samples;
-        samples.reserve(this->num_occupied_voxel());
-
-        traverse(*this, [&samples, this](size_t, const voxel &vox) {
-            VectorS<D> mean = VectorS<D>::Zero();
-            size_t current_idx = vox.v_start;
-            while (current_idx != vox.v_end) {
-                mean += this->ref_positions[current_idx] / vox.size;
-                current_idx = this->successor[current_idx];
-            }
-            samples.template emplace_back(mean);
-            return true;
-        });
-        return samples;
     }
 };
 
@@ -264,13 +243,13 @@ using sample_first_grid2 = sample_first_grid<2>;
 using sample_last_grid2 = sample_last_grid<2>;
 using sample_random_grid2 = sample_random_grid<2>;
 using sample_closest_grid2 = sample_closest_grid<2>;
-using sample_mean_grid2 = sample_mean_grid<2>;
+using sample_mean_grid2 = sample_medioid_grid<2>;
 
 using sample_first_grid3 = sample_first_grid<3>;
 using sample_last_grid3 = sample_last_grid<3>;
 using sample_random_grid3 = sample_random_grid<3>;
 using sample_closest_grid3 = sample_closest_grid<3>;
-using sample_mean_grid3 = sample_mean_grid<3>;
+using sample_medioid_grid3 = sample_medioid_grid<3>;
 
 }
 

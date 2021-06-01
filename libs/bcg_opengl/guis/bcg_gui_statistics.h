@@ -12,7 +12,7 @@ namespace bcg{
 
 struct viewer_state;
 
-void gui_statistics(viewer_state *state, running_stats *stats, const std::vector<float> *values = nullptr);
+void gui_statistics(viewer_state *state, const running_stats *stats, const std::vector<float> *values = nullptr);
 
 }
 

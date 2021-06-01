@@ -28,7 +28,6 @@ void EmitVertexVector(int Index){
     vec3 P = gl_in[Index].gl_Position.xyz;
     vec3 V = vertex[Index].vector;
 
-
     if(material.use_uniform_vector_length){
         V = normalize(vertex[Index].vector) * material.uniform_vector_length;
     }else{
