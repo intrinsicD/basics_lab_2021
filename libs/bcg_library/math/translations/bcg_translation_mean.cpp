@@ -20,7 +20,7 @@ VectorS<3> translation_mean::operator()(const MatrixS<-1, 3> &translations) {
     if (m_outlier_reject) {
         VectorS<-1> norms = translations.rowwise().norm();
         auto result = quantil<bcg_scalar_t>(norms);
-        VectorS<-1> weights = (norms.array() < result.value).select(VectorS<-1>::Ones(translations.size()), 0.0);
+        VectorS<-1> weights = (norms.array() < result.value).select(VectorS<-1>::Ones(translations.rows()), 0.0);
         return weights.transpose() * translations / weights.sum();
     }
     return translations.colwise().mean();

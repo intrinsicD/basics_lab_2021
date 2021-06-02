@@ -221,40 +221,47 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 ImGui::InputFloat("normal_angle_threshold", &normal_angle_threshold);
             }
             //TODO here print the transformations of each tooth after removing the loading transform.
-            std::unordered_map<size_t, Transform> transforms;
+            static std::unordered_map<size_t, Transform> transforms;
             if (ImGui::Button("Compute Alignment Step")) {
-                for (const auto &tooth : source_teeth) {
-                    state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target,
-                                                                               static_cast<RegistrationMethod>(selected_registration_method),
-                                                                               false, filter_normals, 0.0, normal_angle_threshold, weight);
-                }
-                geodesic_median_so3 r_mean(true, true);
-                translation_mean t_mean(true);
-                std::vector<MatrixS<3, 3>> rotations;
-                std::vector<VectorS<3>> translations;
-                transforms.clear();
-                avg_alignment.setIdentity();
-                for (const auto &tooth : source_teeth) {
-                    if (tooth.selected) {
-                        auto loading_model = state->scene.get<entity_info>(tooth.entity_id).loading_model;
-                        auto model = state->scene.get<Transform>(tooth.entity_id);
-                        model = model * loading_model.inverse();
-                        transforms[size_t(tooth.entity_id)] = model;
-                        rotations.emplace_back(model.linear());
-                        translations.emplace_back(model.translation());
+                if(!source_teeth.empty()){
+                    for (const auto &tooth : source_teeth) {
+                        state->dispatcher.trigger<event::registration::align_step>(tooth.entity_id, target,
+                                                                                   static_cast<RegistrationMethod>(selected_registration_method),
+                                                                                   false, filter_normals, 0.0, normal_angle_threshold, weight);
+                    }
+                    geodesic_median_so3 r_mean(true, true);
+                    translation_mean t_mean(true);
+                    std::vector<MatrixS<3, 3>> rotations;
+                    std::vector<VectorS<3>> translations;
+                    transforms.clear();
+                    avg_alignment.setIdentity();
+                    for (const auto &tooth : source_teeth) {
+                        if (tooth.selected) {
+                            auto loading_model = state->scene.get<entity_info>(tooth.entity_id).loading_model;
+                            auto model = state->scene.get<Transform>(tooth.entity_id);
+                            model = model * loading_model.inverse();
+                            transforms[size_t(tooth.entity_id)] = model;
+                            rotations.emplace_back(model.linear());
+                            translations.emplace_back(model.translation());
+                        }
+                    }
+
+                    avg_alignment.linear() = r_mean(rotations);
+                    avg_alignment.translation() = t_mean(translations);
+                    auto &source_model = state->scene.get<Transform>(source);
+                    source_model = avg_alignment;
+                    auto avg_inverse = avg_alignment.inverse();
+                    for (const auto &tooth : source_teeth) {
+                        if (tooth.selected) {
+                            transforms[size_t(tooth.entity_id)] = transforms[size_t(tooth.entity_id)] * avg_inverse;
+                        }
                     }
                 }
-
-                avg_alignment.linear() = r_mean(rotations);
-                avg_alignment.translation() = t_mean(translations);
-                auto &source_model = state->scene.get<Transform>(source);
-                source_model = avg_alignment;
             }
             if(ImGui::Button("Print transformations")){
                 auto source_info = state->scene.get<entity_info>(source);
                 std::string error = "";
-                make_directory(path_basename(source_info.filename), error);
-                if(error.empty()){
+                if(make_directory(path_basename(source_info.filename), error)){
                     for(const auto &item : transforms){
                         file_stream fs(path_join(path_basename(source_info.filename), "Tooth" + std::to_string(item.first) + ".txt"));
                         std::stringstream ss;
