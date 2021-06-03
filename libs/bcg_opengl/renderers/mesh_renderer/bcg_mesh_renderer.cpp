@@ -21,11 +21,16 @@ mesh_renderer::mesh_renderer(viewer_state *state) : renderer("mesh_renderer", st
     state->dispatcher.sink<event::internal::startup>().connect<&mesh_renderer::on_startup>(this);
     state->dispatcher.sink<event::internal::shutdown>().connect<&mesh_renderer::on_shutdown>(this);
     state->dispatcher.sink<event::mesh_renderer::enqueue>().connect<&mesh_renderer::on_enqueue>(this);
-    state->dispatcher.sink<event::mesh_renderer::setup_for_rendering>().connect<&mesh_renderer::on_setup_for_rendering>(this);
-    state->dispatcher.sink<event::mesh_renderer::set_position_attribute>().connect<&mesh_renderer::on_set_position_attribute>(this);
-    state->dispatcher.sink<event::mesh_renderer::set_normal_attribute>().connect<&mesh_renderer::on_set_normal_attribute>(this);
-    state->dispatcher.sink<event::mesh_renderer::set_vertex_color_attribute>().connect<&mesh_renderer::on_set_vertex_color_attribute>(this);
-    state->dispatcher.sink<event::mesh_renderer::set_face_color_attribute>().connect<&mesh_renderer::on_set_face_color_attribute>(this);
+    state->dispatcher.sink<event::mesh_renderer::setup_for_rendering>().connect<&mesh_renderer::on_setup_for_rendering>(
+            this);
+    state->dispatcher.sink<event::mesh_renderer::set_position_attribute>().connect<&mesh_renderer::on_set_position_attribute>(
+            this);
+    state->dispatcher.sink<event::mesh_renderer::set_normal_attribute>().connect<&mesh_renderer::on_set_normal_attribute>(
+            this);
+    state->dispatcher.sink<event::mesh_renderer::set_vertex_color_attribute>().connect<&mesh_renderer::on_set_vertex_color_attribute>(
+            this);
+    state->dispatcher.sink<event::mesh_renderer::set_face_color_attribute>().connect<&mesh_renderer::on_set_face_color_attribute>(
+            this);
 }
 
 void mesh_renderer::on_startup(const event::internal::startup &) {
@@ -37,9 +42,9 @@ void mesh_renderer::on_startup(const event::internal::startup &) {
                                                             "mesh_renderer/mesh_fragment_shader.glsl");
 }
 
-void mesh_renderer::on_shutdown(const event::internal::shutdown &){
+void mesh_renderer::on_shutdown(const event::internal::shutdown &) {
     auto view = state->scene.view<material_mesh>();
-    for(const auto id : view){
+    for (const auto id : view) {
         auto &material = view.get<material_mesh>(id);
         material.vao.destroy();
     }
@@ -51,30 +56,33 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->get_faces(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if(!state->scene.all_of<material_mesh>(event.id)){
+    if (!state->scene.all_of<material_mesh>(event.id)) {
         auto &material = state->scene.emplace<material_mesh>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
         state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
-    }else{
+    } else {
         auto &material = state->scene.get<material_mesh>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         std::vector<attribute> face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
-        if(material.use_face_color){
+        if (material.use_face_color) {
             auto *faces = state->get_faces(event.id);
-            if(faces && faces->has(material.attributes[2].property_name)){
-                state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(event.id, material.attributes[2]);
+            if (faces && faces->has(material.attributes[2].property_name) &&
+                faces->get_base_ptr(material.attributes[2].property_name)->is_dirty()) {
+                state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(event.id,
+                                                                                          material.attributes[2]);
+                faces->get_base_ptr(material.attributes[2].property_name)->set_clean();
             }
         }
-        for(auto &attribute : material.attributes){
+        for (auto &attribute : material.attributes) {
             attribute.update = false;
         }
     }
 }
 
-void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for_rendering &event){
+void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
     if (!state->scene.all_of<Transform>(event.id)) {
         state->scene.emplace<Transform>(event.id, Transform::Identity());
@@ -86,19 +94,19 @@ void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for
         material.vao.create();
     }
     material.vao.bind();
-    for(const auto &attribute: material.attributes){
+    for (const auto &attribute: material.attributes) {
         auto iter = shape.vertex_buffers.find(attribute.buffer_name);
-        if(iter != shape.vertex_buffers.end()){
+        if (iter != shape.vertex_buffers.end()) {
             iter->second.bind();
-            if(attribute.enable){
+            if (attribute.enable) {
                 material.vao.capture_vertex_buffer(attribute.index, iter->second);
-            }else{
+            } else {
                 material.vao.disable_attribute(attribute.index);
             }
             iter->second.release();
         }
     }
-    if(shape.triangle_buffer.is_valid()){
+    if (shape.triangle_buffer.is_valid()) {
         shape.triangle_buffer.bind();
     }
     material.vao.release();
@@ -150,7 +158,7 @@ void mesh_renderer::on_end_frame(const event::internal::end_frame &) {
 
 }
 
-void mesh_renderer::on_set_position_attribute(const event::mesh_renderer::set_position_attribute &event){
+void mesh_renderer::on_set_position_attribute(const event::mesh_renderer::set_position_attribute &event) {
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_mesh>(event.id);
     auto *vertices = state->get_vertices(event.id);
@@ -167,7 +175,7 @@ void mesh_renderer::on_set_position_attribute(const event::mesh_renderer::set_po
     state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 
-void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_normal_attribute &event){
+void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_normal_attribute &event) {
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_mesh>(event.id);
     auto *vertices = state->get_vertices(event.id);
@@ -182,15 +190,15 @@ void mesh_renderer::on_set_normal_attribute(const event::mesh_renderer::set_norm
     state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 
-void mesh_renderer::on_set_vertex_color_attribute(const event::mesh_renderer::set_vertex_color_attribute &event){
+void mesh_renderer::on_set_vertex_color_attribute(const event::mesh_renderer::set_vertex_color_attribute &event) {
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_mesh>(event.id);
 
     auto &color = material.attributes[2];
     color.property_name = event.color.property_name;
-    if(event.color.buffer_name.empty() || contains(event.color.buffer_name, "_color")){
-        color.buffer_name = color.property_name+"_color";
-    }else{
+    if (event.color.buffer_name.empty() || contains(event.color.buffer_name, "_color")) {
+        color.buffer_name = color.property_name + "_color";
+    } else {
         color.buffer_name = color.property_name;
     }
     color.enable = true;
@@ -202,21 +210,25 @@ void mesh_renderer::on_set_vertex_color_attribute(const event::mesh_renderer::se
     state->dispatcher.trigger<event::mesh_renderer::setup_for_rendering>(event.id);
 }
 
-void mesh_renderer::on_set_face_color_attribute(const event::mesh_renderer::set_face_color_attribute &event){
+void mesh_renderer::on_set_face_color_attribute(const event::mesh_renderer::set_face_color_attribute &event) {
     if (!state->scene.valid(event.id)) return;
     auto &material = state->scene.get<material_mesh>(event.id);
 
     auto *faces = state->get_faces(event.id);
     std::vector<Vector<float, 3>> colors = map_to_colors(faces, event.color.property_name, material.color_map);
+
     material.attributes[2].property_name = event.color.property_name;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &material.width);
-    material.width = std::min((int)colors.size(), material.width);
+    material.width = std::min((int) colors.size(), material.width);
     int height = colors.size() % material.width;
-    colors.resize(material.width * (height + 1));
+    size_t new_size = material.width * (height + 1);
+    if (colors.size() != new_size) {
+        colors.resize(new_size);
+    }
 
-    if(material.face_colors()){
-        material.face_colors().update_data(colors[0].data(),  material.width, height + 1);
-    }else {
+    if (material.face_colors()) {
+        material.face_colors().update_data(colors[0].data(), material.width, height + 1);
+    } else {
         auto &texture = material.face_colors();
         texture = ogl_texture(GL_TEXTURE_2D, "face_color");
         int unit = 0;

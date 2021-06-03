@@ -66,6 +66,9 @@ renderer::map_to_colors(property_container *container, const std::string &proper
         colors.resize(colors1.size());
         Map<3>(colors) = (MapConst<3>(colors1).array() - min) /  (max - min);
     }
+
+    assert(MapConst(colors).minCoeff() >= 0.0);
+    assert(MapConst(colors).maxCoeff() <= 1.0);
     return colors;
 }
 

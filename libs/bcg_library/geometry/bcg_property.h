@@ -108,53 +108,53 @@ struct face_handle : public base_handle {
 struct property_container;
 
 namespace property_types {
-    enum class Type {
-        BOOL,
-        FLOAT,
-        DOUBLE,
-        INT,
-        UNSIGNED_INT,
-        LONG,
-        UNSIGNED_LONG,
-        UNKNOWN
-    };
+enum class Type {
+    BOOL,
+    FLOAT,
+    DOUBLE,
+    INT,
+    UNSIGNED_INT,
+    LONG,
+    UNSIGNED_LONG,
+    UNKNOWN
+};
 
-    constexpr Type get_property_type(const bool *) {
-        return Type::BOOL;
-    }
+constexpr Type get_property_type(const bool *) {
+    return Type::BOOL;
+}
 
-    constexpr Type get_property_type(const float *) {
-        return Type::FLOAT;
-    }
+constexpr Type get_property_type(const float *) {
+    return Type::FLOAT;
+}
 
-    constexpr Type get_property_type(const double *) {
-        return Type::DOUBLE;
-    }
+constexpr Type get_property_type(const double *) {
+    return Type::DOUBLE;
+}
 
-    constexpr Type get_property_type(const int *) {
-        return Type::INT;
-    }
+constexpr Type get_property_type(const int *) {
+    return Type::INT;
+}
 
-    constexpr Type get_property_type(const unsigned int *) {
-        return Type::UNSIGNED_INT;
-    }
+constexpr Type get_property_type(const unsigned int *) {
+    return Type::UNSIGNED_INT;
+}
 
-    constexpr Type get_property_type(const long *) {
-        return Type::LONG;
-    }
+constexpr Type get_property_type(const long *) {
+    return Type::LONG;
+}
 
-    constexpr Type get_property_type(const unsigned long *) {
-        return Type::UNSIGNED_LONG;
-    }
+constexpr Type get_property_type(const unsigned long *) {
+    return Type::UNSIGNED_LONG;
+}
 
-    template<typename Derived>
-    constexpr Type get_property_type(const Eigen::EigenBase<Derived> *) {
-        return get_property_type((typename Derived::Scalar *) (nullptr));
-    }
+template<typename Derived>
+constexpr Type get_property_type(const Eigen::EigenBase<Derived> *) {
+    return get_property_type((typename Derived::Scalar *) (nullptr));
+}
 
-    constexpr Type get_property_type(const void *) {
-        return Type::UNKNOWN;
-    }
+constexpr Type get_property_type(const void *) {
+    return Type::UNKNOWN;
+}
 };
 
 
@@ -225,7 +225,7 @@ struct property_vector : public base_property {
 
     ~property_vector() override = default;
 
-    const std::string &name() const override {
+    [[nodiscard]] const std::string &name() const override {
         return property_name;
     }
 
@@ -651,13 +651,13 @@ struct property_container {
         return has(other.name());
     }
 
-    bool has(const std::string &name) const {
-        return container.find(name) != container.end();
+    bool has(const std::string &name_) const {
+        return container.find(name_) != container.end();
     }
 
     template<typename T, int N>
-    property<T, N> get(const std::string &name) const {
-        auto iter = container.find(name);
+    property<T, N> get(const std::string &name_) const {
+        auto iter = container.find(name_);
         if (iter == container.end()) {
             return property<T, N>();
         }
@@ -665,12 +665,12 @@ struct property_container {
     }
 
     template<typename T, int N>
-    property<T, N> add(const std::string &name, T t = T()) {
-        auto iter = container.find(name);
+    property<T, N> add(const std::string &name_, T t = T()) {
+        auto iter = container.find(name_);
         if (iter != container.end()) {
             return property<T, N>();
         }
-        auto sptr = std::make_shared<property_vector<T, N>>(name, t);
+        auto sptr = std::make_shared<property_vector<T, N>>(name_, t);
         auto n = size();
         if (n > 0) {
             sptr->reserve(n);
@@ -678,7 +678,7 @@ struct property_container {
                 sptr->push_back();
             }
         }
-        container[name] = sptr;
+        container[name_] = sptr;
         return std::dynamic_pointer_cast<property_vector<T, N>>(sptr);
     }
 
@@ -693,13 +693,13 @@ struct property_container {
     }
 
     template<typename T, int N>
-    inline property<T, N> get_or_add(const std::string &name, T t = T()) {
-        auto d = get<T, N>(name);
-        return d ? d : add<T, N>(name, t);
+    inline property<T, N> get_or_add(const std::string &name_, T t = T()) {
+        auto d = get<T, N>(name_);
+        return d ? d : add<T, N>(name_, t);
     }
 
-    base_property *get_base_ptr(const std::string &name) const {
-        auto iter = container.find(name);
+    base_property *get_base_ptr(const std::string &name_) const {
+        auto iter = container.find(name_);
         if (iter == container.end()) {
             return nullptr;
         }
@@ -707,16 +707,19 @@ struct property_container {
     }
 
     bool any_dirty(const std::vector<std::string> &names) const {
-        for (const auto &name : names) {
-            if (has(name) && get_base_ptr(name)->is_dirty()) {
+        return std::any_of(names.begin(), names.end(), [&](const std::string &name_){
+            return has(name_) && get_base_ptr(name_)->is_dirty();
+        });
+/*        for (const auto &name_ : names) {
+            if (has(name_) && get_base_ptr(name_)->is_dirty()) {
                 return true;
             }
         }
-        return false;
+        return false;*/
     }
 
-    inline void remove(const std::string &name) {
-        auto iter = container.find(name);
+    inline void remove(const std::string &name_) {
+        auto iter = container.find(name_);
         if (iter != container.end()) {
             container.erase(iter);
         }
@@ -862,9 +865,6 @@ inline std::ostream &operator<<(std::ostream &stream, const property_container &
 }
 
 struct vertex_container : public property_container {
-    /*using property_container::property_container;
-
-    */
     vertex_container() : property_container("vertices") {}
 
     struct vertex_iterator : public property_iterator<vertex_iterator, vertex_handle, vertex_container> {
@@ -881,9 +881,6 @@ struct vertex_container : public property_container {
 };
 
 struct halfedge_container : public property_container {
-    /*using property_container::property_container;
-
-    */
     halfedge_container() : property_container("halfedges") {}
 
     struct halfedge_iterator : public property_iterator<halfedge_iterator, halfedge_handle, halfedge_container> {
@@ -899,9 +896,6 @@ struct halfedge_container : public property_container {
 };
 
 struct edge_container : public property_container {
-    /*using property_container::property_container;
-
-    */
     edge_container() : property_container("edges") {}
 
     struct edge_iterator : public property_iterator<edge_iterator, edge_handle, edge_container> {
@@ -917,9 +911,6 @@ struct edge_container : public property_container {
 };
 
 struct face_container : public property_container {
-    /*using property_container::property_container;
-
-    */
     face_container() : property_container("faces") {}
 
     struct face_iterator : public property_iterator<face_iterator, face_handle, face_container> {

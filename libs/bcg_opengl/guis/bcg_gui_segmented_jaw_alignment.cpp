@@ -260,7 +260,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
             }
             if(ImGui::Button("Print transformations")){
                 auto source_info = state->scene.get<entity_info>(source);
-                std::string error = "";
+                std::string error;
                 if(make_directory(path_basename(source_info.filename), error)){
                     for(const auto &item : transforms){
                         file_stream fs(path_join(path_basename(source_info.filename), "Tooth" + std::to_string(item.first) + ".txt"));
