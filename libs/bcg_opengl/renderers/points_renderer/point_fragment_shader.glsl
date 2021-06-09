@@ -93,6 +93,7 @@ void splat() {
     pos = pos / pos.w;
     gl_FragDepth = (pos.z + 1.0) / 2.0;
 
+
     vec3 light_dir = normalize(f_position.xyz);
     vec3 view_dir = normalize(-f_position.xyz);
     vec3 normal;

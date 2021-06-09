@@ -12,7 +12,7 @@ void gui_viewer_mouse(viewer_state *state){
         ImGui::Checkbox("moving", &state->mouse.is_moving);
         ImGui::Checkbox("scrolling", &state->mouse.is_scrolling);
         ImGui::Checkbox("dragging", &state->mouse.is_dragging);
-        ImGui::Checkbox("captured by gui", &state->mouse.is_captured_by_gui);
+        ImGui::Checkbox("captured by gui", &state->gui.captured_mouse);
         ImGui::Checkbox("left pressed", &state->mouse.left);
         ImGui::Checkbox("middle pressed", &state->mouse.middle);
         ImGui::Checkbox("right pressed", &state->mouse.right);

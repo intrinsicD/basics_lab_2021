@@ -32,7 +32,7 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
                                     state->keyboard.shift_pressed ||
                                     state->keyboard.ctrl_pressed ||
                                     state->keyboard.command_pressed);
-    if (state->keyboard.is_captured_by_gui) return;
+    if (state->gui.captured_keyboard) return;
     if (state->keyboard.keys[GLFW_KEY_A]) {
         if(state->keyboard.ctrl_pressed){
             auto view = state->scene.view<entity_info>();
@@ -50,7 +50,12 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_D]) {}
     if (state->keyboard.keys[GLFW_KEY_E]) {}
     if (state->keyboard.keys[GLFW_KEY_F]) {}
-    if (state->keyboard.keys[GLFW_KEY_G]) {}
+    if (state->keyboard.keys[GLFW_KEY_G]) {
+        state->gui.hide_all = !state->gui.hide_all;
+        state->gui.captured_keyboard = false;
+        state->gui.captured_mouse = false;
+        state->gui.widgets_active = false;
+    }
     if (state->keyboard.keys[GLFW_KEY_H]) {}
     if (state->keyboard.keys[GLFW_KEY_I]) {}
     if (state->keyboard.keys[GLFW_KEY_J]) {}
@@ -60,7 +65,11 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_N]) {}
     if (state->keyboard.keys[GLFW_KEY_O]) {}
     if (state->keyboard.keys[GLFW_KEY_P]) {}
-    if (state->keyboard.keys[GLFW_KEY_Q]) {}
+    if (state->keyboard.keys[GLFW_KEY_Q]) {
+        if(state->keyboard.ctrl_pressed){
+            glfwSetWindowShouldClose(state->window.win, true);
+        }
+    }
     if (state->keyboard.keys[GLFW_KEY_R]) {
         if(state->keyboard.ctrl_pressed){
             for(const auto &item : state->picker.selected_entities){

@@ -24,18 +24,11 @@ namespace bcg {
 
 struct viewer_colors {
     Vector<float, 4> background = color<float>::default_background;
-    Vector<float, 3> overlay;
-    Vector<float, 3> entity_selection;
-    Vector<float, 3> vertex_selection;
-    Vector<float, 3> edge_selection;
-    Vector<float, 3> face_selection;
-    Vector<float, 3> boundary;
-    Vector<float, 3> wireframe;
 };
 
 struct viewer_mouse {
     dynamic_bitset buttons;
-    bool is_moving = false, is_scrolling = false, is_dragging = false, is_captured_by_gui = false, left = false, middle = false, right = false;
+    bool is_moving = false, is_scrolling = false, is_dragging = false, left = false, middle = false, right = false;
     VectorS<2> last_left_click = zero2s;
     VectorS<2> last_middle_click = zero2s;
     VectorS<2> last_right_click = zero2s;
@@ -50,7 +43,7 @@ struct viewer_mouse {
 
 struct viewer_keyboard {
     dynamic_bitset keys;
-    bool shift_pressed = false, alt_pressed = false, ctrl_pressed = false, command_pressed = false, no_modifier = true, is_captured_by_gui = false;
+    bool shift_pressed = false, alt_pressed = false, ctrl_pressed = false, command_pressed = false, no_modifier = true;
 };
 
 struct viewer_time {
@@ -58,6 +51,8 @@ struct viewer_time {
     size_t clock_last = 0;
     double time_now = 0;
     double time_delta = 0;
+
+    void update();
 };
 
 struct viewer_state;
@@ -107,15 +102,19 @@ struct viewer_window {
     int width, height;
     VectorI<4> framebuffer_viewport;
     int widgets_width = 0;
+    void update();
 };
 
 struct viewer_gui {
     bool widgets_active = true;
     bool show_menu = true;
     bool hide_all = false;
+    bool captured_mouse = false;
+    bool captured_keyboard = false;
     int menu_height = 0;
     gui_menu menu;
     left_panel left;
+    void update();
 };
 
 struct viewer_systems {

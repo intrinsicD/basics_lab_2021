@@ -1645,6 +1645,8 @@ bool ogl_framebuffer::check() const {
     assert_ogl_error();
     if (!complete) {  //Check for FBO completeness
         std::cerr << "FrameBuffer is not complete!\n";
+    }else{
+        std::cout << "FragmentBuffer complete!\n";
     }
     return complete;
 }

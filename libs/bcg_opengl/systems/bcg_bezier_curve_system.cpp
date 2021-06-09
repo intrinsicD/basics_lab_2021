@@ -90,7 +90,7 @@ void bezier_curve_system::on_make(const event::curve::make &) {
 }
 
 void bezier_curve_system::on_mouse_button(const event::mouse::button &) {
-    if (state->mouse.is_captured_by_gui) return;
+    if (state->gui.captured_mouse) return;
     if (!state->scene.valid(current_curve_id)) return;
     auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
     if (!curve || curve->finished) return;
@@ -173,7 +173,7 @@ void bezier_curve_system::on_mouse_button(const event::mouse::button &) {
 }
 
 void bezier_curve_system::on_mouse_motion(const event::mouse::motion &) {
-    if (state->mouse.is_captured_by_gui) return;
+    if (state->gui.captured_mouse) return;
     if (!state->scene.valid(current_curve_id)) return;
     auto *curve = state->scene.try_get<curve_bezier>(current_curve_id);
     if (!curve || curve->finished) return;

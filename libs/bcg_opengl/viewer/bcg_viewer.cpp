@@ -41,6 +41,9 @@ static void draw_window(viewer_state *state) {
         state->dispatcher.trigger<event::internal::render>();
     }
     state->dispatcher.trigger<event::internal::end_frame>();
+}
+
+void draw_gui(viewer_state *state){
     if (!state->gui.hide_all) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -71,10 +74,6 @@ void init_widgets(viewer_state *state, int width) {
 #endif
     ImGui::StyleColorsDark();
     state->window.widgets_width = width;
-}
-
-void set_close(viewer_state *state, bool close) {
-    glfwSetWindowShouldClose(state->window.win, close ? GLFW_TRUE : GLFW_FALSE);
 }
 
 void
@@ -178,7 +177,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
     glfwSetWindowCloseCallback(state->window.win,
                                [](GLFWwindow *glfw) {
                                    auto state = (viewer_state *) glfwGetWindowUserPointer(glfw);
-                                   set_close(state, true);
+                                   glfwSetWindowShouldClose(state->window.win, true);
                                });
     glfwSwapInterval(1);
     // init gl extensions
@@ -191,13 +190,7 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
         init_widgets(state, widgets_width);
     }
 
-    glfwGetWindowSize(state->window.win, &state->window.width, &state->window.height);
-    int vw, vh;
-    glfwGetFramebufferSize(state->window.win, &vw, &vh);
-    state->window.framebuffer_viewport[0] = 0;
-    state->window.framebuffer_viewport[1] = 0;
-    state->window.framebuffer_viewport[2] = vw;
-    state->window.framebuffer_viewport[3] = vh;
+    state->window.update();
     state->window.high_dpi_scaling =
             (bcg_scalar_t) state->window.framebuffer_viewport[2] / (bcg_scalar_t) state->window.width;
     if (state->window.high_dpi_scaling != 1) {
@@ -229,32 +222,9 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
         // event hadling
         glfwPollEvents();
         // update input
-        if ((glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
-             glfwGetKey(win, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS) &&
-            glfwGetKey(win, GLFW_KEY_Q) == GLFW_PRESS) {
-            set_close(&state, true);
-        }
-
-        glfwGetWindowSize(win, &state.window.width, &state.window.height);
-        int vw, vh;
-        glfwGetFramebufferSize(win, &vw, &vh);
-        state.window.framebuffer_viewport[0] = 0;
-        state.window.framebuffer_viewport[1] = 0;
-        state.window.framebuffer_viewport[2] = vw;
-        state.window.framebuffer_viewport[3] = vh;
-
-        if (state.gui.menu.show) {
-            auto io = &ImGui::GetIO();
-            state.mouse.is_captured_by_gui = io->WantCaptureMouse;
-            state.keyboard.is_captured_by_gui = io->WantCaptureKeyboard || io->WantTextInput;
-            state.gui.widgets_active = state.mouse.is_captured_by_gui || state.keyboard.is_captured_by_gui;
-        }
-
-        // time
-        state.time.clock_last = state.time.clock_now;
-        state.time.clock_now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        state.time.time_now = (double) state.time.clock_now / 1000000000.0;
-        state.time.time_delta = (double) (state.time.clock_now - state.time.clock_last) / 1000000000.0;
+        state.window.update();
+        state.time.update();
+        state.gui.update();
 
         // update ui
         if (state.callbacks.uiupdate_cb && !state.gui.widgets_active) {
@@ -270,16 +240,11 @@ void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_w
 
         // draw
         draw_window(&state);
+        draw_gui(&state);
 
         state.mouse.is_moving = false;
         state.mouse.is_scrolling = false;
         state.mouse.scroll_value = 0;
-
-
-        //------------------------------------------------------------------------------------------------------------------
-
-        //------------------------------------------------------------------------------------------------------------------
-
 
         glfwSwapBuffers(win);
     }

@@ -86,7 +86,7 @@ void picking_renderer::on_begin_frame(const event::internal::begin_frame &) {
 }
 
 void picking_renderer::on_mouse_button(const event::mouse::button &event) {
-    if(state->mouse.is_captured_by_gui) return;
+    if(state->gui.captured_mouse) return;
     if (!state->mouse.left || event.action == GLFW_RELEASE) return;
 
 /*    const auto &vp = state->window.framebuffer_viewport;

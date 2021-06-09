@@ -48,7 +48,7 @@ void transform_system::on_rotate(const event::transform::rotate &event) {
 }
 
 void transform_system::on_update(const event::internal::update &){
-    if (state->mouse.is_dragging && !state->mouse.is_captured_by_gui && state->keyboard.ctrl_pressed) {
+    if (state->mouse.is_dragging && !state->gui.captured_mouse && state->keyboard.ctrl_pressed) {
         if(!state->picker.valid || !state->scene.all_of<Transform>(state->picker.entity_id)) return;
         auto &model = state->scene.get<Transform>(state->picker.entity_id);
         if (state->mouse.middle) {

@@ -31,6 +31,37 @@
 
 namespace bcg {
 
+void viewer_time::update(){
+    clock_last = clock_now;
+    clock_now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    time_now = (double) clock_now / 1000000000.0;
+    time_delta = (double) (clock_now - clock_last) / 1000000000.0;
+}
+
+void viewer_window::update(){
+    glfwGetWindowSize(win, &width, &height);
+    int vw, vh;
+    glfwGetFramebufferSize(win, &vw, &vh);
+    framebuffer_viewport[0] = 0;
+    framebuffer_viewport[1] = 0;
+    framebuffer_viewport[2] = vw;
+    framebuffer_viewport[3] = vh;
+}
+
+void viewer_gui::update(){
+    if (menu.show) {
+        auto io = &ImGui::GetIO();
+        captured_keyboard = io->WantCaptureKeyboard || io->WantTextInput;
+        captured_mouse = io->WantCaptureMouse;
+        widgets_active = captured_mouse || captured_keyboard;
+    }
+    if(hide_all){
+        captured_keyboard = false;
+        captured_mouse = false;
+        widgets_active = false;
+    }
+}
+
 bool viewer_systems::has(const std::string &name) const {
     return systems.find(name) != systems.end();
 }
