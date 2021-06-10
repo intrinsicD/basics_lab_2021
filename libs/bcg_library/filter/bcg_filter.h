@@ -6,6 +6,7 @@
 #define BCG_GRAPHICS_BCG_FILTER_H
 
 #include "math/bcg_linalg.h"
+#include <vector>
 
 namespace bcg {
 

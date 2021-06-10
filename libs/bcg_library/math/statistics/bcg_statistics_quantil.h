@@ -5,7 +5,8 @@
 #ifndef BCG_GRAPHICS_BCG_STATISTICS_QUANTIL_H
 #define BCG_GRAPHICS_BCG_STATISTICS_QUANTIL_H
 
-#include "math/vector//bcg_vector.h"
+#include "math/vector/bcg_vector.h"
+#include <vector>
 
 namespace bcg{
 

@@ -5,6 +5,9 @@
 #ifndef BCG_GRAPHICS_BCG_HQ_PBR_UFSI_RENDERER_EVENTS_H
 #define BCG_GRAPHICS_BCG_HQ_PBR_UFSI_RENDERER_EVENTS_H
 
+#include <string>
+#include "entt/entt.hpp"
+
 namespace bcg::event::hq_pbr_ufsi_renderer{
 struct enqueue {
     entt::entity id;
