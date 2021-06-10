@@ -9,13 +9,13 @@
 using namespace bcg;
 
 TEST(TestOccupancyGrid, constructor) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     EXPECT_EQ(grid.capacity(), 125);
 }
 
 TEST(TestOccupancyGrid, has_add_remove) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     std::vector<VectorS<3>> items;
     for (size_t i = 0; i < 100; ++i) {
@@ -56,7 +56,7 @@ TEST(TestOccupancyGrid, has_add_remove) {
 }
 
 TEST(TestOccupancyGrid, to_idx) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     EXPECT_EQ(0, grid.to_idx(grid.aabb.min));
     EXPECT_EQ(62, grid.to_idx(grid.aabb.center()));
@@ -64,7 +64,7 @@ TEST(TestOccupancyGrid, to_idx) {
 }
 
 TEST(TestOccupancyGrid, to_coord) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     EXPECT_EQ(VectorI<3>::Zero(), grid.to_coord(grid.aabb.min));
     EXPECT_EQ(VectorI<3>::Constant(1), grid.to_coord(grid.aabb.center() - grid.voxel_side_length()));
@@ -76,13 +76,13 @@ TEST(TestOccupancyGrid, to_coord) {
 }
 
 TEST(TestOccupancyGrid, to_voxel_center) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
     float eps = 1e-6f;
     EXPECT_LE((grid.aabb.center() - grid.to_voxel_center(grid.aabb.center())).norm(), eps);
 }
 
 TEST(TestOccupancyGrid, to_voxel_min) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE(
@@ -91,7 +91,7 @@ TEST(TestOccupancyGrid, to_voxel_min) {
 }
 
 TEST(TestOccupancyGrid, to_voxel_max) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE(
@@ -100,7 +100,7 @@ TEST(TestOccupancyGrid, to_voxel_max) {
 }
 
 TEST(TestOccupancyGrid, coord_to_idx) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
@@ -117,7 +117,7 @@ TEST(TestOccupancyGrid, coord_to_idx) {
 }
 
 TEST(TestOccupancyGrid, coord_to_voxel_center) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
@@ -137,7 +137,7 @@ TEST(TestOccupancyGrid, coord_to_voxel_center) {
 }
 
 TEST(TestOccupancyGrid, coord_to_voxel_min) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE((grid.aabb.center() - grid.voxel_side_length() / 2 -
@@ -145,7 +145,7 @@ TEST(TestOccupancyGrid, coord_to_voxel_min) {
 }
 
 TEST(TestOccupancyGrid, coord_to_voxel_max) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE((grid.aabb.center() + grid.voxel_side_length() / 2 -
@@ -153,7 +153,7 @@ TEST(TestOccupancyGrid, coord_to_voxel_max) {
 }
 
 TEST(TestOccupancyGrid, idx_to_coord) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     for (size_t i = 0; i < grid.capacity(); ++i) {
         EXPECT_EQ(i, grid.coord_to_idx(grid.idx_to_coord(i)));
@@ -169,21 +169,21 @@ TEST(TestOccupancyGrid, idx_to_coord) {
 }
 
 TEST(TestOccupancyGrid, idx_to_voxel_center) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE((grid.aabb.center() - grid.idx_to_voxel_center(62)).norm(), eps);
 }
 
 TEST(TestOccupancyGrid, idx_to_voxel_min) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE((grid.aabb.min + grid.voxel_side_length() / 2 - grid.idx_to_voxel_center(0)).norm(), eps);
 }
 
 TEST(TestOccupancyGrid, itd_to_voxel_max) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     float eps = 1e-6f;
     EXPECT_LE((grid.aabb.max - grid.voxel_side_length() / 2 - grid.idx_to_voxel_center(124)).norm(), eps);
@@ -191,7 +191,7 @@ TEST(TestOccupancyGrid, itd_to_voxel_max) {
 
 
 TEST(TestOccupancyGrid, voxel_side_length) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     EXPECT_EQ(grid.voxel_side_length(),
               (grid.aabb.diagonal().array() / grid.dims.cast<bcg_scalar_t >().array()).matrix());
@@ -200,11 +200,11 @@ TEST(TestOccupancyGrid, voxel_side_length) {
 }
 
 TEST(TestOccupancyGrid, traverse) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     size_t count = 0;
     bool has_any = false;
-    traverse(grid, [&has_any, &count](size_t idx, occupancy_grid &grid) {
+    traverse<3>(grid, [&has_any, &count](size_t idx, occupancy_grid<3> &grid) {
         ++count;
         has_any = grid.is_occupied_idx(idx);
         return true;
@@ -218,7 +218,7 @@ TEST(TestOccupancyGrid, traverse) {
 
     count = 0;
     has_any = false;
-    traverse(grid, [&has_any, &count](size_t idx, occupancy_grid &grid) {
+    traverse<3>(grid, [&has_any, &count](size_t idx, occupancy_grid<3> &grid) {
         if (grid.is_occupied_idx(idx)) {
             ++count;
             has_any = grid.is_occupied_idx(idx);
@@ -232,7 +232,7 @@ TEST(TestOccupancyGrid, traverse) {
 
     count = 0;
     has_any = false;
-    traverse(grid, [&has_any, &count](size_t idx, occupancy_grid &grid) {
+    traverse<3>(grid, [&has_any, &count](size_t idx, occupancy_grid<3> &grid) {
         if (grid.is_occupied_idx(idx)) {
             ++count;
             has_any = grid.is_occupied_idx(idx);
@@ -244,7 +244,7 @@ TEST(TestOccupancyGrid, traverse) {
 }
 
 TEST(TestOccupancyGrid, query_knn) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
 
     EXPECT_FALSE(grid.is_occupied_coord(VectorI<3>(1, 1, 1)));
     grid.mark_occupied_coord(VectorI<3>(1, 1, 1));
@@ -341,7 +341,7 @@ TEST(TestOccupancyGrid, query_knn) {
 }
 
 TEST(TestOccupancyGrid, query_kring) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
     grid.mark_occupied_coord(VectorI<3>(1, 1, 1));
     grid.mark_occupied_coord(VectorI<3>(1, 1, 2));
     grid.mark_occupied_coord(VectorI<3>(1, 1, 3));
@@ -409,7 +409,7 @@ TEST(TestOccupancyGrid, query_kring) {
 
 
 TEST(TestOccupancyGrid, query_radius) {
-    occupancy_grid grid({5, 5, 5}, aligned_box3::unit());
+    occupancy_grid<3> grid({5, 5, 5}, aligned_box3::unit());
     grid.mark_occupied_coord(VectorI<3>(1, 1, 1));
     grid.mark_occupied_coord(VectorI<3>(1, 1, 2));
     grid.mark_occupied_coord(VectorI<3>(1, 1, 3));

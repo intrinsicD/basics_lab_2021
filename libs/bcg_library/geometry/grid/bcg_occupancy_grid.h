@@ -43,11 +43,11 @@ struct occupancy_grid : public base_grid<D> {
     }
 
     bool is_occupied_point(const VectorS<D> &point) const{
-        return occupied.test(to_idx(point));
+        return occupied.test(this->to_idx(point));
     }
 
     bool is_occupied_coord(const VectorI<D> &coord) const{
-        return occupied.test(coord_to_idx(coord));
+        return occupied.test(this->coord_to_idx(coord));
     }
 
     [[nodiscard]] bool is_occupied_idx(size_t idx) const{
@@ -108,11 +108,11 @@ void traverse(occupancy_grid<D> &grid, const std::function<bool(size_t, occupanc
 
 template<int D>
 neighbors_query query_kring(const occupancy_grid<D> &grid, const VectorS<D> &query_point, size_t k){
-    occupancy_grid moore(VectorI<D>::Constant(2 * k + 1), grid.aabb);
+    occupancy_grid<D> moore(VectorI<D>::Constant(2 * k + 1), grid.aabb);
     VectorI<D> center_coord = moore.to_coord(grid.aabb.center());
     VectorI<D> query_coord = grid.to_coord(query_point);
     neighbors_query result;
-    traverse(moore, [&query_point, &query_coord, &center_coord, &grid, &result](size_t idx,
+    traverse<D>(moore, [&query_point, &query_coord, &center_coord, &grid, &result](size_t idx,
                                                                                 const occupancy_grid<D> &moore) {
         VectorI<D> current_coords = query_coord + moore.idx_to_coord(idx) - center_coord;
         if (grid.is_inside_bounds_coord(current_coords) && grid.is_occupied_coord(current_coords)) {
@@ -131,7 +131,7 @@ neighbors_query query_knn(const occupancy_grid<D> &grid, const VectorS<D> &query
     VectorI<D> query_coord = grid.to_coord(query_point);
     neighbors_query result_set;
     bcg_index_t kring = 1;
-    occupancy_grid boundary({2, 2, 2}, grid.aabb);
+    occupancy_grid<D> boundary({2, 2, 2}, grid.aabb);
     VectorI<D> center_coord = boundary.to_coord(grid.aabb.center());
 
     while (result_set.indices.size() < num_closest) {
@@ -159,10 +159,10 @@ neighbors_query query_radius(const occupancy_grid<D> &grid, const VectorS<D> &qu
     VectorI<D> query_coord = grid.to_coord(query_point);
     neighbors_query result_set;
     int kring = std::max<int>(radius / grid.voxel_side_length().maxCoeff(), 1);
-    occupancy_grid moore(VectorI<D>::Constant(2 * kring + 1), grid.aabb);
+    occupancy_grid<D> moore(VectorI<D>::Constant(2 * kring + 1), grid.aabb);
     VectorI<D> center_coord = moore.to_coord(grid.aabb.center());
 
-    traverse(moore, [&query_point, &query_coord, &center_coord, &grid, &result_set, &radius](size_t idx,
+    traverse<D>(moore, [&query_point, &query_coord, &center_coord, &grid, &result_set, &radius](size_t idx,
                                                                                              const occupancy_grid<D> &moore) {
         VectorI<D> current_coords = query_coord + moore.idx_to_coord(idx) - center_coord;
         if (grid.is_inside_bounds_coord(current_coords) && grid.is_occupied_coord(current_coords)) {
