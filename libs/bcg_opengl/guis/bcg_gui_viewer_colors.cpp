@@ -9,7 +9,7 @@ namespace bcg{
 
 void gui_viewer_colors(viewer_state *state){
     if (ImGui::CollapsingHeader("Colors")) {
-        draw_coloredit(&state->window, "background", state->colors.background);
+        draw_coloredit(&state->window, "background", state->config.background);
         ImGui::Separator();
     }
 }

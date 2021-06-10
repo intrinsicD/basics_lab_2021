@@ -22,10 +22,6 @@ struct GLFWwindow;
 
 namespace bcg {
 
-struct viewer_colors {
-    Vector<float, 4> background = color<float>::default_background;
-};
-
 struct viewer_mouse {
     dynamic_bitset buttons;
     bool is_moving = false, is_scrolling = false, is_dragging = false, left = false, middle = false, right = false;
@@ -97,7 +93,7 @@ struct viewer_callbacks {
 
 struct viewer_window {
     GLFWwindow *win = nullptr;
-    std::string title = "";
+    std::string title;
     bcg_scalar_t high_dpi_scaling = 1.0;
     int width, height;
     VectorI<4> framebuffer_viewport;
@@ -174,6 +170,7 @@ struct viewer_picker {
 };
 
 struct viewer_config {
+    Vector<float, 4> background = color<float>::default_background;
     size_t parallel_grain_size = 1024;
     bcg_scalar_t max_point_size = 20.0;
     std::string get_renderers_path_from_config_file();
@@ -186,7 +183,6 @@ struct viewer_state {
     entt::dispatcher dispatcher;
 
     viewer_config config;
-    viewer_colors colors;
     viewer_keyboard keyboard;
     viewer_mouse mouse;
     viewer_picker picker;

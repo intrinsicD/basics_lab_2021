@@ -10,7 +10,7 @@
 #include "entt/entt.hpp"
 
 namespace bcg::event::internal{
-struct startup {
+struct startup{
 
 };
 struct shutdown {

@@ -5,8 +5,6 @@
 #include "bcg_projection_matrix.h"
 
 namespace bcg{
-
-
     projection::projection() : matrix(MatrixS<4, 4>::Identity()) {}
 
     void projection::perspective(bcg_scalar_t near, bcg_scalar_t far, bcg_scalar_t aspect, bcg_scalar_t fovy_radians) {

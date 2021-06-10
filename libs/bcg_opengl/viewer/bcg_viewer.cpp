@@ -29,10 +29,10 @@
 namespace bcg {
 
 static void draw_window(viewer_state *state) {
-    glClearColor(state->colors.background[0],
-                 state->colors.background[1],
-                 state->colors.background[2],
-                 state->colors.background[3]);
+    glClearColor(state->config.background[0],
+                 state->config.background[1],
+                 state->config.background[2],
+                 state->config.background[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     state->dispatcher.trigger<event::internal::begin_frame>();
     if (state->callbacks.draw_cb) {
@@ -203,8 +203,8 @@ init_window(viewer_state *state, const VectorI<2> &size, const std::string &titl
 }
 
 
-void viewer::run(const VectorI<2> &size, const std::string &title, int widgets_width) {
-    init_window(&state, size, title, (bool) state.callbacks.widgets_cb, widgets_width);
+void viewer::run(int width, int height, const std::string &title, int widgets_width) {
+    init_window(&state, {width, height}, title, (bool) state.callbacks.widgets_cb, widgets_width);
 
     if (state.callbacks.startup_cb) {
         state.callbacks.startup_cb(&state);
