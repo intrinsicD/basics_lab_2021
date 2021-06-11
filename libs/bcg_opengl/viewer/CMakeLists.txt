@@ -13,7 +13,8 @@ target_sources(bcg_opengl PRIVATE
         bcg_viewer.h bcg_viewer.cpp
         bcg_viewer_state.h bcg_viewer_state.cpp
         ${GLAD_SOURCE_DIRS}/glad.c
-        ${IMGUI_SOURCES})
+        ${IMGUI_SOURCES}
+        ${CMAKE_SOURCE_DIR}/external/ImGuizmo/ImGuizmo.cpp)
 
 target_include_directories(bcg_opengl PUBLIC ${GLAD_INCLUDE_DIRS})
 target_include_directories(bcg_opengl PUBLIC ${IMGUI_INCLUDE_DIRS})

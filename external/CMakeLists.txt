@@ -4,6 +4,7 @@ add_subdirectory(eigen)
 add_subdirectory(spectra)
 add_subdirectory(entt)
 add_subdirectory(tbb)
+include_directories(ImGuizmo)
 
 if(BCG_OPENGL)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

@@ -21,6 +21,8 @@ struct transform_system : public system {
     void on_rotate(const event::transform::rotate &event);
 
     void on_update(const event::internal::update &event);
+
+    void on_render_gui(const event::internal::render_gui &event);
 };
 
 }

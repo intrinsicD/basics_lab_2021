@@ -20,6 +20,7 @@
 #include "bcg_imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
+#include "ImGuizmo/ImGuizmo.h"
 
 #ifdef _WIN32
 #undef near
@@ -48,13 +49,14 @@ void draw_gui(viewer_state *state){
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
+        ImGuizmo::BeginFrame();
         if (state->gui.show_menu && state->gui.menu.show) {
             state->gui.menu.render(state);
         }
         if (state->gui.left.show && state->gui.left.active) {
             state->gui.left.render(state);
         }
+        state->dispatcher.trigger<event::internal::render_gui>();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

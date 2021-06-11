@@ -31,6 +31,9 @@ struct begin_frame {
 struct render {
 
 };
+struct render_gui{
+
+};
 struct end_frame {
 
 };
