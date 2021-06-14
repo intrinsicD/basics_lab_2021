@@ -85,39 +85,41 @@ void transform_system::on_render_gui(const event::internal::render_gui &) {
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoBackground;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
-    window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::Begin("TransparentTransformWindow", &open_ptr, window_flags);
-    auto win_size = ImGui::GetWindowSize();
-    win_size[0] = 250;
-    win_size[1] = 60;
-    ImGui::SetWindowSize(win_size);
-    ImVec2 pos(state->window.width - win_size[0], 19);
-    ImGui::SetWindowPos(pos);
+    ImGui::LabelText("Selected Entity", "%zu", size_t(state->picker.entity_id));
     if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
         mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
     ImGui::SameLine();
     if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
         mCurrentGizmoOperation = ImGuizmo::ROTATE;
-    ImGui::SameLine();
     if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
         mCurrentGizmoOperation = ImGuizmo::SCALE;
+    ImGui::SameLine();
+    static bool disabled = false;
+    ImGui::Checkbox("Disabled", &disabled);
+    ImGuizmo::Enable(!disabled);
+
     static bool useSnap(false);
     ImGui::PushID("use_snap");
     ImGui::Checkbox("", &useSnap);
-    ImGui::SameLine();
-    static float snap[3] = {1.f, 1.f, 1.f};
-    ImGui::InputFloat3("Snap", &snap[0]);
     ImGui::PopID();
+    ImGui::SameLine();
+    static float snap[3] = {1.0f, 1.0f, 1.0f};
+    ImGui::InputFloat3("Snap", &snap[0]);
 
     ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
     auto &model = state->scene.get<Transform>(state->picker.entity_id);
     Matrix<float, 4, 4> M = model.matrix().cast<float>();
-    ImGuizmo::Enable(true);
+
     ImGuizmo::Manipulate(view.data(), proj.data(), mCurrentGizmoOperation, mCurrentGizmoMode, M.data(),
-                         useSnap ? &snap[0] : NULL);
+                         nullptr, useSnap ? &snap[0] : nullptr);
     model.matrix() = M.cast<bcg_scalar_t>();
+    auto win_size = ImGui::GetWindowSize();
+    ImVec2 pos(state->window.width - win_size[0], 19);
+    ImGui::SetWindowPos(pos);
     ImGui::End();
 }
 

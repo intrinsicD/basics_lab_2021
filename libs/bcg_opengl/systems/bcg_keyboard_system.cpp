@@ -76,6 +76,10 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
                 auto &model = state->scene.get<Transform>(item.second);
                 model.setIdentity();
             }
+            if(state->scene.valid(state->picker.entity_id)){
+                auto &model = state->scene.get<Transform>(state->picker.entity_id);
+                model.setIdentity();
+            }
         }else{
             state->cam.init(state->window.width, state->window.height);
         }
