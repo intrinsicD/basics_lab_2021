@@ -63,12 +63,12 @@ void graph_shortest_paths_from(halfedge_graph &graph, vertex_handle v_start, pro
     }
 }
 
-Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, vertex_handle v_end) {
+geometric_path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, vertex_handle v_end) {
     return graph_shortest_path_between(graph, v_start, v_end, property<bcg_scalar_t, 1>(), property<VectorS<3>, 3>());
 }
 
-Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, vertex_handle v_end,
-                                 property<bcg_scalar_t, 1> heuristic, property<VectorS<3>, 3> guide_vectorfield) {
+geometric_path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, vertex_handle v_end,
+                                           property<bcg_scalar_t, 1> heuristic, property<VectorS<3>, 3> guide_vectorfield) {
     auto v_visited = graph.vertices.get_or_add<bcg_scalar_t, 1>("v_visited");
     v_visited.reset(0);
     auto v_dijkstra_distance = graph.vertices.get_or_add<bcg_scalar_t, 1>("v_dijkstra_distance");
@@ -123,7 +123,7 @@ Path graph_shortest_path_between(halfedge_graph &graph, vertex_handle v_start, v
     //backtrack from v_end;
     auto v_shortest_path = graph.vertices.get_or_add<bcg_scalar_t, 1>("v_shortest_path");
     v_shortest_path.reset(0);
-    Path result;
+    geometric_path result;
     result.length = v_dijkstra_distance[v_end];
     auto v = v_end;
     size_t count = 0;

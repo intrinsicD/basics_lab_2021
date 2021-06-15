@@ -27,7 +27,7 @@ void gui_graph_dijkstra(viewer_state *state) {
             gui_property_selector(state, vertices, {3}, "guide_vectorfield", current_selected_guide_vectorfield);
         }
 
-        static std::vector<Path> paths;
+        static std::vector<geometric_path> paths;
         static float shortest_path_length = 0;
         static bool vertex_selection_mode = state->picker.mode == viewer_picker::Mode::vertices;
         if (ImGui::Checkbox("vertex_selection_mode", &vertex_selection_mode)) {
@@ -61,7 +61,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                     paths.back().vertices.clear();
                     shortest_path_length = 0;
                     for (size_t i = 0; i < selection.ordering.size() - 1; ++i) {
-                        Path result;
+                        geometric_path result;
                         if (state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) {
                             auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                             result = graph_shortest_path_between(mesh, selection.ordering[i], selection.ordering[i + 1],
