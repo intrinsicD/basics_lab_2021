@@ -25,8 +25,8 @@ struct material_mesh : public material{
     bool use_uniform_color = true;
     bool use_face_color = false;
 
-    Vector<float, 3> ambient = color<float>::random();
-    Vector<float, 3> diffuse = color<float>::white;
+    Vector<float, 3> ambient = color<float>::white;
+    Vector<float, 3> diffuse = color<float>::random();
     Vector<float, 3> specular = color<float>::grey;
     float shininess = 32;
     float uniform_alpha = 1;

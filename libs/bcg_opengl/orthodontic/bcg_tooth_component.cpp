@@ -276,7 +276,26 @@ tooth_component primary_tooth_factory::make(int fdi_number) {
     assert(fdi_number <= 85);
     int number = fdi_number % 10;
     assert(number != 0);
-    auto quadrant = static_cast<ToothQuadrant>((fdi_number - number) / 10);
+    int q = (fdi_number - number) / 10;
+    ToothQuadrant quadrant;
+    switch (q) {
+        case 5: {
+            quadrant = ToothQuadrant::upper_right;
+            break;
+        }
+        case 6: {
+            quadrant = ToothQuadrant::upper_left;
+            break;
+        }
+        case 7: {
+            quadrant = ToothQuadrant::lower_left;
+            break;
+        }
+        case 8: {
+            quadrant = ToothQuadrant::lower_right;
+            break;
+        }
+    }
     assert(static_cast<int>(quadrant) < static_cast<int>(ToothQuadrant::__last__));
     tooth_component component = make(quadrant, number);
     assert(component.fdi_number == fdi_number);
@@ -287,7 +306,27 @@ tooth_component primary_tooth_factory::make(ToothQuadrant quadrant, int number) 
     tooth_component component;
     component.quadrant = quadrant;
     component.number = number;
-    component.fdi_number = (static_cast<int>(quadrant) + 4) * 10 + number;
+    int q;
+    switch (quadrant) {
+        case ToothQuadrant::upper_right: {
+            q = 5;
+            break;
+        }
+        case ToothQuadrant::upper_left: {
+            q = 6;
+            break;
+        }
+        case ToothQuadrant::lower_left: {
+            q = 7;
+            break;
+        }
+        case ToothQuadrant::lower_right: {
+            q = 8;
+            break;
+        }
+
+    }
+    component.fdi_number = q * 10 + number;
     if (component.number == 1 || component.number == 2) {
         component.type = ToothType::incisor;
     } else if (component.number == 3) {

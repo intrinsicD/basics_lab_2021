@@ -33,9 +33,18 @@ struct jaw_component {
     JawAge age = JawAge::undefined;
     std::unordered_map<int, entt::entity> teeth;
     unsigned int max_number_teeth;
-    bool has_teeth(int fdi_number) {
-        return teeth.find(fdi_number) != teeth.end();
-    }
+
+    bool has_teeth(int fdi_number) const;
+
+    std::vector<int> get_incisors() const;
+
+    std::vector<int> get_canines() const;
+
+    std::vector<int> get_premolars() const;
+
+    std::vector<int> get_molars() const;
+
+    std::vector<int> get_undefined() const;
 };
 
 struct jaw_factory {
