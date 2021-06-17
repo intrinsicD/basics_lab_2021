@@ -7,6 +7,7 @@
 #include <bcg_library/geometry/bcg_property_map_eigen.h>
 
 #include "bcg_picking_renderer.h"
+#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_picking.h"
@@ -116,6 +117,10 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         auto &material = state->scene.get<material_picking>(id);
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
+        if(state->scene.all_of<object_space_view>(id)){
+            auto &osv = state->scene.get<object_space_view>(id);
+            model_matrix = (model * osv).matrix().cast<float>();
+        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.upload(program);

@@ -6,6 +6,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_entity_info.h"
 #include "bcg_property_map_eigen.h"
+#include "components/bcg_component_object_space_view.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "geometry/mesh/bcg_mesh_factory.h"
 #include "geometry/mesh/bcg_mesh_vertex_normals.h"
@@ -99,16 +100,15 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
 
     state->scene.emplace<entity_info>(event.id, event.filename, "mesh", loading_model, aabb);
 
-    Map(mesh.positions) =
-            (MapConst(mesh.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
-
+    state->dispatcher.trigger<event::aligned_box::add>(event.id);
+    state->dispatcher.trigger<event::object_space::add_component_object_space_transform>(event.id);
+    state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(event.id, loading_model.inverse());
 
     if (!mesh.vertices.has("v_normal")) {
         state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
     }
     state->dispatcher.trigger<event::mesh::face::centers>(event.id);
     state->dispatcher.trigger<event::graph::edge::centers>(event.id);
-    state->dispatcher.trigger<event::aligned_box::add>(event.id);
     state->scene.emplace_or_replace<event::picking_renderer::enqueue>(event.id);
     state->scene.emplace_or_replace<event::mesh_renderer::enqueue>(event.id);
     state->picker.entity_id = event.id;
@@ -231,19 +231,28 @@ void mesh_system::on_connected_components_detect(const event::mesh::connected_co
 }
 
 void mesh_system::on_connected_components_split(const event::mesh::connected_components::split &event) {
-    if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<halfedge_mesh>(event.id)) return;
+    auto parent_id = event.id;
+    if (!state->scene.valid(parent_id)) return;
+    if (!state->scene.all_of<halfedge_mesh>(parent_id)) return;
 
-    auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-    auto info = state->scene.get<entity_info>(event.id);
+    auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
+    auto info = state->scene.get<entity_info>(parent_id);
     auto parts = mesh_connected_components_split(mesh);
+    auto &parent_osv = state->scene.get<object_space_view>(parent_id);
     for (const auto &part : parts) {
-        auto id = state->scene.create();
-        state->scene.emplace<halfedge_mesh>(id, part);
-
+        auto child_id = state->scene.create();
+        state->scene.emplace<halfedge_mesh>(child_id, part);
+        //TODO figure out how to handle loading/construction dimensions and mapping the view to the unit cube while keeping data intact!
         std::string filename = path_join(path_dirname(info.filename), path_basename(info.filename)) + "_part_" +
-                               std::to_string(int(id)) + path_extension(info.filename);
-        state->dispatcher.trigger<event::mesh::setup>(id, filename, true);
+                               std::to_string(int(child_id)) + path_extension(info.filename);
+        state->dispatcher.trigger<event::mesh::setup>(child_id, filename, true);
+        if(state->scene.all_of<object_space_view>(parent_id)){
+            auto &child_osv = state->scene.get<object_space_view>(child_id);
+            auto &model = state->scene.get<Transform>(child_id);
+            auto &child_info = state->scene.get<entity_info>(child_id);
+            child_info.loading_model = Transform(parent_osv) * Transform(child_osv).inverse();
+            model = child_info.loading_model;
+        }
         //state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         //state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }

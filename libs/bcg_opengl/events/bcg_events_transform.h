@@ -24,6 +24,9 @@ struct rotate{
     entt::entity id;
     VectorS<4> angle_axis;
 };
+struct reset{
+    entt::entity id;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_TRANSFORM_H

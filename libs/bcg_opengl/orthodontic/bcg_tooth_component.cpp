@@ -324,7 +324,10 @@ tooth_component primary_tooth_factory::make(ToothQuadrant quadrant, int number) 
             q = 8;
             break;
         }
-
+        default:{
+            q = 0;
+            break;
+        }
     }
     component.fdi_number = q * 10 + number;
     if (component.number == 1 || component.number == 2) {

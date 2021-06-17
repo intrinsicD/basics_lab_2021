@@ -9,6 +9,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_points.h"
+#include "components/bcg_component_object_space_view.h"
 #include "renderers/bcg_attribute.h"
 #include "utils/bcg_string_utils.h"
 #include "bcg_events_points_renderer.h"
@@ -127,6 +128,10 @@ void points_renderer::on_render(const event::internal::render &) {
         auto &material = state->scene.get<material_points>(id);
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
+        if(state->scene.all_of<object_space_view>(id)){
+            auto &osv = state->scene.get<object_space_view>(id);
+            model_matrix = (model * osv).matrix().cast<float>();
+        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.uniform_size = gl_state.point_size_value;

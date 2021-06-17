@@ -7,6 +7,7 @@
 #include <string>
 
 #include "bcg_vectorfield_renderer.h"
+#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_vectorfield.h"
@@ -148,6 +149,7 @@ void vectorfield_renderer::on_begin_frame(const event::internal::begin_frame &) 
 
 void render_vectorfield(material_vectorfield &material, Transform &model, glsl_program &program) {
     Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
+
     program.set_uniform_matrix_4f("model", model_matrix.data());
 
     material.upload(program);
@@ -175,7 +177,11 @@ void vectorfield_renderer::on_render(const event::internal::render &) {
         if (!state->scene.valid(id)) continue;
         if (!state->scene.all_of<vectorfields>(id)) continue;
 
-        auto &model = state->scene.get<Transform>(id);
+        auto model = state->scene.get<Transform>(id);
+        if(state->scene.all_of<object_space_view>(id)){
+            auto &osv = state->scene.get<object_space_view>(id);
+            model = model * osv;
+        }
         auto &vectors = state->scene.get<vectorfields>(id);
         for (auto &item : vectors.vertex_vectorfields) {
             if (!item.second.vao.is_valid()) continue;

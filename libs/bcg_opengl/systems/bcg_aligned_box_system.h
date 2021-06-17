@@ -13,6 +13,8 @@ struct aligned_box_system : public system {
     explicit aligned_box_system(viewer_state *state);
 
     void on_add(const event::aligned_box::add &event);
+
+    void on_set(const event::aligned_box::set &event);
 };
 
 }

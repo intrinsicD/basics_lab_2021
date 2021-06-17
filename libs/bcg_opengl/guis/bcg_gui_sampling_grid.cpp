@@ -4,6 +4,7 @@
 
 
 #include "bcg_gui_sampling_grid.h"
+#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_entity_hierarchy.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
@@ -99,6 +100,10 @@ void gui_sampling_grid(viewer_state *state) {
                         state->scene.emplace<point_cloud>(child_id, pc);
                         state->scene.emplace<entt::tag<"subsampled_grid"_hs>>(child_id);
                         state->dispatcher.trigger<event::point_cloud::setup>(child_id, "subsampled_grid");
+                        if(state->scene.all_of<object_space_view>(parent_id)){
+                            auto &osv = state->scene.get<object_space_view>(parent_id);
+                            state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(id, osv);
+                        }
                         state->scene.remove_if_exists<event::picking_renderer::enqueue>(child_id);
                         state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, child_id);
                         state->picker.entity_id = parent_id;

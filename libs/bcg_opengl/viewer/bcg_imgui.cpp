@@ -614,7 +614,7 @@ struct ImGuiAppLog {
             ImGui::TextUnformatted(Buf.begin());
         }
 
-        if (ScrollToBottom) ImGui::SetScrollHere(1.0f);
+        if (ScrollToBottom) ImGui::SetScrollHereX(1.0f);
         ScrollToBottom = false;
         ImGui::PopStyleVar();
         ImGui::EndChild();

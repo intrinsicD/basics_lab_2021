@@ -36,8 +36,8 @@ void orthodontic_system::on_mouse_button(const event::mouse::button &) {
     if (consume_next_click && state->mouse.left && state->scene.valid(id) && state->scene.valid(jaw_id) &&
         fid_number > 0) {
         auto &component = state->scene.get<jaw_component>(jaw_id);
-        for(auto it = component.teeth.begin(); it != component.teeth.end(); ++it){
-            if((*it).second == id){
+        for (auto it = component.teeth.begin(); it != component.teeth.end(); ++it) {
+            if ((*it).second == id) {
                 component.teeth.erase(it);
                 break;
             }
@@ -61,7 +61,7 @@ void orthodontic_system::on_set_tooth_component(const event::orthodontic::set_to
             tooth = factory.make(event.fdi_number);
             break;
         }
-        case JawAge::permament: {
+        case JawAge::permanent: {
             permanent_tooth_factory factory;
             tooth = factory.make(event.fdi_number);
             break;
@@ -157,7 +157,7 @@ void orthodontic_system::on_internal_keyboard(const event::internal::keyboard &e
     }
 }
 
-void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &event) {
+void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &) {
     auto entity_id = state->picker.entity_id;
     if (!state->scene.valid(entity_id)) { return; }
     entt::entity current_selected_tooth = entt::null;
@@ -177,6 +177,7 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
     if (!state->scene.all_of<jaw_component>(jaw_id)) { return; }
     auto &jaw = state->scene.get<jaw_component>(jaw_id);
 
+
     int selected_jaw_type = static_cast<int>(jaw.type);
     int selected_jaw_age = static_cast<int>(jaw.age);
     int selected_tooth_type = static_cast<int>(ToothType::undefined);
@@ -185,15 +186,19 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
     if (draw_combobox(&state->window, "JawType", selected_jaw_type, jaw_type)) {
         jaw.type = static_cast<JawType>(selected_jaw_type);
     }
+    bool is_maxilla = jaw.type == JawType::maxilla;
+    bool is_mandible = jaw.type == JawType::mandible;
     if (draw_combobox(&state->window, "JawAge", selected_jaw_age, jaw_age)) {
         jaw.age = static_cast<JawAge>(selected_jaw_age);
         if (jaw.age == JawAge::primary) {
             jaw.max_number_teeth = 10;
-        } else if (jaw.age == JawAge::permament) {
+        } else if (jaw.age == JawAge::permanent) {
             jaw.max_number_teeth = 16;
         }
-
     }
+    bool is_primary = jaw.age == JawAge::primary;
+    bool is_permanent = jaw.age == JawAge::permanent;
+
     ImGui::Separator();
     auto dentition_button = [&](int fid_number_, float width) {
         ImVec2 button_sz(width, width);
@@ -220,7 +225,7 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
         }
     };
 
-    if (jaw.age == JawAge::primary) {
+    if (is_primary) {
         float width = float(state->window.widgets_width) / (jaw.max_number_teeth + 3);
         if (ImGui::CollapsingHeader("Primary Dentition")) {
             ImGui::Columns(2, "prim_dentition");
@@ -230,6 +235,9 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             ImGui::Text("upper left - 6");
             ImGui::NextColumn();
             ImGui::Separator();
+            if (is_mandible) {
+                ImGui::PushDisabled();
+            }
             dentition_button(55, width);
             ImGui::SameLine();
             dentition_button(54, width);
@@ -249,6 +257,12 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             dentition_button(64, width);
             ImGui::SameLine();
             dentition_button(65, width);
+            if (is_mandible) {
+                ImGui::PopDisabled();
+            }
+            if (is_maxilla) {
+                ImGui::PushDisabled();
+            }
             ImGui::NextColumn();
             dentition_button(85, width);
             ImGui::SameLine();
@@ -269,6 +283,9 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             dentition_button(74, width);
             ImGui::SameLine();
             dentition_button(75, width);
+            if (is_maxilla) {
+                ImGui::PopDisabled();
+            }
             ImGui::NextColumn();
             ImGui::Separator();
             ImGui::Text("lower right - 8");
@@ -278,7 +295,7 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             ImGui::Separator();
             ImGui::Columns(1);
         }
-    } else if (jaw.age == JawAge::permament) {
+    } else if (is_permanent) {
         float width = float(state->window.widgets_width) / (jaw.max_number_teeth + 6);
         if (ImGui::CollapsingHeader("Permanent Dentition")) {
             ImGui::Columns(2, "prim_dentition");
@@ -288,6 +305,9 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             ImGui::Text("upper left - 2");
             ImGui::NextColumn();
             ImGui::Separator();
+            if (is_mandible) {
+                ImGui::PushDisabled();
+            }
             dentition_button(18, width);
             ImGui::SameLine();
             dentition_button(17, width);
@@ -319,7 +339,13 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             dentition_button(27, width);
             ImGui::SameLine();
             dentition_button(28, width);
+            if (is_mandible) {
+                ImGui::PopDisabled();
+            }
             ImGui::NextColumn();
+            if (is_maxilla) {
+                ImGui::PushDisabled();
+            }
             dentition_button(48, width);
             ImGui::SameLine();
             dentition_button(47, width);
@@ -351,6 +377,9 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             dentition_button(37, width);
             ImGui::SameLine();
             dentition_button(38, width);
+            if (is_maxilla) {
+                ImGui::PopDisabled();
+            }
             ImGui::NextColumn();
             ImGui::Separator();
             ImGui::Text("lower right - 4");
@@ -361,7 +390,7 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             ImGui::Columns(1);
         }
     }
-
+    static std::vector<int> selected_teeth;
     if (state->scene.all_of<tooth_component>(entity_id)) {
         auto &tooth = state->scene.get<tooth_component>(entity_id);
         if (ImGui::CollapsingHeader("Current selected tooth")) {
@@ -371,47 +400,94 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &eve
             ImGui::LabelText("type", "%s", tooth_type[static_cast<int>(tooth.type)].c_str());
             ImGui::LabelText("quadrant", "%s", tooth_quadrant[static_cast<int>(tooth.quadrant)].c_str());
         }
+        ImGui::Text("Select: ");
+        ImGui::SameLine();
+        if (ImGui::Button("Incisors")) {
+            selected_teeth = jaw.get_incisors();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Canines")) {
+            selected_teeth = jaw.get_canines();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Premolars")) {
+            selected_teeth = jaw.get_premolars();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Molars")) {
+            selected_teeth = jaw.get_molars();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("All")) {
+            selected_teeth = jaw.get_all();
+        }
+
         switch (tooth.type) {
             case ToothType::incisor: {
-                if (ImGui::Button("Compute Incisal Edges")) {
+                ImGui::Text("Compute Incisal: ");
+                ImGui::SameLine();
+                ImGui::PushID("Compute Incisal");
+                if (ImGui::Button("Edges")) {
 
                 }
+                ImGui::PopID();
                 break;
             }
             case ToothType::canine: {
-                if (ImGui::Button("Compute Canine cusp")) {
+                ImGui::Text("Compute Canines: ");
+                ImGui::SameLine();
+                ImGui::PushID("Compute Canines");
+                if (ImGui::Button("Cusp")) {
 
                 }
+                ImGui::PopID();
                 break;
             }
             case ToothType::premolar: {
-                if (ImGui::Button("Compute Premolar cusp")) {
+                ImGui::Text("Compute Premolars: ");
+                ImGui::SameLine();
+                ImGui::PushID("Compute Premolars");
+                if (ImGui::Button("Cusp")) {
 
                 }
-                if (ImGui::Button("Compute Premolar grove")) {
+                ImGui::SameLine();
+                if (ImGui::Button("Grove")) {
 
                 }
-                if (ImGui::Button("Compute Premolar ridges")) {
+                ImGui::SameLine();
+                if (ImGui::Button("Ridges")) {
 
                 }
-                if (ImGui::Button("Compute Premolar occlusal surface boundary")) {
+                ImGui::SameLine();
+                if (ImGui::Button("Occlusal surface boundary")) {
 
                 }
+                ImGui::PopID();
                 break;
             }
             case ToothType::molar: {
-                if (ImGui::Button("Compute Molar cusp")) {
+                ImGui::Text("Compute Molars: ");
+                ImGui::SameLine();
+                ImGui::PushID("Compute Molars");
+                if (ImGui::Button("Cusps")) {
 
                 }
-                if (ImGui::Button("Compute Molar grove")) {
+                ImGui::SameLine();
+                if (ImGui::Button("Grove")) {
 
                 }
-                if (ImGui::Button("Compute Molar ridges")) {
+                ImGui::SameLine();
+                if (ImGui::Button("Ridges")) {
 
                 }
-                if (ImGui::Button("Compute Molar occlusal surface boundary")) {
+                ImGui::SameLine();
+                if (ImGui::Button("Occlusal surface boundary")) {
 
                 }
+                ImGui::PopID();
+                break;
+            }
+            default: {
                 break;
             }
         }

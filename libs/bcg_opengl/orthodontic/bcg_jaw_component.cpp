@@ -17,7 +17,7 @@ std::vector<std::string> jaw_type_names() {
 std::vector<std::string> jaw_age_type_names() {
     std::vector<std::string> names(static_cast<int>(JawType::__last__));
     names[static_cast<int>(JawAge::primary)] = "primary";
-    names[static_cast<int>(JawAge::permament)] = "permament";
+    names[static_cast<int>(JawAge::permanent)] = "permanent";
     names[static_cast<int>(JawAge::undefined)] = "undefined";
     return names;
 }
@@ -72,11 +72,19 @@ std::vector<int> jaw_component::get_molars() const {
             if(number == 4 || number == 5){
                 subset.push_back(fid);
             }
-        }else if(age == JawAge::permament){
+        }else if(age == JawAge::permanent){
             if(number == 6 || number == 7 || number == 8){
                 subset.push_back(fid);
             }
         }
+    }
+    return subset;
+}
+
+std::vector<int> jaw_component::get_all() const{
+    std::vector<int> subset;
+    for(const auto &item : teeth){
+        subset.push_back(item.first);
     }
     return subset;
 }
@@ -102,7 +110,7 @@ jaw_component jaw_factory::make_primary_mandible() {
 jaw_component jaw_factory::make_permanent_maxilla() {
     jaw_component component;
     component.type = JawType::maxilla;
-    component.age = JawAge::permament;
+    component.age = JawAge::permanent;
     component.max_number_teeth = 16;
     return component;
 }
@@ -110,7 +118,7 @@ jaw_component jaw_factory::make_permanent_maxilla() {
 jaw_component jaw_factory::make_permanent_mandible() {
     jaw_component component;
     component.type = JawType::mandible;
-    component.age = JawAge::permament;
+    component.age = JawAge::permanent;
     component.max_number_teeth = 16;
     return component;
 }

@@ -11,7 +11,8 @@ target_sources(bcg_graphics PRIVATE
         bcg_pca.h
         bcg_polynomial.h bcg_polynomial.cpp
         bcg_robust_pca.h
-        bcg_vertex_classify_curvature.h bcg_vertex_classify_curvature.cpp)
+        bcg_vertex_classify_curvature.h bcg_vertex_classify_curvature.cpp
+        bcg_object_space.h bcg_object_space.cpp)
 
 
 

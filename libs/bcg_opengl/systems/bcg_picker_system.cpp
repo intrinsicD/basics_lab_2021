@@ -5,6 +5,7 @@
 #include "bcg_picker_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_selection.h"
+#include "components/bcg_component_object_space_view.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"

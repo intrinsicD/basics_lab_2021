@@ -80,10 +80,9 @@ void point_cloud_system::on_setup(const event::point_cloud::setup &event) {
     loading_model.translation() = aabb.center();
     state->scene.emplace<entity_info>(event.id, event.filename, "point_cloud", loading_model, aabb);
 
-    Map(pc.positions) =
-            (MapConst(pc.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
-
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
+    state->dispatcher.trigger<event::object_space::add_component_object_space_transform>(event.id);
+    state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(event.id, loading_model.inverse());
     state->scene.emplace_or_replace<event::picking_renderer::enqueue>(event.id);
     state->scene.emplace_or_replace<event::points_renderer::enqueue>(event.id);
     //state->scene.emplace_or_replace<event::hq_pbr_ufsi_renderer::enqueue>(event.id);

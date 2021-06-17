@@ -12,6 +12,7 @@ if (BCG_OPENGL)
     add_subdirectory(renderers)
     add_subdirectory(viewer)
     add_subdirectory(orthodontic)
+    add_subdirectory(components)
 
     #target_link_libraries(bcg_opengl PUBLIC glfw3 ${OPENGL_gl_LIBRARY} bcg_graphics tbb)
 

@@ -9,8 +9,9 @@ add_subdirectory(math)
 add_subdirectory(registration)
 add_subdirectory(utils)
 add_subdirectory(torch)
+add_subdirectory(orthodontic)
 
-#target_link_options(bcg_graphics PUBLIC -v)
+target_link_options(bcg_graphics PUBLIC -v)
 
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
     message("CMAKE_CXX_COMPILER_VERSION " ${CMAKE_CXX_COMPILER_VERSION})

@@ -22,6 +22,7 @@ if(NOT IMGUI_FOUND)
 			   ${IMGUI_DIRECTORY}/imgui.cpp
 			   ${IMGUI_DIRECTORY}/imgui_demo.cpp
 			   ${IMGUI_DIRECTORY}/imgui_draw.cpp
+			   ${IMGUI_DIRECTORY}/imgui_tables.cpp
 			   ${IMGUI_DIRECTORY}/imgui_widgets.cpp
 			   ${IMGUI_DIRECTORY}/backends/imgui_impl_glfw.cpp
 			   ${IMGUI_DIRECTORY}/backends/imgui_impl_opengl3.cpp

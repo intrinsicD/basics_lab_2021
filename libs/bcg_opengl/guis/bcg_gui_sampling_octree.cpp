@@ -7,6 +7,7 @@
 #include "bcg_gui_property_selector.h"
 #include "geometry/sampling/bcg_sampling_octree.h"
 #include "viewer/bcg_entity_hierarchy.h"
+#include "components/bcg_component_object_space_view.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "math/vector/bcg_vector_map_eigen.h"
 #include "entt/entt.hpp"
@@ -101,6 +102,10 @@ void gui_sampling_octree(viewer_state *state) {
                 state->scene.emplace<point_cloud>(id, pc);
                 state->scene.emplace<entt::tag<"subsampled"_hs>>(id);
                 state->dispatcher.trigger<event::point_cloud::setup>(id, "subsampled");
+                if(state->scene.all_of<object_space_view>(parent_id)){
+                    auto &osv = state->scene.get<object_space_view>(parent_id);
+                    state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(id, osv);
+                }
                 state->scene.remove_if_exists<event::picking_renderer::enqueue>(id);
                 state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, id);
                 state->picker.entity_id = parent_id;

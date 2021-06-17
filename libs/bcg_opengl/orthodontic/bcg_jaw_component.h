@@ -20,7 +20,7 @@ enum class JawType {
 enum class JawAge {
     undefined,
     primary,
-    permament,
+    permanent,
     __last__
 };
 
@@ -43,6 +43,8 @@ struct jaw_component {
     std::vector<int> get_premolars() const;
 
     std::vector<int> get_molars() const;
+
+    std::vector<int> get_all() const;
 
     std::vector<int> get_undefined() const;
 };

@@ -4,7 +4,8 @@
 
 #include "bcg_transform_system.h"
 #include "viewer/bcg_viewer_state.h"
-#include "ImGuizmo/ImGuizmo.h"
+#include "viewer/bcg_entity_info.h"
+#include "guis/bcg_gui_guizmo.h"
 
 namespace bcg {
 
@@ -13,6 +14,7 @@ transform_system::transform_system(viewer_state *state) : system("transform_syst
     state->dispatcher.sink<event::transform::translate>().connect<&transform_system::on_translate>(this);
     state->dispatcher.sink<event::transform::scale>().connect<&transform_system::on_scale>(this);
     state->dispatcher.sink<event::transform::rotate>().connect<&transform_system::on_rotate>(this);
+    state->dispatcher.sink<event::transform::reset>().connect<&transform_system::on_reset>(this);
     state->dispatcher.sink<event::internal::update>().connect<&transform_system::on_update>(this);
     state->dispatcher.sink<event::internal::render_gui>().connect<&transform_system::on_render_gui>(this);
 }
@@ -49,6 +51,16 @@ void transform_system::on_rotate(const event::transform::rotate &event) {
     }
 }
 
+void transform_system::on_reset(const event::transform::reset &event){
+    if (!state->scene.valid(event.id)) return;
+    if(!state->scene.all_of<entity_info>(event.id)) return;
+    if(!state->scene.all_of<Transform>(event.id)) return;
+
+    auto &model = state->scene.get<Transform>(event.id);
+    auto &info = state->scene.get<entity_info>(event.id);
+    model = info.loading_model.inverse();
+}
+
 void transform_system::on_update(const event::internal::update &) {
     if (state->mouse.is_dragging && !state->gui.captured_mouse && state->keyboard.ctrl_pressed) {
         if (!state->picker.valid || !state->scene.all_of<Transform>(state->picker.entity_id)) return;
@@ -77,10 +89,7 @@ void transform_system::on_update(const event::internal::update &) {
 
 void transform_system::on_render_gui(const event::internal::render_gui &) {
     if (!state->scene.valid(state->picker.entity_id)) return;
-    Matrix<float, 4, 4> view = state->cam.view_matrix().cast<float>();
-    Matrix<float, 4, 4> proj = state->cam.projection_matrix().cast<float>();
-    ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
-    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+    auto &model = state->scene.get<Transform>(state->picker.entity_id);
     bool open_ptr = state->picker.entity_id != entt::null;
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoBackground;
@@ -88,37 +97,9 @@ void transform_system::on_render_gui(const event::internal::render_gui &) {
     window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::Begin("TransparentTransformWindow", &open_ptr, window_flags);
     ImGui::LabelText("Selected Entity", "%zu", size_t(state->picker.entity_id));
-    if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-        mCurrentGizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-        mCurrentGizmoOperation = ImGuizmo::SCALE;
-    ImGui::SameLine();
-    static bool disabled = false;
-    ImGui::Checkbox("Disabled", &disabled);
-    ImGuizmo::Enable(!disabled);
-
-    static bool useSnap(false);
-    ImGui::PushID("use_snap");
-    ImGui::Checkbox("", &useSnap);
-    ImGui::PopID();
-    ImGui::SameLine();
-    static float snap[3] = {1.0f, 1.0f, 1.0f};
-    ImGui::InputFloat3("Snap", &snap[0]);
-
-    ImGuiIO &io = ImGui::GetIO();
-    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-    auto &model = state->scene.get<Transform>(state->picker.entity_id);
-    Matrix<float, 4, 4> M = model.matrix().cast<float>();
-
-    ImGuizmo::Manipulate(view.data(), proj.data(), mCurrentGizmoOperation, mCurrentGizmoMode, M.data(),
-                         nullptr, useSnap ? &snap[0] : nullptr);
-    model.matrix() = M.cast<bcg_scalar_t>();
+    gui_guizmo(state, model);
     auto win_size = ImGui::GetWindowSize();
-    ImVec2 pos(state->window.width - win_size[0], 19);
+    ImVec2 pos(state->window.width - win_size[0], state->gui.menu_height);
     ImGui::SetWindowPos(pos);
     ImGui::End();
 }

@@ -85,5 +85,6 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_selected_entities.h bcg_gui_selected_entities.cpp
         bcg_gui_segmented_jaw_alignment.h bcg_gui_segmented_jaw_alignment.cpp
         bcg_gui_orthodontic_jaw.h bcg_gui_orthodontic_jaw.cpp
+        bcg_gui_guizmo.h bcg_gui_guizmo.cpp
         )
 
