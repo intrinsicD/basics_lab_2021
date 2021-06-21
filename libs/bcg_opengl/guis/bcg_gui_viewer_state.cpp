@@ -28,7 +28,7 @@ namespace bcg {
 
 void gui_viewer_state(viewer_state *state) {
     if (ImGui::CollapsingHeader("Scene")) {
-        auto view = state->scene.view<entity_info>();
+        auto view = state->scene().view<entity_info>();
         for (const auto id : view) {
             auto &info = state->scene.get<entity_info>(id);
             std::stringstream ss;

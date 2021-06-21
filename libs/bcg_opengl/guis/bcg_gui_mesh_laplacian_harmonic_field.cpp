@@ -33,11 +33,11 @@ void gui_mesh_laplacian_harmonic_field(viewer_state *state){
         ImGui::InputFloat("weight", &weight);
         if(ImGui::Button("Set Vertex Values")){
             if(state->scene.valid(state->picker.entity_id)){
-                if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+                if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
                     auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                     auto v_constrained_values = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_constrained_values");
                     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
-                    if(state->scene.all_of<selected_vertices>(state->picker.entity_id)){
+                    if(state->scene.has<selected_vertices>(state->picker.entity_id)){
                         auto &selection = state->scene.get<selected_vertices>(state->picker.entity_id);
                         for(const auto &item : selection.selected){
                             v_feature[item.second.element] = true;
@@ -55,7 +55,7 @@ void gui_mesh_laplacian_harmonic_field(viewer_state *state){
         ImGui::SameLine();
         if(ImGui::Button("Set Boundary Values")){
             if(state->scene.valid(state->picker.entity_id)){
-                if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+                if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
                     auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                     auto v_constrained_values = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_constrained_values");
                     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
@@ -75,7 +75,7 @@ void gui_mesh_laplacian_harmonic_field(viewer_state *state){
         ImGui::SameLine();
         if(ImGui::Button("Clear Vertex Values")){
             if(state->scene.valid(state->picker.entity_id)){
-                if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+                if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
                     auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                     auto v_constrained_values = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_constrained_values");
                     v_constrained_values.reset(0);
@@ -87,13 +87,13 @@ void gui_mesh_laplacian_harmonic_field(viewer_state *state){
     }
 
     if(state->scene.valid(state->picker.entity_id)){
-        if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) {
+        if(state->scene.has<halfedge_mesh>(state->picker.entity_id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
             auto v_constrained_values = mesh.vertices.get<bcg_scalar_t, 1>("v_constrained_values");
             if(v_constrained_values){
                 ImGui::Separator();
                 if(ImGui::Button("Compute Harmonic Field")){
-                    if(state->scene.all_of<mesh_laplacian>(state->picker.entity_id)){
+                    if(state->scene.has<mesh_laplacian>(state->picker.entity_id)){
                         auto &laplacian = state->scene.get<mesh_laplacian>(state->picker.entity_id);
                         laplacian_harmonic_field(&mesh.vertices, laplacian, v_constrained_values, weight);
                         auto &material = state->scene.get<material_mesh>(state->picker.entity_id);

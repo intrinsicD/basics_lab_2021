@@ -98,6 +98,7 @@ struct viewer_window {
     int width, height;
     VectorI<4> framebuffer_viewport;
     int widgets_width = 0;
+
     void update();
 };
 
@@ -110,6 +111,7 @@ struct viewer_gui {
     int menu_height = 0;
     gui_menu menu;
     left_panel left;
+
     void update();
 };
 
@@ -149,13 +151,13 @@ private:
 };
 
 struct viewer_picker {
-    enum class Mode{
+    enum class Mode {
         disabled,
         points,
         vertices,
         edges,
         faces
-    }mode = Mode::disabled;
+    } mode = Mode::disabled;
 
     bool valid = false;
     entt::entity entity_id;
@@ -173,13 +175,70 @@ struct viewer_config {
     Vector<float, 4> background = color<float>::default_background;
     size_t parallel_grain_size = 1024;
     bcg_scalar_t max_point_size = 20.0;
+
     std::string get_renderers_path_from_config_file();
+};
+
+struct viewer_scene {
+    entt::registry scene;
+
+    operator entt::registry &() {
+        return scene;
+    }
+
+    operator const entt::registry &() const {
+        return scene;
+    }
+
+    entt::registry &operator()() {
+        return scene;
+    }
+
+    const entt::registry &operator()() const {
+        return scene;
+    }
+
+    entt::entity create() {
+        return scene.create();
+    }
+
+    template<typename Component>
+    bool has(const entt::entity &id) const {
+        return scene.template all_of<Component>(id);
+    }
+
+    bool valid(const entt::entity &id) const {
+        return scene.valid(id);
+    }
+
+    template<typename Component>
+    [[nodiscard]] decltype(auto) get(const entt::entity &id) {
+        return scene.template get<Component>(id);
+    }
+
+    template<typename Component>
+    [[nodiscard]] decltype(auto) get(const entt::entity &id) const {
+        return scene.template get<Component>(id);
+    }
+
+    template<typename Component>
+    [[nodiscard]] auto try_get(const entt::entity &id) {
+        return scene.template try_get<Component>(id);
+    }
+
+    template<typename Component>
+    [[nodiscard]] auto try_get(const entt::entity &id) const {
+        return scene.template try_get<Component>(id);
+    }
+
+    aligned_box3 aabb;
 };
 
 struct viewer_state {
     viewer_state();
 
-    entt::registry scene;
+    //entt::registry scene;
+    viewer_scene scene;
     entt::dispatcher dispatcher;
 
     viewer_config config;

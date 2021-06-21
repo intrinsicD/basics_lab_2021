@@ -53,7 +53,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                     computed_property_name = "v_mesh_curv_mean";
                 }
                 if (ImGui::Button("Invert Function")) {
-                    if (state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) {
+                    if (state->scene.has<halfedge_mesh>(state->picker.entity_id)) {
                         auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                         auto vertex_property = mesh.vertices.get<bcg_scalar_t, 1>(computed_property_name);
                         auto result = invert(&mesh.vertices, vertex_property);
@@ -114,7 +114,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                                 ImGui::Separator();
                                 gui_mesh_laplacian_harmonic_field(state);
                                 if (state->picker.mode == viewer_picker::Mode::vertices &&
-                                    state->scene.all_of<material_points>(state->picker.entity_id)) {
+                                    state->scene.has<material_points>(state->picker.entity_id)) {
                                     auto &material = state->scene.get<material_points>(state->picker.entity_id);
                                     if (material.attributes[2].buffer_name.empty() && mesh.vertices.has("v_selected")) {
                                         material.attributes[2].property_name = "v_selected";
@@ -192,9 +192,9 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 ImGui::SameLine();
                 if (ImGui::Checkbox("Hide Jaw", &hide_jaw)) {
                     if (hide_jaw) {
-                        state->scene.remove<event::mesh_renderer::enqueue>(source_jaw);
+                        state->scene().remove_if_exists<event::mesh_renderer::enqueue>(source_jaw);
                     } else {
-                        state->scene.emplace<event::mesh_renderer::enqueue>(source_jaw);
+                        state->scene().emplace_or_replace<event::mesh_renderer::enqueue>(source_jaw);
                     }
                 }
             }

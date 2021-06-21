@@ -29,7 +29,7 @@ void gui_point_cloud_vertex_saliency(viewer_state *state){
                 auto &index = state->scene.get<kdtree_property<bcg_scalar_t>>(state->picker.entity_id);
                 point_cloud_vertex_saliency(vertices, property, index, radius, state->config.parallel_grain_size);
                 std::string property_name = "v_saliency_diff";
-                if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+                if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
                     auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
                     auto &color = material.attributes[2];
                     color.property_name = property_name;

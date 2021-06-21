@@ -41,7 +41,7 @@ void gui_point_cloud_normal_filtering_robust_statistics(viewer_state *state) {
         if (state->scene.valid(id)) {
             auto *vertices = state->get_vertices(id);
             if (vertices) {
-                if (!state->scene.all_of<kdtree_property<bcg_scalar_t >>(id)) {
+                if (!state->scene.has<kdtree_property<bcg_scalar_t >>(id)) {
                     state->dispatcher.trigger<event::spatial_index::setup_kdtree>(id);
                 }
                 auto &index = state->scene.get<kdtree_property<bcg_scalar_t>>(id);

@@ -16,61 +16,61 @@
 namespace bcg{
 
 void gui_rendering_options(viewer_state *state, entt::entity id){
-    bool show_points = state->scene.all_of<event::points_renderer::enqueue>(id);
-    bool show_hq_points = state->scene.all_of<event::hq_pbr_ufsi_renderer::enqueue>(id);
-    bool show_edges = state->scene.all_of<event::graph_renderer::enqueue>(id);
-    bool show_mesh = state->scene.all_of<event::mesh_renderer::enqueue>(id);
-    bool show_vectors = state->scene.all_of<event::vectorfield_renderer::enqueue>(id);
-    bool show_curves = state->scene.all_of<event::curve_renderer::enqueue>(id);
-    bool render_deferred = state->scene.all_of<event::deferred_renderer::enqueue>(id);
+    bool show_points = state->scene.has<event::points_renderer::enqueue>(id);
+    bool show_hq_points = state->scene.has<event::hq_pbr_ufsi_renderer::enqueue>(id);
+    bool show_edges = state->scene.has<event::graph_renderer::enqueue>(id);
+    bool show_mesh = state->scene.has<event::mesh_renderer::enqueue>(id);
+    bool show_vectors = state->scene.has<event::vectorfield_renderer::enqueue>(id);
+    bool show_curves = state->scene.has<event::curve_renderer::enqueue>(id);
+    bool render_deferred = state->scene.has<event::deferred_renderer::enqueue>(id);
     if (ImGui::CollapsingHeader("rendering")) {
         if (ImGui::Checkbox("show points", &show_points)) {
             if (show_points) {
-                state->scene.emplace_or_replace<event::points_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::points_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::points_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::points_renderer::enqueue>(id);
             }
         }
         if (ImGui::Checkbox("show hq_points", &show_hq_points)) {
             if (show_hq_points) {
-                state->scene.emplace_or_replace<event::hq_pbr_ufsi_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::hq_pbr_ufsi_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::hq_pbr_ufsi_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::hq_pbr_ufsi_renderer::enqueue>(id);
             }
         }
         if (ImGui::Checkbox("show edges", &show_edges)) {
             if (show_edges && state->get_edges(id) != nullptr) {
-                state->scene.emplace_or_replace<event::graph_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::graph_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::graph_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::graph_renderer::enqueue>(id);
             }
         }
         if (ImGui::Checkbox("show mesh", &show_mesh)) {
             if (show_mesh && state->get_faces(id) != nullptr) {
-                state->scene.emplace_or_replace<event::mesh_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::mesh_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::mesh_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::mesh_renderer::enqueue>(id);
             }
         }
         if (ImGui::Checkbox("show vectors", &show_vectors)) {
             if (show_vectors) {
-                state->scene.emplace_or_replace<event::vectorfield_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::vectorfield_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::vectorfield_renderer::enqueue>(id);
             }
         }
         if (ImGui::Checkbox("show curves", &show_curves)) {
             if (show_curves) {
-                state->scene.emplace_or_replace<event::curve_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::curve_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::curve_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::curve_renderer::enqueue>(id);
             }
         }
         if(ImGui::Checkbox("render deferred", &render_deferred)){
             if (render_deferred) {
-                state->scene.emplace_or_replace<event::deferred_renderer::enqueue>(id);
+                state->scene().emplace_or_replace<event::deferred_renderer::enqueue>(id);
             } else {
-                state->scene.remove_if_exists<event::deferred_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::deferred_renderer::enqueue>(id);
             }
         }
         ImGui::Separator();

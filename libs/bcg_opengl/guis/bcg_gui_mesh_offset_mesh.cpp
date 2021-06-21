@@ -15,7 +15,7 @@ void gui_mesh_offset_mesh(viewer_state *state){
     ImGui::InputFloat("Offset", &offset);
     ImGui::InputFloat("Sigma_p", &sigma_p);
     if(state->scene.valid(state->picker.entity_id)){
-        if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+        if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
             if(ImGui::Button("Apply offset")){
                 auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                 mesh_normal_offset_mesh(mesh, offset);

@@ -10,7 +10,6 @@
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_mesh.h"
-#include "components/bcg_component_object_space_view.h"
 #include "renderers/bcg_attribute.h"
 #include "bcg_events_mesh_renderer.h"
 #include "utils/bcg_string_utils.h"
@@ -44,7 +43,7 @@ void mesh_renderer::on_startup(const event::internal::startup &) {
 }
 
 void mesh_renderer::on_shutdown(const event::internal::shutdown &) {
-    auto view = state->scene.view<material_mesh>();
+    auto view = state->scene().view<material_mesh>();
     for (const auto id : view) {
         auto &material = view.get<material_mesh>(id);
         material.vao.destroy();
@@ -57,8 +56,8 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
     if (!state->get_faces(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if (!state->scene.all_of<material_mesh>(event.id)) {
-        auto &material = state->scene.emplace<material_mesh>(event.id);
+    if (!state->scene.has<material_mesh>(event.id)) {
+        auto &material = state->scene().emplace<material_mesh>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto face_attributes = {attribute{"triangles", "triangles", "triangles", 0, true}};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, face_attributes);
@@ -85,10 +84,10 @@ void mesh_renderer::on_enqueue(const event::mesh_renderer::enqueue &event) {
 
 void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (!state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
     }
-    auto &material = state->scene.get_or_emplace<material_mesh>(event.id);
+    auto &material = state->scene().get_or_emplace<material_mesh>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "mesh";
@@ -114,8 +113,8 @@ void mesh_renderer::on_setup_for_rendering(const event::mesh_renderer::setup_for
 }
 
 void mesh_renderer::on_begin_frame(const event::internal::begin_frame &) {
-    state->scene.each([&](auto id) {
-        if (state->scene.all_of<event::mesh_renderer::enqueue>(id)) {
+    state->scene().each([&](auto id) {
+        if (state->scene.has<event::mesh_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::mesh_renderer::enqueue>(id);
         }
     });
@@ -141,10 +140,6 @@ void mesh_renderer::on_render(const event::internal::render &) {
         auto &material = state->scene.get<material_mesh>(id);
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
-        if(state->scene.all_of<object_space_view>(id)){
-            auto &osv = state->scene.get<object_space_view>(id);
-            model_matrix = (model * osv).matrix().cast<float>();
-        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.upload(program);

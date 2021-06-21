@@ -31,7 +31,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         if (contains(type_names[selected_type], "anisotropic")) {
             if (contains(type_names[selected_type], "local")) {
                 auto id = state->picker.entity_id;
-                if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+                if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                     gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_p",
                                           selected_local_sigma_p);
                     gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_n",
@@ -44,7 +44,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         } else {
             if (contains(type_names[selected_type], "local")) {
                 auto id = state->picker.entity_id;
-                if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+                if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                     gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_p",
                                           selected_local_sigma_p);
                     gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_n",
@@ -60,7 +60,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
     auto id = state->picker.entity_id;
 
     if (ImGui::Button("Compute Vertex Quadrics")) {
-        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
             auto normals = mesh.vertices.get<VectorS<3>, 3>("v_normal");
             selected_quadrics = "v_quadric";
@@ -114,7 +114,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         gui_property_selector(state, state->get_vertices(id), {1}, "selected_quadrics",
                               selected_quadrics);
         if (ImGui::Button("Compute Error")) {
-            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 mesh_vertex_quadric_error(mesh, mesh.vertices.get<quadric, 1>(selected_quadrics),
                                           state->config.parallel_grain_size);
@@ -127,7 +127,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         }
         ImGui::SameLine();
         if (ImGui::Button("Compute Minimizer")) {
-            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 mesh_vertex_quadric_minimizer(mesh, mesh.vertices.get<quadric, 1>(selected_quadrics),
                                               state->config.parallel_grain_size);
@@ -136,7 +136,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         }
         ImGui::SameLine();
         if (ImGui::Button("Extract Normals")) {
-            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 mesh_vertex_quadric_extract_normals(mesh, mesh.vertices.get<quadric, 1>(selected_quadrics),
                                                     state->config.parallel_grain_size);
@@ -149,7 +149,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         ImGui::Checkbox("use_normal_weighting", &params.use_normal_weighting);
         ImGui::Checkbox("use_distance_weighting", &params.use_distance_weighting);
         if (ImGui::Button("Sum")) {
-            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 mesh_vertex_quadric_neighbors_sum(mesh, mesh.vertices.get<quadric, 1>(selected_quadrics), params,
                                                   state->config.parallel_grain_size);
@@ -158,7 +158,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
         }
         ImGui::SameLine();
         if (ImGui::Button("Average")) {
-            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 mesh_vertex_quadric_neighbors_avg(mesh, mesh.vertices.get<quadric, 1>(selected_quadrics),
                                                   params,
@@ -169,7 +169,7 @@ void gui_mesh_vertex_quadrics(viewer_state *state) {
     }
     ImGui::Separator();
     if (gui_point_cloud_vertex_noise(state)) {
-        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
             vertex_normals(mesh, vertex_normal_area_angle, state->config.parallel_grain_size);
         }

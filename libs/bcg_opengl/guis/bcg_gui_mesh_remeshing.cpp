@@ -37,7 +37,7 @@ void gui_mesh_remeshing(viewer_state *state) {
     ImGui::Checkbox("use projection", &use_projection);
 
     if (ImGui::Button("Compute") && state->scene.valid(state->picker.entity_id)) {
-        if(!state->scene.all_of<mesh_stats>(state->picker.entity_id)){
+        if(!state->scene.has<mesh_stats>(state->picker.entity_id)){
             state->dispatcher.trigger<event::mesh::statistics>(state->picker.entity_id);
         }
         auto &stats = state->scene.get<mesh_stats>(state->picker.entity_id);

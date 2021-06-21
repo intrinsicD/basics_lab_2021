@@ -21,7 +21,7 @@ bcg_scalar_t gui_radius_from_aabb(viewer_state *state, bool *changed){
     }
     ImGui::InputFloat("percentage", &percentage);
     if(ImGui::Button("% from AABB diagonal")){
-        if (state->scene.all_of<aligned_box3>(state->picker.entity_id)) {
+        if (state->scene.has<aligned_box3>(state->picker.entity_id)) {
             auto &aabb = state->scene.get<aligned_box3>(state->picker.entity_id);
             radius = aabb_stats::percentage_diagonal(aabb, percentage);
             if(changed){

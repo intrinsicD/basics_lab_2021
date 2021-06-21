@@ -10,8 +10,8 @@ namespace bcg{
 
 void gui_mesh_statistics(viewer_state *state){
     if(!state->scene.valid(state->picker.entity_id)) return;
-    if(!state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) return;
-    if(!state->scene.all_of<mesh_stats>(state->picker.entity_id)){
+    if(!state->scene.has<halfedge_mesh>(state->picker.entity_id)) return;
+    if(!state->scene.has<mesh_stats>(state->picker.entity_id)){
         state->dispatcher.trigger<event::mesh::statistics>(state->picker.entity_id);
     }
     auto &stats = state->scene.get<mesh_stats>(state->picker.entity_id);

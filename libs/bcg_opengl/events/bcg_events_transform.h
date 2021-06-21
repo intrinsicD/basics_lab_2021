@@ -24,6 +24,10 @@ struct rotate{
     entt::entity id;
     VectorS<4> angle_axis;
 };
+struct set{
+    entt::entity id;
+    Transform model;
+};
 struct reset{
     entt::entity id;
 };

@@ -66,7 +66,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
                     if (contains(vertex_quadric_type_names[selected_vertex_quadric], "anisotropic")) {
                         if (contains(vertex_quadric_type_names[selected_vertex_quadric], "local")) {
                             auto id = state->picker.entity_id;
-                            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+                            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                                 gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_p",
                                                       selected_local_sigma_p);
                                 gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_n",
@@ -79,7 +79,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
                     } else {
                         if (contains(vertex_quadric_type_names[selected_vertex_quadric], "local")) {
                             auto id = state->picker.entity_id;
-                            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+                            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                                 gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_p",
                                                       selected_local_sigma_p);
                                 gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_n",
@@ -97,7 +97,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
                     if (contains(face_quadric_type_names[selected_face_quadric], "anisotropic")) {
                         if (contains(face_quadric_type_names[selected_face_quadric], "local")) {
                             auto id = state->picker.entity_id;
-                            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+                            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                                 gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_p",
                                                       selected_local_sigma_p);
                                 if (contains(face_quadric_type_names[selected_face_quadric], "triangle")) {
@@ -119,7 +119,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
                     } else {
                         if (contains(face_quadric_type_names[selected_face_quadric], "local")) {
                             auto id = state->picker.entity_id;
-                            if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+                            if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
                                 gui_property_selector(state, state->get_vertices(id), {1}, "selected_local_sigma_p",
                                                       selected_local_sigma_p);
                                 if (contains(face_quadric_type_names[selected_face_quadric], "triangle")) {
@@ -163,7 +163,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
 
     if (update_every_frame || ImGui::Button("Compute Filtering")) {
         auto id = state->picker.entity_id;
-        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
 
             if (volume_before < scalar_eps) {
@@ -377,7 +377,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
     ImGui::LabelText("volume_shrinkage", "%f", volume_after / volume_before);
     if (ImGui::Button("Update volume_before")) {
         auto id = state->picker.entity_id;
-        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
             volume_before = mesh_volume(mesh, state->config.parallel_grain_size);
         }
@@ -385,7 +385,7 @@ void gui_mesh_normal_filtering_robust_statistics(viewer_state *state) {
 
     if (gui_point_cloud_vertex_noise(state)) {
         auto id = state->picker.entity_id;
-        if (state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)) {
+        if (state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(id);
             vertex_normals(mesh, vertex_normal_area_angle, state->config.parallel_grain_size);
         }

@@ -26,7 +26,6 @@
 #include "bcg_opengl/systems/bcg_correspondence_system.h"
 #include "bcg_opengl/systems/bcg_registration_system.h"
 #include "bcg_opengl/systems/bcg_orthodontic_system.h"
-#include "bcg_opengl/systems/bcg_object_space_system.h"
 #include "bcg_opengl/renderers/bcg_render_system.h"
 
 #include "geometry/curve/bcg_curve_bezier.h"
@@ -165,7 +164,6 @@ viewer_state::viewer_state() : shaders(this){
     systems["correspondence_system"] = std::make_unique<correspondence_system>(this);
     systems["registration_system"] = std::make_unique<registration_system>(this);
     systems["orthodontic_system"] = std::make_unique<orthodontic_system>(this);
-    systems["object_space_system"] = std::make_unique<object_space_system>(this);
 }
 
 VectorS<4> viewer_state::get_viewport() const{

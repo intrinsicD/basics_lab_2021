@@ -16,14 +16,14 @@ void gui_mesh_projected_distances(viewer_state *state){
     static entt::entity target_id = entt::null;
     if(ImGui::Button("Set Source")){
         auto id = state->picker.entity_id;
-        if(state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)){
+        if(state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)){
             source_id = id;
         }
     }
     ImGui::SameLine();
     if(ImGui::Button("Set Target")){
         auto id = state->picker.entity_id;
-        if(state->scene.valid(id) && state->scene.all_of<halfedge_mesh>(id)){
+        if(state->scene.valid(id) && state->scene.has<halfedge_mesh>(id)){
             target_id = id;
         }
     }

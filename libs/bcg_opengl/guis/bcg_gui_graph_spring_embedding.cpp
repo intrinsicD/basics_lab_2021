@@ -12,10 +12,10 @@ void gui_graph_spring_embedding(viewer_state *state) {
     if (ImGui::Button("Random 2D embedding")) {
         auto id = state->picker.entity_id;
         if (state->scene.valid(id) && state->get_edges(id) != nullptr) {
-            if (state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 graph_random_embedding_2D(mesh);
-            } else if (state->scene.all_of<halfedge_graph>(id)) {
+            } else if (state->scene.has<halfedge_graph>(id)) {
                 auto &graph = state->scene.get<halfedge_graph>(id);
                 graph_random_embedding_2D(graph);
             }
@@ -25,10 +25,10 @@ void gui_graph_spring_embedding(viewer_state *state) {
     if (ImGui::Button("Random 3D embedding")) {
         auto id = state->picker.entity_id;
         if (state->scene.valid(id) && state->get_edges(id) != nullptr) {
-            if (state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 graph_random_embedding_3D(mesh);
-            } else if (state->scene.all_of<halfedge_graph>(id)) {
+            } else if (state->scene.has<halfedge_graph>(id)) {
                 auto &graph = state->scene.get<halfedge_graph>(id);
                 graph_random_embedding_3D(graph);
             }
@@ -49,10 +49,10 @@ void gui_graph_spring_embedding(viewer_state *state) {
     if (ImGui::Button("Iterate Spring Embedding") || run_each_frame) {
         auto id = state->picker.entity_id;
         if (state->scene.valid(id) && state->get_edges(id) != nullptr) {
-            if (state->scene.all_of<halfedge_mesh>(id)) {
+            if (state->scene.has<halfedge_mesh>(id)) {
                 auto &mesh = state->scene.get<halfedge_mesh>(id);
                 embedding.iterate(mesh);
-            } else if (state->scene.all_of<halfedge_graph>(id)) {
+            } else if (state->scene.has<halfedge_graph>(id)) {
                 auto &graph = state->scene.get<halfedge_graph>(id);
                 embedding.iterate(graph);
             }

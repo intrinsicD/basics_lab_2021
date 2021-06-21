@@ -6,7 +6,6 @@
 #include <string>
 
 #include "bcg_graph_renderer.h"
-#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_graph.h"
@@ -36,7 +35,7 @@ void graph_renderer::on_startup(const event::internal::startup &) {
 }
 
 void graph_renderer::on_shutdown(const event::internal::shutdown &){
-    auto view = state->scene.view<material_graph>();
+    auto view = state->scene().view<material_graph>();
     for(const auto id : view){
         auto &material = view.get<material_graph>(id);
         material.vao.destroy();
@@ -49,8 +48,8 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
     if(!state->get_edges(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if(!state->scene.all_of<material_graph>(event.id)){
-        auto &material = state->scene.emplace<material_graph>(event.id);
+    if(!state->scene.has<material_graph>(event.id)){
+        auto &material = state->scene().emplace<material_graph>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
@@ -68,10 +67,10 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
 
 void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (!state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
     }
-    auto &material = state->scene.get_or_emplace<material_graph>(event.id);
+    auto &material = state->scene().get_or_emplace<material_graph>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "graph";
@@ -97,8 +96,8 @@ void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_f
 }
 
 void graph_renderer::on_begin_frame(const event::internal::begin_frame &) {
-    state->scene.each([&](auto id) {
-        if (state->scene.all_of<event::graph_renderer::enqueue>(id)) {
+    state->scene().each([&](auto id) {
+        if (state->scene.has<event::graph_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::graph_renderer::enqueue>(id);
         }
     });
@@ -124,10 +123,6 @@ void graph_renderer::on_render(const event::internal::render &) {
         auto &material = state->scene.get<material_graph>(id);
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
-        if(state->scene.all_of<object_space_view>(id)){
-            auto &osv = state->scene.get<object_space_view>(id);
-            model_matrix = (model * osv).matrix().cast<float>();
-        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
         material.upload(program);
 
@@ -162,8 +157,8 @@ void graph_renderer::on_set_position_attribute(const event::graph_renderer::set_
 
 void graph_renderer::on_set_color_texture(const event::graph_renderer::set_color_texture &event){
     if (!state->scene.valid(event.id)) return;
-    if(!state->scene.all_of<event::graph_renderer::enqueue>(event.id)){
-        state->scene.emplace_or_replace<event::graph_renderer::enqueue>(event.id);
+    if(!state->scene.has<event::graph_renderer::enqueue>(event.id)){
+        state->scene().emplace_or_replace<event::graph_renderer::enqueue>(event.id);
         state->dispatcher.trigger<event::graph_renderer::enqueue>(event.id);
     }
     auto &material = state->scene.get<material_graph>(event.id);

@@ -14,6 +14,8 @@ struct transform_system : public system {
 
     void on_add(const event::transform::add &event);
 
+    void on_set(const event::transform::set &event);
+
     void on_translate(const event::transform::translate &event);
 
     void on_scale(const event::transform::scale &event);

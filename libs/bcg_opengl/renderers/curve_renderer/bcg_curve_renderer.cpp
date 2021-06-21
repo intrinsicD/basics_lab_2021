@@ -6,7 +6,6 @@
 #include <string>
 
 #include "bcg_curve_renderer.h"
-#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_curve.h"
@@ -43,7 +42,7 @@ void curve_renderer::on_startup(const event::internal::startup &) {
 }
 
 void curve_renderer::on_shutdown(const event::internal::shutdown &) {
-    auto view = state->scene.view<material_curve>();
+    auto view = state->scene().view<material_curve>();
     for (const auto id : view) {
         auto &material = view.get<material_curve>(id);
         material.vao.destroy();
@@ -53,11 +52,11 @@ void curve_renderer::on_shutdown(const event::internal::shutdown &) {
 
 void curve_renderer::on_enqueue(const event::curve_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<curve_bezier>(event.id)) return;
+    if (!state->scene.has<curve_bezier>(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if (!state->scene.all_of<material_curve>(event.id)) {
-        auto &material = state->scene.emplace<material_curve>(event.id);
+    if (!state->scene.has<material_curve>(event.id)) {
+        auto &material = state->scene().emplace<material_curve>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, edge_attributes);
@@ -75,10 +74,10 @@ void curve_renderer::on_enqueue(const event::curve_renderer::enqueue &event) {
 
 void curve_renderer::on_setup_for_rendering(const event::curve_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (!state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
     }
-    auto &material = state->scene.get_or_emplace<material_curve>(event.id);
+    auto &material = state->scene().get_or_emplace<material_curve>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "curve";
@@ -104,8 +103,8 @@ void curve_renderer::on_setup_for_rendering(const event::curve_renderer::setup_f
 }
 
 void curve_renderer::on_begin_frame(const event::internal::begin_frame &) {
-    state->scene.each([&](auto id) {
-        if (state->scene.all_of<event::curve_renderer::enqueue>(id)) {
+    state->scene().each([&](auto id) {
+        if (state->scene.has<event::curve_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::curve_renderer::enqueue>(id);
         }
     });
@@ -133,10 +132,6 @@ void curve_renderer::on_render(const event::internal::render &) {
         auto &model = state->scene.get<Transform>(id);
         auto &material = state->scene.get<material_curve>(id);
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
-        if(state->scene.all_of<object_space_view>(id)){
-            auto &osv = state->scene.get<object_space_view>(id);
-            model_matrix = (model * osv).matrix().cast<float>();
-        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.upload(program);

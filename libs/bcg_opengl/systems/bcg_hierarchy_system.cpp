@@ -17,14 +17,14 @@ hierarchy_system::hierarchy_system(viewer_state *state) : system("hierarchy_syst
 
 void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<entity_hierarchy>(event.id)) {
-        state->scene.emplace<entity_hierarchy>(event.id);
+    if (!state->scene.has<entity_hierarchy>(event.id)) {
+        state->scene().emplace<entity_hierarchy>(event.id);
     }
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     hierarchy.parent = event.parent_id;
 
     auto &model = state->scene.get<Transform>(event.id);
-    if (state->scene.valid(hierarchy.parent) && state->scene.all_of<entity_hierarchy>(hierarchy.parent)) {
+    if (state->scene.valid(hierarchy.parent) && state->scene.has<entity_hierarchy>(hierarchy.parent)) {
         auto &parent_hierarchy = state->scene.get<entity_hierarchy>(hierarchy.parent);
         hierarchy.accumulated_model = parent_hierarchy.accumulated_model * model;
     }
@@ -32,8 +32,8 @@ void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) 
 
 void hierarchy_system::on_add_child(const event::hierarchy::add_child &event) {
     if(!state->scene.valid(event.id)) return;
-    if(!state->scene.all_of<entity_hierarchy>(event.id)){
-        state->scene.emplace<entity_hierarchy>(event.id);
+    if(!state->scene.has<entity_hierarchy>(event.id)){
+        state->scene().emplace<entity_hierarchy>(event.id);
     }
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     hierarchy.children[event.child_id] = event.child_id;
@@ -42,13 +42,13 @@ void hierarchy_system::on_add_child(const event::hierarchy::add_child &event) {
 
 void hierarchy_system::on_remove_child(const event::hierarchy::remove_child &event) {
     if(!state->scene.valid(event.id)) return;
-    if(!state->scene.all_of<entity_hierarchy>(event.id)){
-        state->scene.emplace<entity_hierarchy>(event.id);
+    if(!state->scene.has<entity_hierarchy>(event.id)){
+        state->scene().emplace<entity_hierarchy>(event.id);
     }
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     auto iter = hierarchy.children.find(event.child_id);
     if(iter != hierarchy.children.end()){
-        if(state->scene.all_of<entity_hierarchy>(event.child_id)){
+        if(state->scene.has<entity_hierarchy>(event.child_id)){
             auto &child_hierarchy = state->scene.get<entity_hierarchy>(event.child_id);
             if(child_hierarchy.parent == event.id){
                 state->dispatcher.trigger<event::hierarchy::set_parent>(event.child_id, entt::null);
@@ -74,7 +74,7 @@ void hierarchy_system::update_accumulated_model(entt::entity id){
 }
 
 void hierarchy_system::on_update(const event::internal::update &){
-    auto view = state->scene.view<entity_hierarchy, Transform>();
+    auto view = state->scene().view<entity_hierarchy, Transform>();
     for(const auto id : view){
         auto &hierarchy = state->scene.get<entity_hierarchy>(id);
         if(hierarchy.parent == entt::null){
@@ -84,12 +84,12 @@ void hierarchy_system::on_update(const event::internal::update &){
 }
 
 void hierarchy_system::on_destroy(const event::internal::destroy &event){
-    if(state->scene.valid(event.id) && state->scene.all_of<entity_hierarchy>(event.id)){
+    if(state->scene.valid(event.id) && state->scene.has<entity_hierarchy>(event.id)){
         auto hierarchy = state->scene.get<entity_hierarchy>(event.id);
         if(!hierarchy.children.empty()){
             for(auto &child : hierarchy.children){
                 state->dispatcher.trigger<event::internal::destroy>(child.second);
-                state->scene.destroy(child.second);
+                state->scene().destroy(child.second);
             }
         }
         if(state->scene.valid(hierarchy.parent)){

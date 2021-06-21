@@ -20,7 +20,7 @@ void gui_parameterized_plane(viewer_state *state) {
     auto id = state->picker.entity_id;
     static entt::entity plane_id = entt::null;
 
-    if (ImGui::Button("Select Plane") || (state->scene.valid(id) && state->scene.all_of<entt::tag<"parameterized_plane"_hs>>(id))) {
+    if (ImGui::Button("Select Plane") || (state->scene.valid(id) && state->scene.has<entt::tag<"parameterized_plane"_hs>>(id))) {
         plane_id = id;
     }
     if (state->scene.valid(plane_id)) {
@@ -79,7 +79,7 @@ void gui_parameterized_plane(viewer_state *state) {
             }
 
             if (state->scene.valid(target_id) &&
-                !state->scene.all_of<entt::tag<"parameterized_plane"_hs>>(target_id)) {
+                !state->scene.has<entt::tag<"parameterized_plane"_hs>>(target_id)) {
                 auto &plane = state->scene.get<ParameterizedPlane3>(plane_id);
                 target_vertices = state->get_vertices(target_id);
                 auto target_positions = target_vertices->get<VectorS<3>, 3>("v_position");

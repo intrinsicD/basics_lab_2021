@@ -25,7 +25,7 @@ void gui_point_cloud_bilateral_filter(viewer_state *state){
         }else if(params.type == kdtree_parameters::Type::radius){
             state->dispatcher.trigger<event::point_cloud::vertex::filter::bilateral_radius>(state->picker.entity_id, points_sigma, normals_sigma, params.radius);
         }
-        state->scene.emplace_or_replace<event::points_renderer::enqueue>(state->picker.entity_id);
+        state->scene().emplace_or_replace<event::points_renderer::enqueue>(state->picker.entity_id);
     }
     if(ImGui::Button("Use smooth version")){
         auto positions = state->get_vertices(state->picker.entity_id)->get<VectorS<3>, 3>("v_position");

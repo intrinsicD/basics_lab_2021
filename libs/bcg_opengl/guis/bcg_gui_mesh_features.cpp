@@ -29,7 +29,7 @@ void gui_mesh_features(viewer_state *state) {
             state->dispatcher.trigger<event::mesh_renderer::set_vertex_color_attribute>(state->picker.entity_id, color);
         }
         {
-            auto &material = state->scene.get_or_emplace<material_graph>(state->picker.entity_id);
+            auto &material = state->scene().get_or_emplace<material_graph>(state->picker.entity_id);
             auto &color = material.attributes[1];
             color.property_name = "e_feature";
             state->dispatcher.trigger<event::graph_renderer::set_color_texture>(state->picker.entity_id, color);
@@ -42,7 +42,7 @@ void gui_mesh_features(viewer_state *state) {
             material.use_uniform_color = true;
         }
         {
-            state->scene.remove_if_exists<event::graph_renderer::enqueue>(state->picker.entity_id);
+            state->scene().remove_if_exists<event::graph_renderer::enqueue>(state->picker.entity_id);
         }
     }
 }

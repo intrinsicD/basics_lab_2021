@@ -32,7 +32,7 @@ void gui_viewer_curve(viewer_state *state){
         id = state->picker.entity_id;
     }
     ImGui::Separator();
-    if(state->scene.valid(id) && state->scene.all_of<curve_bezier>(id)){
+    if(state->scene.valid(id) && state->scene.has<curve_bezier>(id)){
         auto &curve = state->scene.get<curve_bezier>(id);
         draw_label(&state->window, "curve id", std::to_string(int(id)));
         draw_label(&state->window, "finished", (curve.finished ? "1" : "0"));

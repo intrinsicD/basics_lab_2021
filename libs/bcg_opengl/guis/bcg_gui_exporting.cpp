@@ -38,7 +38,7 @@ void gui_exporting_mesh(viewer_state *state) {
                 mesh_format_selected = 0;
             }
         }
-        if (state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) {
+        if (state->scene.has<halfedge_mesh>(state->picker.entity_id)) {
             if (ImGui::Button("export mesh")) {
                 ImGui::OpenPopup("export mesh");
                 filter = join(join("*.", mesh_formats), ";");

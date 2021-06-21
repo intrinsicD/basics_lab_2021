@@ -30,7 +30,7 @@ void gui_mesh_vertex_convex_concave(viewer_state *state) {
     static float value_small = 0.1;
     static float value_large = 1000;
     if (state->scene.valid(state->picker.entity_id)) {
-        if (state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) {
+        if (state->scene.has<halfedge_mesh>(state->picker.entity_id)) {
             auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
             if (mesh.vertices.has("v_concave")) {
                 auto result = gui_property_classify_max(state);

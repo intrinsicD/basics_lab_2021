@@ -35,7 +35,7 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->gui.captured_keyboard) return;
     if (state->keyboard.keys[GLFW_KEY_A]) {
         if(state->keyboard.ctrl_pressed){
-            auto view = state->scene.view<entity_info>();
+            auto view = state->scene().view<entity_info>();
             state->picker.selected_entities.clear();
             std::string message;
             for(const auto &id: view){
@@ -116,7 +116,7 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_DELETE]) {
         if (state->picker.valid && state->scene.valid(state->picker.entity_id)) {
             state->dispatcher.trigger<event::internal::destroy>(state->picker.entity_id);
-            state->scene.destroy(state->picker.entity_id);
+            state->scene().destroy(state->picker.entity_id);
             state->picker.entity_id = entt::null;
         }
     }

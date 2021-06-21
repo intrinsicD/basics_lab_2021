@@ -12,7 +12,7 @@ namespace bcg{
 
 void gui_hq_pbr_ufsi_material(viewer_state *state, entt::entity id){
     if(!state->scene.valid(id)) return;
-    auto &material = state->scene.get_or_emplace<hq_pbr_ufsi_material>(id);
+    auto &material = state->scene().get_or_emplace<hq_pbr_ufsi_material>(id);
 
     if(ImGui::CollapsingHeader("hq_pbr_ufsi_material")){
         ImGui::PushID(("hq_pbr_ufsi_material" + std::to_string(int(id))).c_str());

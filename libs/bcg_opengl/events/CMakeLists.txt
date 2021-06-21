@@ -15,5 +15,4 @@ target_sources(bcg_opengl PRIVATE
         bcg_events_registration.h
         bcg_events_spatial_index.h
         bcg_events_transform.h
-        bcg_events_filter.h
-        bcg_events_object_space.h)
+        bcg_events_filter.h)

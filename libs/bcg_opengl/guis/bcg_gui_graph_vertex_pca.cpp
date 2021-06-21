@@ -59,7 +59,7 @@ void gui_graph_vertex_pca(viewer_state *state) {
             }
         }
         if(state->scene.valid(state->picker.entity_id)){
-            state->scene.emplace_or_replace<event::points_renderer::enqueue>(state->picker.entity_id);
+            state->scene().emplace_or_replace<event::points_renderer::enqueue>(state->picker.entity_id);
         }
     }
     if(state->scene.valid(state->picker.entity_id)) {

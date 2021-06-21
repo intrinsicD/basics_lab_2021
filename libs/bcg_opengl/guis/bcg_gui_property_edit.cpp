@@ -106,7 +106,7 @@ void gui_property_edit(viewer_state *state, property_container *container, const
             }
         }
         if(change){
-            if(state->scene.all_of<event::mesh_renderer::enqueue>(state->picker.entity_id)){
+            if(state->scene.has<event::mesh_renderer::enqueue>(state->picker.entity_id)){
                 auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
                 auto &color = material.attributes[2];
                 color.property_name = current_property_name11;

@@ -6,7 +6,6 @@
 #include <string>
 
 #include "bcg_hq_pbr_ufsi_renderer.h"
-#include "components/bcg_component_object_space_view.h"
 #include "bcg_hq_pbr_ufsi_material.h"
 #include "bcg_library/math/bcg_linalg.h"
 #include "viewer/bcg_viewer_state.h"
@@ -41,7 +40,7 @@ void hq_pbr_ufsi_renderer::on_startup(const event::internal::startup &) {
 }
 
 void hq_pbr_ufsi_renderer::on_shutdown(const event::internal::shutdown &) {
-    auto view = state->scene.view<hq_pbr_ufsi_material>();
+    auto view = state->scene().view<hq_pbr_ufsi_material>();
     for (const auto id : view) {
         auto &material = view.get<hq_pbr_ufsi_material>(id);
         material.vao.destroy();
@@ -53,17 +52,17 @@ void hq_pbr_ufsi_renderer::on_enqueue(const event::hq_pbr_ufsi_renderer::enqueue
     if (!state->scene.valid(event.id)) return;
     if (state->get_vertices(event.id) == nullptr) return;
     entities_to_draw.emplace_back(event.id);
-    if (!state->scene.all_of<hq_pbr_ufsi_material>(event.id)) {
+    if (!state->scene.has<hq_pbr_ufsi_material>(event.id)) {
         on_setup_material({event.id});
     }
 }
 
 void hq_pbr_ufsi_renderer::on_setup_material(const event::hq_pbr_ufsi_renderer::setup_material &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (!state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
     }
-    auto &material = state->scene.get_or_emplace<hq_pbr_ufsi_material>(event.id);
+    auto &material = state->scene().get_or_emplace<hq_pbr_ufsi_material>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "hq_pbr_ufsi";
@@ -86,7 +85,7 @@ void hq_pbr_ufsi_renderer::on_setup_material(const event::hq_pbr_ufsi_renderer::
 }
 
 void hq_pbr_ufsi_renderer::on_begin_frame(const event::internal::begin_frame &) {
-    auto view = state->scene.view<event::hq_pbr_ufsi_renderer::enqueue>();
+    auto view = state->scene().view<event::hq_pbr_ufsi_renderer::enqueue>();
     for (const auto id : view) {
         state->dispatcher.trigger<event::hq_pbr_ufsi_renderer::enqueue>(id);
     }
@@ -108,14 +107,10 @@ void hq_pbr_ufsi_renderer::on_render(const event::internal::render &) {
 
     for (const auto id : entities_to_draw) {
         if (!state->scene.valid(id)) continue;
-        if (!state->scene.all_of<hq_pbr_ufsi_material>(id)) continue;
+        if (!state->scene.has<hq_pbr_ufsi_material>(id)) continue;
 
         auto &model = state->scene.get<Transform>(id);
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
-        if(state->scene.all_of<object_space_view>(id)){
-            auto &osv = state->scene.get<object_space_view>(id);
-            model_matrix = (model * osv).matrix().cast<float>();
-        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         auto &material = state->scene.get<hq_pbr_ufsi_material>(id);
@@ -142,7 +137,7 @@ void hq_pbr_ufsi_renderer::on_set_position(const event::hq_pbr_ufsi_renderer::se
     if (!vertices) return;
     if (!vertices->has(event.property_name)) return;
     if (vertices->get_base_ptr(event.property_name)->dims() != 3) return;
-    auto &material = state->scene.get_or_emplace<hq_pbr_ufsi_material>(event.id);
+    auto &material = state->scene().get_or_emplace<hq_pbr_ufsi_material>(event.id);
     auto &position = material.attributes[0];
     position.buffer_name = event.property_name;
     position.property_name = event.property_name;
@@ -159,7 +154,7 @@ void hq_pbr_ufsi_renderer::on_set_color(const event::hq_pbr_ufsi_renderer::set_c
     if (!vertices) return;
     if (!vertices->has(event.property_name)) return;
     if (vertices->get_base_ptr(event.property_name)->dims() != 3) return;
-    auto &material = state->scene.get_or_emplace<hq_pbr_ufsi_material>(event.id);
+    auto &material = state->scene().get_or_emplace<hq_pbr_ufsi_material>(event.id);
     auto &color = material.attributes[1];
     color.property_name = event.property_name;
     color.buffer_name = event.property_name + "_color";
@@ -176,7 +171,7 @@ void hq_pbr_ufsi_renderer::on_set_normal(const event::hq_pbr_ufsi_renderer::set_
     if (!vertices) return;
     if (!vertices->has(event.property_name)) return;
     if (vertices->get_base_ptr(event.property_name)->dims() != 3) return;
-    auto &material = state->scene.get_or_emplace<hq_pbr_ufsi_material>(event.id);
+    auto &material = state->scene().get_or_emplace<hq_pbr_ufsi_material>(event.id);
     auto &normal = material.attributes[2];
     normal.property_name = event.property_name;
     normal.buffer_name = event.property_name;

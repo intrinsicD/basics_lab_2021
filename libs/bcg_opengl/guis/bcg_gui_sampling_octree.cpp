@@ -7,7 +7,6 @@
 #include "bcg_gui_property_selector.h"
 #include "geometry/sampling/bcg_sampling_octree.h"
 #include "components/bcg_component_entity_hierarchy.h"
-#include "components/bcg_component_object_space_view.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "math/vector/bcg_vector_map_eigen.h"
 #include "entt/entt.hpp"
@@ -65,7 +64,7 @@ void gui_sampling_octree(viewer_state *state) {
             trigger = true;
         }
     }
-    if(state->scene.valid(state->picker.entity_id) && state->scene.all_of<sampling_octree>(state->picker.entity_id)){
+    if(state->scene.valid(state->picker.entity_id) && state->scene.has<sampling_octree>(state->picker.entity_id)){
         if(ImGui::Button("+")){
             ++sample_depth;
             trigger = true;
@@ -83,10 +82,10 @@ void gui_sampling_octree(viewer_state *state) {
             sample_depth = std::max<int>(sample_depth, 0);
             sample_depth = std::min<int>(sample_depth, max_depth);
             auto &index = state->scene.get<sampling_octree>(state->picker.entity_id);
-            auto &hierarchy = state->scene.get_or_emplace<entity_hierarchy>(state->picker.entity_id);
+            auto &hierarchy = state->scene().get_or_emplace<entity_hierarchy>(state->picker.entity_id);
             entt::entity child_id = entt::null;
             for (const auto &child : hierarchy.children) {
-                if (state->scene.all_of<entt::tag<"subsampled"_hs>>(child.first)) {
+                if (state->scene.has<entt::tag<"subsampled"_hs>>(child.first)) {
                     child_id = child.first;
                     break;
                 }
@@ -99,14 +98,10 @@ void gui_sampling_octree(viewer_state *state) {
                 pc.vertices.resize(pc.positions.size());
                 pc.positions.set_dirty();
                 auto id = state->scene.create();
-                state->scene.emplace<point_cloud>(id, pc);
-                state->scene.emplace<entt::tag<"subsampled"_hs>>(id);
+                state->scene().emplace<point_cloud>(id, pc);
+                state->scene().emplace<entt::tag<"subsampled"_hs>>(id);
                 state->dispatcher.trigger<event::point_cloud::setup>(id, "subsampled");
-                if(state->scene.all_of<object_space_view>(parent_id)){
-                    auto &osv = state->scene.get<object_space_view>(parent_id);
-                    state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(id, osv);
-                }
-                state->scene.remove_if_exists<event::picking_renderer::enqueue>(id);
+                state->scene().remove_if_exists<event::picking_renderer::enqueue>(id);
                 state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, id);
                 state->picker.entity_id = parent_id;
             }else{

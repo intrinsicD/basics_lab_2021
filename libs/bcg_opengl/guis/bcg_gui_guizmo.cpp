@@ -45,7 +45,7 @@ bool gui_guizmo(viewer_state *state, entt::entity id, Transform &transform){
     Matrix<float, 4, 4> proj = state->cam.projection_matrix().cast<float>();
     bool manipulated = ImGuizmo::Manipulate(view.data(), proj.data(), mCurrentGizmoOperation, mCurrentGizmoMode, M.data(),
                          nullptr, useSnap ? &snap[0] : nullptr);
-    transform.matrix() = M.cast<bcg_scalar_t>();
+    transform = Transform(M.cast<bcg_scalar_t>());
     return manipulated;
 }
 

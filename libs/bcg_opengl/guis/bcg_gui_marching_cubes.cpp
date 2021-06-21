@@ -25,7 +25,7 @@ void gui_marching_cubes(viewer_state *state) {
     if (ImGui::Button("convert to mesh")) {
         auto mesh = mc.reconstruct(isovalue, min, max, dims.cast<bcg_index_t>());
         auto id = state->scene.create();
-        state->scene.emplace<halfedge_mesh>(id, mesh);
+        state->scene().emplace<halfedge_mesh>(id, mesh);
         state->dispatcher.trigger<event::mesh::setup>(id, "marching cubes");
     }
 

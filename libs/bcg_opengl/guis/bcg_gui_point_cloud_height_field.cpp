@@ -33,7 +33,7 @@ void gui_point_cloud_height_field(viewer_state *state){
                 weighting = vertices->get<bcg_scalar_t, 1>(current_property_name);
             }
             point_cloud_height_field(vertices, weighting, bcg_scalar_t(alpha), dim, invert);
-            if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+            if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
                 auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
                 auto &color = material.attributes[2];
                 color.property_name = "v_height_field";

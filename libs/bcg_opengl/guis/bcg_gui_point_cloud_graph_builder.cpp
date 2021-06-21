@@ -31,8 +31,8 @@ void gui_point_cloud_graph_builder(viewer_state *state){
         }
 
         if(!state->scene.valid(state->picker.entity_id)) return;
-        state->scene.emplace_or_replace<event::graph_renderer::enqueue>(state->picker.entity_id);
-        auto &material = state->scene.get_or_emplace<material_graph>(state->picker.entity_id);
+        state->scene().emplace_or_replace<event::graph_renderer::enqueue>(state->picker.entity_id);
+        auto &material = state->scene().get_or_emplace<material_graph>(state->picker.entity_id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(state->picker.entity_id, material.attributes);
         auto edge_attributes = {attribute{"edges", "edges", "edges",0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(state->picker.entity_id, edge_attributes);

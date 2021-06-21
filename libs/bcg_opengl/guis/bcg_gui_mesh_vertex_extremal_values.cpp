@@ -14,7 +14,7 @@ namespace bcg{
 void gui_mesh_vertex_extremal_values(viewer_state *state){
     static int e = 0;
     static std::string current_property_name;
-    if(state->scene.valid(state->picker.entity_id) && state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+    if(state->scene.valid(state->picker.entity_id) && state->scene.has<halfedge_mesh>(state->picker.entity_id)){
         auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
         gui_property_selector(state, &mesh.vertices, {1}, "property", current_property_name);
         draw_combobox(&state->window, "type", e, mesh_vertex_extremal_type_names());

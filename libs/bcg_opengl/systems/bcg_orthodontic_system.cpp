@@ -51,8 +51,8 @@ void orthodontic_system::on_mouse_button(const event::mouse::button &) {
 void orthodontic_system::on_set_tooth_component(const event::orthodontic::set_tooth_component &event) {
     auto id = event.id;
     if (!state->scene.valid(id)) return;
-    if (!state->scene.all_of<tooth_component>(id)) {
-        state->scene.emplace<tooth_component>(id);
+    if (!state->scene.has<tooth_component>(id)) {
+        state->scene().emplace<tooth_component>(id);
     }
     auto &tooth = state->scene.get<tooth_component>(id);
     switch (event.age) {
@@ -103,11 +103,11 @@ void orthodontic_system::on_reset_teeth_colors(const event::orthodontic::reset_t
     colors[static_cast<int>(ToothType::premolar)] = color<float>::magenta;
     colors[static_cast<int>(ToothType::molar)] = color<float>::blue;
     colors[static_cast<int>(ToothType::undefined)] = color<float>::grey;
-    if (state->scene.valid(jaw_id) && state->scene.all_of<jaw_component>(jaw_id)) {
+    if (state->scene.valid(jaw_id) && state->scene.has<jaw_component>(jaw_id)) {
         auto &component = state->scene.get<jaw_component>(jaw_id);
         for (auto &item : component.teeth) {
             auto id = item.second;
-            if (state->scene.all_of<tooth_component>(id)) {
+            if (state->scene.has<tooth_component>(id)) {
                 auto &tooth = state->scene.get<tooth_component>(id);
                 switch (tooth.type) {
                     case ToothType::incisor : {
@@ -146,7 +146,7 @@ void orthodontic_system::on_reset_teeth_colors(const event::orthodontic::reset_t
 
 void orthodontic_system::on_set_tooth_color(const event::orthodontic::set_tooth_color &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<material_mesh>(event.id)) return;
+    if (!state->scene.has<material_mesh>(event.id)) return;
     auto &material = state->scene.get<material_mesh>(event.id);
     material.diffuse = event.color;
 }
@@ -169,12 +169,12 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &) {
 
     if (ImGui::Button("Set Jaw Id")) {
         jaw_id = entity_id;
-        if (!state->scene.all_of<jaw_component>(jaw_id)) {
-            state->scene.emplace<jaw_component>(jaw_id);
+        if (!state->scene.has<jaw_component>(jaw_id)) {
+            state->scene().emplace<jaw_component>(jaw_id);
         }
     }
     if (!state->scene.valid(jaw_id)) { return; }
-    if (!state->scene.all_of<jaw_component>(jaw_id)) { return; }
+    if (!state->scene.has<jaw_component>(jaw_id)) { return; }
     auto &jaw = state->scene.get<jaw_component>(jaw_id);
 
 
@@ -391,7 +391,7 @@ void orthodontic_system::on_render_gui(const event::orthodontic::render_gui &) {
         }
     }
     static std::vector<int> selected_teeth;
-    if (state->scene.all_of<tooth_component>(entity_id)) {
+    if (state->scene.has<tooth_component>(entity_id)) {
         auto &tooth = state->scene.get<tooth_component>(entity_id);
         if (ImGui::CollapsingHeader("Current selected tooth")) {
             ImGui::LabelText("entity_id", "%zu", size_t(entity_id));

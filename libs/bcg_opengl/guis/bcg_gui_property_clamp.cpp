@@ -20,7 +20,7 @@ void gui_property_clamp(viewer_state *state, property_container *container, prop
         min_value = std::max(min_value, property_min);
         min_value = std::min(min_value, max_value - 2 * speed_clamp);
         auto result = clamp(container, p, min_value, max_value);
-        if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+        if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
             auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
             auto &color = material.attributes[2];
             color.property_name = result.name();
@@ -32,7 +32,7 @@ void gui_property_clamp(viewer_state *state, property_container *container, prop
         max_value = std::max(max_value, min_value + 2 * speed_clamp);
         max_value = std::min(max_value, property_max);
         auto result = clamp(container, p, min_value, max_value);
-        if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+        if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
             auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
             auto &color = material.attributes[2];
             color.property_name = result.name();

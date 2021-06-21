@@ -7,7 +7,6 @@
 #include <string>
 
 #include "bcg_vectorfield_renderer.h"
-#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_vectorfield.h"
@@ -51,7 +50,7 @@ void vectorfield_renderer::on_startup(const event::internal::startup &) {
 }
 
 void vectorfield_renderer::on_shutdown(const event::internal::shutdown &) {
-    auto view = state->scene.view<vectorfields>();
+    auto view = state->scene().view<vectorfields>();
     for (const auto id : view) {
         auto &vectors = view.get<vectorfields>(id);
         for (auto &item : vectors.vertex_vectorfields) {
@@ -70,8 +69,8 @@ void vectorfield_renderer::on_shutdown(const event::internal::shutdown &) {
 void vectorfield_renderer::on_enqueue(const event::vectorfield_renderer::enqueue &event) {
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
-    if (!state->scene.all_of<vectorfields>(event.id)) {
-        auto &vectors = state->scene.emplace<vectorfields>(event.id);
+    if (!state->scene.has<vectorfields>(event.id)) {
+        auto &vectors = state->scene().emplace<vectorfields>(event.id);
         for (auto &item : vectors.vertex_vectorfields) {
             state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, item.second.attributes);
         }
@@ -120,13 +119,13 @@ void setup_material(material_vectorfield &material, ogl_shape &shape) {
 
 void vectorfield_renderer::on_setup_for_rendering(const event::vectorfield_renderer::setup_for_rendering &event) {
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (!state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
     }
-    if (!state->scene.all_of<vectorfields>(event.id)) {
-        state->scene.emplace<vectorfields>(event.id);
+    if (!state->scene.has<vectorfields>(event.id)) {
+        state->scene().emplace<vectorfields>(event.id);
     }
-    auto &vectors = state->scene.get_or_emplace<vectorfields>(event.id);
+    auto &vectors = state->scene().get_or_emplace<vectorfields>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     for (auto &item : vectors.vertex_vectorfields) {
         setup_material(item.second, shape);
@@ -140,8 +139,8 @@ void vectorfield_renderer::on_setup_for_rendering(const event::vectorfield_rende
 }
 
 void vectorfield_renderer::on_begin_frame(const event::internal::begin_frame &) {
-    state->scene.each([&](auto id) {
-        if (state->scene.all_of<event::vectorfield_renderer::enqueue>(id)) {
+    state->scene().each([&](auto id) {
+        if (state->scene.has<event::vectorfield_renderer::enqueue>(id)) {
             state->dispatcher.trigger<event::vectorfield_renderer::enqueue>(id);
         }
     });
@@ -175,13 +174,9 @@ void vectorfield_renderer::on_render(const event::internal::render &) {
 
     for (const auto id : entities_to_draw) {
         if (!state->scene.valid(id)) continue;
-        if (!state->scene.all_of<vectorfields>(id)) continue;
+        if (!state->scene.has<vectorfields>(id)) continue;
 
         auto model = state->scene.get<Transform>(id);
-        if(state->scene.all_of<object_space_view>(id)){
-            auto &osv = state->scene.get<object_space_view>(id);
-            model = model * osv;
-        }
         auto &vectors = state->scene.get<vectorfields>(id);
         for (auto &item : vectors.vertex_vectorfields) {
             if (!item.second.vao.is_valid()) continue;
@@ -208,7 +203,7 @@ void vectorfield_renderer::on_end_frame(const event::internal::end_frame &) {
 
 void vectorfield_renderer::on_set_vertex_vectorfield(const event::vectorfield_renderer::set_vertex_vectorfield &event) {
     if (!state->scene.valid(event.id)) return;
-    auto &vectors = state->scene.get_or_emplace<vectorfields>(event.id);
+    auto &vectors = state->scene().get_or_emplace<vectorfields>(event.id);
     auto *vertices = state->get_vertices(event.id);
     if (!vertices) return;
     auto *base_ptr = vertices->get_base_ptr(event.vectorfield_name);
@@ -238,13 +233,13 @@ void vectorfield_renderer::on_set_vertex_vectorfield(const event::vectorfield_re
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
     }
     vectors.current_vertex_vectorfield_name = event.vectorfield_name;
-    state->scene.emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
+    state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
     state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
 }
 
 void vectorfield_renderer::on_set_edge_vectorfield(const event::vectorfield_renderer::set_edge_vectorfield &event) {
     if (!state->scene.valid(event.id)) return;
-    auto &vectors = state->scene.get_or_emplace<vectorfields>(event.id);
+    auto &vectors = state->scene().get_or_emplace<vectorfields>(event.id);
     auto *edges = state->get_edges(event.id);
     if (!edges) return;
     auto *base_ptr = edges->get_base_ptr(event.vectorfield_name);
@@ -274,13 +269,13 @@ void vectorfield_renderer::on_set_edge_vectorfield(const event::vectorfield_rend
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
     }
     vectors.current_edge_vectorfield_name = event.vectorfield_name;
-    state->scene.emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
+    state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
     state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
 }
 
 void vectorfield_renderer::on_set_face_vectorfield(const event::vectorfield_renderer::set_face_vectorfield &event) {
     if (!state->scene.valid(event.id)) return;
-    auto &vectors = state->scene.get_or_emplace<vectorfields>(event.id);
+    auto &vectors = state->scene().get_or_emplace<vectorfields>(event.id);
     auto *faces = state->get_faces(event.id);
     if (!faces) return;
     auto *base_ptr = faces->get_base_ptr(event.vectorfield_name);
@@ -310,7 +305,7 @@ void vectorfield_renderer::on_set_face_vectorfield(const event::vectorfield_rend
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
     }
     vectors.current_face_vectorfield_name = event.vectorfield_name;
-    state->scene.emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
+    state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
     state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
 }
 

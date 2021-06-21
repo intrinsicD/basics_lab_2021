@@ -7,7 +7,6 @@
 #include <bcg_library/geometry/bcg_property_map_eigen.h>
 
 #include "bcg_picking_renderer.h"
-#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
 #include "bcg_material_picking.h"
@@ -41,8 +40,8 @@ void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event)
     if (!state->scene.valid(event.id)) return;
     entities_to_draw.emplace_back(event.id);
 
-    if (!state->scene.all_of<material_picking>(event.id)) {
-        auto &material = state->scene.emplace<material_picking>(event.id);
+    if (!state->scene.has<material_picking>(event.id)) {
+        auto &material = state->scene().emplace<material_picking>(event.id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, material.attributes);
         state->dispatcher.trigger<event::picking_renderer::setup_for_rendering>(event.id);
     }
@@ -50,11 +49,11 @@ void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event)
 
 void picking_renderer::on_setup_for_rendering(const event::picking_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (!state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
     }
 
-    auto &material = state->scene.emplace_or_replace<material_picking>(event.id, event.id);
+    auto &material = state->scene().emplace_or_replace<material_picking>(event.id, event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
         material.vao.name = "picking";
@@ -80,7 +79,7 @@ void picking_renderer::on_setup_for_rendering(const event::picking_renderer::set
 }
 
 void picking_renderer::on_begin_frame(const event::internal::begin_frame &) {
-    auto view = state->scene.view<event::picking_renderer::enqueue>();
+    auto view = state->scene().view<event::picking_renderer::enqueue>();
     for (auto id : view) {
         state->dispatcher.trigger<event::picking_renderer::enqueue>(id);
     }
@@ -117,10 +116,6 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         auto &material = state->scene.get<material_picking>(id);
 
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
-        if(state->scene.all_of<object_space_view>(id)){
-            auto &osv = state->scene.get<object_space_view>(id);
-            model_matrix = (model * osv).matrix().cast<float>();
-        }
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
         material.upload(program);
@@ -128,11 +123,11 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         auto &shape = state->scene.get<ogl_shape>(id);
         material.vao.bind();
 
-        if (state->scene.all_of<halfedge_graph>(id)) {
+        if (state->scene.has<halfedge_graph>(id)) {
             shape.edge_buffer.bind();
             glDrawElements(GL_LINES, shape.edge_buffer.num_elements, GL_UNSIGNED_INT, 0);
             glDrawArrays(GL_POINTS, 0, shape.num_vertices);
-        } else if(state->scene.all_of<halfedge_mesh>(id)){
+        } else if(state->scene.has<halfedge_mesh>(id)){
             shape.triangle_buffer.bind();
             glDrawElements(GL_TRIANGLES, shape.triangle_buffer.num_elements, GL_UNSIGNED_INT, 0);
         }else{
@@ -193,12 +188,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     Transform model = Transform::Identity();
 
-    if(state->scene.valid(id) && state->scene.all_of<Transform>(id)){
+    if(state->scene.valid(id) && state->scene.has<Transform>(id)){
         model = state->scene.get<Transform>(id);
-    }
-    if(state->scene.valid(id) && state->scene.all_of<object_space_view>(id)){
-        auto osv = state->scene.get<object_space_view>(id);
-        model = model * osv;
     }
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
     state->picker.view_space_point = (state->cam.view_matrix() *
@@ -212,7 +203,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     auto result = kd_tree.query_knn(state->picker.model_space_point, 1);
     state->picker.vertex_id = vertex_handle(result.indices[0]);
 
-    if (state->scene.all_of<halfedge_graph>(id)) {
+    if (state->scene.has<halfedge_graph>(id)) {
         auto &graph = state->scene.get<halfedge_graph>(id);
         state->picker.edge_id = graph.find_closest_edge_in_neighborhood(state->picker.vertex_id,
                                                                         state->picker.model_space_point);
@@ -220,7 +211,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
         state->picker.edge_id = edge_handle();
     }
 
-    if (state->scene.all_of<halfedge_mesh>(id)) {
+    if (state->scene.has<halfedge_mesh>(id)) {
         auto &mesh = state->scene.get<halfedge_mesh>(id);
         state->picker.edge_id = mesh.find_closest_edge_in_neighborhood(state->picker.vertex_id,
                                                                        state->picker.model_space_point);

@@ -30,7 +30,7 @@ void gpu_system::on_update_property(const event::gpu::update_property &event) {
     if (!event.container->has(event.attrib.property_name)) return;
 
     if (!event.container->get_base_ptr(event.attrib.property_name)->is_dirty() && !event.attrib.update) return;
-    auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
+    auto &shape = state->scene().get_or_emplace<ogl_shape>(event.id);
     ogl_buffer_object *buffer = nullptr;
     if (event.attrib.property_name == "edges") {
         buffer = &shape.edge_buffer;
@@ -85,7 +85,7 @@ void gpu_system::on_update_vertex_colors_scalarfield(const event::gpu::update_ve
     if (base_ptr->dims() != 1) return;
 
     if (!event.container->get_base_ptr(event.color.property_name)->is_dirty() && !event.color.update) return;
-    auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
+    auto &shape = state->scene().get_or_emplace<ogl_shape>(event.id);
 
     ogl_buffer_object *buffer = &shape.vertex_buffers[event.color.buffer_name];
     if (buffer == nullptr) return;
@@ -127,7 +127,7 @@ void gpu_system::on_update_vertex_attributes(const event::gpu::update_vertex_att
 
     property_container *vertices = state->get_vertices(event.id);
     if (vertices) {
-        auto &shape = state->scene.get_or_emplace<ogl_shape>(event.id);
+        auto &shape = state->scene().get_or_emplace<ogl_shape>(event.id);
         shape.num_vertices = vertices->size();
         auto &attributes = event.attributes;
 
@@ -153,15 +153,15 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
             if (halfedges->get<halfedge_graph::halfedge_connectivity, 4>("h_connectivity").is_dirty() &&
                 attribute.property_name == "edges") {
                 property<VectorI<2>, 2> property;
-                if (state->scene.all_of<halfedge_mesh>(event.id)) {
+                if (state->scene.has<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
                     property = mesh.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = mesh.get_connectivity();
-                } else if (state->scene.all_of<halfedge_graph>(event.id)) {
+                } else if (state->scene.has<halfedge_graph>(event.id)) {
                     auto &graph = state->scene.get<halfedge_graph>(event.id);
                     property = graph.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = graph.get_connectivity();
-                } else if (state->scene.all_of<curve_bezier>(event.id)) {
+                } else if (state->scene.has<curve_bezier>(event.id)) {
                     auto &curve = state->scene.get<curve_bezier>(event.id);
                     property = curve.edges.get_or_add<VectorI<2>, 2>("edges");
                     property.vector() = curve.get_connectivity();
@@ -171,7 +171,7 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
             }
             if (attribute.buffer_name == "e_position") {
                 property<VectorS<3>, 3> property;
-                if (state->scene.all_of<halfedge_mesh>(event.id)) {
+                if (state->scene.has<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
                     property = mesh.edges.get_or_add<VectorS<3>, 3>("e_position");
                     auto connectivity = mesh.get_connectivity();
@@ -179,7 +179,7 @@ void gpu_system::on_update_edge_attributes(const event::gpu::update_edge_attribu
                         property[e] =
                                 (mesh.positions[connectivity[e.idx][0]] + mesh.positions[connectivity[e.idx][1]]) / 2.0;
                     }
-                } else if (state->scene.all_of<halfedge_graph>(event.id)) {
+                } else if (state->scene.has<halfedge_graph>(event.id)) {
                     auto &graph = state->scene.get<halfedge_graph>(event.id);
                     property = graph.edges.get_or_add<VectorS<3>, 3>("e_position");
                     auto connectivity = graph.get_connectivity();
@@ -219,7 +219,7 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
 
             if (attribute.buffer_name == "f_position") {
                 property<VectorS<3>, 3> property;
-                if (state->scene.all_of<halfedge_mesh>(event.id)) {
+                if (state->scene.has<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
                     property = mesh.faces.get_or_add<VectorS<3>, 3>("f_position");
                     auto triangles = mesh.get_triangles();
@@ -239,7 +239,7 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
 }
 
 void gpu_system::on_shutdown(const event::internal::shutdown &) {
-    auto view = state->scene.view<ogl_shape>();
+    auto view = state->scene().view<ogl_shape>();
     for (const auto id : view) {
         auto &shape = view.get<ogl_shape>(id);
         for (auto &item : shape.vertex_buffers) {

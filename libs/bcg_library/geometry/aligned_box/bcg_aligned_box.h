@@ -58,7 +58,7 @@ struct aligned_box {
     }
 
     inline aligned_box merge(const aligned_box &other) const {
-        return aligned_box(min.min(other.min), max.max(other.max));
+        return aligned_box(min.cwiseMin(other.min), max.cwiseMax(other.max));
     }
 
     inline void make_cubic() {

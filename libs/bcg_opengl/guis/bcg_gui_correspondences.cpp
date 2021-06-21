@@ -32,7 +32,7 @@ void gui_correspondences(viewer_state *state) {
     static entt::entity target_id = entt::null;
 
     if (state->scene.valid(source_id)) {
-        auto &entity_corrs = state->scene.get_or_emplace<entity_correspondences>(source_id);
+        auto &entity_corrs = state->scene().get_or_emplace<entity_correspondences>(source_id);
         if (state->scene.valid(target_id)) {
             corrs = &entity_corrs.maps[size_t(target_id)];
             corrs->target_id = size_t(target_id);

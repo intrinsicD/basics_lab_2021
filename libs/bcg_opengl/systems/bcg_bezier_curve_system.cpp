@@ -78,14 +78,14 @@ void bezier_curve_system::on_setup(const event::curve::setup &event) {
     entity_info info;
     info.entity_name = "bezier_curve";
     info.filename = "generated";
-    state->scene.emplace_or_replace<entity_info>(event.id, info);
+    state->scene().emplace_or_replace<entity_info>(event.id, info);
     current_curve_id = event.id;
     state->picker.entity_id = event.id;
 }
 
 void bezier_curve_system::on_make(const event::curve::make &) {
     auto id = state->scene.create();
-    state->scene.emplace<curve_bezier>(id);
+    state->scene().emplace<curve_bezier>(id);
     state->dispatcher.trigger<event::curve::setup>(id);
 }
 
@@ -153,15 +153,15 @@ void bezier_curve_system::on_mouse_button(const event::mouse::button &) {
     }
     if (!curve->positions.empty()) {
         curve->positions.set_dirty();
-        auto &material = state->scene.get_or_emplace<material_curve>(current_curve_id);
+        auto &material = state->scene().get_or_emplace<material_curve>(current_curve_id);
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(current_curve_id, material.attributes);
         auto edge_attributes = {attribute{"edges", "edges", "edges", 0, true}};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(current_curve_id, edge_attributes);
         if (curve->points_clicked == 1) {
-            state->scene.emplace_or_replace<event::points_renderer::enqueue>(current_curve_id);
-            state->scene.emplace_or_replace<event::picking_renderer::enqueue>(current_curve_id);
-            state->scene.emplace_or_replace<event::curve_renderer::enqueue>(current_curve_id);
-            state->scene.emplace_or_replace<event::graph_renderer::enqueue>(current_curve_id);
+            state->scene().emplace_or_replace<event::points_renderer::enqueue>(current_curve_id);
+            state->scene().emplace_or_replace<event::picking_renderer::enqueue>(current_curve_id);
+            state->scene().emplace_or_replace<event::curve_renderer::enqueue>(current_curve_id);
+            state->scene().emplace_or_replace<event::graph_renderer::enqueue>(current_curve_id);
             state->dispatcher.trigger<event::spatial_index::setup_kdtree>(current_curve_id);
         }
         state->dispatcher.trigger<event::curve_renderer::setup_for_rendering>(current_curve_id);

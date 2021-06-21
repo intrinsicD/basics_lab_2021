@@ -23,7 +23,7 @@ Result gui_property_classify_max(viewer_state *state){
             static bcg_scalar_t threshold;
             bool change = false;
             if(gui_property_selector(state, vertices, {1}, "property", current_property_name)){
-                if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+                if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
                     auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
                     auto &color = material.attributes[2];
                     color.property_name = current_property_name;
@@ -58,7 +58,7 @@ Result gui_property_classify_max(viewer_state *state, property_container *contai
     float classify_max_value = threshold;
     if (ImGui::DragFloat((p.name() + "_classify_max_value").c_str(), &classify_max_value, 0.001, min, max)) {
         auto result_max = classify_max(container, p, classify_max_value);
-        if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id)){
+        if(state->scene.has<halfedge_mesh>(state->picker.entity_id)){
             auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
             auto &color = material.attributes[2];
             color.property_name = result_max.name();

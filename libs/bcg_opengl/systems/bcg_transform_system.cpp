@@ -11,6 +11,7 @@ namespace bcg {
 
 transform_system::transform_system(viewer_state *state) : system("transform_system", state) {
     state->dispatcher.sink<event::transform::add>().connect<&transform_system::on_add>(this);
+    state->dispatcher.sink<event::transform::set>().connect<&transform_system::on_set>(this);
     state->dispatcher.sink<event::transform::translate>().connect<&transform_system::on_translate>(this);
     state->dispatcher.sink<event::transform::scale>().connect<&transform_system::on_scale>(this);
     state->dispatcher.sink<event::transform::rotate>().connect<&transform_system::on_rotate>(this);
@@ -20,8 +21,14 @@ transform_system::transform_system(viewer_state *state) : system("transform_syst
 }
 
 void transform_system::on_add(const event::transform::add &event) {
-    if (state->scene.valid(event.id) && !state->scene.all_of<Transform>(event.id)) {
-        state->scene.emplace<Transform>(event.id, Transform::Identity());
+    if (state->scene.valid(event.id) && !state->scene.has<Transform>(event.id)) {
+        state->scene().emplace<Transform>(event.id, Transform::Identity());
+    }
+}
+
+void transform_system::on_set(const event::transform::set &event){
+    if (state->scene.valid(event.id)) {
+        state->scene().emplace_or_replace<Transform>(event.id, event.model);
     }
 }
 
@@ -53,8 +60,8 @@ void transform_system::on_rotate(const event::transform::rotate &event) {
 
 void transform_system::on_reset(const event::transform::reset &event){
     if (!state->scene.valid(event.id)) return;
-    if(!state->scene.all_of<entity_info>(event.id)) return;
-    if(!state->scene.all_of<Transform>(event.id)) return;
+    if(!state->scene.has<entity_info>(event.id)) return;
+    if(!state->scene.has<Transform>(event.id)) return;
 
     auto &model = state->scene.get<Transform>(event.id);
     auto &info = state->scene.get<entity_info>(event.id);
@@ -63,7 +70,7 @@ void transform_system::on_reset(const event::transform::reset &event){
 
 void transform_system::on_update(const event::internal::update &) {
     if (state->mouse.is_dragging && !state->gui.captured_mouse && state->keyboard.ctrl_pressed) {
-        if (!state->picker.valid || !state->scene.all_of<Transform>(state->picker.entity_id)) return;
+        if (!state->picker.valid || !state->scene.has<Transform>(state->picker.entity_id)) return;
         auto &model = state->scene.get<Transform>(state->picker.entity_id);
 /*        if (state->mouse.middle) {
             //translate camera in plane

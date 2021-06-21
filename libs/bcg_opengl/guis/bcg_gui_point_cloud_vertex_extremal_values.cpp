@@ -66,7 +66,7 @@ void gui_point_cloud_vertex_extremal_values(viewer_state *state) {
                         break;
                     }
                 }
-                if(state->scene.all_of<halfedge_mesh>(state->picker.entity_id) && !property_name.empty()){
+                if(state->scene.has<halfedge_mesh>(state->picker.entity_id) && !property_name.empty()){
                     auto &material = state->scene.get<material_mesh>(state->picker.entity_id);
                     auto &color = material.attributes[2];
                     color.property_name = property_name;

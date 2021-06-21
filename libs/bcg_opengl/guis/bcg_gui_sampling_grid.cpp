@@ -4,7 +4,6 @@
 
 
 #include "bcg_gui_sampling_grid.h"
-#include "components/bcg_component_object_space_view.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_entity_hierarchy.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
@@ -30,7 +29,7 @@ void gui_sampling_grid(viewer_state *state) {
                 std::vector<VectorS<3>> samples;
                 switch (static_cast<GridSamplingType>(idx)) {
                     case GridSamplingType::first : {
-                        auto &grid = state->scene.get_or_emplace<sample_first_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene().get_or_emplace<sample_first_grid3>(id, dims.cast<bcg_index_t>(), aabb);
                         grid.set_aabb(aabb);
                         grid.set_dims(dims.cast<bcg_index_t>());
                         grid.clear();
@@ -39,7 +38,7 @@ void gui_sampling_grid(viewer_state *state) {
                         break;
                     }
                     case GridSamplingType::last : {
-                        auto &grid = state->scene.get_or_emplace<sample_last_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene().get_or_emplace<sample_last_grid3>(id, dims.cast<bcg_index_t>(), aabb);
                         grid.set_aabb(aabb);
                         grid.set_dims(dims.cast<bcg_index_t>());
                         grid.clear();
@@ -48,7 +47,7 @@ void gui_sampling_grid(viewer_state *state) {
                         break;
                     }
                     case GridSamplingType::random : {
-                        auto &grid = state->scene.get_or_emplace<sample_random_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene().get_or_emplace<sample_random_grid3>(id, dims.cast<bcg_index_t>(), aabb);
                         grid.set_aabb(aabb);
                         grid.set_dims(dims.cast<bcg_index_t>());
                         grid.clear();
@@ -57,7 +56,7 @@ void gui_sampling_grid(viewer_state *state) {
                         break;
                     }
                     case GridSamplingType::closest : {
-                        auto &grid = state->scene.get_or_emplace<sample_closest_grid3>(id, dims.cast<bcg_index_t>(),
+                        auto &grid = state->scene().get_or_emplace<sample_closest_grid3>(id, dims.cast<bcg_index_t>(),
                                                                                       aabb);
                         grid.set_aabb(aabb);
                         grid.set_dims(dims.cast<bcg_index_t>());
@@ -67,7 +66,7 @@ void gui_sampling_grid(viewer_state *state) {
                         break;
                     }
                     case GridSamplingType::medioid : {
-                        auto &grid = state->scene.get_or_emplace<sample_medioid_grid3>(id, dims.cast<bcg_index_t>(), aabb);
+                        auto &grid = state->scene().get_or_emplace<sample_medioid_grid3>(id, dims.cast<bcg_index_t>(), aabb);
                         grid.set_aabb(aabb);
                         grid.set_dims(dims.cast<bcg_index_t>());
                         grid.clear();
@@ -80,10 +79,10 @@ void gui_sampling_grid(viewer_state *state) {
                     }
                 }
 
-                auto &hierarchy = state->scene.get_or_emplace<entity_hierarchy>(state->picker.entity_id);
+                auto &hierarchy = state->scene().get_or_emplace<entity_hierarchy>(state->picker.entity_id);
                 entt::entity child_id = entt::null;
                 for (const auto &child : hierarchy.children) {
-                    if (state->scene.all_of<entt::tag<"subsampled_grid"_hs>>(child.first)) {
+                    if (state->scene.has<entt::tag<"subsampled_grid"_hs>>(child.first)) {
                         child_id = child.first;
                         break;
                     }
@@ -97,14 +96,10 @@ void gui_sampling_grid(viewer_state *state) {
                         pc.vertices.resize(pc.positions.size());
                         pc.positions.set_dirty();
                         child_id = state->scene.create();
-                        state->scene.emplace<point_cloud>(child_id, pc);
-                        state->scene.emplace<entt::tag<"subsampled_grid"_hs>>(child_id);
+                        state->scene().emplace<point_cloud>(child_id, pc);
+                        state->scene().emplace<entt::tag<"subsampled_grid"_hs>>(child_id);
                         state->dispatcher.trigger<event::point_cloud::setup>(child_id, "subsampled_grid");
-                        if(state->scene.all_of<object_space_view>(parent_id)){
-                            auto &osv = state->scene.get<object_space_view>(parent_id);
-                            state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(id, osv);
-                        }
-                        state->scene.remove_if_exists<event::picking_renderer::enqueue>(child_id);
+                        state->scene().remove_if_exists<event::picking_renderer::enqueue>(child_id);
                         state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, child_id);
                         state->picker.entity_id = parent_id;
                     } else {

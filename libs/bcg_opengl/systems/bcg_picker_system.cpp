@@ -5,7 +5,6 @@
 #include "bcg_picker_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_selection.h"
-#include "components/bcg_component_object_space_view.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
@@ -50,8 +49,8 @@ void picker_system::on_disable(const event::picker::disable &) {
 void picker_system::on_pick_point(const event::picker::pick::point &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::points) return;
-    if (!state->scene.all_of<selected_points>(event.id)) {
-        state->scene.emplace<selected_points>(event.id);
+    if (!state->scene.has<selected_points>(event.id)) {
+        state->scene().emplace<selected_points>(event.id);
     }
     auto &selection = state->scene.get<selected_points>(event.id);
     selection.selected.emplace_back(state->picker.world_space_point);
@@ -60,8 +59,8 @@ void picker_system::on_pick_point(const event::picker::pick::point &event) {
 void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::vertices) return;
-    if (!state->scene.all_of<selected_vertices>(event.id)) {
-        state->scene.emplace<selected_vertices>(event.id);
+    if (!state->scene.has<selected_vertices>(event.id)) {
+        state->scene().emplace<selected_vertices>(event.id);
     }
     auto &selection = state->scene.get<selected_vertices>(event.id);
     auto *vertices = state->get_vertices(event.id);
@@ -85,10 +84,10 @@ void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
             v_selected[state->picker.vertex_id] = true;
         }
         v_selected.set_dirty();
-        auto &material = state->scene.get_or_emplace<material_points>(event.id);
+        auto &material = state->scene().get_or_emplace<material_points>(event.id);
         auto &color = material.attributes[1];
         color.property_name = "v_selected";
-        state->scene.emplace_or_replace<event::points_renderer::enqueue>(event.id);
+        state->scene().emplace_or_replace<event::points_renderer::enqueue>(event.id);
         state->dispatcher.trigger<event::points_renderer::set_color_attribute>(event.id, color);
     }
 
@@ -97,8 +96,8 @@ void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
 void picker_system::on_pick_edge(const event::picker::pick::edge &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::edges) return;
-    if (!state->scene.all_of<selected_edges>(event.id)) {
-        state->scene.emplace<selected_edges>(event.id);
+    if (!state->scene.has<selected_edges>(event.id)) {
+        state->scene().emplace<selected_edges>(event.id);
     }
     auto &selection = state->scene.get<selected_edges>(event.id);
     auto *edges = state->get_edges(event.id);
@@ -118,7 +117,7 @@ void picker_system::on_pick_edge(const event::picker::pick::edge &event) {
         e_selected[state->picker.edge_id] = true;
     }
     e_selected.set_dirty();
-    auto &material = state->scene.get_or_emplace<material_graph>(event.id);
+    auto &material = state->scene().get_or_emplace<material_graph>(event.id);
     auto &color = material.attributes[1];
     color.property_name = "e_selected";
     state->dispatcher.trigger<event::graph_renderer::set_color_texture>(event.id, color);
@@ -127,8 +126,8 @@ void picker_system::on_pick_edge(const event::picker::pick::edge &event) {
 void picker_system::on_pick_face(const event::picker::pick::face &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::faces) return;
-    if (!state->scene.all_of<selected_faces>(event.id)) {
-        state->scene.emplace<selected_faces>(event.id);
+    if (!state->scene.has<selected_faces>(event.id)) {
+        state->scene().emplace<selected_faces>(event.id);
     }
     auto &selection = state->scene.get<selected_faces>(event.id);
     auto *faces = state->get_faces(event.id);
@@ -148,10 +147,10 @@ void picker_system::on_pick_face(const event::picker::pick::face &event) {
         f_selected[state->picker.face_id] = true;
     }
     f_selected.set_dirty();
-    auto &material = state->scene.get_or_emplace<material_mesh>(event.id);
+    auto &material = state->scene().get_or_emplace<material_mesh>(event.id);
     auto &color = material.attributes[2];
     color.property_name = "f_selected";
-    state->scene.emplace_or_replace<event::graph_renderer::enqueue>(event.id);
+    state->scene().emplace_or_replace<event::graph_renderer::enqueue>(event.id);
     state->dispatcher.trigger<event::mesh_renderer::set_face_color_attribute>(event.id, color);
 }
 

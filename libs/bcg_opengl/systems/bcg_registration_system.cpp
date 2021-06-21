@@ -23,9 +23,9 @@ void registration_system::on_align_step(const event::registration::align_step &e
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
     if (event.source_id == event.target_id) return;
-    if (!state->scene.all_of<registration>(event.source_id)) {
+    if (!state->scene.has<registration>(event.source_id)) {
         registration reg;
-        state->scene.emplace<registration>(event.source_id, reg);
+        state->scene().emplace<registration>(event.source_id, reg);
     }
     auto &reg = state->scene.get<registration>(event.source_id);
 
@@ -81,7 +81,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
         case RegistrationMethod::coherent_point_drift_rigid : {
-            auto &rigid = state->scene.get_or_emplace<coherent_point_drift_rigid>(event.source_id);
+            auto &rigid = state->scene().get_or_emplace<coherent_point_drift_rigid>(event.source_id);
             if (reg.errors.empty() || !rigid.initialized) {
                 rigid.init(source_vertices, source_model, target_vertices, target_model);
                 rigid.initialized = true;
@@ -94,7 +94,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
         case RegistrationMethod::coherent_point_drift_affine : {
-            auto &affine = state->scene.get_or_emplace<coherent_point_drift_affine>(event.source_id);
+            auto &affine = state->scene().get_or_emplace<coherent_point_drift_affine>(event.source_id);
             if (reg.errors.empty() || !affine.initialized) {
                 affine.init(source_vertices, source_model, target_vertices, target_model);
                 affine.initialized = true;
@@ -107,7 +107,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
         case RegistrationMethod::coherent_point_drift_nonrigid : {
-            auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid>(event.source_id);
+            auto &nonrigid = state->scene().get_or_emplace<coherent_point_drift_nonrigid>(event.source_id);
             if (reg.errors.empty() || !nonrigid.initialized) {
                 nonrigid.init(source_vertices, source_model, target_vertices, target_model);
                 nonrigid.initialized = true;
@@ -120,7 +120,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
         case RegistrationMethod::coherent_point_drift_nonrigid2 : {
-            auto &nonrigid = state->scene.get_or_emplace<coherent_point_drift_nonrigid2>(event.source_id);
+            auto &nonrigid = state->scene().get_or_emplace<coherent_point_drift_nonrigid2>(event.source_id);
             if (reg.errors.empty() || !nonrigid.initialized) {
                 nonrigid.init(source_vertices, source_model, target_vertices, target_model);
                 nonrigid.initialized = true;
@@ -134,7 +134,7 @@ void registration_system::on_align_step(const event::registration::align_step &e
             break;
         }
         case RegistrationMethod::coherent_point_drift_bayes : {
-            auto &bayes = state->scene.get_or_emplace<coherent_point_drift_bayes>(event.source_id);
+            auto &bayes = state->scene().get_or_emplace<coherent_point_drift_bayes>(event.source_id);
             if (reg.errors.empty() || !bayes.initialized) {
                 bayes.init(source_vertices, source_model, target_vertices, target_model);
                 bayes.initialized = true;
@@ -161,8 +161,8 @@ void registration_system::on_align_step(const event::registration::align_step &e
 void registration_system::on_align_converge(const event::registration::align_converge &event) {
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
-    if (!state->scene.all_of<registration>(event.source_id)) {
-        state->scene.emplace<registration>(event.source_id);
+    if (!state->scene.has<registration>(event.source_id)) {
+        state->scene().emplace<registration>(event.source_id);
     }
     auto &reg = state->scene.get<registration>(event.source_id);
 
@@ -174,30 +174,30 @@ void registration_system::on_align_converge(const event::registration::align_con
 void registration_system::on_reset(const event::registration::reset &event) {
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
-    if (!state->scene.all_of<registration>(event.source_id))return;
+    if (!state->scene.has<registration>(event.source_id))return;
 
     auto &reg = state->scene.get<registration>(event.source_id);
     reg.errors.clear();
 
-    if (state->scene.all_of<coherent_point_drift_rigid>(event.source_id)) {
+    if (state->scene.has<coherent_point_drift_rigid>(event.source_id)) {
         auto &cpd = state->scene.get<coherent_point_drift_rigid>(event.source_id);
         cpd.reset();
-        state->scene.remove_if_exists<coherent_point_drift_rigid>(event.source_id);
+        state->scene().remove_if_exists<coherent_point_drift_rigid>(event.source_id);
     }
-    if (state->scene.all_of<coherent_point_drift_affine>(event.source_id)) {
+    if (state->scene.has<coherent_point_drift_affine>(event.source_id)) {
         auto &cpd = state->scene.get<coherent_point_drift_affine>(event.source_id);
         cpd.reset();
-        state->scene.remove_if_exists<coherent_point_drift_affine>(event.source_id);
+        state->scene().remove_if_exists<coherent_point_drift_affine>(event.source_id);
     }
-    if (state->scene.all_of<coherent_point_drift_nonrigid>(event.source_id)) {
+    if (state->scene.has<coherent_point_drift_nonrigid>(event.source_id)) {
         auto &cpd = state->scene.get<coherent_point_drift_nonrigid>(event.source_id);
         cpd.reset();
-        state->scene.remove_if_exists<coherent_point_drift_nonrigid>(event.source_id);
+        state->scene().remove_if_exists<coherent_point_drift_nonrigid>(event.source_id);
     }
-    if (state->scene.all_of<coherent_point_drift_bayes>(event.source_id)) {
+    if (state->scene.has<coherent_point_drift_bayes>(event.source_id)) {
         auto &cpd = state->scene.get<coherent_point_drift_bayes>(event.source_id);
         cpd.reset();
-        state->scene.remove_if_exists<coherent_point_drift_bayes>(event.source_id);
+        state->scene().remove_if_exists<coherent_point_drift_bayes>(event.source_id);
     }
 }
 
