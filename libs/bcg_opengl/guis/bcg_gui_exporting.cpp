@@ -3,7 +3,7 @@
 //
 
 #include "bcg_gui_exporting.h"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "viewer/bcg_viewer_state.h"
 #include "utils/bcg_path.h"
 #include "utils/bcg_string_utils.h"

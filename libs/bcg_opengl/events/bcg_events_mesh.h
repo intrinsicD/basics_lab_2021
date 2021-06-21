@@ -12,7 +12,7 @@ namespace bcg::event::mesh{
 struct setup{
     entt::entity id;
     std::string filename;
-    bool apply_loading_model = false;
+    //bool apply_loading_model = false;
 };
 struct make_triangle{
 

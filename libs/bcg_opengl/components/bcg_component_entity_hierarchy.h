@@ -2,8 +2,8 @@
 // Created by alex on 19.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_ENTITY_HIERARCHY_H
-#define BCG_GRAPHICS_BCG_ENTITY_HIERARCHY_H
+#ifndef BCG_GRAPHICS_BCG_COMPONENT_ENTITY_HIERARCHY_H
+#define BCG_GRAPHICS_BCG_COMPONENT_ENTITY_HIERARCHY_H
 
 #include <unordered_map>
 #include "entt/entt.hpp"
@@ -19,4 +19,4 @@ struct entity_hierarchy{
 
 }
 
-#endif //BCG_GRAPHICS_BCG_ENTITY_HIERARCHY_H
+#endif //BCG_GRAPHICS_BCG_COMPONENT_ENTITY_HIERARCHY_H

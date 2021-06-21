@@ -2,8 +2,8 @@
 // Created by alex on 29.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_SELECTION_H
-#define BCG_GRAPHICS_BCG_SELECTION_H
+#ifndef BCG_GRAPHICS_BCG_COMPONENT_SELECTION_H
+#define BCG_GRAPHICS_BCG_COMPONENT_SELECTION_H
 
 #include <unordered_map>
 #include "mesh/bcg_mesh.h"
@@ -29,4 +29,4 @@ struct selected_faces{
 };
 }
 
-#endif //BCG_GRAPHICS_BCG_SELECTION_H
+#endif //BCG_GRAPHICS_BCG_COMPONENT_SELECTION_H

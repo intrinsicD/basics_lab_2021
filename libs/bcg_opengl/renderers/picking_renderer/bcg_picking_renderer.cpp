@@ -192,8 +192,13 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     }
 
     Transform model = Transform::Identity();
+
     if(state->scene.valid(id) && state->scene.all_of<Transform>(id)){
         model = state->scene.get<Transform>(id);
+    }
+    if(state->scene.valid(id) && state->scene.all_of<object_space_view>(id)){
+        auto osv = state->scene.get<object_space_view>(id);
+        model = model * osv;
     }
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
     state->picker.view_space_point = (state->cam.view_matrix() *

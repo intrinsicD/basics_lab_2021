@@ -4,7 +4,7 @@
 
 #include "bcg_bezier_curve_system.h"
 #include "viewer/bcg_viewer_state.h"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "renderers/curve_renderer/bcg_material_curve.h"
 #include "renderers/curve_renderer/bcg_curve_renderer.h"
 #include "renderers/picking_renderer/bcg_picking_renderer.h"

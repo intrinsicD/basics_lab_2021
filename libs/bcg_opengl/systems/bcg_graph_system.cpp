@@ -5,7 +5,7 @@
 #include "bcg_graph_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "aligned_box/bcg_aligned_box.h"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "bcg_property_map_eigen.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"

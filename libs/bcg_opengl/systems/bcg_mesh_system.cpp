@@ -4,7 +4,7 @@
 
 #include "bcg_mesh_system.h"
 #include "viewer/bcg_viewer_state.h"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "bcg_property_map_eigen.h"
 #include "components/bcg_component_object_space_view.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
@@ -94,15 +94,11 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
     loading_model.linear() = Scaling(scale, scale, scale);
     loading_model.translation() = aabb.center();
 
-    if (event.apply_loading_model) {
-        state->scene.get<Transform>(event.id) = loading_model;
-    }
-
-    state->scene.emplace<entity_info>(event.id, event.filename, "mesh", loading_model, aabb);
-
     state->dispatcher.trigger<event::aligned_box::add>(event.id);
     state->dispatcher.trigger<event::object_space::add_component_object_space_transform>(event.id);
     state->dispatcher.trigger<event::object_space::set_component_object_space_transform>(event.id, loading_model.inverse());
+    loading_model = Transform::Identity();
+    state->scene.emplace<entity_info>(event.id, event.filename, "mesh", loading_model, aabb);
 
     if (!mesh.vertices.has("v_normal")) {
         state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
@@ -237,22 +233,20 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
 
     auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
     auto info = state->scene.get<entity_info>(parent_id);
+    auto parent_model = state->scene.get<Transform>(parent_id);
+    auto parent_osv = state->scene.get<object_space_view>(parent_id);
     auto parts = mesh_connected_components_split(mesh);
-    auto &parent_osv = state->scene.get<object_space_view>(parent_id);
     for (const auto &part : parts) {
         auto child_id = state->scene.create();
         state->scene.emplace<halfedge_mesh>(child_id, part);
-        //TODO figure out how to handle loading/construction dimensions and mapping the view to the unit cube while keeping data intact!
         std::string filename = path_join(path_dirname(info.filename), path_basename(info.filename)) + "_part_" +
                                std::to_string(int(child_id)) + path_extension(info.filename);
-        state->dispatcher.trigger<event::mesh::setup>(child_id, filename, true);
-        if(state->scene.all_of<object_space_view>(parent_id)){
-            auto &child_osv = state->scene.get<object_space_view>(child_id);
-            auto &model = state->scene.get<Transform>(child_id);
-            auto &child_info = state->scene.get<entity_info>(child_id);
-            child_info.loading_model = Transform(parent_osv) * Transform(child_osv).inverse();
-            model = child_info.loading_model;
-        }
+        state->dispatcher.trigger<event::mesh::setup>(child_id, filename);
+        auto &model = state->scene.get<Transform>(child_id);
+        auto &child_info = state->scene.get<entity_info>(child_id);
+        auto &osv = state->scene.get<object_space_view>(child_id);
+        model = parent_model * Transform(parent_osv) * Transform(osv).inverse();
+        child_info.loading_model = model.inverse();
         //state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         //state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }

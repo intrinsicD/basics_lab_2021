@@ -8,7 +8,7 @@
 
 namespace bcg{
 
-bool gui_guizmo(viewer_state *state, Transform &transform){
+bool gui_guizmo(viewer_state *state, entt::entity id, Transform &transform){
     ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
     static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
     if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
@@ -21,6 +21,12 @@ bool gui_guizmo(viewer_state *state, Transform &transform){
     ImGui::SameLine();
     static bool disabled = false;
     ImGui::Checkbox("Disabled", &disabled);
+    ImGui::SameLine();
+    if (ImGui::Button("Reset")) {
+        if(state->scene.valid(id)){
+            state->dispatcher.trigger<event::transform::reset>(id);
+        }
+    }
     ImGuizmo::Enable(!disabled);
 
     static bool useSnap(false);

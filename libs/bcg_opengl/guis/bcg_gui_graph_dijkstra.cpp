@@ -6,9 +6,11 @@
 #include "bcg_gui_property_selector.h"
 #include "bcg_property_map_eigen.h"
 #include "viewer/bcg_viewer_state.h"
-#include "viewer/bcg_selection.h"
+#include "components/bcg_component_selection.h"
 #include "graph/bcg_graph_dijkstra.h"
 #include "mesh/bcg_mesh_split_path.h"
+#include "components/bcg_component_entity_info.h"
+#include "components/bcg_component_object_space_view.h"
 #include "bcg_opengl/renderers/points_renderer/bcg_material_points.h"
 #include "bcg_opengl/renderers/points_renderer/bcg_events_points_renderer.h"
 #include "bcg_opengl/renderers/mesh_renderer/bcg_material_mesh.h"
@@ -170,14 +172,25 @@ void gui_graph_dijkstra(viewer_state *state) {
             ImGui::Separator();
             if (state->scene.all_of<halfedge_mesh>(state->picker.entity_id)) {
                 if (ImGui::Button("Split mesh at path")) {
-                    auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
+                    auto parent_id = state->picker.entity_id;
+                    auto info = state->scene.get<entity_info>(parent_id);
+                    auto parent_model = state->scene.get<Transform>(parent_id);
+                    auto parent_osv = state->scene.get<object_space_view>(parent_id);
+
+                    auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
+
                     auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
                     auto components = mesh_split_path(mesh, merged_path);
                     size_t count = 0;
                     for (const auto &component : components) {
-                        auto id = state->scene.create();
-                        state->scene.emplace<halfedge_mesh>(id, component);
-                        state->dispatcher.trigger<event::mesh::setup>(id, "split_part " + std::to_string(count), true);
+                        auto child_id = state->scene.create();
+                        state->scene.emplace<halfedge_mesh>(child_id, component);
+                        state->dispatcher.trigger<event::mesh::setup>(child_id, "split_part " + std::to_string(count));
+                        auto &model = state->scene.get<Transform>(child_id);
+                        auto &child_info = state->scene.get<entity_info>(child_id);
+                        auto &osv = state->scene.get<object_space_view>(child_id);
+                        model = parent_model * Transform(parent_osv) * Transform(osv).inverse();
+                        child_info.loading_model = model.inverse();
                         ++count;
                     }
                 }

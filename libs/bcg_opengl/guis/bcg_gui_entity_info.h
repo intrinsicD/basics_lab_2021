@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_GUI_ENTITY_INFO_H
 
 #include "entt/entt.hpp"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 
 namespace bcg{
 

@@ -4,7 +4,7 @@
 
 #include "bcg_hierarchy_system.h"
 #include "viewer/bcg_viewer_state.h"
-#include "viewer/bcg_entity_hierarchy.h"
+#include "components/bcg_component_entity_hierarchy.h"
 
 namespace bcg {
 

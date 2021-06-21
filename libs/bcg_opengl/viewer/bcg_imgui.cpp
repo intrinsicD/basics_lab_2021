@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "imgui/imgui_internal.h"
 
-#include "bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "renderers/curve_renderer/bcg_events_curve_renderer.h"
 
 

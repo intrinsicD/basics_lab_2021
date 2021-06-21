@@ -88,7 +88,9 @@ void gui_transform(viewer_state *state, Transform *model, const std::string *nam
         draw_label(&state->window, "model_matrix\n\n\n\n", ss.str());
         ImGui::Separator();
         if (ImGui::Button("reset")) {
-            *model = Transform::Identity();
+            if(state->scene.valid(state->picker.entity_id)){
+                state->dispatcher.trigger<event::transform::reset>(state->picker.entity_id);
+            }
         }
         static bool show_guizmo = false;
         ImGui::Checkbox("show_guizmo", &show_guizmo);

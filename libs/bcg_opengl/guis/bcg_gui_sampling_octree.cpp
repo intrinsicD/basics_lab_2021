@@ -6,7 +6,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_property_selector.h"
 #include "geometry/sampling/bcg_sampling_octree.h"
-#include "viewer/bcg_entity_hierarchy.h"
+#include "components/bcg_component_entity_hierarchy.h"
 #include "components/bcg_component_object_space_view.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "math/vector/bcg_vector_map_eigen.h"

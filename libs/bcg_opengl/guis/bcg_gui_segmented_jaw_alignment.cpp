@@ -11,7 +11,7 @@
 #include "bcg_gui_transform.h"
 #include "bcg_property_utils.h"
 #include "bcg_property_map_eigen.h"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "graph/bcg_graph_edge_from_vertex_function.h"
 #include "bcg_gui_mesh_laplacian_harmonic_field.h"
 #include "viewer/bcg_viewer_state.h"

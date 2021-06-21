@@ -2,8 +2,8 @@
 // Created by alex on 04.11.20.
 //
 
-#ifndef BCG_GRAPHICS_BCG_ENTITY_INFO_H
-#define BCG_GRAPHICS_BCG_ENTITY_INFO_H
+#ifndef BCG_GRAPHICS_BCG_COMPONENT_ENTITY_INFO_H
+#define BCG_GRAPHICS_BCG_COMPONENT_ENTITY_INFO_H
 
 #include <string>
 #include "math/bcg_linalg.h"
@@ -19,4 +19,4 @@ struct entity_info{
 
 }
 
-#endif //BCG_GRAPHICS_BCG_ENTITY_INFO_H
+#endif //BCG_GRAPHICS_BCG_COMPONENT_ENTITY_INFO_H

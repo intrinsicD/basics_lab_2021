@@ -4,7 +4,7 @@
 
 #include "bcg_transform_system.h"
 #include "viewer/bcg_viewer_state.h"
-#include "viewer/bcg_entity_info.h"
+#include "components/bcg_component_entity_info.h"
 #include "guis/bcg_gui_guizmo.h"
 
 namespace bcg {
@@ -97,7 +97,7 @@ void transform_system::on_render_gui(const event::internal::render_gui &) {
     window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::Begin("TransparentTransformWindow", &open_ptr, window_flags);
     ImGui::LabelText("Selected Entity", "%zu", size_t(state->picker.entity_id));
-    gui_guizmo(state, model);
+    gui_guizmo(state, state->picker.entity_id, model);
     auto win_size = ImGui::GetWindowSize();
     ImVec2 pos(state->window.width - win_size[0], state->gui.menu_height);
     ImGui::SetWindowPos(pos);

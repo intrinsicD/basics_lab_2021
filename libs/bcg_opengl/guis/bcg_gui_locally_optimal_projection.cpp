@@ -5,7 +5,7 @@
 #include "bcg_gui_locally_optimal_projection.h"
 #include "viewer/bcg_viewer_state.h"
 #include "sampling/bcg_sampling_locally_optimal_projection.h"
-#include "viewer/bcg_entity_hierarchy.h"
+#include "components/bcg_component_entity_hierarchy.h"
 #include "bcg_gui_sampling_octree.h"
 
 namespace bcg{

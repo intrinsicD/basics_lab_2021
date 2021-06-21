@@ -5,7 +5,7 @@
 #include "bcg_gui_mesh_laplacian_harmonic_field.h"
 #include "bcg_gui_mesh_laplacian.h"
 #include "viewer/bcg_viewer_state.h"
-#include "viewer/bcg_selection.h"
+#include "components/bcg_component_selection.h"
 #include "graph/bcg_graph_harmonic_segmentation_to_path.h"
 #include "mesh/bcg_mesh_boundary.h"
 #include "math/laplacian/bcg_laplacian_harmonic_field.h"
