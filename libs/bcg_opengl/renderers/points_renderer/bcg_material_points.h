@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_MATERIAL_POINTS_H
 
 #include "color/bcg_colors.h"
-#include "renderers/bcg_material.h"
+#include "components/bcg_component_material.h"
 
 namespace bcg{
 

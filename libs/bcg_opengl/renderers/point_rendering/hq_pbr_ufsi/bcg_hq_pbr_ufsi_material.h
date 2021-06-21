@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_HQ_PBR_UFSI_MATERIAL_H
 
 #include "color/bcg_colors.h"
-#include "bcg_opengl/renderers/bcg_material.h"
+#include "components/bcg_component_material.h"
 
 namespace bcg{
 

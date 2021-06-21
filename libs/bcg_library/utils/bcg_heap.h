@@ -37,7 +37,7 @@ public:
     //! reserve space for N entries
     void reserve(unsigned int n) { heapVector::reserve(n); }
 
-    //! reset heap position to -1 (not in heap)
+    //! set_identity heap position to -1 (not in heap)
     void reset_heap_position(heap_entry h) {
         interface.set_heap_position(h, -1);
     }

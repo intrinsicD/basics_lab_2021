@@ -6,7 +6,7 @@
 #define BCG_GRAPHICS_BCG_MATERIAL_MESH_H
 
 #include "color/bcg_colormap.h"
-#include "renderers/bcg_material.h"
+#include "components/bcg_component_material.h"
 
 namespace bcg{
 

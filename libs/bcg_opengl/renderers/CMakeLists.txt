@@ -1,5 +1,5 @@
 target_sources(bcg_opengl PRIVATE
-        bcg_attribute.h bcg_material.h
+        bcg_attribute.h ../components/bcg_component_material.h
         bcg_render_system.h bcg_render_system.cpp
         bcg_renderer.h bcg_renderer.cpp
         bcg_vectorfields.h)

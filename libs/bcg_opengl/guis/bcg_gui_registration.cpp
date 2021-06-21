@@ -80,7 +80,7 @@ void gui_registration(viewer_state *state) {
             converge = true;
         }
     }
-    if (ImGui::Button("reset")) {
+    if (ImGui::Button("set_identity")) {
         state->dispatcher.trigger<event::registration::reset>(source_id, target_id, static_cast<RegistrationMethod>(e));
     }
 

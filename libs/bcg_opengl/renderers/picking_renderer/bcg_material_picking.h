@@ -7,7 +7,7 @@
 
 #include "entt/entt.hpp"
 #include "color/bcg_colors.h"
-#include "renderers/bcg_material.h"
+#include "components/bcg_component_material.h"
 
 namespace bcg{
 

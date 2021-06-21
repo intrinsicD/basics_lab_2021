@@ -16,4 +16,6 @@ target_sources(bcg_opengl PRIVATE
         bcg_registration_system.h bcg_registration_system.cpp
         bcg_spatial_index_system.h bcg_spatial_index_system.cpp
         bcg_transform_system.h bcg_transform_system.cpp
-        bcg_orthodontic_system.h bcg_orthodontic_system.cpp)
+        bcg_orthodontic_system.h bcg_orthodontic_system.cpp
+        bcg_system_world_space_transform.h bcg_system_world_space_transform.cpp
+        bcg_system_object_space_transform.h bcg_system_object_space_transform.cpp)
