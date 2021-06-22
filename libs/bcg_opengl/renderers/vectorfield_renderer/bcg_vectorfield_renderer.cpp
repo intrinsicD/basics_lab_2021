@@ -176,15 +176,7 @@ void vectorfield_renderer::on_render(const event::internal::render &) {
         if (!state->scene.valid(id)) continue;
         if (!state->scene.has<vectorfields>(id)) continue;
 
-
-        Transform model = state->scene.get<world_space_transform>(id);
-
-        if(state->scene.has<object_space_transform>(id)){
-            auto &osm = state->scene.get<object_space_transform>(id);
-            model = model * osm;
-        }
-
-        model = model * state->scene.scaling;
+        Transform model = state->scene.get_full_transform(id) * state->scene.scaling;
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
         auto &vectors = state->scene.get<vectorfields>(id);

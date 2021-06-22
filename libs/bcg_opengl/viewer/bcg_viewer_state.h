@@ -183,34 +183,22 @@ struct viewer_config {
 struct viewer_scene {
     entt::registry scene;
 
-    operator entt::registry &() {
-        return scene;
-    }
+    operator entt::registry &();
 
-    operator const entt::registry &() const {
-        return scene;
-    }
+    operator const entt::registry &() const;
 
-    entt::registry &operator()() {
-        return scene;
-    }
+    entt::registry &operator()();
 
-    const entt::registry &operator()() const {
-        return scene;
-    }
+    const entt::registry &operator()() const;
 
-    entt::entity create() {
-        return scene.create();
-    }
+    entt::entity create();
 
     template<typename Component>
     bool has(const entt::entity &id) const {
         return scene.template all_of<Component>(id);
     }
 
-    bool valid(const entt::entity &id) const {
-        return scene.valid(id);
-    }
+    bool valid(const entt::entity &id) const;
 
     template<typename Component>
     [[nodiscard]] decltype(auto) get(const entt::entity &id) {
@@ -231,6 +219,8 @@ struct viewer_scene {
     [[nodiscard]] auto try_get(const entt::entity &id) const {
         return scene.template try_get<Component>(id);
     }
+
+    Transform get_full_transform(entt::entity id) const;
 
     aligned_box3 aabb;
     Transform scaling = Transform::Identity();

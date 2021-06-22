@@ -4,7 +4,7 @@
 
 #include "bcg_gui_selected_entities.h"
 #include "viewer/bcg_viewer_state.h"
-#include "bcg_gui_entity_info.h"
+#include "bcg_gui_component_entity_info.h"
 
 namespace bcg{
 

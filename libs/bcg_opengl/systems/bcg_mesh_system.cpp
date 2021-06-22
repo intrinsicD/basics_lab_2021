@@ -242,6 +242,8 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
                                std::to_string(int(child_id)) + path_extension(info.filename);
         state->dispatcher.trigger<event::mesh::setup>(child_id, filename);
         state->dispatcher.trigger<event::transform::world_space::set>(child_id, parent_model);
+        auto &aabb = state->scene.get<aligned_box3>(child_id);
+        state->dispatcher.trigger<event::transform::object_space::set>(child_id, Transform(Translation(-aabb.center())));
         //state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         //state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }

@@ -2,8 +2,8 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_show_aligned_box3.h bcg_gui_show_aligned_box3.cpp
         bcg_gui_radius_from_aabb.h bcg_gui_radius_from_aabb.cpp
         bcg_gui_correspondences.h bcg_gui_correspondences.cpp
-        bcg_gui_entity_hierarchy.h bcg_gui_entity_hierarchy.cpp
-        bcg_gui_entity_info.h bcg_gui_entity_info.cpp
+        bcg_gui_component_entity_hierarchy.h bcg_gui_component_entity_hierarchy.cpp
+        bcg_gui_component_entity_info.h bcg_gui_component_entity_info.cpp
         bcg_gui_graph.h bcg_gui_graph.cpp
         bcg_gui_graph_vertex_pca.h bcg_gui_graph_vertex_pca.cpp
         bcg_gui_graph_dijkstra.h bcg_gui_graph_dijkstra.cpp

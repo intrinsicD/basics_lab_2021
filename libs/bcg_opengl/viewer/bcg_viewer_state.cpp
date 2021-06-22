@@ -28,6 +28,8 @@
 #include "bcg_opengl/systems/bcg_system_world_space_transform.h"
 #include "bcg_opengl/systems/bcg_system_object_space_transform.h"
 #include "bcg_opengl/renderers/bcg_render_system.h"
+#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform_object_space.h"
 
 #include "geometry/curve/bcg_curve_bezier.h"
 
@@ -145,6 +147,43 @@ std::string viewer_config::get_renderers_path_from_config_file(){
     config_file.load_text(text);
     return text;
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+viewer_scene::operator entt::registry &() {
+    return scene;
+}
+
+viewer_scene::operator const entt::registry &() const {
+    return scene;
+}
+
+entt::registry &viewer_scene::operator()() {
+    return scene;
+}
+
+const entt::registry &viewer_scene::operator()() const {
+    return scene;
+}
+
+entt::entity viewer_scene::create() {
+    return scene.create();
+}
+
+bool viewer_scene::valid(const entt::entity &id) const {
+    return scene.valid(id);
+}
+
+Transform viewer_scene::get_full_transform(entt::entity id) const {
+    Transform model = get<world_space_transform>(id);
+    if(has<object_space_transform>(id)){
+        auto &osm = get<object_space_transform>(id);
+        model = model * osm;
+    }
+    return model;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 
 viewer_state::viewer_state() : shaders(this){
     systems["camera_system"] = std::make_unique<camera_system>(this);

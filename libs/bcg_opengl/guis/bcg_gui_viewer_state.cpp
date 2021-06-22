@@ -13,7 +13,7 @@
 #include "bcg_gui_viewer_camera.h"
 #include "viewer/bcg_imgui.h"
 #include "viewer/bcg_viewer_state.h"
-#include "bcg_gui_entity_info.h"
+#include "bcg_gui_component_entity_info.h"
 #include "bcg_gui_show_aligned_box3.h"
 #include "bcg_gui_component_transform_world_space.h"
 #include "bcg_gui_component_transform_object_space.h"
@@ -23,7 +23,7 @@
 #include "bcg_gui_graph.h"
 #include "bcg_gui_point_cloud.h"
 #include "bcg_gui_ogl_shape.h"
-#include "bcg_gui_entity_hierarchy.h"
+#include "bcg_gui_component_entity_hierarchy.h"
 #include "geometry/curve/bcg_curve_bezier.h"
 
 namespace bcg {
@@ -36,7 +36,9 @@ void gui_viewer_state(viewer_state *state) {
             std::stringstream ss;
             ss << info.entity_name << " id: " << std::to_string((unsigned int) id);
             if (ImGui::TreeNode(ss.str().c_str())) {
-                gui_entity_info(state, state->scene.try_get<entity_info>(id), id);
+                if(ImGui::CollapsingHeader("Entity Info")){
+                    gui_component_entity_info(state, id);
+                }
                 if(ImGui::CollapsingHeader("Aligned Box")){
                     gui_show_aligned_box3(state->scene.try_get<aligned_box3>(id));
                 }
@@ -59,7 +61,7 @@ void gui_viewer_state(viewer_state *state) {
                 auto *pc = state->scene.try_get<point_cloud>(id);
                 if (pc) gui_point_cloud(state, pc);
                 gui_ogl_shape(state, state->scene.try_get<ogl_shape>(id));
-                gui_entity_hierarchy(state, state->scene.try_get<entity_hierarchy>(id));
+                gui_component_entity_hierarchy(state, state->scene.try_get<entity_hierarchy>(id));
                 ImGui::TreePop();
             }
         }

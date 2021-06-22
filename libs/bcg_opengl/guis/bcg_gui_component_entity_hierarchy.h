@@ -12,7 +12,7 @@ namespace bcg{
 
 struct viewer_state;
 
-void gui_entity_hierarchy(viewer_state *state, entity_hierarchy *hierarchy);
+void gui_component_entity_hierarchy(viewer_state *state, entity_hierarchy *hierarchy);
 
 }
 
