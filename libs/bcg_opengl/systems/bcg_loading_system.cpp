@@ -8,6 +8,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_library/geometry/mesh/bcg_meshio.h"
 #include "bcg_library/geometry/point_cloud/bcg_point_cloudio.h"
+#include "components/bcg_component_loading_backup.h"
 
 namespace bcg {
 
@@ -47,14 +48,9 @@ void loading_system::on_file_drop(const event::internal::file_drop &event) {
             for (const auto &id : view) {
                 state->scene.aabb = state->scene.aabb.merge(view.get<aligned_box3>(id));
             }
-            //TODO this does not work correctly since it is not a good idea to scale the camera view matrix... figure out another way!
-            Transform model = Transform::Identity();
-            bcg_scalar_t scale = state->scene.aabb.halfextent().maxCoeff();
-            model.linear() = Scaling(scale, scale, scale);
-            model.translation() = state->scene.aabb.center();
-            state->cam.init(state->window.width, state->window.height);
-            auto M = state->cam.model_matrix;
-            state->cam.model_matrix = model * M;
+
+            bcg_scalar_t scale = 1.0 / state->scene.aabb.halfextent().maxCoeff();
+            state->scene.scaling = Scaling(scale, scale, scale);
         }
     }
 }

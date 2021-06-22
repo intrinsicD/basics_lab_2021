@@ -13,8 +13,6 @@ namespace bcg{
 
 struct entity_info{
     std::string filename, entity_name;
-    Transform loading_model;
-    aligned_box3 loading_aabb;
 };
 
 }

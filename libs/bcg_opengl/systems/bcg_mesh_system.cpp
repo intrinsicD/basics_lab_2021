@@ -5,6 +5,9 @@
 #include "bcg_mesh_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_entity_info.h"
+#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_loading_backup.h"
 #include "bcg_property_map_eigen.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
 #include "geometry/mesh/bcg_mesh_factory.h"
@@ -85,17 +88,17 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
 void mesh_system::on_setup(const event::mesh::setup &event) {
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
 
-    aligned_box3 aabb(mesh.positions.vector());
+    auto &backup = state->scene().emplace<loading_backup>(event.id);
+    backup.aabb = aligned_box3(mesh.positions.vector());
+    bcg_scalar_t scale = backup.aabb.halfextent().maxCoeff();
+    backup.os_model.linear() = Scaling(scale, scale, scale);
+    backup.os_model.translation() = backup.aabb.center();
 
-    Transform loading_model = Transform::Identity();
-    bcg_scalar_t scale = aabb.halfextent().maxCoeff();
-    loading_model.linear() = Scaling(scale, scale, scale);
-    loading_model.translation() = aabb.center();
+    state->dispatcher.trigger<event::transform::world_space::init>(event.id);
+    state->dispatcher.trigger<event::transform::object_space::init>(event.id);
+    state->dispatcher.trigger<event::aligned_box::set>(event.id, backup.aabb);
 
-    state->dispatcher.trigger<event::transform::set>(event.id, Transform::Identity());
-    state->dispatcher.trigger<event::aligned_box::set>(event.id, aabb);
-
-    state->scene().emplace<entity_info>(event.id, event.filename, "mesh", loading_model, aabb);
+    state->scene().emplace<entity_info>(event.id, event.filename, "mesh");
 
     if (!mesh.vertices.has("v_normal")) {
         state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
@@ -230,7 +233,7 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
 
     auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
     auto info = state->scene.get<entity_info>(parent_id);
-    auto parent_model = state->scene.get<Transform>(parent_id);
+    auto parent_model = state->scene.get<world_space_transform>(parent_id);
     auto parts = mesh_connected_components_split(mesh);
     for (const auto &part : parts) {
         auto child_id = state->scene.create();
@@ -238,7 +241,7 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
         std::string filename = path_join(path_dirname(info.filename), path_basename(info.filename)) + "_part_" +
                                std::to_string(int(child_id)) + path_extension(info.filename);
         state->dispatcher.trigger<event::mesh::setup>(child_id, filename);
-        state->dispatcher.trigger<event::transform::set>(child_id, parent_model);
+        state->dispatcher.trigger<event::transform::world_space::set>(child_id, parent_model);
         //state->dispatcher.trigger<event::hierarchy::add_child>(event.id, id);
         //state->dispatcher.trigger<event::hierarchy::set_parent>(id, event.id);
     }

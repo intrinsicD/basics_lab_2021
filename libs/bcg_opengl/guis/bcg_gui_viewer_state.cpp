@@ -14,8 +14,10 @@
 #include "viewer/bcg_imgui.h"
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_gui_entity_info.h"
-#include "bcg_gui_aligned_box3.h"
-#include "bcg_gui_transform.h"
+#include "bcg_gui_show_aligned_box3.h"
+#include "bcg_gui_component_transform_world_space.h"
+#include "bcg_gui_component_transform_object_space.h"
+#include "bcg_gui_component_loading_backup.h"
 #include "bcg_gui_rendering_options.h"
 #include "bcg_gui_mesh.h"
 #include "bcg_gui_graph.h"
@@ -35,8 +37,18 @@ void gui_viewer_state(viewer_state *state) {
             ss << info.entity_name << " id: " << std::to_string((unsigned int) id);
             if (ImGui::TreeNode(ss.str().c_str())) {
                 gui_entity_info(state, state->scene.try_get<entity_info>(id), id);
-                gui_aligned_box3(state, state->scene.try_get<aligned_box3>(id));
-                gui_transform(state, state->scene.try_get<Transform>(id));
+                if(ImGui::CollapsingHeader("Aligned Box")){
+                    gui_show_aligned_box3(state->scene.try_get<aligned_box3>(id));
+                }
+                if(ImGui::CollapsingHeader("World Space Transform")){
+                    gui_component_transform_world_space(state, id);
+                }
+                if(ImGui::CollapsingHeader("Object Space Transform")){
+                    gui_component_transform_object_space(state, id);
+                }
+                if(ImGui::CollapsingHeader("Loading Backup")){
+                    gui_component_loading_backup(state, id);
+                }
                 gui_rendering_options(state, id);
                 auto *mesh = state->scene.try_get<halfedge_mesh>(id);
                 if (mesh) gui_mesh(state, mesh);

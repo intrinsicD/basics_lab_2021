@@ -73,10 +73,10 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_R]) {
         if(state->keyboard.ctrl_pressed){
             for(const auto &item : state->picker.selected_entities){
-                state->dispatcher.trigger<event::transform::reset>(item.second);
+                state->dispatcher.trigger<event::transform::world_space::set_identity>(item.second);
             }
             if(state->scene.valid(state->picker.entity_id)){
-                state->dispatcher.trigger<event::transform::reset>(state->picker.entity_id);
+                state->dispatcher.trigger<event::transform::world_space::set_identity>(state->picker.entity_id);
             }
         }else{
             state->cam.init(state->window.width, state->window.height);

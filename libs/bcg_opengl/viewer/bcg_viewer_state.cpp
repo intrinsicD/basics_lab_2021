@@ -17,7 +17,6 @@
 #include "bcg_opengl/systems/bcg_mesh_system.h"
 #include "bcg_opengl/systems/bcg_mouse_system.h"
 #include "bcg_opengl/systems/bcg_keyboard_system.h"
-#include "bcg_opengl/systems/bcg_transform_system.h"
 #include "bcg_opengl/systems/bcg_aligned_box_system.h"
 #include "bcg_opengl/systems/bcg_loading_system.h"
 #include "bcg_opengl/systems/bcg_bezier_curve_system.h"
@@ -158,7 +157,6 @@ viewer_state::viewer_state() : shaders(this){
     systems["gpu_system"] = std::make_unique<gpu_system>(this);
     systems["mouse_system"] = std::make_unique<mouse_system>(this);
     systems["keyboard_system"] = std::make_unique<keyboard_system>(this);
-    systems["transform_system"] = std::make_unique<transform_system>(this);
     systems["aligned_box_system"] = std::make_unique<aligned_box_system>(this);
     systems["bezier_curve_system"] = std::make_unique<bezier_curve_system>(this);
     systems["hierarchy_system"] = std::make_unique<hierarchy_system>(this);

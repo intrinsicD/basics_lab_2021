@@ -5,6 +5,7 @@
 #include "bcg_hierarchy_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_entity_hierarchy.h"
+#include "components/bcg_component_transform_world_space.h"
 
 namespace bcg {
 
@@ -23,7 +24,7 @@ void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) 
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     hierarchy.parent = event.parent_id;
 
-    auto &model = state->scene.get<Transform>(event.id);
+    auto &model = state->scene.get<world_space_transform>(event.id);
     if (state->scene.valid(hierarchy.parent) && state->scene.has<entity_hierarchy>(hierarchy.parent)) {
         auto &parent_hierarchy = state->scene.get<entity_hierarchy>(hierarchy.parent);
         hierarchy.accumulated_model = parent_hierarchy.accumulated_model * model;
@@ -60,7 +61,7 @@ void hierarchy_system::on_remove_child(const event::hierarchy::remove_child &eve
 
 void hierarchy_system::update_accumulated_model(entt::entity id){
     auto &hierarchy = state->scene.get<entity_hierarchy>(id);
-    auto &model = state->scene.get<Transform>(id);
+    auto &model = state->scene.get<world_space_transform>(id);
     hierarchy.accumulated_model = model;
     if(hierarchy.parent == entt::null){
         hierarchy.accumulated_model = model;

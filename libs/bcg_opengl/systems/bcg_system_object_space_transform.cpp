@@ -43,6 +43,7 @@ system_object_space_transform::~system_object_space_transform(){
 }
 
 void system_object_space_transform::init(const event::transform::object_space::init &event){
+    if(state->scene.has<object_space_transform>(event.id)) return;
     set_identity({event.id});
 }
 

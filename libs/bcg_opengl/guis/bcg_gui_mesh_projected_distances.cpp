@@ -8,6 +8,7 @@
 #include "mesh/bcg_mesh_projected_distances.h"
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 #include "renderers/mesh_renderer/bcg_events_mesh_renderer.h"
+#include "components/bcg_component_transform_world_space.h"
 
 namespace bcg{
 
@@ -39,8 +40,8 @@ void gui_mesh_projected_distances(viewer_state *state){
     if(ImGui::Button("Compute projected distances")){
         auto &source = state->scene.get<halfedge_mesh>(source_id);
         auto &target = state->scene.get<halfedge_mesh>(target_id);
-        auto &s_model = state->scene.get<Transform>(source_id);
-        auto &t_model = state->scene.get<Transform>(target_id);
+        auto &s_model = state->scene.get<world_space_transform>(source_id);
+        auto &t_model = state->scene.get<world_space_transform>(target_id);
         Transform s_to_t = t_model.inverse() * s_model;
         mesh_projected_distances(source, target, s_to_t, state->config.parallel_grain_size);
         auto &material = state->scene.get<material_mesh>(source_id);

@@ -6,6 +6,9 @@
 #include "viewer/bcg_viewer_state.h"
 #include "aligned_box/bcg_aligned_box.h"
 #include "components/bcg_component_entity_info.h"
+#include "components/bcg_component_loading_backup.h"
+#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform_object_space.h"
 #include "bcg_property_map_eigen.h"
 #include "renderers/picking_renderer/bcg_events_picking_renderer.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
@@ -24,17 +27,17 @@ graph_system::graph_system(viewer_state *state) : system("graph_system", state){
 void graph_system::on_setup(const event::graph::setup &event){
     auto &graph = state->scene.get<halfedge_graph>(event.id);
 
-    state->dispatcher.trigger<event::transform::add>(event.id);
+    auto &backup = state->scene().emplace<loading_backup>(event.id);
+    backup.aabb = aligned_box3(graph.positions.vector());
+    bcg_scalar_t scale = backup.aabb.halfextent().maxCoeff();
+    backup.os_model.linear() = Scaling(scale, scale, scale);
+    backup.os_model.translation() = backup.aabb.center();
 
-    aligned_box3 aabb(graph.positions.vector());
-    Transform loading_model = Transform::Identity();
-    bcg_scalar_t scale = aabb.halfextent().maxCoeff();
-    loading_model.linear() = Scaling(scale, scale, scale);
-    loading_model.translation() = aabb.center();
-    state->scene().emplace<entity_info>(event.id, event.filename, "graph", loading_model, aabb);
+    state->dispatcher.trigger<event::transform::world_space::init>(event.id);
+    state->dispatcher.trigger<event::transform::object_space::init>(event.id);
+    state->dispatcher.trigger<event::aligned_box::set>(event.id, backup.aabb);
 
-    Map(graph.positions) =
-            (MapConst(graph.positions).rowwise() - aabb.center().transpose()) / aabb.halfextent().maxCoeff();
+    state->scene().emplace<entity_info>(event.id, event.filename, "graph");
 
     state->dispatcher.trigger<event::mesh::vertex_normals::area_angle>(event.id);
     state->dispatcher.trigger<event::mesh::face::centers>(event.id);

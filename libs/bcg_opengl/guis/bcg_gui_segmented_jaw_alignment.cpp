@@ -8,7 +8,9 @@
 #include "bcg_gui_property_selector.h"
 #include "bcg_gui_property_classify_max.h"
 #include "bcg_gui_property_clamp.h"
-#include "bcg_gui_transform.h"
+#include "bcg_gui_component_transform_world_space.h"
+#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform_object_space.h"
 #include "bcg_property_utils.h"
 #include "bcg_property_map_eigen.h"
 #include "components/bcg_component_entity_info.h"
@@ -237,9 +239,9 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                     avg_alignment.setIdentity();
                     for (const auto &tooth : source_teeth) {
                         if (tooth.selected) {
-                            auto loading_model = state->scene.get<entity_info>(tooth.entity_id).loading_model;
-                            auto model = state->scene.get<Transform>(tooth.entity_id);
-                            model = model * loading_model.inverse();
+                            Transform ws_model = state->scene.get<world_space_transform>(tooth.entity_id);
+                            Transform os_model = state->scene.get<object_space_transform>(tooth.entity_id);
+                            Transform model = ws_model * os_model;
                             transforms[size_t(tooth.entity_id)] = model;
                             rotations.emplace_back(model.linear());
                             translations.emplace_back(model.translation());
@@ -248,7 +250,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
 
                     avg_alignment.linear() = r_mean(rotations);
                     avg_alignment.translation() = t_mean(translations);
-                    auto &source_model = state->scene.get<Transform>(source);
+                    Transform &source_model = state->scene.get<world_space_transform>(source);
                     source_model = avg_alignment;
                     auto avg_inverse = avg_alignment.inverse();
                     for (const auto &tooth : source_teeth) {
@@ -275,14 +277,6 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                 }else{
                     std::cout << error << "\n";
                 }
-            }
-            if(state->scene.valid(state->picker.entity_id)){
-                auto model = state->scene.get<Transform>(state->picker.entity_id);
-                std::string name = "global_transform";
-                gui_transform(state, &model, &name);
-                Transform local = avg_alignment.inverse() * model;
-                name = "local_transform";
-                gui_transform(state, &local, &name);
             }
         }
     }

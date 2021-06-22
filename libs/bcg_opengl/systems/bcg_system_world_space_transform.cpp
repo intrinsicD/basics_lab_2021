@@ -65,6 +65,7 @@ system_world_space_transform::~system_world_space_transform() {
 }
 
 void system_world_space_transform::init(const event::transform::world_space::init &event) {
+    if(state->scene.has<world_space_transform>(event.id)) return;
     set_identity({event.id});
 }
 

@@ -8,6 +8,7 @@
 #include "correspondences/bcg_correspondences.h"
 #include "math/vector/bcg_vector_cos.h"
 #include "math/vector/bcg_vector_map_eigen.h"
+#include "components/bcg_component_transform_world_space.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
@@ -25,16 +26,16 @@ correspondence_system::correspondence_system(viewer_state *state) : system("corr
 
 void correspondence_system::on_correspondences_estiamte(const event::correspondences::estimate &event) {
     if (!state->scene.valid(event.source_id) || !state->scene.valid(event.target_id)) return;
-    if (!state->scene.has<Transform>(event.source_id)) return;
-    if (!state->scene.has<Transform>(event.target_id)) return;
+    if (!state->scene.has<world_space_transform>(event.source_id)) return;
+    if (!state->scene.has<world_space_transform>(event.target_id)) return;
 
     if (!state->scene.has<kdtree_property<bcg_scalar_t >>(event.target_id)) {
         state->dispatcher.trigger<event::spatial_index::setup_kdtree>(event.target_id);
     }
     auto &index = state->scene.get<kdtree_property<bcg_scalar_t >>(event.target_id);
 
-    auto &src_model = state->scene.get<Transform>(event.source_id);
-    auto &target_model = state->scene.get<Transform>(event.target_id);
+    auto &src_model = state->scene.get<world_space_transform>(event.source_id);
+    auto &target_model = state->scene.get<world_space_transform>(event.target_id);
     auto src_2_target_model = target_model.inverse() * src_model;
     auto target_2_src_model = src_model.inverse() * target_model;
 
@@ -151,11 +152,11 @@ void correspondence_system::on_correspondences_filter_normal_angle(
     if (!state->scene.valid(event.source_id)) return;
     if (!state->scene.valid(event.target_id)) return;
 
-    if (!state->scene.has<Transform>(event.source_id)) return;
-    if (!state->scene.has<Transform>(event.target_id)) return;
+    if (!state->scene.has<world_space_transform>(event.source_id)) return;
+    if (!state->scene.has<world_space_transform>(event.target_id)) return;
 
-    auto &src_model = state->scene.get<Transform>(event.source_id);
-    auto &target_model = state->scene.get<Transform>(event.target_id);
+    auto &src_model = state->scene.get<world_space_transform>(event.source_id);
+    auto &target_model = state->scene.get<world_space_transform>(event.target_id);
 
     auto *src = state->get_vertices(event.source_id);
     auto *target = state->get_vertices(event.target_id);

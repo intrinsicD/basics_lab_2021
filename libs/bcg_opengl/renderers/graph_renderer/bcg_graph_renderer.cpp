@@ -13,6 +13,8 @@
 #include "bcg_events_graph_renderer.h"
 #include "bcg_property_map_eigen.h"
 #include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
+#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform_object_space.h"
 
 namespace bcg {
 
@@ -67,9 +69,7 @@ void graph_renderer::on_enqueue(const event::graph_renderer::enqueue &event) {
 
 void graph_renderer::on_setup_for_rendering(const event::graph_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
-        state->scene().emplace<Transform>(event.id, Transform::Identity());
-    }
+    state->dispatcher.trigger<event::transform::world_space::init>(event.id);
     auto &material = state->scene().get_or_emplace<material_graph>(event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
@@ -119,11 +119,18 @@ void graph_renderer::on_render(const event::internal::render &) {
     for (const auto id : entities_to_draw) {
         if (!state->scene.valid(id)) continue;
 
-        auto &model = state->scene.get<Transform>(id);
-        auto &material = state->scene.get<material_graph>(id);
+        Transform model = state->scene.get<world_space_transform>(id);
 
+        if(state->scene.has<object_space_transform>(id)){
+            auto &osm = state->scene.get<object_space_transform>(id);
+            model = model * osm;
+        }
+
+        model = model * state->scene.scaling;
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
+
+        auto &material = state->scene.get<material_graph>(id);
         material.upload(program);
 
         auto &shape = state->scene.get<ogl_shape>(id);

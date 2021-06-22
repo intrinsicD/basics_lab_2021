@@ -4,7 +4,6 @@
 
 #include "bcg_gui_registration.h"
 #include "viewer/bcg_viewer_state.h"
-#include "bcg_gui_transform.h"
 #include "bcg_gui_kernel_matrix.h"
 #include "registration/bcg_registration.h"
 #include "registration/bcg_coherent_point_drift.h"
@@ -259,8 +258,6 @@ void gui_registration(viewer_state *state) {
                 break;
             }
         }
-        ImGui::Separator();
-        gui_transform(state, state->scene.try_get<Transform>(source_id));
     }
 }
 

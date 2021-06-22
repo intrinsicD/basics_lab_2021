@@ -9,6 +9,8 @@
 #include "bcg_picking_renderer.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
+#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform_object_space.h"
 #include "bcg_material_picking.h"
 #include "bcg_events_picking_renderer.h"
 #include "kdtree/bcg_kdtree.h"
@@ -49,10 +51,7 @@ void picking_renderer::on_enqueue(const event::picking_renderer::enqueue &event)
 
 void picking_renderer::on_setup_for_rendering(const event::picking_renderer::setup_for_rendering &event){
     if (!state->scene.valid(event.id)) return;
-    if (!state->scene.has<Transform>(event.id)) {
-        state->scene().emplace<Transform>(event.id, Transform::Identity());
-    }
-
+    state->dispatcher.trigger<event::transform::world_space::init>(event.id);
     auto &material = state->scene().emplace_or_replace<material_picking>(event.id, event.id);
     auto &shape = state->scene.get<ogl_shape>(event.id);
     if (!material.vao) {
@@ -112,9 +111,16 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
     for (const auto id : entities_to_draw) {
         if (!state->scene.valid(id)) continue;
 
-        auto &model = state->scene.get<Transform>(id);
         auto &material = state->scene.get<material_picking>(id);
 
+        Transform model = state->scene.get<world_space_transform>(id);
+
+        if(state->scene.has<object_space_transform>(id)){
+            auto &osm = state->scene.get<object_space_transform>(id);
+            model = model * osm;
+        }
+
+        model = model * state->scene.scaling;
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 
@@ -188,8 +194,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     Transform model = Transform::Identity();
 
-    if(state->scene.valid(id) && state->scene.has<Transform>(id)){
-        model = state->scene.get<Transform>(id);
+    if(state->scene.valid(id) && state->scene.has<world_space_transform>(id)){
+        model = state->scene.get<world_space_transform>(id);
     }
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
     state->picker.view_space_point = (state->cam.view_matrix() *

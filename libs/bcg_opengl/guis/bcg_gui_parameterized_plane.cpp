@@ -7,6 +7,7 @@
 #include "geometry/parameterized_plane/bcg_parameterized_plane_fit.h"
 #include "bcg_property_map_eigen.h"
 #include "math/matrix/bcg_matrix_map_eigen.h"
+#include "components/bcg_component_transform_world_space.h"
 #include "bcg_gui_property_selector.h"
 
 namespace bcg {
@@ -128,7 +129,7 @@ void gui_parameterized_plane(viewer_state *state) {
                     auto &mesh = state->scene.get<halfedge_mesh>(plane_id);
                     Map(mesh.positions) = MapConst(get_vertices(plane));
                     mesh.positions.set_dirty();
-                    auto &transform = state->scene.get<Transform>(plane_id);
+                    auto &transform = state->scene.get<world_space_transform>(plane_id);
                     transform.setIdentity();
                 }
             }

@@ -24,7 +24,7 @@ bool gui_guizmo(viewer_state *state, entt::entity id, Transform &transform){
     ImGui::SameLine();
     if (ImGui::Button("Reset")) {
         if(state->scene.valid(id)){
-            state->dispatcher.trigger<event::transform::reset>(id);
+            transform.setIdentity();
         }
     }
     ImGuizmo::Enable(!disabled);

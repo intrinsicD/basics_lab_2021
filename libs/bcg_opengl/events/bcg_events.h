@@ -7,7 +7,6 @@
 
 #include "bcg_events_internal.h"
 #include "bcg_events_mouse.h"
-#include "bcg_events_transform.h"
 #include "bcg_events_gpu.h"
 #include "bcg_events_aligned_box.h"
 #include "bcg_events_point_cloud.h"

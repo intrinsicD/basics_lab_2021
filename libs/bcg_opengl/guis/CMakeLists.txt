@@ -1,5 +1,5 @@
 target_sources(bcg_opengl PRIVATE
-        bcg_gui_aligned_box3.h bcg_gui_aligned_box3.cpp
+        bcg_gui_show_aligned_box3.h bcg_gui_show_aligned_box3.cpp
         bcg_gui_radius_from_aabb.h bcg_gui_radius_from_aabb.cpp
         bcg_gui_correspondences.h bcg_gui_correspondences.cpp
         bcg_gui_entity_hierarchy.h bcg_gui_entity_hierarchy.cpp
@@ -66,7 +66,8 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_sampling_grid.h bcg_gui_sampling_grid.cpp
         bcg_gui_sampling_octree.h bcg_gui_sampling_octree.cpp
         bcg_gui_statistics.h bcg_gui_statistics.cpp
-        bcg_gui_transform.h bcg_gui_transform.cpp
+        bcg_gui_edit_transform.h bcg_gui_edit_transform.cpp
+        bcg_gui_component_transform_world_space.h bcg_gui_component_transform_world_space.cpp
         bcg_gui_vectorfields.h bcg_gui_vectorfields.cpp
         bcg_gui_viewer_camera.h bcg_gui_viewer_camera.cpp
         bcg_gui_viewer_colors.h bcg_gui_viewer_colors.cpp
@@ -86,5 +87,9 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_segmented_jaw_alignment.h bcg_gui_segmented_jaw_alignment.cpp
         bcg_gui_orthodontic_jaw.h bcg_gui_orthodontic_jaw.cpp
         bcg_gui_guizmo.h bcg_gui_guizmo.cpp
+        bcg_gui_show_transform.h bcg_gui_show_transform.cpp
+        bcg_gui_component_transform_world_space.h bcg_gui_component_transform_world_space.cpp
+        bcg_gui_component_transform_object_space.h bcg_gui_component_transform_object_space.cpp
+        bcg_gui_component_loading_backup.h bcg_gui_component_loading_backup.cpp
         )
 

@@ -16,12 +16,6 @@ void gui_entity_info(viewer_state *state, entity_info *info, entt::entity id){
         draw_label(&state->window, "entity_id", std::to_string((unsigned int) id));
         draw_label(&state->window, "filename", path_filename(info->filename));
         draw_textinput(&state->window, "entity_name", info->entity_name);
-        std::stringstream ss;
-        ss << info->loading_model.matrix();
-        draw_label(&state->window, "loading_model", ss.str());
-        ss.str() = "";
-        ss << info->loading_aabb;
-        draw_label(&state->window, "loading_aabb", ss.str());
         ImGui::Separator();
     }
 }

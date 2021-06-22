@@ -53,6 +53,7 @@
 #include "bcg_opengl/guis/bcg_gui_parameterized_plane.h"
 #include "bcg_opengl/guis/bcg_gui_segmented_jaw_alignment.h"
 #include "bcg_opengl/guis/bcg_gui_orthodontic_jaw.h"
+#include "bcg_opengl/guis/bcg_gui_component_transform_world_space.h"
 
 int main() {
     using namespace bcg;
