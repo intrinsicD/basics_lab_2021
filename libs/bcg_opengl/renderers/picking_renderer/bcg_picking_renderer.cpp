@@ -113,7 +113,7 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
         auto &material = state->scene.get<material_picking>(id);
 
-        Transform model = state->scene.get_full_transform(id) * state->scene.scaling;
+        Transform model = state->scene.get_entity_world_transform(id);
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 

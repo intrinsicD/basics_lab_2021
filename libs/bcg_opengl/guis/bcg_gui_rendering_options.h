@@ -11,6 +11,8 @@ namespace bcg{
 
 struct viewer_state;
 
+void gui_rendering_options(viewer_state *state);
+
 void gui_rendering_options(viewer_state *state, entt::entity id);
 
 }

@@ -220,10 +220,10 @@ struct viewer_scene {
         return scene.template try_get<Component>(id);
     }
 
-    Transform get_full_transform(entt::entity id) const;
+    Transform get_entity_world_transform(entt::entity id) const;
 
     aligned_box3 aabb;
-    Transform scaling = Transform::Identity();
+    Transform ws_model = Transform::Identity();
 };
 
 struct viewer_state {

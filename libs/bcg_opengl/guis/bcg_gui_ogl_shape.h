@@ -6,12 +6,17 @@
 #define BCG_GRAPHICS_BCG_GUI_OGL_SHAPE_H
 
 #include "viewer/bcg_opengl.h"
+#include "entt/entt.hpp"
 
-namespace bcg{
+namespace bcg {
 
 struct viewer_state;
 
-void gui_ogl_shape(viewer_state *state, ogl_shape *shape);
+void gui_ogl_shape(viewer_state *state);
+
+void gui_ogl_shape(viewer_state *state, entt::entity id);
+
+void gui_ogl_shape(viewer_state *state, ogl_shape &shape);
 
 }
 

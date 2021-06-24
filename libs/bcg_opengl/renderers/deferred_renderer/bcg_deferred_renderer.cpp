@@ -190,7 +190,7 @@ void deferred_renderer::on_render(const event::internal::render &) {
         if (!state->scene.valid(id)) continue;
 
         auto &material = state->scene.get<material_deferred>(id);
-        Transform model = state->scene.get_full_transform(id) * state->scene.scaling;
+        Transform model = state->scene.get_entity_world_transform(id);
         Matrix<float, 4, 4> model_matrix = model.matrix().cast<float>();
         program.set_uniform_matrix_4f("model", model_matrix.data());
 

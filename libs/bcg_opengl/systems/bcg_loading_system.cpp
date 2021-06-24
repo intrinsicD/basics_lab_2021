@@ -50,7 +50,7 @@ void loading_system::on_file_drop(const event::internal::file_drop &event) {
             }
 
             bcg_scalar_t scale = 1.0 / state->scene.aabb.halfextent().maxCoeff();
-            state->scene.scaling = Scaling(scale, scale, scale);
+            state->scene.ws_model = Scaling(scale, scale, scale);
         }
     }
 }

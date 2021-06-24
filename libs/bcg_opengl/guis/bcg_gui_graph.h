@@ -5,13 +5,17 @@
 #ifndef BCG_GRAPHICS_BCG_GUI_GRAPH_H
 #define BCG_GRAPHICS_BCG_GUI_GRAPH_H
 
+#include "entt/entt.hpp"
+
 #include "geometry/graph/bcg_graph.h"
 
 namespace bcg{
 
 struct viewer_state;
 
-void gui_graph(viewer_state *state, halfedge_graph *graph);
+void gui_graph(viewer_state *state);
+void gui_graph(viewer_state *state, entt::entity id);
+void gui_graph(viewer_state *state, halfedge_graph &graph);
 
 }
 

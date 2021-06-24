@@ -38,7 +38,7 @@ void gui_viewer_curve(viewer_state *state){
         draw_label(&state->window, "finished", (curve.finished ? "1" : "0"));
         draw_label(&state->window, "is 3d", (curve.is_3d ? "1" : "0"));
         draw_label(&state->window, "points_clicked", std::to_string(curve.points_clicked));
-        gui_graph(state, &curve);
+        gui_graph(state, curve);
         gui_rendering_options(state, id);
     }
 

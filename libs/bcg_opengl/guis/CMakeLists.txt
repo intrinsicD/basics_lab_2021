@@ -88,6 +88,8 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_orthodontic_jaw.h bcg_gui_orthodontic_jaw.cpp
         bcg_gui_guizmo.h bcg_gui_guizmo.cpp
         bcg_gui_show_transform.h bcg_gui_show_transform.cpp
+        bcg_gui_entity_components.h bcg_gui_entity_components.cpp
+        bcg_gui_components_geometry.h bcg_gui_components_geometry.cpp
         bcg_gui_component_transform_world_space.h bcg_gui_component_transform_world_space.cpp
         bcg_gui_component_transform_object_space.h bcg_gui_component_transform_object_space.cpp
         bcg_gui_component_loading_backup.h bcg_gui_component_loading_backup.cpp

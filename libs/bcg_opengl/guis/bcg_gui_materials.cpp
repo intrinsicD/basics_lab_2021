@@ -15,7 +15,7 @@ namespace bcg{
 
 void gui_materials(viewer_state *state, entt::entity id,
                    bool show_points, bool show_hq_points, bool show_edges, bool show_meshes, bool show_vectors, bool show_curves){
-    if (ImGui::CollapsingHeader("materials")) {
+    if (ImGui::CollapsingHeader("Materials")) {
         if (show_points) {
             ImGui::Separator();
             gui_material_points(state, state->scene.try_get<material_points>(id), id);
@@ -40,7 +40,6 @@ void gui_materials(viewer_state *state, entt::entity id,
             ImGui::Separator();
             gui_material_curve(state, state->scene.try_get<material_curve>(id), id);
         }
-        ImGui::Separator();
     }
 }
 

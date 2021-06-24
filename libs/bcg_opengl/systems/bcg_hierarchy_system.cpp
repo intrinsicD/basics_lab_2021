@@ -14,6 +14,7 @@ hierarchy_system::hierarchy_system(viewer_state *state) : system("hierarchy_syst
     state->dispatcher.sink<event::hierarchy::add_child>().connect<&hierarchy_system::on_add_child>(this);
     state->dispatcher.sink<event::hierarchy::remove_child>().connect<&hierarchy_system::on_remove_child>(this);
     state->dispatcher.sink<event::internal::destroy>().connect<&hierarchy_system::on_destroy>(this);
+    state->dispatcher.sink<event::internal::update>().connect<&hierarchy_system::on_update>(this);
 }
 
 void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) {

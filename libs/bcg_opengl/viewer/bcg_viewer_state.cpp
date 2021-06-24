@@ -30,6 +30,7 @@
 #include "bcg_opengl/renderers/bcg_render_system.h"
 #include "components/bcg_component_transform_world_space.h"
 #include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_entity_hierarchy.h"
 
 #include "geometry/curve/bcg_curve_bezier.h"
 
@@ -174,13 +175,20 @@ bool viewer_scene::valid(const entt::entity &id) const {
     return scene.valid(id);
 }
 
-Transform viewer_scene::get_full_transform(entt::entity id) const {
-    Transform model = get<world_space_transform>(id);
+Transform viewer_scene::get_entity_world_transform(entt::entity id) const {
+    Transform model;
+    if(has<entity_hierarchy>(id)){
+        auto &hierarchy = get<entity_hierarchy>(id);
+        model = hierarchy.accumulated_model;
+    }else{
+        model = get<world_space_transform>(id);
+    }
+
     if(has<object_space_transform>(id)){
         auto &osm = get<object_space_transform>(id);
-        model = model * osm;
+        model = model * osm.inverse();
     }
-    return model;
+    return ws_model * model;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

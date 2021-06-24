@@ -6,13 +6,14 @@
 #define BCG_GRAPHICS_BCG_GUI_ENTITY_HIERARCHY_H
 
 #include "entt/entt.hpp"
-#include "components/bcg_component_entity_hierarchy.h"
 
 namespace bcg{
 
 struct viewer_state;
 
-void gui_component_entity_hierarchy(viewer_state *state, entity_hierarchy *hierarchy);
+void gui_component_entity_hierarchy(viewer_state *state);
+
+void gui_component_entity_hierarchy(viewer_state *state, entt::entity id);
 
 }
 
