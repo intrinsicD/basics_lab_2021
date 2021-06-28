@@ -30,6 +30,10 @@ void gui_viewer_camera(viewer_state *state){
         if (ImGui::InputFloat("rot_speed", &rot_speed)) {
             state->cam.rot_speed = rot_speed;
         }
+        float mov_speed = state->cam.mov_speed;
+        if (ImGui::InputFloat("mov_speed", &mov_speed)) {
+            state->cam.mov_speed = mov_speed;
+        }
         draw_checkbox(&state->window, "orthoraphic", state->cam.orthographic);
         ImGui::Separator();
         float left = state->cam.left;

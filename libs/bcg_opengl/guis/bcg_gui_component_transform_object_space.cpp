@@ -19,7 +19,7 @@ void gui_component_transform_object_space(viewer_state *state, entt::entity id){
     if(!state->scene.valid(id)) return;
     if(!state->scene.has<object_space_transform>(id)) return;
     Transform &osm = state->scene.get<object_space_transform>(id);
-    gui_edit_transform(state, state->cam, state->scene.ws_model.inverse() * state->scene.get_entity_world_transform(id) * osm, osm);
+    gui_edit_transform(state,  osm);
     if(ImGui::Button("Set Identity")){
         osm.setIdentity();
     }

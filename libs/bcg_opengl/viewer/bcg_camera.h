@@ -21,7 +21,7 @@ struct camera {
     VectorS<2> last_point_2d;
     VectorS<3> last_point_3d;
     bool last_point_ok;
-    bcg_scalar_t rot_speed;
+    bcg_scalar_t rot_speed, mov_speed;
 
     camera();
 

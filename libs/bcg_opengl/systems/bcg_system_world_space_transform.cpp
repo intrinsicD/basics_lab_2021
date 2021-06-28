@@ -17,6 +17,8 @@ system_world_space_transform::system_world_space_transform(viewer_state *state) 
     state->dispatcher.sink<event::transform::world_space::set>().connect<&system_world_space_transform::set>(this);
     state->dispatcher.sink<event::transform::world_space::set_identity>().connect<&system_world_space_transform::set_identity>(
             this);
+    state->dispatcher.sink<event::transform::world_space::pre_transform>().connect<&system_world_space_transform::pre_transform>(
+            this);
     state->dispatcher.sink<event::transform::world_space::pre_translate>().connect<&system_world_space_transform::pre_translate>(
             this);
     state->dispatcher.sink<event::transform::world_space::pre_scale>().connect<&system_world_space_transform::pre_scale>(
@@ -24,6 +26,8 @@ system_world_space_transform::system_world_space_transform(viewer_state *state) 
     state->dispatcher.sink<event::transform::world_space::pre_uniform_scale>().connect<&system_world_space_transform::pre_uniform_scale>(
             this);
     state->dispatcher.sink<event::transform::world_space::pre_rotate>().connect<&system_world_space_transform::pre_rotate>(
+            this);
+    state->dispatcher.sink<event::transform::world_space::post_transform>().connect<&system_world_space_transform::post_transform>(
             this);
     state->dispatcher.sink<event::transform::world_space::post_translate>().connect<&system_world_space_transform::post_translate>(
             this);
@@ -44,6 +48,8 @@ system_world_space_transform::~system_world_space_transform() {
     state->dispatcher.sink<event::transform::world_space::set>().disconnect<&system_world_space_transform::set>(this);
     state->dispatcher.sink<event::transform::world_space::set_identity>().disconnect<&system_world_space_transform::set_identity>(
             this);
+    state->dispatcher.sink<event::transform::world_space::pre_transform>().disconnect<&system_world_space_transform::pre_transform>(
+            this);
     state->dispatcher.sink<event::transform::world_space::pre_translate>().disconnect<&system_world_space_transform::pre_translate>(
             this);
     state->dispatcher.sink<event::transform::world_space::pre_scale>().disconnect<&system_world_space_transform::pre_scale>(
@@ -51,6 +57,8 @@ system_world_space_transform::~system_world_space_transform() {
     state->dispatcher.sink<event::transform::world_space::pre_uniform_scale>().disconnect<&system_world_space_transform::pre_uniform_scale>(
             this);
     state->dispatcher.sink<event::transform::world_space::pre_rotate>().disconnect<&system_world_space_transform::pre_rotate>(
+            this);
+    state->dispatcher.sink<event::transform::world_space::post_transform>().disconnect<&system_world_space_transform::post_transform>(
             this);
     state->dispatcher.sink<event::transform::world_space::post_translate>().disconnect<&system_world_space_transform::post_translate>(
             this);
@@ -65,7 +73,7 @@ system_world_space_transform::~system_world_space_transform() {
 }
 
 void system_world_space_transform::init(const event::transform::world_space::init &event) {
-    if(state->scene.has<world_space_transform>(event.id)) return;
+    if (state->scene.has<world_space_transform>(event.id)) return;
     set_identity({event.id});
 }
 
@@ -81,6 +89,12 @@ void system_world_space_transform::set(const event::transform::world_space::set 
 
 void system_world_space_transform::set_identity(const event::transform::world_space::set_identity &event) {
     set({event.id, Transform::Identity()});
+}
+
+void system_world_space_transform::pre_transform(const event::transform::world_space::pre_transform &event) {
+    if (!state->scene.valid(event.id)) return;
+    Transform &transformation = state->scene.get<world_space_transform>(event.id);
+    transformation = transformation * event.transform;
 }
 
 void system_world_space_transform::pre_translate(const event::transform::world_space::pre_translate &event) {
@@ -106,6 +120,12 @@ void system_world_space_transform::pre_rotate(const event::transform::world_spac
     Transform &transformation = state->scene.get<world_space_transform>(event.id);
     auto angle = event.angle_axis.norm();
     transformation = transformation * Rotation(angle, event.angle_axis / angle);
+}
+
+void system_world_space_transform::post_transform(const event::transform::world_space::post_transform &event) {
+    if (!state->scene.valid(event.id)) return;
+    Transform &transformation = state->scene.get<world_space_transform>(event.id);
+    transformation = event.transform * transformation;
 }
 
 void system_world_space_transform::post_translate(const event::transform::world_space::post_translate &event) {

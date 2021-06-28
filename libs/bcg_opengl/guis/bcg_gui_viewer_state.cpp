@@ -17,10 +17,22 @@
 #include "bcg_gui_show_aligned_box3.h"
 #include "bcg_gui_ogl_shape.h"
 #include "bcg_gui_entity_components.h"
+#include "bcg_gui_edit_transform.h"
 
 namespace bcg {
 
 void gui_viewer_state(viewer_state *state) {
+    if(ImGui::CollapsingHeader("Coordinate System")){
+        static bool show_guizmo = false;
+        ImGui::Checkbox("Show", &show_guizmo);
+        if(show_guizmo) {
+            ImGui::SameLine();
+            if(ImGui::Button("Set Identity")){
+                state->scene.ws_model.setIdentity();
+            }
+            gui_edit_transform(state, state->scene.ws_model);
+        }
+    }
     if (ImGui::CollapsingHeader("Scene")) {
         auto view = state->scene().view<entity_info>();
         for (const auto id : view) {

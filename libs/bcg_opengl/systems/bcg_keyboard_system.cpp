@@ -138,14 +138,14 @@ void keyboard_system::on_update(const event::internal::update &) {
     * */
     if (state->keyboard.keys[GLFW_KEY_A]) {
         if(state->keyboard.no_modifier){
-            state->cam.model_matrix.translation() -= state->cam.right_vec() * state->time.time_delta;
+            state->cam.model_matrix.translation() -= state->cam.right_vec() * state->time.time_delta * state->cam.mov_speed;
         }
     }
     if (state->keyboard.keys[GLFW_KEY_B]) {}
     if (state->keyboard.keys[GLFW_KEY_C]) {}
     if (state->keyboard.keys[GLFW_KEY_D]) {
         if(state->keyboard.no_modifier) {
-            state->cam.model_matrix.translation() += state->cam.right_vec() * state->time.time_delta;
+            state->cam.model_matrix.translation() += state->cam.right_vec() * state->time.time_delta * state->cam.mov_speed;
         }
     }
     if (state->keyboard.keys[GLFW_KEY_E]) {}
@@ -164,7 +164,7 @@ void keyboard_system::on_update(const event::internal::update &) {
     if (state->keyboard.keys[GLFW_KEY_R]) {}
     if (state->keyboard.keys[GLFW_KEY_S]) {
         if(state->keyboard.no_modifier) {
-            state->cam.model_matrix.translation() += state->cam.direction_vec() * state->time.time_delta;
+            state->cam.model_matrix.translation() += state->cam.direction_vec() * state->time.time_delta * state->cam.mov_speed;
         }
     }
     if (state->keyboard.keys[GLFW_KEY_T]) {}
@@ -172,7 +172,7 @@ void keyboard_system::on_update(const event::internal::update &) {
     if (state->keyboard.keys[GLFW_KEY_V]) {}
     if (state->keyboard.keys[GLFW_KEY_W]) {
         if(state->keyboard.no_modifier) {
-            state->cam.model_matrix.translation() -= state->cam.direction_vec() * state->time.time_delta;
+            state->cam.model_matrix.translation() -= state->cam.direction_vec() * state->time.time_delta * state->cam.mov_speed;
         }
     }
     if (state->keyboard.keys[GLFW_KEY_X]) {}

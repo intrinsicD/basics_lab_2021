@@ -91,11 +91,10 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
     auto &backup = state->scene().emplace<loading_backup>(event.id);
     backup.aabb = aligned_box3(mesh.positions.vector());
     bcg_scalar_t scale = backup.aabb.halfextent().maxCoeff();
+    backup.scale = scale;
+    state->scene.scale = scale;
     backup.os_model.linear() = Scaling(scale, scale, scale);
     backup.os_model.translation() = backup.aabb.center();
-
-    state->dispatcher.trigger<event::transform::object_space::init>(event.id);
-    state->dispatcher.trigger<event::transform::world_space::init>(event.id);
     state->dispatcher.trigger<event::transform::object_space::set>(event.id, backup.os_model);
     state->dispatcher.trigger<event::transform::world_space::set>(event.id, backup.os_model);
     state->dispatcher.trigger<event::aligned_box::set>(event.id, backup.aabb);
@@ -235,8 +234,8 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
 
     auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
     auto info = state->scene.get<entity_info>(parent_id);
-    auto parent_os_model = state->scene.get<object_space_transform>(parent_id);
-    auto parent_ws_model = state->scene.get<world_space_transform>(parent_id);
+    Transform parent_os_model = state->scene.get<object_space_transform>(parent_id);
+    Transform parent_ws_model = state->scene.get<world_space_transform>(parent_id);
     auto parts = mesh_connected_components_split(mesh);
     for (const auto &part : parts) {
         auto child_id = state->scene.create();
@@ -246,11 +245,7 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
         state->dispatcher.trigger<event::mesh::setup>(child_id, filename);
         state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, child_id);
         state->dispatcher.trigger<event::hierarchy::set_parent>(child_id, parent_id);
-        auto &aabb = state->scene.get<aligned_box3>(child_id);
-        Transform &osm = state->scene.get<object_space_transform>(child_id);
-        Transform &wsm = state->scene.get<world_space_transform>(child_id);
-        wsm.linear().setIdentity();
-        wsm.translation() = wsm.translation() - parent_ws_model.translation();
+        //state->dispatcher.trigger<event::transform::world_space::post_transform>(child_id, parent_os_model.inverse());
     }
 }
 

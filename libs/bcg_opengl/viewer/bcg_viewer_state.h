@@ -223,13 +223,14 @@ struct viewer_scene {
     Transform get_entity_world_transform(entt::entity id) const;
 
     aligned_box3 aabb;
+
     Transform ws_model = Transform::Identity();
+    bcg_scalar_t scale = 1.0;
 };
 
 struct viewer_state {
     viewer_state();
 
-    //entt::registry scene;
     viewer_scene scene;
     entt::dispatcher dispatcher;
 

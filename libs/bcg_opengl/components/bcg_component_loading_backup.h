@@ -15,6 +15,7 @@ struct loading_backup {
     aligned_box3 aabb;
     world_space_transform ws_model;
     object_space_transform os_model;
+    bcg_scalar_t scale;
 };
 
 }

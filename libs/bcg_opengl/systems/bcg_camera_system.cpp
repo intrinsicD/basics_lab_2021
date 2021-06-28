@@ -30,7 +30,7 @@ void camera_system::on_resize(const event::internal::resize &event) {
 
 void camera_system::on_mouse_scroll(const event::mouse::scroll &event) {
     if (state->gui.captured_mouse) return;
-    state->cam.fovy_degrees = std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(state->cam.fovy_degrees - event.value, 1.0),
+    state->cam.fovy_degrees = std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(state->cam.fovy_degrees - event.value * state->cam.mov_speed, 1.0),
                                                      90.0);
 }
 

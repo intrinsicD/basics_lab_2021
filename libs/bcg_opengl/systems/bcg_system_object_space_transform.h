@@ -22,6 +22,8 @@ struct system_object_space_transform : public system {
 
     void set_identity(const event::transform::object_space::set_identity &event);
 
+    void pre_transform(const event::transform::object_space::pre_transform &event);
+
     void pre_translate(const event::transform::object_space::pre_translate &event);
 
     void pre_scale(const event::transform::object_space::pre_scale &event);
@@ -29,6 +31,8 @@ struct system_object_space_transform : public system {
     void pre_uniform_scale(const event::transform::object_space::pre_uniform_scale &event);
 
     void pre_rotate(const event::transform::object_space::pre_rotate &event);
+
+    void post_transform(const event::transform::object_space::post_transform &event);
 
     void post_translate(const event::transform::object_space::post_translate &event);
 

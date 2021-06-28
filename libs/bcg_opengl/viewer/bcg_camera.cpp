@@ -22,7 +22,8 @@ camera::camera() : proj(),
                    orthographic(false),
                    last_point_3d(0, 0, 0),
                    last_point_ok(false),
-                   rot_speed(5) {
+                   rot_speed(5),
+                   mov_speed(1){
 
 }
 

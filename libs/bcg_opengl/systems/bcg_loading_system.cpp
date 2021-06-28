@@ -43,14 +43,19 @@ void loading_system::on_file_drop(const event::internal::file_drop &event) {
         }
 
         if (state->scene.valid(id)) {
+            auto &aabb = state->scene().get<aligned_box3>(id);
+            state->cam.set_target(aabb.center());
+            state->cam.model_matrix = Translation(0.0, 0.0, aabb.halfextent().maxCoeff());
+
+            /*
             auto view = state->scene().view<aligned_box3>();
             state->scene.aabb.set_centered_form(VectorS<3>::Zero(), VectorS<3>::Zero());
-            for (const auto &id : view) {
-                state->scene.aabb = state->scene.aabb.merge(view.get<aligned_box3>(id));
+            for (const auto &id_ : view) {
+                state->scene.aabb = state->scene.aabb.merge(view.get<aligned_box3>(id_));
             }
 
             bcg_scalar_t scale = 1.0 / state->scene.aabb.halfextent().maxCoeff();
-            state->scene.ws_model = Scaling(scale, scale, scale);
+            state->scene.ws_model = Scaling(scale, scale, scale);*/
         }
     }
 }

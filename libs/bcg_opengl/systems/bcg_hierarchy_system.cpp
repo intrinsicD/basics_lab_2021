@@ -68,7 +68,8 @@ void hierarchy_system::update_accumulated_model(entt::entity id){
         hierarchy.accumulated_model = model;
     }else{
         auto &parent_hierarchy = state->scene.get<entity_hierarchy>(hierarchy.parent);
-        hierarchy.accumulated_model = parent_hierarchy.accumulated_model * model;
+        auto &parent_ws_model = state->scene.get<world_space_transform>(hierarchy.parent);
+        hierarchy.accumulated_model = parent_hierarchy.accumulated_model * parent_ws_model.inverse() * model;
     }
     for(const auto item : hierarchy.children){
         update_accumulated_model(item.second);
@@ -76,7 +77,7 @@ void hierarchy_system::update_accumulated_model(entt::entity id){
 }
 
 void hierarchy_system::on_update(const event::internal::update &){
-    auto view = state->scene().view<entity_hierarchy, Transform>();
+    auto view = state->scene().view<entity_hierarchy, world_space_transform>();
     for(const auto id : view){
         auto &hierarchy = state->scene.get<entity_hierarchy>(id);
         if(hierarchy.parent == entt::null){

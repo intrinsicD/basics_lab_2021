@@ -27,6 +27,11 @@ struct set_identity{
     entt::entity id;
 };
 
+struct pre_transform{
+    entt::entity id;
+    Transform transform;
+};
+
 struct pre_translate{
     entt::entity id;
     VectorS<3> translation;
@@ -45,6 +50,11 @@ struct pre_uniform_scale{
 struct pre_rotate{
     entt::entity id;
     VectorS<3> angle_axis;
+};
+
+struct post_transform{
+    entt::entity id;
+    Transform transform;
 };
 
 struct post_translate{
