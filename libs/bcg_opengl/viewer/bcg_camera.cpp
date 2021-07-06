@@ -28,8 +28,8 @@ camera::camera() : proj(),
 }
 
 void camera::init(int width, int height) {
-    near = 0.001;
-    far = 100.0;
+    near = 0.1;
+    far = 200.0;
     aspect = (bcg_scalar_t) width / (bcg_scalar_t) height;
     fovy_degrees = 45.0;
     left = -1;

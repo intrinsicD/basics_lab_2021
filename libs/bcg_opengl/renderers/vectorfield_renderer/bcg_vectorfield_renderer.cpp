@@ -15,8 +15,7 @@
 #include "bcg_events_vectorfield_renderer.h"
 #include "utils/bcg_string_utils.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 

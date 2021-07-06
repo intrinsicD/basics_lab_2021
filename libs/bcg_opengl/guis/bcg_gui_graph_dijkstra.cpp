@@ -10,7 +10,7 @@
 #include "graph/bcg_graph_dijkstra.h"
 #include "mesh/bcg_mesh_split_path.h"
 #include "components/bcg_component_entity_info.h"
-#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform.h"
 #include "bcg_opengl/renderers/points_renderer/bcg_material_points.h"
 #include "bcg_opengl/renderers/points_renderer/bcg_events_points_renderer.h"
 #include "bcg_opengl/renderers/mesh_renderer/bcg_material_mesh.h"
@@ -174,7 +174,7 @@ void gui_graph_dijkstra(viewer_state *state) {
                 if (ImGui::Button("Split mesh at path")) {
                     auto parent_id = state->picker.entity_id;
                     auto info = state->scene.get<entity_info>(parent_id);
-                    auto parent_model = state->scene.get<world_space_transform>(parent_id);
+                    auto parent_model = state->scene.get<component_transform>(parent_id);
                     auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
 
                     auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");

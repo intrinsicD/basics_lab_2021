@@ -9,7 +9,7 @@
 #include "bcg_library/registration/bcg_rigid_icp.h"
 #include "bcg_library/registration/bcg_coherent_point_drift.h"
 #include "bcg_property_map_eigen.h"
-#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 
@@ -36,8 +36,8 @@ void registration_system::on_align_step(const event::registration::align_step &e
     auto source_positions = source_vertices->get<VectorS<3>, 3>("v_position");
     auto target_positions = target_vertices->get<VectorS<3>, 3>("v_position");
 
-    Transform &source_model = state->scene.get<world_space_transform>(event.source_id);
-    Transform &target_model = state->scene.get<world_space_transform>(event.target_id);
+    Transform &source_model = state->scene.get<component_transform>(event.source_id);
+    Transform &target_model = state->scene.get<component_transform>(event.target_id);
 
     Transform delta = Transform::Identity();
     switch (event.method) {

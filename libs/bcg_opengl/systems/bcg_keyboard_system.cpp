@@ -4,6 +4,7 @@
 
 #include "bcg_keyboard_system.h"
 #include "viewer/bcg_viewer_state.h"
+#include "components/bcg_component_loading_backup.h"
 #include "components/bcg_component_entity_info.h"
 
 namespace bcg {
@@ -73,13 +74,16 @@ void keyboard_system::on_keyboard(const event::internal::keyboard &event) {
     if (state->keyboard.keys[GLFW_KEY_R]) {
         if(state->keyboard.ctrl_pressed){
             for(const auto &item : state->picker.selected_entities){
-                state->dispatcher.trigger<event::transform::world_space::set_identity>(item.second);
+                auto &backup = state->scene.get<loading_backup>(item.second);
+                state->dispatcher.trigger<event::transform::world_space::set>(item.second, backup.ws_model);
             }
             if(state->scene.valid(state->picker.entity_id)){
-                state->dispatcher.trigger<event::transform::world_space::set_identity>(state->picker.entity_id);
+                auto &backup = state->scene.get<loading_backup>(state->picker.entity_id);
+                state->dispatcher.trigger<event::transform::world_space::set>(state->picker.entity_id, backup.ws_model);
             }
         }else{
             state->cam.init(state->window.width, state->window.height);
+            state->dispatcher.trigger<event::internal::camera_reset>();
         }
     }
     if (state->keyboard.keys[GLFW_KEY_S]) {}

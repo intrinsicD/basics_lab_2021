@@ -222,6 +222,8 @@ struct viewer_scene {
 
     Transform get_entity_world_transform(entt::entity id) const;
 
+    Transform get_entity_parents_transform(entt::entity id) const;
+
     aligned_box3 aabb;
 
     Transform ws_model = Transform::Identity();

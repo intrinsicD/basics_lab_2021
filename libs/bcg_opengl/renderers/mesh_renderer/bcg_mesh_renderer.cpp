@@ -14,8 +14,7 @@
 #include "bcg_events_mesh_renderer.h"
 #include "utils/bcg_string_utils.h"
 #include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 

@@ -13,6 +13,7 @@ camera_system::camera_system(viewer_state *state) : system("camera_system", stat
     state->dispatcher.sink<event::mouse::scroll>().connect<&camera_system::on_mouse_scroll>(this);
     state->dispatcher.sink<event::internal::update>().connect<&camera_system::on_update>(this);
     state->dispatcher.sink<event::internal::end_frame>().connect<&camera_system::on_end_frame>(this);
+    state->dispatcher.sink<event::internal::camera_reset>().connect<&camera_system::on_camera_reset>(this);
 }
 
 void camera_system::on_startup(const event::internal::startup &) {
@@ -30,8 +31,9 @@ void camera_system::on_resize(const event::internal::resize &event) {
 
 void camera_system::on_mouse_scroll(const event::mouse::scroll &event) {
     if (state->gui.captured_mouse) return;
-    state->cam.fovy_degrees = std::min<bcg_scalar_t>(std::max<bcg_scalar_t>(state->cam.fovy_degrees - event.value * state->cam.mov_speed, 1.0),
-                                                     90.0);
+    state->cam.fovy_degrees = std::min<bcg_scalar_t>(
+            std::max<bcg_scalar_t>(state->cam.fovy_degrees - event.value, 1.0),
+            90.0);
 }
 
 void camera_system::on_update(const event::internal::update &) {
@@ -67,6 +69,21 @@ void camera_system::on_end_frame(const event::internal::end_frame &) {
                                              state->window.height,
                                              state->cam.last_point_3d);
 
+}
+
+void camera_system::on_camera_reset(const event::internal::camera_reset &) {
+    auto view = state->scene().view<aligned_box3>();
+    state->scene.aabb.set_centered_form(VectorS<3>::Zero(), VectorS<3>::Zero());
+    for (const auto &id_ : view) {
+        state->scene.aabb = state->scene.aabb.merge(view.get<aligned_box3>(id_));
+    }
+
+    bcg_scalar_t radius = state->scene.aabb.diagonal().norm();
+    state->cam.mov_speed = radius;
+    state->cam.set_target(zero3s);
+    bcg_scalar_t z = 2 * radius / std::sin(state->cam.fovy_degrees);
+    state->cam.model_matrix = Translation(0.0, 0.0, z);
+    state->cam.far = 2 * z;
 }
 
 }

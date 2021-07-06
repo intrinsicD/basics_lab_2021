@@ -9,11 +9,13 @@
 #include "bcg_library/geometry/mesh/bcg_meshio.h"
 #include "bcg_library/geometry/point_cloud/bcg_point_cloudio.h"
 #include "components/bcg_component_loading_backup.h"
+#include "bcg_property_map_eigen.h"
 
 namespace bcg {
 
 loading_system::loading_system(viewer_state *state) : system("loading_system", state) {
     state->dispatcher.sink<event::internal::file_drop>().connect<&loading_system::on_file_drop>(this);
+    state->dispatcher.sink<event::internal::entity_setup>().connect<&loading_system::on_entity_setup>(this);
 }
 
 void loading_system::on_file_drop(const event::internal::file_drop &event) {
@@ -33,30 +35,44 @@ void loading_system::on_file_drop(const event::internal::file_drop &event) {
                 id = state->scene.create();
                 state->scene().emplace<point_cloud>(id, pc);
                 std::cout << "read successful " << filename << "\n";
+                state->dispatcher.trigger<event::internal::entity_setup>(id);
                 state->dispatcher.trigger<event::point_cloud::setup>(id, filename);
             }
         } else {
             id = state->scene.create();
             state->scene().emplace<halfedge_mesh>(id, mesh);
             std::cout << "read successful " << filename << "\n";
+            state->dispatcher.trigger<event::internal::entity_setup>(id);
             state->dispatcher.trigger<event::mesh::setup>(id, filename);
         }
 
-        if (state->scene.valid(id)) {
-            auto &aabb = state->scene().get<aligned_box3>(id);
-            state->cam.set_target(aabb.center());
-            state->cam.model_matrix = Translation(0.0, 0.0, aabb.halfextent().maxCoeff());
+    }
+}
 
-            /*
-            auto view = state->scene().view<aligned_box3>();
-            state->scene.aabb.set_centered_form(VectorS<3>::Zero(), VectorS<3>::Zero());
-            for (const auto &id_ : view) {
-                state->scene.aabb = state->scene.aabb.merge(view.get<aligned_box3>(id_));
+void loading_system::on_entity_setup(const event::internal::entity_setup &event){
+    auto id = event.id;
+    if (state->scene.valid(id)) {
+        auto *vertices = state->get_vertices(id);
+        if(vertices){
+            auto positions = vertices->get<VectorS<3>, 3>("v_position");
+            auto &backup = state->scene().emplace<loading_backup>(id);
+            backup.aabb = aligned_box3(positions.vector());
+            bcg_scalar_t scale = backup.aabb.halfextent().maxCoeff();
+            backup.scale = scale;
+            if(state->scene.scale == 1){
+                state->scene.scale = scale;
             }
-
-            bcg_scalar_t scale = 1.0 / state->scene.aabb.halfextent().maxCoeff();
-            state->scene.ws_model = Scaling(scale, scale, scale);*/
+            backup.loading_model.linear() = Scaling(scale, scale, scale);
+            backup.loading_model.translation() = backup.aabb.center();
+            backup.ws_model.setIdentity();
+            if(event.scaling){
+                Map(positions) = (MapConst(positions).rowwise() - backup.aabb.center().transpose()).array() / state->scene.scale;
+            }
+            state->dispatcher.trigger<event::transform::world_space::set>(id, backup.ws_model);
+            state->dispatcher.trigger<event::aligned_box::set>(id, aligned_box3(positions.vector()));
         }
+        state->picker.entity_id = id;
+        state->dispatcher.trigger<event::internal::camera_reset>();
     }
 }
 

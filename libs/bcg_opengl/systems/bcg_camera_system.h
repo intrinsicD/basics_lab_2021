@@ -22,6 +22,8 @@ struct camera_system : public system {
     void on_update(const event::internal::update &event);
 
     void on_end_frame(const event::internal::end_frame &event);
+
+    void on_camera_reset(const event::internal::camera_reset &event);
 };
 
 }

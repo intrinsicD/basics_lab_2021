@@ -6,8 +6,7 @@
 #include "viewer/bcg_viewer_state.h"
 #include "bcg_events_deferred_renderer.h"
 #include "bcg_material_deferred.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 

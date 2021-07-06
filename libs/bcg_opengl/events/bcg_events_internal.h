@@ -49,6 +49,13 @@ struct set_uniform_point_size{
 struct destroy{
     entt::entity id;
 };
+struct camera_reset{
+
+};
+struct entity_setup{
+    entt::entity id;
+    bool scaling = true;
+};
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_INTERNAL_H

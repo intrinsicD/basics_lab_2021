@@ -9,7 +9,6 @@
 #include "bcg_gui_component_entity_hierarchy.h"
 #include "bcg_gui_component_loading_backup.h"
 #include "bcg_gui_component_transform_world_space.h"
-#include "bcg_gui_component_transform_object_space.h"
 #include "bcg_gui_components_geometry.h"
 #include "bcg_gui_rendering_options.h"
 #include "bcg_gui_show_aligned_box3.h"
@@ -32,10 +31,6 @@ void gui_entity_components(viewer_state *state, entt::entity id){
     }
     if(ImGui::CollapsingHeader("World Space Transform")){
         gui_component_transform_world_space(state, id);
-        ImGui::Separator();
-    }
-    if(ImGui::CollapsingHeader("Object Space Transform")){
-        gui_component_transform_object_space(state, id);
         ImGui::Separator();
     }
     if(ImGui::CollapsingHeader("Loading Backup")){

@@ -9,8 +9,7 @@
 #include "bcg_picking_renderer.h"
 #include "viewer/bcg_viewer_state.h"
 #include "viewer/bcg_opengl.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 #include "bcg_material_picking.h"
 #include "bcg_events_picking_renderer.h"
 #include "kdtree/bcg_kdtree.h"
@@ -187,8 +186,8 @@ void picking_renderer::on_mouse_button(const event::mouse::button &event) {
 
     Transform model = Transform::Identity();
 
-    if(state->scene.valid(id) && state->scene.has<world_space_transform>(id)){
-        model = state->scene.get<world_space_transform>(id);
+    if(state->scene.valid(id) && state->scene.has<component_transform>(id)){
+        model = state->scene.get<component_transform>(id);
     }
     state->picker.model_space_point = model.inverse() * state->picker.world_space_point;
     state->picker.view_space_point = (state->cam.view_matrix() *

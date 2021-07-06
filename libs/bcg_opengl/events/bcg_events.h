@@ -21,6 +21,5 @@
 #include "bcg_events_filter.h"
 #include "bcg_events_registration.h"
 #include "bcg_events_transform_world_space.h"
-#include "bcg_events_transform_object_space.h"
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_H

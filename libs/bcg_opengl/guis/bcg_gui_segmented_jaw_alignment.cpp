@@ -9,8 +9,7 @@
 #include "bcg_gui_property_classify_max.h"
 #include "bcg_gui_property_clamp.h"
 #include "bcg_gui_component_transform_world_space.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 #include "bcg_property_utils.h"
 #include "bcg_property_map_eigen.h"
 #include "components/bcg_component_entity_info.h"
@@ -239,9 +238,8 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
                     avg_alignment.setIdentity();
                     for (const auto &tooth : source_teeth) {
                         if (tooth.selected) {
-                            Transform ws_model = state->scene.get<world_space_transform>(tooth.entity_id);
-                            Transform os_model = state->scene.get<object_space_transform>(tooth.entity_id);
-                            Transform model = ws_model * os_model;
+                            Transform ws_model = state->scene.get<component_transform>(tooth.entity_id);
+                            Transform model = ws_model;
                             transforms[size_t(tooth.entity_id)] = model;
                             rotations.emplace_back(model.linear());
                             translations.emplace_back(model.translation());
@@ -250,7 +248,7 @@ void gui_segmented_jaw_alignment(viewer_state *state) {
 
                     avg_alignment.linear() = r_mean(rotations);
                     avg_alignment.translation() = t_mean(translations);
-                    Transform &source_model = state->scene.get<world_space_transform>(source);
+                    Transform &source_model = state->scene.get<component_transform>(source);
                     source_model = avg_alignment;
                     auto avg_inverse = avg_alignment.inverse();
                     for (const auto &tooth : source_teeth) {

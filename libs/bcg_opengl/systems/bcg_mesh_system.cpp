@@ -5,8 +5,7 @@
 #include "bcg_mesh_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_entity_info.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 #include "components/bcg_component_loading_backup.h"
 #include "bcg_property_map_eigen.h"
 #include "geometry/aligned_box/bcg_aligned_box.h"
@@ -88,17 +87,6 @@ mesh_system::mesh_system(viewer_state *state) : system("mesh_system", state) {
 void mesh_system::on_setup(const event::mesh::setup &event) {
     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
 
-    auto &backup = state->scene().emplace<loading_backup>(event.id);
-    backup.aabb = aligned_box3(mesh.positions.vector());
-    bcg_scalar_t scale = backup.aabb.halfextent().maxCoeff();
-    backup.scale = scale;
-    state->scene.scale = scale;
-    backup.os_model.linear() = Scaling(scale, scale, scale);
-    backup.os_model.translation() = backup.aabb.center();
-    state->dispatcher.trigger<event::transform::object_space::set>(event.id, backup.os_model);
-    state->dispatcher.trigger<event::transform::world_space::set>(event.id, backup.os_model);
-    state->dispatcher.trigger<event::aligned_box::set>(event.id, backup.aabb);
-
     state->scene().emplace<entity_info>(event.id, event.filename, "mesh");
 
     if (!mesh.vertices.has("v_normal")) {
@@ -108,7 +96,6 @@ void mesh_system::on_setup(const event::mesh::setup &event) {
     state->dispatcher.trigger<event::graph::edge::centers>(event.id);
     state->scene().emplace_or_replace<event::picking_renderer::enqueue>(event.id);
     state->scene().emplace_or_replace<event::mesh_renderer::enqueue>(event.id);
-    state->picker.entity_id = event.id;
     std::cout << mesh << "\n";
 }
 
@@ -234,18 +221,25 @@ void mesh_system::on_connected_components_split(const event::mesh::connected_com
 
     auto &mesh = state->scene.get<halfedge_mesh>(parent_id);
     auto info = state->scene.get<entity_info>(parent_id);
-    Transform parent_os_model = state->scene.get<object_space_transform>(parent_id);
-    Transform parent_ws_model = state->scene.get<world_space_transform>(parent_id);
+    Transform parent_ws_model = state->scene.get<component_transform>(parent_id);
     auto parts = mesh_connected_components_split(mesh);
     for (const auto &part : parts) {
         auto child_id = state->scene.create();
         state->scene().emplace<halfedge_mesh>(child_id, part);
         std::string filename = path_join(path_dirname(info.filename), path_basename(info.filename)) + "_part_" +
                                std::to_string(int(child_id)) + path_extension(info.filename);
+        state->dispatcher.trigger<event::internal::entity_setup>(child_id, false);
         state->dispatcher.trigger<event::mesh::setup>(child_id, filename);
         state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, child_id);
         state->dispatcher.trigger<event::hierarchy::set_parent>(child_id, parent_id);
-        //state->dispatcher.trigger<event::transform::world_space::post_transform>(child_id, parent_os_model.inverse());
+        auto &aabb = state->scene.get<aligned_box3>(child_id);
+        auto &child_mesh = state->scene.get<halfedge_mesh>(child_id);
+        Map(child_mesh.positions) = MapConst(child_mesh.positions).rowwise() - aabb.center().transpose();
+        auto &backup = state->scene.get<loading_backup>(child_id);
+        backup.ws_model.setIdentity();
+        backup.ws_model.translation() = aabb.center();
+        state->dispatcher.trigger<event::transform::world_space::set>(child_id, backup.ws_model);
+        //TODO fix these transformations...
     }
 }
 

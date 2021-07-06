@@ -81,6 +81,7 @@ struct render_gui{
     entt::entity id;
 };
 
+
 }
 
 #endif //BCG_GRAPHICS_BCG_EVENTS_TRANSFORM_WORLD_SPACE_H

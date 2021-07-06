@@ -13,8 +13,7 @@
 #include "bcg_events_curve_renderer.h"
 #include "bcg_library/math/matrix/bcg_matrix_map_eigen.h"
 #include "geometry/curve/bcg_curve_bezier.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 

@@ -14,16 +14,16 @@ namespace bcg {
 template<int N>
 struct Plane {
     VectorS<N> normal;
-    bcg_scalar_t distance;
+    bcg_scalar_t d;
 
-    plane() : normal(zeros<N>), distance(0) {}
+    Plane() : normal(zeros<N>), d(0) {}
 
-    plane(const VectorS<N> &normal, bcg_scalar_t distance) : normal(normal), distance(distance) {}
+    Plane(const VectorS<N> &normal, bcg_scalar_t d) : normal(normal), d(d) {}
 
-    plane(const VectorS<N> &normal, const VectorS<N> &point) : normal(normal), distance(normal.dot(point)) {}
+    Plane(const VectorS<N> &normal, const VectorS<N> &point) : normal(normal), d(normal.dot(point)) {}
 
     inline VectorS<N> basepoint() const {
-        return normal * distance;
+        return normal * d;
     }
 
     inline bcg_scalar_t distance(const VectorS<N> &point) const {
@@ -33,6 +33,10 @@ struct Plane {
     inline bcg_scalar_t distance_squared(const VectorS<N> &point) const {
         bcg_scalar_t dist = distance(point);
         return dist * dist;
+    }
+
+    inline VectorS<N> project(const VectorS<N> &point) const {
+        return point - normal * distance(point);
     }
 };
 

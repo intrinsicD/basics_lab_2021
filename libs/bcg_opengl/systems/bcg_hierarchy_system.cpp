@@ -5,7 +5,7 @@
 #include "bcg_hierarchy_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_entity_hierarchy.h"
-#include "components/bcg_component_transform_world_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 
@@ -25,7 +25,7 @@ void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) 
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     hierarchy.parent = event.parent_id;
 
-    auto &model = state->scene.get<world_space_transform>(event.id);
+    auto &model = state->scene.get<component_transform>(event.id);
     if (state->scene.valid(hierarchy.parent) && state->scene.has<entity_hierarchy>(hierarchy.parent)) {
         auto &parent_hierarchy = state->scene.get<entity_hierarchy>(hierarchy.parent);
         hierarchy.accumulated_model = parent_hierarchy.accumulated_model * model;
@@ -62,14 +62,13 @@ void hierarchy_system::on_remove_child(const event::hierarchy::remove_child &eve
 
 void hierarchy_system::update_accumulated_model(entt::entity id){
     auto &hierarchy = state->scene.get<entity_hierarchy>(id);
-    auto &model = state->scene.get<world_space_transform>(id);
-    hierarchy.accumulated_model = model;
+    auto &model = state->scene.get<component_transform>(id);
     if(hierarchy.parent == entt::null){
-        hierarchy.accumulated_model = model;
+        hierarchy.accumulated_model = Transform::Identity();
     }else{
         auto &parent_hierarchy = state->scene.get<entity_hierarchy>(hierarchy.parent);
-        auto &parent_ws_model = state->scene.get<world_space_transform>(hierarchy.parent);
-        hierarchy.accumulated_model = parent_hierarchy.accumulated_model * parent_ws_model.inverse() * model;
+        auto &parent_ws_model = state->scene.get<component_transform>(hierarchy.parent);
+        hierarchy.accumulated_model = parent_hierarchy.accumulated_model * parent_ws_model;
     }
     for(const auto item : hierarchy.children){
         update_accumulated_model(item.second);
@@ -77,7 +76,7 @@ void hierarchy_system::update_accumulated_model(entt::entity id){
 }
 
 void hierarchy_system::on_update(const event::internal::update &){
-    auto view = state->scene().view<entity_hierarchy, world_space_transform>();
+    auto view = state->scene().view<entity_hierarchy, component_transform>();
     for(const auto id : view){
         auto &hierarchy = state->scene.get<entity_hierarchy>(id);
         if(hierarchy.parent == entt::null){

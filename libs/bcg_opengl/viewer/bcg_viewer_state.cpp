@@ -26,10 +26,8 @@
 #include "bcg_opengl/systems/bcg_registration_system.h"
 #include "bcg_opengl/systems/bcg_orthodontic_system.h"
 #include "bcg_opengl/systems/bcg_system_world_space_transform.h"
-#include "bcg_opengl/systems/bcg_system_object_space_transform.h"
 #include "bcg_opengl/renderers/bcg_render_system.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 #include "components/bcg_component_entity_hierarchy.h"
 
 #include "geometry/curve/bcg_curve_bezier.h"
@@ -175,20 +173,17 @@ bool viewer_scene::valid(const entt::entity &id) const {
     return scene.valid(id);
 }
 
-Transform viewer_scene::get_entity_world_transform(entt::entity id) const {
-    Transform model;
-    if(has<entity_hierarchy>(id)){
+Transform viewer_scene::get_entity_parents_transform(entt::entity id) const{
+    Transform model = ws_model;
+    if(has<entity_hierarchy>(id)) {
         auto &hierarchy = get<entity_hierarchy>(id);
-        model = hierarchy.accumulated_model;
-    }else{
-        model = get<world_space_transform>(id);
+        model = model * hierarchy.accumulated_model;
     }
+    return model;
+}
 
-    if(has<object_space_transform>(id)){
-        auto &osm = get<object_space_transform>(id);
-        model = model * osm.inverse();
-    }
-    return ws_model * model;
+Transform viewer_scene::get_entity_world_transform(entt::entity id) const {
+    return get_entity_parents_transform(id) * get<component_transform>(id);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -212,7 +207,6 @@ viewer_state::viewer_state() : shaders(this){
     systems["registration_system"] = std::make_unique<registration_system>(this);
     systems["orthodontic_system"] = std::make_unique<orthodontic_system>(this);
     systems["system_world_space_transform"] = std::make_unique<system_world_space_transform>(this);
-    systems["system_object_space_transform"] = std::make_unique<system_object_space_transform>(this);
 }
 
 VectorS<4> viewer_state::get_viewport() const{

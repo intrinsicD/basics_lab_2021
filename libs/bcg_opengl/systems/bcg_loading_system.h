@@ -13,6 +13,8 @@ struct loading_system : public system {
     explicit loading_system(viewer_state *state);
 
     void on_file_drop(const event::internal::file_drop &event);
+
+    void on_entity_setup(const event::internal::entity_setup &event);
 };
 
 }

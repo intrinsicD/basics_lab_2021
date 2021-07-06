@@ -22,10 +22,6 @@ void gui_component_loading_backup(viewer_state *state, entt::entity id) {
     ImGui::Separator();
     gui_show_transform(backup.ws_model);
     ImGui::Separator();
-    ImGui::Text("Object Space Transform");
-    ImGui::Separator();
-    gui_show_transform(backup.os_model);
-    ImGui::Separator();
     ImGui::Text("Aligned Box");
     ImGui::Separator();
     gui_show_aligned_box3(&backup.aabb);

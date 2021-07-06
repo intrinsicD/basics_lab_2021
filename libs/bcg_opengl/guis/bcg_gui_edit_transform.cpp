@@ -61,7 +61,15 @@ void gui_edit_transform(viewer_state *state, camera &cam, const Transform &accum
     ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-    Matrix<float, 4, 4> view = (cam.view_matrix() * accumulated_model.matrix()).cast<float>();
+    Matrix<float, 4, 4> accumulated_matrix = accumulated_model.matrix().cast<float>();
+    float accumulated_matrixTranslation[3], accumulated_matrixRotation[3], accumulated_matrixScale[3];
+    ImGuizmo::DecomposeMatrixToComponents(accumulated_matrix.data(), accumulated_matrixTranslation, accumulated_matrixRotation, accumulated_matrixScale);
+    accumulated_matrixScale[0] = 1;
+    accumulated_matrixScale[1] = 1;
+    accumulated_matrixScale[2] = 1;
+    ImGuizmo::RecomposeMatrixFromComponents(accumulated_matrixTranslation, accumulated_matrixRotation, accumulated_matrixScale, accumulated_matrix.data());
+
+    Matrix<float, 4, 4> view = cam.view_matrix().cast<float>() * accumulated_matrix.matrix();
     Matrix<float, 4, 4> proj = cam.projection_matrix().cast<float>();
     ImGuizmo::Manipulate(view.data(), proj.data(), mCurrentGizmoOperation, mCurrentGizmoMode,
                          matrix.data(), NULL, useSnap ? &snap[0] : NULL);
@@ -128,6 +136,9 @@ void gui_edit_transform(viewer_state *state, Transform &transformation) {
                          matrix.data(), NULL, useSnap ? &snap[0] : NULL);
 
     transformation.matrix() = matrix.cast<bcg_scalar_t>();
+    if(ImGui::Button("Set Identity")){
+        transformation.setIdentity();
+    }
 }
 
 }

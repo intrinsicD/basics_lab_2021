@@ -10,8 +10,7 @@
 #include "bcg_library/math/bcg_linalg.h"
 #include "viewer/bcg_viewer_state.h"
 #include "utils/bcg_path.h"
-#include "components/bcg_component_transform_world_space.h"
-#include "components/bcg_component_transform_object_space.h"
+#include "components/bcg_component_transform.h"
 
 namespace bcg {
 
