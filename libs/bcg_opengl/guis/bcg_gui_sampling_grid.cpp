@@ -98,6 +98,7 @@ void gui_sampling_grid(viewer_state *state) {
                         child_id = state->scene.create();
                         state->scene().emplace<point_cloud>(child_id, pc);
                         state->scene().emplace<entt::tag<"subsampled_grid"_hs>>(child_id);
+                        state->dispatcher.trigger<event::internal::entity_setup>(child_id, false);
                         state->dispatcher.trigger<event::point_cloud::setup>(child_id, "subsampled_grid");
                         state->scene().remove_if_exists<event::picking_renderer::enqueue>(child_id);
                         state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, child_id);

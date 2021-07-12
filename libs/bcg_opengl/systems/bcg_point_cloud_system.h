@@ -14,6 +14,8 @@ struct point_cloud_system : public system {
 
     void on_setup(const event::point_cloud::setup &event);
 
+    void on_make_overlay_point_cloud(const event::point_cloud::setup &event);
+
     void on_build_graph_knn(const event::point_cloud::build::graph_knn &event);
 
     void on_build_graph_radius(const event::point_cloud::build::graph_radius &event);

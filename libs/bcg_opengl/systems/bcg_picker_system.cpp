@@ -5,6 +5,7 @@
 #include "bcg_picker_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_selection.h"
+#include "components/bcg_component_selection_vertex_overlay.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
 #include "renderers/graph_renderer/bcg_events_graph_renderer.h"
@@ -13,6 +14,8 @@
 #include "renderers/mesh_renderer/bcg_material_mesh.h"
 
 namespace bcg {
+
+using namespace entt::literals;
 
 picker_system::picker_system(viewer_state *state) : system("picker_system", state) {
     state->dispatcher.sink<event::picker::enable::point>().connect<&picker_system::on_enable_point>(this);
@@ -32,6 +35,10 @@ void picker_system::on_enable_point(const event::picker::enable::point &) {
 
 void picker_system::on_enable_vertex(const event::picker::enable::vertex &) {
     state->picker.mode = viewer_picker::Mode::vertices;
+    if(state->scene.valid(state->picker.entity_id) && state->scene.has<component_selection_vertex_overlay>(state->picker.entity_id)){
+        auto &selection_vertex_overlay = state->scene.get<component_selection_vertex_overlay>(state->picker.entity_id);
+        state->scene().emplace_or_replace<event::points_renderer::enqueue>(selection_vertex_overlay.overlay_id);
+    }
 }
 
 void picker_system::on_enable_edge(const event::picker::enable::edge &) {
@@ -55,7 +62,7 @@ void picker_system::on_pick_point(const event::picker::pick::point &event) {
     auto &selection = state->scene.get<selected_points>(event.id);
     selection.selected.emplace_back(state->picker.world_space_point);
 }
-
+/*
 void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::vertices) return;
@@ -91,7 +98,36 @@ void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
         state->dispatcher.trigger<event::points_renderer::set_color_attribute>(event.id, color);
     }
 
+}*/
+
+void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {
+    if (!state->scene.valid(event.id)) return;
+    if (state->picker.mode != viewer_picker::Mode::vertices) return;
+    if(!state->scene.has<component_selection_vertex_overlay>(event.id)){
+        entt::entity id = state->scene.create();
+        auto &pc = state->scene().emplace<point_cloud>(id, point_cloud());
+        state->scene().emplace<entt::tag<"VertexSelectionOverlay"_hs>>(id);
+        state->scene().emplace<material_points>(id);
+        state->scene().emplace<event::points_renderer::enqueue>(id);
+        state->scene().emplace<component_selection_vertex_overlay>(event.id, event.id, id, state->get_vertices(event.id), &pc);
+        state->dispatcher.trigger<event::hierarchy::set_parent_child>(event.id, id);
+    }
+
+    auto &selection_vertex_overlay = state->scene.get<component_selection_vertex_overlay>(event.id);
+    if(!state->picker.vertex_id.is_valid()) return;
+    if(state->keyboard.ctrl_pressed){
+        if(state->picker.mode == viewer_picker::Mode::vertices){
+            state->scene().emplace_or_replace<event::points_renderer::enqueue>(selection_vertex_overlay.overlay_id);
+        }
+        if(!state->keyboard.shift_pressed){
+            selection_vertex_overlay.clear();
+        }
+        if(!selection_vertex_overlay.select(state->picker.vertex_id)){
+            selection_vertex_overlay.deselect(state->picker.vertex_id);
+        }
+    }
 }
+
 
 void picker_system::on_pick_edge(const event::picker::pick::edge &event) {
     if (!state->scene.valid(event.id)) return;

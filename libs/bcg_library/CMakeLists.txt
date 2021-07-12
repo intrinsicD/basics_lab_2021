@@ -21,13 +21,16 @@ endif ()
 
 target_compile_features(bcg_graphics PUBLIC cxx_std_17)
 
-target_include_directories(bcg_graphics PUBLIC "." "./geometry")
+target_include_directories(bcg_graphics PUBLIC .)
+target_include_directories(bcg_graphics PUBLIC geometry)
 
 target_compile_options(bcg_graphics PUBLIC
         "-Wall"
         "-Wextra"
         #"-Werror"
         )
+
+target_compile_options(bcg_graphics PUBLIC "-ftime-trace")
 
 if (UNIX AND NOT APPLE)
     #target_compile_options(bcg_graphics PUBLIC -Wall -Wno-shorten-64-to-32 -Wno-c++20-extensions -Wno-deprecated-copy -Wpedantic -Wconversion -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-missing-field-initializers)

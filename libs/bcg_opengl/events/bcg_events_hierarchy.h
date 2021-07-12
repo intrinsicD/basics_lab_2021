@@ -8,6 +8,10 @@
 #include "entt/entt.hpp"
 
 namespace bcg::event::hierarchy{
+struct set_parent_child{
+    entt::entity parent_id;
+    entt::entity child_id;
+};
 struct set_parent{
     entt::entity id;
     entt::entity parent_id;

@@ -5,6 +5,8 @@
 #include "bcg_gui_viewer_picker.h"
 #include "bcg_gui_selected_entities.h"
 #include "viewer/bcg_viewer_state.h"
+#include "components/bcg_component_selection_vertex_overlay.h"
+#include "renderers/points_renderer/bcg_events_points_renderer.h"
 
 namespace bcg {
 
@@ -39,6 +41,19 @@ void gui_viewer_picker(viewer_state *state) {
                 }
             }
         }
+
+        if(state->scene.valid(state->picker.entity_id) && state->scene.has<component_selection_vertex_overlay>(state->picker.entity_id)){
+            auto &selection = state->scene().get<component_selection_vertex_overlay>(state->picker.entity_id);
+            bool show_selection = state->scene.has<event::points_renderer::enqueue>(selection.overlay_id);
+            if(ImGui::Checkbox("Show Vertex Selection", &show_selection)){
+                if(show_selection){
+                    state->scene().emplace<event::points_renderer::enqueue>(selection.overlay_id);
+                }else{
+                    state->scene().remove<event::points_renderer::enqueue>(selection.overlay_id);
+                }
+            }
+        }
+
         if (ImGui::CollapsingHeader("Picker Info")) {
             draw_label(&state->window, "valid", std::to_string(state->picker.valid));
             draw_label(&state->window, "entity_id", std::to_string((unsigned int) state->picker.entity_id));

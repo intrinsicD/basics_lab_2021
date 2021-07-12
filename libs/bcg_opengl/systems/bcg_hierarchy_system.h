@@ -12,6 +12,8 @@ namespace bcg {
 struct hierarchy_system : public system {
     explicit hierarchy_system(viewer_state *state);
 
+    void on_set_parent_child(const event::hierarchy::set_parent_child &event);
+
     void on_set_parent(const event::hierarchy::set_parent &event);
 
     void on_add_child(const event::hierarchy::add_child &event);

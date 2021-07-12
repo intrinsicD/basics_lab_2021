@@ -14,6 +14,8 @@ if (BCG_OPENGL)
     add_subdirectory(orthodontic)
     add_subdirectory(components)
 
+    target_compile_options(bcg_opengl PUBLIC "-ftime-trace")
+
     #target_link_libraries(bcg_opengl PUBLIC glfw3 ${OPENGL_gl_LIBRARY} bcg_graphics tbb)
 
     if (UNIX AND NOT APPLE)

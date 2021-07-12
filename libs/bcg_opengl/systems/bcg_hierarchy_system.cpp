@@ -10,11 +10,17 @@
 namespace bcg {
 
 hierarchy_system::hierarchy_system(viewer_state *state) : system("hierarchy_system", state) {
+    state->dispatcher.sink<event::hierarchy::set_parent_child>().connect<&hierarchy_system::on_set_parent_child>(this);
     state->dispatcher.sink<event::hierarchy::set_parent>().connect<&hierarchy_system::on_set_parent>(this);
     state->dispatcher.sink<event::hierarchy::add_child>().connect<&hierarchy_system::on_add_child>(this);
     state->dispatcher.sink<event::hierarchy::remove_child>().connect<&hierarchy_system::on_remove_child>(this);
     state->dispatcher.sink<event::internal::destroy>().connect<&hierarchy_system::on_destroy>(this);
     state->dispatcher.sink<event::internal::update>().connect<&hierarchy_system::on_update>(this);
+}
+
+void hierarchy_system::on_set_parent_child(const event::hierarchy::set_parent_child &event){
+    on_set_parent({event.child_id, event.parent_id});
+    on_add_child({event.parent_id, event.child_id});
 }
 
 void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) {
@@ -25,7 +31,7 @@ void hierarchy_system::on_set_parent(const event::hierarchy::set_parent &event) 
     auto &hierarchy = state->scene.get<entity_hierarchy>(event.id);
     hierarchy.parent = event.parent_id;
 
-    auto &model = state->scene.get<component_transform>(event.id);
+    auto &model = state->scene().get_or_emplace<component_transform>(event.id, Transform::Identity());
     if (state->scene.valid(hierarchy.parent) && state->scene.has<entity_hierarchy>(hierarchy.parent)) {
         auto &parent_hierarchy = state->scene.get<entity_hierarchy>(hierarchy.parent);
         hierarchy.accumulated_model = parent_hierarchy.accumulated_model * model;

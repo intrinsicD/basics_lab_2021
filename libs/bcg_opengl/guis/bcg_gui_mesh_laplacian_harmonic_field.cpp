@@ -5,7 +5,7 @@
 #include "bcg_gui_mesh_laplacian_harmonic_field.h"
 #include "bcg_gui_mesh_laplacian.h"
 #include "viewer/bcg_viewer_state.h"
-#include "components/bcg_component_selection.h"
+#include "components/bcg_component_selection_vertex_overlay.h"
 #include "graph/bcg_graph_harmonic_segmentation_to_path.h"
 #include "mesh/bcg_mesh_boundary.h"
 #include "math/laplacian/bcg_laplacian_harmonic_field.h"
@@ -37,11 +37,11 @@ void gui_mesh_laplacian_harmonic_field(viewer_state *state){
                     auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
                     auto v_constrained_values = mesh.vertices.get_or_add<bcg_scalar_t, 1>("v_constrained_values");
                     auto v_feature = mesh.vertices.get_or_add<bool, 1>("v_feature");
-                    if(state->scene.has<selected_vertices>(state->picker.entity_id)){
-                        auto &selection = state->scene.get<selected_vertices>(state->picker.entity_id);
-                        for(const auto &item : selection.selected){
-                            v_feature[item.second.element] = true;
-                            v_constrained_values[item.second.element] = vertex_values;
+                    if(state->scene.has<component_selection_vertex_overlay>(state->picker.entity_id)){
+                        auto &selection = state->scene.get<component_selection_vertex_overlay>(state->picker.entity_id);
+                        for(const auto &v : selection.index_order){
+                            v_feature[selection.parent_indices[v]] = true;
+                            v_constrained_values[selection.parent_indices[v]] = vertex_values;
                         }
 
                         auto &material = state->scene.get<material_mesh>(state->picker.entity_id);

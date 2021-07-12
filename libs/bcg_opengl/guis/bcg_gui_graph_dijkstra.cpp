@@ -6,7 +6,7 @@
 #include "bcg_gui_property_selector.h"
 #include "bcg_property_map_eigen.h"
 #include "viewer/bcg_viewer_state.h"
-#include "components/bcg_component_selection.h"
+#include "components/bcg_component_selection_vertex_overlay.h"
 #include "graph/bcg_graph_dijkstra.h"
 #include "mesh/bcg_mesh_split_path.h"
 #include "components/bcg_component_entity_info.h"
@@ -41,16 +41,17 @@ void gui_graph_dijkstra(viewer_state *state) {
             vertex_selection_mode = state->picker.mode == viewer_picker::Mode::vertices;
         }
         if (vertex_selection_mode) {
-            if(state->scene.has<material_points>(state->picker.entity_id)){
+            if (state->scene.has<material_points>(state->picker.entity_id)) {
                 auto &material = state->scene.get<material_points>(state->picker.entity_id);
-                if(material.attributes[2].buffer_name.empty() && vertices->has("v_selected")){
+                if (material.attributes[2].buffer_name.empty() && vertices->has("v_selected")) {
                     material.attributes[2].property_name = "v_selected";
-                    state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(state->picker.entity_id, material.attributes[2]);
+                    state->dispatcher.trigger<event::points_renderer::set_point_size_attribute>(state->picker.entity_id,
+                                                                                                material.attributes[2]);
                 }
             }
             if (ImGui::Button("Shortest path between")) {
-                if (state->scene.has<selected_vertices>(state->picker.entity_id)) {
-                    auto &selection = state->scene.get<selected_vertices>(state->picker.entity_id);
+                if (state->scene.has<component_selection_vertex_overlay>(state->picker.entity_id)) {
+                    auto &selection = state->scene.get<component_selection_vertex_overlay>(state->picker.entity_id);
                     auto merged_path = vertices->get_or_add<bcg_scalar_t, 1>("v_merged_shortest_path");
 
                     Map(merged_path).setZero();
@@ -62,16 +63,17 @@ void gui_graph_dijkstra(viewer_state *state) {
                     }
                     paths.back().vertices.clear();
                     shortest_path_length = 0;
-                    for (size_t i = 0; i < selection.ordering.size() - 1; ++i) {
+                    for (size_t i = 0; i < selection.overlay_point_cloud->num_vertices() - 1; ++i) {
                         geometric_path result;
                         if (state->scene.has<halfedge_mesh>(state->picker.entity_id)) {
                             auto &mesh = state->scene.get<halfedge_mesh>(state->picker.entity_id);
-                            result = graph_shortest_path_between(mesh, selection.ordering[i], selection.ordering[i + 1],
+                            result = graph_shortest_path_between(mesh, selection.parent_indices[i],
+                                                                 selection.parent_indices[i + 1],
                                                                  heuristic, guide_vectorfield);
                         } else if (state->scene.has<halfedge_graph>(state->picker.entity_id)) {
                             auto &graph = state->scene.get<halfedge_graph>(state->picker.entity_id);
-                            result = graph_shortest_path_between(graph, selection.ordering[i],
-                                                                 selection.ordering[i + 1], heuristic,
+                            result = graph_shortest_path_between(graph, selection.parent_indices[i],
+                                                                 selection.parent_indices[i + 1], heuristic,
                                                                  guide_vectorfield);
                         }
                         shortest_path_length += result.length;

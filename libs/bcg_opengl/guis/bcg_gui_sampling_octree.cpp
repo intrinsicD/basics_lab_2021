@@ -100,6 +100,7 @@ void gui_sampling_octree(viewer_state *state) {
                 auto id = state->scene.create();
                 state->scene().emplace<point_cloud>(id, pc);
                 state->scene().emplace<entt::tag<"subsampled"_hs>>(id);
+                state->dispatcher.trigger<event::internal::entity_setup>(id, false);
                 state->dispatcher.trigger<event::point_cloud::setup>(id, "subsampled");
                 state->scene().remove_if_exists<event::picking_renderer::enqueue>(id);
                 state->dispatcher.trigger<event::hierarchy::add_child>(parent_id, id);
