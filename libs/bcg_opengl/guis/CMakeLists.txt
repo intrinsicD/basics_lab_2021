@@ -37,6 +37,7 @@ target_sources(bcg_opengl PRIVATE
         bcg_gui_mesh_vertex_normals.h bcg_gui_mesh_vertex_normals.cpp
         bcg_gui_mesh_vertex_extremal_values.h bcg_gui_mesh_vertex_extremal_values.cpp
         bcg_gui_mesh_vertex_quadrics.h bcg_gui_mesh_vertex_quadrics.cpp
+        bcg_gui_mesh_geodesic_distances_heat_method.h bcg_gui_mesh_geodesic_distances_heat_method.cpp
         bcg_gui_mesh_offset_mesh.h bcg_gui_mesh_offset_mesh.cpp
         bcg_gui_mesh_factory.h bcg_gui_mesh_factory.cpp
         bcg_gui_mesh_connected_components.h bcg_gui_mesh_connected_components.cpp

@@ -86,8 +86,19 @@ struct probabilistic_plane_quadric_anisotropic_radius {
     entt::entity id;
     bcg_scalar_t radius = 0;
 };
-struct collect{
+struct sum{
     entt::entity id;
+};
+struct avg{
+    entt::entity id;
+};
+struct fit_knn{
+    entt::entity id;
+    int num_closest = 0;
+};
+struct fit_radius{
+    entt::entity id;
+    bcg_scalar_t radius = 0;
 };
 
 }

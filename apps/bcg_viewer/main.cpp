@@ -47,6 +47,7 @@
 #include "bcg_opengl/guis/bcg_gui_marching_cubes.h"
 #include "bcg_opengl/guis/bcg_gui_sampling_octree.h"
 #include "bcg_opengl/guis/bcg_gui_sampling_grid.h"
+#include "bcg_opengl/guis/bcg_gui_mesh_geodesic_distances_heat_method.h"
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
 #include "../spike/opengl/bcg_gui_mesh_normal_filtering.h"
 #include "../spike/opengl/bcg_gui_point_cloud_normal_filtering.h"
@@ -166,6 +167,9 @@ int main() {
                 }
                 if (ImGui::MenuItem("Harmonic Field")) {
                     state->gui.left = gui_mesh_laplacian_harmonic_field;
+                }
+                if (ImGui::MenuItem("Heat Method")) {
+                    state->gui.left = gui_mesh_geodesic_heat_method;
                 }
                 ImGui::EndMenu();
             }

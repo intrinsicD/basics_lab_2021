@@ -13,11 +13,12 @@ namespace bcg {
 
 using quadric = pq::quadric<pq::math<bcg_scalar_t, VectorS<3>, VectorS<3>, MatrixS<3, 3>>>;
 
-enum class PointCloudQuadricTypes{
+enum class PointCloudQuadricTypes {
     point,
     plane,
     isotropic,
     anisotropic,
+    fit,
     __last__
 };
 
@@ -37,6 +38,10 @@ quadric probabilistic_plane_quadric_anisotropic(vertex_handle v, property<Vector
                                                 const neighbors_query &result,
                                                 property<VectorS<3>, 3> normals);
 
+quadric fit(vertex_handle v, property<VectorS<3>, 3> positions,
+            const neighbors_query &result,
+            property<VectorS<3>, 3> normals);
+
 void point_cloud_vertex_quadric_knn(vertex_container *vertices,
                                     std::function<quadric(vertex_handle, property<VectorS<3>, 3>,
                                                           const neighbors_query &,
@@ -51,7 +56,9 @@ void point_cloud_vertex_quadric_radius(vertex_container *vertices,
                                        const kdtree_property<bcg_scalar_t> &index, bcg_scalar_t radius,
                                        size_t parallel_grain_size = 1024);
 
-void point_cloud_vertex_quadric_collect_neighbors(vertex_container *vertices, size_t parallel_grain_size = 1024);
+void point_cloud_vertex_quadric_sum_neighbors(vertex_container *vertices, size_t parallel_grain_size = 1024);
+
+void point_cloud_vertex_quadric_avg_neighbors(vertex_container *vertices, size_t parallel_grain_size = 1024);
 
 }
 

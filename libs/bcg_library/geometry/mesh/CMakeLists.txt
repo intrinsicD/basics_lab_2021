@@ -34,6 +34,7 @@ target_sources(bcg_graphics PRIVATE
         bcg_mesh_vertex_convex_concave.h bcg_mesh_vertex_convex_concave.cpp
         bcg_mesh_vertex_cotan.h bcg_mesh_vertex_cotan.cpp
         bcg_mesh_vertex_fujiwara.h
+        bcg_mesh_vertex_divergence.h bcg_mesh_vertex_divergence.cpp
         bcg_mesh_vertex_normals.h bcg_mesh_vertex_normals.cpp
         bcg_mesh_vertex_valences.h bcg_mesh_vertex_valences.cpp
         bcg_mesh_vertex_extremal_values.h bcg_mesh_vertex_extremal_values.cpp

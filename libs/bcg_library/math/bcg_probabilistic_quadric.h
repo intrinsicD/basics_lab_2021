@@ -48,6 +48,7 @@
 // ===============================================================================
 
 #include <type_traits>
+#include <cmath>
 
 namespace pq {
 // ============== Forward Declarations ==============
@@ -240,6 +241,11 @@ struct math {
     // can be pos3 or vec3
     static scalar_t dot(A const &a, B const &b) {
         return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    }
+
+    template<class A, class B>
+    static scalar_t len(A const &a, B const &b) {
+        return sqrt(dot(a, b));
     }
 
     static scalar_t trace_of_product(mat3 const &A, mat3 const &B) {
@@ -648,6 +654,41 @@ public:
         auto nom2 = r0 * be_cd + r1 * bc_ae + r2 * (ad - b * b);
 
         return math::make_pos(nom0 * denom, nom1 * denom, nom2 * denom);
+    }
+
+    vec3 gradient(pos3 const &p) const {
+        vec3 Ap = math::make_vec(A00 * p[0] + A01 * p[1] + A02 * p[2], //
+                                 A01 * p[0] + A11 * p[1] + A12 * p[2], //
+                                 A02 * p[0] + A12 * p[1] + A22 * p[2]);
+        return math::make_vec(Ap[0] + b0, Ap[1] + b1, Ap[2] + b2);
+    }
+
+    vec3 normal(pos3 const &p) const {
+        auto grad = gradient(p);
+        auto l = sqrt(math::dot(grad, grad));
+        return math::make_vec(grad[0] / l, grad[1] / l, grad[2] / l);
+    }
+
+    void plane_intersection(pos3 const &p, vec3 const &dir, scalar_t &t_1, scalar_t &t_2, scalar_t eps = 0.0000001) const {
+        vec3 Av = math::make_vec(A00 * dir[0] + A01 * dir[1] + A02 * dir[2], //
+                                 A01 * dir[0] + A11 * dir[1] + A12 * dir[2], //
+                                 A02 * dir[0] + A12 * dir[1] + A22 * dir[2]);
+        auto vAv = math::dot(dir, Av);
+        auto Ap = math::make_vec(A00 * p[0] + A01 * p[1] + A02 * p[2], //
+                                 A01 * p[0] + A11 * p[1] + A12 * p[2], //
+                                 A02 * p[0] + A12 * p[1] + A22 * p[2]);
+        auto value = math::dot(p, Ap) - scalar_t(2) * (p[0] * b0 + p[1] * b1 + p[2] * b2) + c;
+        auto vb = dir[0] * b0 + dir[1] * b1 + dir[2] * b2;
+        auto vbMINUSvAp = vb - math::dot(dir, Ap);
+        if (vAv <= eps) {
+            t_1 = 0.5 * value / vbMINUSvAp;
+        } else {
+            auto tmp = vbMINUSvAp / vAv;
+            auto tmp2 = tmp * tmp;
+            auto value_div = value / vAv;
+            t_1 = tmp + sqrt(tmp2 - value_div);
+            t_2 = tmp - sqrt(tmp2 - value_div);
+        }
     }
 
     // operators

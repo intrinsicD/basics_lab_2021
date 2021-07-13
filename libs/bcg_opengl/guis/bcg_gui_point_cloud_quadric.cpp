@@ -16,7 +16,7 @@ void gui_point_cloud_quadric(viewer_state *state){
     static int e = 0;
     draw_combobox(&state->window, "quadric type", e, names);
     kdtree_parameters parameters = gui_kd_tree_selector(state);
-    static bool can_collect = false;
+    static bool has_quadrics = false;
 
     if(ImGui::Button("Compute Quadric")){
         switch (static_cast<PointCloudQuadricTypes>(e)){
@@ -44,6 +44,14 @@ void gui_point_cloud_quadric(viewer_state *state){
                 }
                 break;
             }
+            case PointCloudQuadricTypes::fit : {
+                if(parameters.type == kdtree_parameters::Type::knn){
+                    state->dispatcher.trigger<event::point_cloud::vertex::quadric::fit_knn>(state->picker.entity_id, parameters.num_closest);
+                }else if(parameters.type == kdtree_parameters::Type::radius){
+                    state->dispatcher.trigger<event::point_cloud::vertex::quadric::fit_radius>(state->picker.entity_id, parameters.radius);
+                }
+                break;
+            }
             case PointCloudQuadricTypes::__last__ : {
 
             }
@@ -51,19 +59,27 @@ void gui_point_cloud_quadric(viewer_state *state){
 
             }
         }
-        can_collect = true;
+        has_quadrics = true;
     }
 
-    if(can_collect){
-        if(ImGui::Button("Collect (Neighborhood quadrics)")){
-            state->dispatcher.trigger<event::point_cloud::vertex::quadric::collect>(state->picker.entity_id);
+    if(has_quadrics){
+        if(ImGui::Button("Sum (Neighborhood quadrics)")){
+            state->dispatcher.trigger<event::point_cloud::vertex::quadric::sum>(state->picker.entity_id);
             auto *material = state->scene.try_get<material_points>(state->picker.entity_id);
             if(material){
                 auto &color = material->attributes[1];
                 color.property_name = "v_quadric_error";
                 state->dispatcher.trigger<event::points_renderer::set_color_attribute>(state->picker.entity_id, color);
             }
-            can_collect = false;
+        }
+        if(ImGui::Button("Avg (Neighborhood quadrics)")){
+            state->dispatcher.trigger<event::point_cloud::vertex::quadric::avg>(state->picker.entity_id);
+            auto *material = state->scene.try_get<material_points>(state->picker.entity_id);
+            if(material){
+                auto &color = material->attributes[1];
+                color.property_name = "v_quadric_error";
+                state->dispatcher.trigger<event::points_renderer::set_color_attribute>(state->picker.entity_id, color);
+            }
         }
     }
 }
