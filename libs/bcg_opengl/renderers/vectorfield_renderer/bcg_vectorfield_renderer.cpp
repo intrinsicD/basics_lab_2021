@@ -221,6 +221,7 @@ void vectorfield_renderer::on_set_vertex_vectorfield(const event::vectorfield_re
         position.update = true;
         std::vector<attribute> attributes = {position};
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
+        position.update = false;
     }
     {
         auto &vector = material.attributes[1];
@@ -232,6 +233,7 @@ void vectorfield_renderer::on_set_vertex_vectorfield(const event::vectorfield_re
         material.use_uniform_size = false;
         material.uniform_size = 1.0;
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
+        vector.update = false;
     }
     vectors.current_vertex_vectorfield_name = event.vectorfield_name;
     state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
@@ -257,6 +259,7 @@ void vectorfield_renderer::on_set_edge_vectorfield(const event::vectorfield_rend
         position.update = true;
         std::vector<attribute> attributes = {position};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
+        position.update = false;
     }
     {
         auto &vector = material.attributes[1];
@@ -268,6 +271,7 @@ void vectorfield_renderer::on_set_edge_vectorfield(const event::vectorfield_rend
         material.use_uniform_size = false;
         material.uniform_size = 1.0;
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
+        vector.update = false;
     }
     vectors.current_edge_vectorfield_name = event.vectorfield_name;
     state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
@@ -293,6 +297,7 @@ void vectorfield_renderer::on_set_face_vectorfield(const event::vectorfield_rend
         position.update = true;
         std::vector<attribute> attributes = {position};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
+        position.update = false;
     }
     {
         auto &vector = material.attributes[1];
@@ -304,6 +309,7 @@ void vectorfield_renderer::on_set_face_vectorfield(const event::vectorfield_rend
         material.use_uniform_size = false;
         material.uniform_size = 1.0;
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
+        vector.update = false;
     }
     vectors.current_face_vectorfield_name = event.vectorfield_name;
     state->scene().emplace_or_replace<event::vectorfield_renderer::enqueue>(event.id);
@@ -327,6 +333,7 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         position.update = true;
         attributes = {position};
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
+        position.update = false;
     } else if (event.position.buffer_name == "e_position") {
         auto *edges = state->get_edges(event.id);
         auto *base_ptr = edges->get_base_ptr(event.position.property_name);
@@ -340,6 +347,7 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         position.update = true;
         attributes = {position};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
+        position.update = false;
     } else if (event.position.buffer_name == "f_position") {
         auto *faces = state->get_faces(event.id);
         auto *base_ptr = faces->get_base_ptr(event.position.property_name);
@@ -353,6 +361,7 @@ void vectorfield_renderer::on_set_position_attribute(const event::vectorfield_re
         position.update = true;
         attributes = {position};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
+        position.update = false;
     }
 
     state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
@@ -377,6 +386,7 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
         material.uniform_size =
                 state->scene.get<aligned_box3>(event.id).diagonal().norm() / std::sqrt(base_ptr->size());
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
+        vector.update = false;
     } else if (contains(event.vector.buffer_name, "e_")) {
         auto *edges = state->get_edges(event.id);
         auto *base_ptr = edges->get_base_ptr(event.vector.property_name);
@@ -391,6 +401,7 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
         material.uniform_size =
                 state->scene.get<aligned_box3>(event.id).diagonal().norm() / std::sqrt(base_ptr->size());
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
+        vector.update = false;
     } else if (contains(event.vector.buffer_name, "f_")) {
         auto *faces = state->get_faces(event.id);
         auto *base_ptr = faces->get_base_ptr(event.vector.property_name);
@@ -405,6 +416,7 @@ void vectorfield_renderer::on_set_vector_attribute(const event::vectorfield_rend
         material.uniform_size =
                 state->scene.get<aligned_box3>(event.id).diagonal().norm() / std::sqrt(base_ptr->size());
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
+        vector.update = false;
     }
 
     state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);
@@ -429,6 +441,7 @@ void vectorfield_renderer::on_set_color_attribute(const event::vectorfield_rende
         color.update = true;
         attributes = {color};
         state->dispatcher.trigger<event::gpu::update_vertex_attributes>(event.id, attributes);
+        color.update = false;
     } else if (contains(event.color.buffer_name, "e_")) {
         auto *edges = state->get_edges(event.id);
         auto *base_ptr = edges->get_base_ptr(event.color.property_name);
@@ -443,6 +456,7 @@ void vectorfield_renderer::on_set_color_attribute(const event::vectorfield_rende
         color.update = true;
         attributes = {color};
         state->dispatcher.trigger<event::gpu::update_edge_attributes>(event.id, attributes);
+        color.update = false;
     } else if (contains(event.color.buffer_name, "f_")) {
         auto *faces = state->get_faces(event.id);
         auto *base_ptr = faces->get_base_ptr(event.color.property_name);
@@ -457,6 +471,7 @@ void vectorfield_renderer::on_set_color_attribute(const event::vectorfield_rende
         color.update = true;
         attributes = {color};
         state->dispatcher.trigger<event::gpu::update_face_attributes>(event.id, attributes);
+        color.update = false;
     }
 
     state->dispatcher.trigger<event::vectorfield_renderer::setup_for_rendering>(event.id);

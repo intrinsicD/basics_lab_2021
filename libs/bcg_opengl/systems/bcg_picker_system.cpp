@@ -5,6 +5,7 @@
 #include "bcg_picker_system.h"
 #include "viewer/bcg_viewer_state.h"
 #include "components/bcg_component_selection.h"
+#include "components/bcg_component_selection_point_overlay.h"
 #include "components/bcg_component_selection_vertex_overlay.h"
 #include "renderers/points_renderer/bcg_events_points_renderer.h"
 #include "renderers/points_renderer/bcg_material_points.h"
@@ -56,11 +57,26 @@ void picker_system::on_disable(const event::picker::disable &) {
 void picker_system::on_pick_point(const event::picker::pick::point &event) {
     if (!state->scene.valid(event.id)) return;
     if (state->picker.mode != viewer_picker::Mode::points) return;
-    if (!state->scene.has<selected_points>(event.id)) {
-        state->scene().emplace<selected_points>(event.id);
+    if (!state->scene.has<component_selection_point_overlay>(event.id)) {
+        entt::entity id = state->scene.create();
+        auto &pc = state->scene().emplace<point_cloud>(id, point_cloud());
+        state->scene().emplace<entt::tag<"PointSelectionOverlay"_hs>>(id);
+        state->scene().emplace<material_points>(id);
+        state->scene().emplace<event::points_renderer::enqueue>(id);
+        state->scene().emplace<component_selection_point_overlay>(event.id, event.id, id, &pc);
+        state->dispatcher.trigger<event::hierarchy::set_parent_child>(event.id, id);
     }
-    auto &selection = state->scene.get<selected_points>(event.id);
-    selection.selected.emplace_back(state->picker.world_space_point);
+    auto &selection = state->scene.get<component_selection_point_overlay>(event.id);
+
+    if(state->keyboard.ctrl_pressed){
+        if(state->picker.mode == viewer_picker::Mode::points){
+            state->scene().emplace_or_replace<event::points_renderer::enqueue>(selection.overlay_id);
+        }
+        if(!state->keyboard.shift_pressed){
+            selection.clear();
+        }
+        selection.select(state->picker.model_space_point);
+    }
 }
 /*
 void picker_system::on_pick_vertex(const event::picker::pick::vertex &event) {

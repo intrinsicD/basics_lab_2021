@@ -22,6 +22,7 @@ endif ()
 target_compile_features(bcg_graphics PUBLIC cxx_std_17)
 
 target_include_directories(bcg_graphics PUBLIC .)
+target_include_directories(bcg_graphics PUBLIC ${LIBIGL_INCLUDE_DIR})
 target_include_directories(bcg_graphics PUBLIC geometry)
 
 target_compile_options(bcg_graphics PUBLIC

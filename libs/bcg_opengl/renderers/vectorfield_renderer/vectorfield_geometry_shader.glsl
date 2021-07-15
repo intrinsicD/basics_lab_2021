@@ -41,11 +41,11 @@ void EmitVertexVector(int Index){
     }
 
     gl_Position = proj * view * model * vec4(P, 1.0);
-    gl_Position.z *= 0.999999;
+    gl_Position.z *= 0.9999;
     EmitVertex();
 
     gl_Position =  proj * view * model * vec4(P + V, 1.0);
-    gl_Position.z *= 0.999999;
+    gl_Position.z *= 0.9999;
     EmitVertex();
 
     EndPrimitive();

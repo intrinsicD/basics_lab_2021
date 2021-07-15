@@ -5,6 +5,8 @@ add_subdirectory(spectra)
 add_subdirectory(entt)
 add_subdirectory(tbb)
 include_directories(ImGuizmo)
+find_package(libigl)
+include_directories(${LIBIGL_INCLUDE_DIRS})
 
 if(BCG_OPENGL)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

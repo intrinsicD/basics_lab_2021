@@ -221,12 +221,14 @@ void gpu_system::on_update_face_attributes(const event::gpu::update_face_attribu
                 property<VectorS<3>, 3> property;
                 if (state->scene.has<halfedge_mesh>(event.id)) {
                     auto &mesh = state->scene.get<halfedge_mesh>(event.id);
-                    property = mesh.faces.get_or_add<VectorS<3>, 3>("f_position");
-                    auto triangles = mesh.get_triangles();
-                    for (const auto f : mesh.faces) {
-                        property[f] = (mesh.positions[triangles[f.idx][0]]
-                                       + mesh.positions[triangles[f.idx][1]]
-                                       + mesh.positions[triangles[f.idx][2]]) / 3.0;
+                    if(!mesh.faces.has("f_position") || attribute.update){
+                        property = mesh.faces.get_or_add<VectorS<3>, 3>("f_position");
+                        auto triangles = mesh.get_triangles();
+                        for (const auto f : mesh.faces) {
+                            property[f] = (mesh.positions[triangles[f.idx][0]]
+                                           + mesh.positions[triangles[f.idx][1]]
+                                           + mesh.positions[triangles[f.idx][2]]) / 3.0;
+                        }
                     }
                 }
             }

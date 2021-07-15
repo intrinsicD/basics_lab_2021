@@ -5,7 +5,6 @@
 #ifndef BCG_GRAPHICS_BCG_COMPONENT_SELECTION_VERTEX_OVERLAY_H
 #define BCG_GRAPHICS_BCG_COMPONENT_SELECTION_VERTEX_OVERLAY_H
 
-#include "bcg_component_proxy_point_cloud.h"
 #include "utils/bcg_stl_utils.h"
 
 namespace bcg {

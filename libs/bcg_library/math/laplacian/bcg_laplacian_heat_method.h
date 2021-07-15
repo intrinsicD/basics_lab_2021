@@ -11,7 +11,7 @@
 
 namespace bcg {
 
-bcg_scalar_t compute_t_squared(halfedge_mesh &mesh, bcg_scalar_t m = 1);
+bcg_scalar_t compute_t(halfedge_mesh &mesh);
 
 property<bcg_scalar_t, 1> heat_method(halfedge_mesh &mesh, const laplacian_matrix &laplacian, bcg_scalar_t timestep, size_t parallel_grain_size = 1024);
 
