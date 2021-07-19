@@ -5,7 +5,7 @@
 #include "geometry/mesh/bcg_mesh_face_normals.h"
 #include "geometry/mesh/bcg_mesh_vertex_normals.h"
 #include "bcg_property_map_eigen.h"
-#include "bcg_mesh_normal_filtering.h"
+#include "bcg_mesh_tutorial.h"
 #include "tbb/tbb.h"
 
 namespace bcg {
@@ -121,7 +121,7 @@ void tutorial(halfedge_mesh &mesh, size_t parallel_grain_size) {
     //positions.set_dirty() // to upload positions or other property to gpu and update visuals
 }
 
-void mesh_normal_filtering(halfedge_mesh &mesh, const mesh_nf_parameters &params, size_t parallel_grain_size) {
+void mesh_geodesic_approx(halfedge_mesh &mesh, const mesh_tutorial_parameters &params, size_t parallel_grain_size) {
 
 }
 

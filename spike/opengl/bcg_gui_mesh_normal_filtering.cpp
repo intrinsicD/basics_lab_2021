@@ -4,7 +4,7 @@
 
 #include "bcg_gui_mesh_normal_filtering.h"
 #include "viewer/bcg_viewer_state.h"
-#include "../graphics/bcg_mesh_normal_filtering.h"
+#include "../graphics/bcg_mesh_tutorial.h"
 #include "guis/bcg_gui_point_cloud_vertex_noise.h"
 
 namespace bcg{

@@ -21,13 +21,46 @@ void gui_marching_cubes(viewer_state *state) {
     draw_input_vec3(&state->window, "max", max);
     draw_input_vec3(&state->window, "dims", dims);
     static marching_cubes mc;
-    mc.implicit_function = marching_cubes::hearts_function;
+    if(ImGui::Button("Hearts Function")){
+        mc.implicit_function = marching_cubes::hearts_function;
+        min = -2 * VectorS<3>::Ones();
+        max = 2 * VectorS<3>::Ones();
+    }
+    if(ImGui::Button("Convert Point Cloud Ellipses")){
+        if(state->scene.valid(state->picker.entity_id)){
+            auto *vertices = state->get_vertices(state->picker.entity_id);
+            if(vertices){
+                auto &aabb = state->scene.get<aligned_box3>(state->picker.entity_id);
+                auto positions = vertices->get<VectorS<3>, 3>("v_position");
+                mc.implicit_function = mc.convert_point_cloud_ellipse(positions);
+                min = aabb.min;
+                max = aabb.max;
+            }
+        }
+    }
+    if(ImGui::Button("Convert Point Cloud Cassini")){
+        if(state->scene.valid(state->picker.entity_id)){
+            auto *vertices = state->get_vertices(state->picker.entity_id);
+            if(vertices){
+                auto &aabb = state->scene.get<aligned_box3>(state->picker.entity_id);
+                auto positions = vertices->get<VectorS<3>, 3>("v_position");
+                mc.implicit_function = mc.convert_point_cloud_cassini(positions);
+                min = aabb.min;
+                max = aabb.max;
+            }
+        }
+    }
     if (ImGui::Button("convert to mesh")) {
         auto mesh = mc.reconstruct(isovalue, min, max, dims.cast<bcg_index_t>());
-        auto id = state->scene.create();
-        state->scene().emplace<halfedge_mesh>(id, mesh);
-        state->dispatcher.trigger<event::mesh::setup>(id, "marching cubes");
+        if(!mesh.empty()){
+            auto id = state->scene.create();
+            state->scene().emplace<halfedge_mesh>(id, mesh);
+            state->dispatcher.trigger<event::mesh::setup>(id, "marching cubes");
+        }
     }
+    ImGui::LabelText("avg_sdf", "%f", mc.avg_sdf);
+    ImGui::LabelText("min_sdf", "%f", mc.min_sdf);
+    ImGui::LabelText("max_sdf", "%f", mc.max_sdf);
 
     if (ImGui::Button("compute vertex normals")) {
         if (state->scene.valid(state->picker.entity_id)) {

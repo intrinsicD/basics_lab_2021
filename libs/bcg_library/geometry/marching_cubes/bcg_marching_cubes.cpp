@@ -8,6 +8,7 @@
 #include "math/matrix/bcg_matrix_map_eigen.h"
 #include "kdtree/bcg_kdtree.h"
 #include "triangle/bcg_triangle.h"
+#include "bcg_property_map_eigen.h"
 
 namespace bcg {
 
@@ -72,7 +73,23 @@ double marching_cubes::hearts_function(const Vector<double, 3> &p) {
     return std::pow(x * x + 9. / 4. * y * y + z * z - 1, 3) - x * x * z * z * z - 9. / 80. * y * y * z * z * z;
 }
 
-marching_cubes::marching_cubes() {
+std::function<double(const Vector<double, 3> &)>
+marching_cubes::convert_point_cloud_ellipse(property<VectorS<3>, 3> points) {
+    return [points](const Vector<double, 3> &p) {
+        VectorS<-1> d = (MapConst(points).rowwise() - p.transpose()).rowwise().norm();
+        return d.sum() / d.maxCoeff();
+    };
+}
+
+std::function<double(const Vector<double, 3> &)>
+marching_cubes::convert_point_cloud_cassini(property<VectorS<3>, 3> points) {
+    return [points](const Vector<double, 3> &p) {
+        VectorS<-1> d = (MapConst(points).rowwise() - p.transpose()).rowwise().norm();
+        return d.prod() / (d.maxCoeff() * d.size());
+    };
+}
+
+marching_cubes::marching_cubes() : avg_sdf(0), min_sdf(0), max_sdf(0){
 
 }
 
@@ -80,13 +97,16 @@ halfedge_mesh marching_cubes::reconstruct(bcg_scalar_t isovalue, const VectorS<3
                                           const VectorI<3> &dims) {
     if (!implicit_function) return {};
     clear();
-    aabb = aligned_box3(min, max);
-    this->dims = dims;
+    set_aabb(aligned_box3(min, max));
+    set_dims(dims);
     size_t size = capacity();
     halfedge_mesh mesh;
     auto f_normals = mesh.faces.get_or_add<VectorS<3>, 3>("f_normal");
     auto edges = get_edges_mc(aabb);
     Vector<double, 8> sdf;
+    avg_sdf = 0;
+    min_sdf = std::numeric_limits<bcg_scalar_t>::max();
+    max_sdf = -std::numeric_limits<bcg_scalar_t>::max();
     for (size_t idx = 0; idx < size; ++idx) {
         aligned_box3 voxel = voxel_bounds(idx_to_coord(idx));
 
@@ -98,6 +118,8 @@ halfedge_mesh marching_cubes::reconstruct(bcg_scalar_t isovalue, const VectorS<3
             ///           1. dont forget to set the bit values of the cubeindex with SET_BIT(cubeindex, i);
             ///           2. if the surface seems to be inverted, just invert your comparison with the isovalue
             sdf[i] = implicit_function(vertices[i].cast<double>());
+            min_sdf = std::min(min_sdf, sdf[i]);
+            max_sdf = std::max(max_sdf, sdf[i]);
             if (sdf[i] >= isovalue) {
                 SET_BIT(cubeindex, i);
             }
@@ -105,7 +127,6 @@ halfedge_mesh marching_cubes::reconstruct(bcg_scalar_t isovalue, const VectorS<3
         if (edge_table[cubeindex] == 0) {
             continue;
         }
-
         Vector<double, 3> vertex_list[12];
         for (unsigned int i = 0; i < 12; ++i) {
             if (CHECK_BIT(edge_table[cubeindex], i)) {
@@ -128,7 +149,7 @@ halfedge_mesh marching_cubes::reconstruct(bcg_scalar_t isovalue, const VectorS<3
 
         }
     }
-
+    avg_sdf = (max_sdf - min_sdf) / 2;
     return mesh;
 }
 
