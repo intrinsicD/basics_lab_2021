@@ -122,7 +122,7 @@ void tutorial(halfedge_mesh &mesh, size_t parallel_grain_size) {
 }
 
 void mesh_geodesic_approx(halfedge_mesh &mesh, const mesh_tutorial_parameters &params, size_t parallel_grain_size) {
-
+    tutorial(mesh, parallel_grain_size);
 }
 
 }

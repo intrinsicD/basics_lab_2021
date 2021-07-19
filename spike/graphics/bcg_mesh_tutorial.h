@@ -10,8 +10,9 @@
 namespace bcg{
 
 struct mesh_tutorial_parameters{
-    bcg_scalar_t parameter_1;
+    float parameter_1;
     bcg_scalar_t parameter_2;
+    double parameter_3;
     int iterations;
     int something_else;
 };

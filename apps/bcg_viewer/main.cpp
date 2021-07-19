@@ -49,7 +49,7 @@
 #include "bcg_opengl/guis/bcg_gui_sampling_grid.h"
 #include "bcg_opengl/guis/bcg_gui_mesh_geodesic_distances_heat_method.h"
 #include "bcg_opengl/guis/bcg_gui_locally_optimal_projection.h"
-#include "../spike/opengl/bcg_gui_mesh_normal_filtering.h"
+#include "../spike/opengl/bcg_gui_mesh_tutorial.h"
 #include "../spike/opengl/bcg_gui_point_cloud_normal_filtering.h"
 #include "bcg_opengl/guis/bcg_gui_parameterized_plane.h"
 #include "bcg_opengl/guis/bcg_gui_segmented_jaw_alignment.h"
@@ -253,7 +253,7 @@ int main() {
         }
         if(ImGui::BeginMenu("Basics Lab")){
             if (ImGui::MenuItem("Mesh filtering")) {
-                state->gui.left = gui_mesh_normal_filtering;
+                state->gui.left = gui_mesh_tutorial;
             }
             if (ImGui::MenuItem("Point cLoud filtering")) {
                 state->gui.left = gui_point_cloud_normal_filtering;
