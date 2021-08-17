@@ -1,6 +1,6 @@
 # Setup
 
-Clone this repository by running `git clone --recurse-submodules https://github.com/intrinsicD/code_base6.git`.
+Clone this repository by running `git clone --recurse-submodules https://github.com/intrinsicD/basics_lab_2021.git`.
 
 In *external/spectra/CMakeLists.txt* the following modifications have to be performed:
   - change all occurences of `CMAKE_SOURCE_DIR` to `CMAKE_CURRENT_SOURCE_DIR`.
